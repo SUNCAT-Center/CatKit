@@ -1,5 +1,4 @@
 import sqlite3
-from sqlite3 import IntegrityError
 import numpy as np
 import networkx as nx
 from ase.data import atomic_numbers as an
@@ -8,12 +7,48 @@ from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
 
 
-def get_chemical_tag(graph):
+def plot_molecule(molecule, file_name=None):
 
-    attr = nx.get_node_attributes(graph, 'symbol')
-    tag = ''.join(np.sort(list(attr.values())))
+    colors = {'H': 'w', 'C': 'grey', 'O': 'r'}
 
-    return tag
+    symbols = nx.get_node_attributes(molecule, 'symbol')
+    color = [colors[sym] for _, sym in list(symbols.items())]
+
+    fig, ax = plt.subplots(figsize=(2, 2))
+    nx.draw_networkx(
+        molecule,
+        labels=nx.get_node_attributes(molecule, 'symbol'),
+        node_color=color)
+    plt.draw()
+
+    plt.title(molecule.graph['index'])
+    plt.axis('off')
+
+    if file_name:
+        plt.savefig(file_name)
+
+    plt.close()
+
+
+def get_chemical_descriptor(graph, rank=1):
+
+    symbols = nx.get_node_attributes(graph, 'symbol')
+    chemical_tag = ''.join(np.sort(list(symbols.values())))
+
+    if rank == 1:
+        edge_list = list(graph.edges())
+
+        if edge_list:
+            bonds = ''
+            for e1, e2 in edge_list:
+                bonds += symbols[e1] + symbols[e2]
+            bonds_tag = ''.join(sorted(bonds))
+        else:
+            bonds_tag = ''
+
+        return chemical_tag, bonds_tag
+
+    return chemical_tag
 
 
 class ReactionNetwork():
@@ -28,7 +63,10 @@ class ReactionNetwork():
     changes to the database will be automatically commited.
     """
 
-    def __init__(self, db_name='reaction-network.db'):
+    def __init__(
+            self,
+            db_name='reaction-network.db',
+            max_bonds={'H': 1, 'C': 4, 'O': 2}):
         """ The __init__ function is automatically called when the
         class is referenced.
 
@@ -38,6 +76,7 @@ class ReactionNetwork():
         """
 
         self.db_name = db_name
+        self.max_bonds = max_bonds
 
     def __enter__(self):
         """ This function is automatically called whenever the class
@@ -59,18 +98,19 @@ class ReactionNetwork():
 
     def create_table(self):
         """ Creates the database table framework used in SQLite.
-        This includes 3 tables: molecules, reasctions, and bonds.
+        This includes 4 tables: molecules, reasctions, atoms, and bonds.
         """
 
         self.c.execute("""CREATE TABLE IF NOT EXISTS molecules(
         molecule_pid INTEGER PRIMARY KEY AUTOINCREMENT,
-        chemical_tag CHAR NOT NULL
+        chemical_tag CHAR NOT NULL,
+        bonds_tag CHAR NOT NULL
         )""")
 
         self.c.execute("""CREATE TABLE IF NOT EXISTS reactions(
         reaction_pid INTEGER PRIMARY KEY AUTOINCREMENT,
         reactant1 INT NOT NULL,
-        reactant2 INT NOT NULL,
+        reactant2 INT,
         product INT NOT NULL,
         FOREIGN KEY(reactant1) REFERENCES molecules(molecule_pid),
         FOREIGN KEY(reactant2) REFERENCES molecules(molecule_pid),
@@ -99,15 +139,15 @@ class ReactionNetwork():
     def molecule_search(
             self,
             element_pool={'C': 2, 'H': 6},
-            max_bonds={'H': 1, 'C': 4, 'O': 2}):
+            multiple_bond_search=False):
 
+        self.multiple_bond_search = multiple_bond_search
         self.element_pool = element_pool
-        self.max_bonds = max_bonds
 
         molecules = {}
         search_molecules = []
-        for el in list(self.element_pool.keys()):
-            molecule = nx.Graph()
+        for el in self.element_pool:
+            molecule = nx.MultiGraph()
             molecule.add_node(
                 0,
                 symbol=el,
@@ -115,7 +155,7 @@ class ReactionNetwork():
                 max_bonds=self.max_bonds[el])
 
             search_molecules += [molecule]
-            molecules[el] = [molecule]
+            molecules[el] = {'': [molecule]}
 
         for molecule in search_molecules:
 
@@ -135,27 +175,29 @@ class ReactionNetwork():
         new_molecules = []
         nodes = molecule.node
 
-        symbol_tags = list(nx.get_node_attributes(molecule, 'symbol').values())
-        symbol_count = {sym: symbol_tags.count(
-            sym) for sym in set(symbol_tags)}
+        symbols, bonds = get_chemical_descriptor(molecule)
+        symbol_count = {sym: symbols.count(sym)
+                        for sym in set(symbols)}
 
         for base_node in nodes:
 
             # Check if an additional bond can be formed
             max_bonds = nodes[base_node]['max_bonds']
             edge_count = len(molecule.edges([base_node]))
+            base_el = molecule.node[base_node]['symbol']
 
             if edge_count >= max_bonds:
                 continue
 
-            for el, cnt in self.element_pool.items():
+            # Creating new nodes
+            for el, cnt in list(self.element_pool.items()):
 
-                # Skip elements which has been fully saturated.
+                # Skip elements exceed specified limit
                 if symbol_count.get(el, 0) >= cnt:
                     continue
 
                 # Oxygen shouldn't bond to itself.
-                if nodes[base_node]['symbol'] == 'O' and el == 'O':
+                if base_el == 'O' and el == 'O':
                     continue
 
                 G = molecule.copy()
@@ -170,14 +212,18 @@ class ReactionNetwork():
 
                 G.add_edge(base_node, node_index)
 
-                tag = ''.join(np.sort(symbol_tags + [el]))
+                chemical_tag = ''.join(sorted(symbols + el))
+                bonds_tag = ''.join(sorted(bonds + base_el + el))
 
                 isomorph_found = False
-                if tag not in list(molecules.keys()):
-                    molecules[tag] = []
+                if chemical_tag not in molecules:
+                    molecules[chemical_tag] = {}
+
+                if bonds_tag not in molecules[chemical_tag]:
+                    molecules[chemical_tag][bonds_tag] = []
 
                 else:
-                    for G1 in molecules[tag]:
+                    for G1 in molecules[chemical_tag][bonds_tag]:
                         if nx.is_isomorphic(
                                 G,
                                 G1,
@@ -188,7 +234,54 @@ class ReactionNetwork():
 
                 if not isomorph_found:
                     new_molecules += [G]
-                    molecules[tag] += [G]
+                    molecules[chemical_tag][bonds_tag] += [G]
+
+            # Bonds to existing nodes
+            if self.multiple_bond_search:
+                for existing_node in nodes:
+
+                    # Atoms don't bond to themselves
+                    if existing_node == base_node:
+                        continue
+
+                    max_bonds_new = nodes[existing_node]['max_bonds']
+                    edge_count_new = len(molecule.edges([existing_node]))
+                    el = molecule.node[existing_node]['symbol']
+
+                    if edge_count_new >= max_bonds_new:
+                        continue
+
+                    # Oxygen shouldn't bond to itself.
+                    if base_el == 'O' and el == 'O':
+                        continue
+
+                    G = molecule.copy()
+
+                    G.add_edge(base_node, existing_node)
+
+                    chemical_tag = ''.join(sorted(symbols))
+                    bonds_tag = ''.join(sorted(bonds + base_el + el))
+
+                    isomorph_found = False
+                    if chemical_tag not in molecules:
+                        molecules[chemical_tag] = {}
+
+                    if bonds_tag not in molecules[chemical_tag]:
+                        molecules[chemical_tag][bonds_tag] = []
+
+                    else:
+                        for G1 in molecules[chemical_tag][bonds_tag]:
+                            if nx.is_isomorphic(
+                                    G,
+                                    G1,
+                                    node_match=iso.numerical_node_match(
+                                        'atomic_number', 1)):
+                                isomorph_found = True
+                                break
+
+                    if not isomorph_found:
+                        new_molecules += [G]
+                        molecules[chemical_tag][bonds_tag] += [G]
 
         return new_molecules, molecules
 
@@ -197,28 +290,28 @@ class ReactionNetwork():
         molecules = self.load_molecules()
 
         pathways = []
-        for tag, graphs in molecules.items():
-            for molecule in graphs:
+        for chemical_tag, data in molecules.items():
+            for bonds_tag, molecule_list in data.items():
+                for molecule in molecule_list:
 
-                pathways += self.branch_paths(molecule, molecules)
+                    pathways += self.branch_paths(molecule, molecules)
 
         return pathways
 
-    def branch_paths(self, molecule, molecules):
+    def branch_paths(self, molecule, molecules, substitution=True):
 
         disjoints, pathways = [], []
-        for edge in molecule.edges_iter():
+        for u, v in molecule.edges():
             cut_molecule = molecule.copy()
-            cut_molecule.remove_edge(*edge)
+            cut_molecule.remove_edge(u, v)
 
             isomorph_found = False
             for disjoint in disjoints:
                 if nx.is_isomorphic(
-                    cut_molecule,
-                    disjoint,
-                    node_match=iso.numerical_node_match(
-                        'atomic_number',
-                        1)):
+                        cut_molecule,
+                        disjoint,
+                        node_match=iso.numerical_node_match(
+                            'atomic_number', 1)):
                     isomorph_found = True
                     break
 
@@ -227,21 +320,22 @@ class ReactionNetwork():
 
                 product_index = cut_molecule.graph['index']
                 pieces = nx.connected_component_subgraphs(cut_molecule)
+                pieces_index = []
 
                 pathway = [product_index]
-                for i, piece in enumerate(pieces):
+                for piece in pieces:
 
-                    tag = get_chemical_tag(piece)
+                    chemical_tag, bonds_tag = get_chemical_descriptor(piece)
 
-                    for reactant in molecules[tag]:
+                    for reactant in molecules[chemical_tag][bonds_tag]:
                         if nx.is_isomorphic(
-                            piece,
-                            reactant,
-                            node_match=iso.numerical_node_match(
-                                'atomic_number',
-                                1)):
-
-                            reactant_index = reactant.graph['index']
+                                piece,
+                                reactant,
+                                node_match=iso.numerical_node_match(
+                                    'atomic_number', 1)):
+                            pindex = reactant.graph['index']
+                            pieces_index += [pindex]
+                            reactant_index = pindex
                             pathway += [reactant_index]
                             break
 
@@ -251,31 +345,42 @@ class ReactionNetwork():
 
     def save_molecules(self, molecules):
 
-        for tag, molecule_list in molecules.items():
-            for molecule in molecule_list:
+        for chemical_tag, data in list(molecules.items()):
+            for bonds_tag, molecule_list in list(data.items()):
+                for molecule in molecule_list:
 
-                self.c.execute("""INSERT INTO molecules (chemical_tag)
-                VALUES(?)""", (tag,))
+                    self.c.execute("""INSERT INTO molecules
+                    (chemical_tag, bonds_tag)
+                    VALUES(?, ?)""", (chemical_tag, bonds_tag))
 
-                self.c.execute("""SELECT last_insert_rowid()""")
-                molecule_pid = self.c.fetchone()[0]
+                    self.c.execute("""SELECT last_insert_rowid()""")
+                    molecule_pid = self.c.fetchone()[0]
 
-                for edge in molecule.edges_iter():
-                    n1 = edge[0]
-                    n2 = edge[1]
-                    self.c.execute("""INSERT INTO bonds
-                    (molecule_id, node_id1, node_id2)
-                    VALUES(?, ?, ?)""", (molecule_pid, n1, n2))
+                    for edge in molecule.edges():
+                        n1 = edge[0]
+                        n2 = edge[1]
+                        self.c.execute("""INSERT INTO bonds
+                        (molecule_id, node_id1, node_id2)
+                        VALUES(?, ?, ?)""", (molecule_pid, n1, n2))
 
-                numbers = nx.get_node_attributes(molecule, 'atomic_number')
-                for node, number in numbers.items():
-                    self.c.execute("""INSERT INTO atoms
-                    (molecule_id, node_id, atom_num, symbol)
-                    VALUES(?, ?, ?, ?)""", (molecule_pid, node, number, cs[number]))
+                    numbers = nx.get_node_attributes(molecule, 'atomic_number')
+                    for node, number in list(numbers.items()):
+                        self.c.execute("""INSERT INTO atoms
+                        (molecule_id, node_id, atom_num, symbol)
+                        VALUES(?, ?, ?, ?)""",
+                                       (molecule_pid,
+                                        node,
+                                        number,
+                                        cs[number]))
 
     def save_pathways(self, pathways):
 
-        for product, reactant1, reactant2 in pathways:
+        for pathway in pathways:
+            if len(pathway) == 2:
+                product, reactant1 = pathway
+                reactant2 = None
+            elif len(pathway) == 3:
+                product, reactant1, reactant2 = pathway
 
             self.c.execute("""INSERT INTO reactions
             (product, reactant1, reactant2)
@@ -283,59 +388,58 @@ class ReactionNetwork():
 
     def load_molecules(self):
 
-        cmd = """SELECT molecule_id, chemical_tag,
-        GROUP_CONCAT(nodes, ';'), GROUP_CONCAT(bonds, ';')
-        FROM (SELECT a.molecule_id,  m.chemical_tag,
-        a.node_id || ',' || a.atom_num AS nodes,
-        b.node_id1 || ',' || b.node_id2 AS bonds
-        FROM atoms a
-        JOIN molecules m on a.molecule_id = m.molecule_pid
-        LEFT OUTER JOIN bonds b on a.molecule_id = b.molecule_id)
-        GROUP BY molecule_id"""
+        cmd = """SELECT m.molecule_pid,
+                        m.chemical_tag,
+                        m.bonds_tag,
+                        nodes,
+                        bonds
+        FROM molecules m LEFT JOIN
+        (
+         SELECT molecule_id,
+         GROUP_CONCAT(node_id || ',' || atom_num, ';') as nodes
+         FROM atoms
+         GROUP BY molecule_id
+        ) a
+          ON a.molecule_id = m.molecule_pid LEFT JOIN
+        (
+         SELECT molecule_id,
+         GROUP_CONCAT(node_id1 || ',' || node_id2, ';') as bonds
+         FROM bonds
+         GROUP BY molecule_id
+        ) b
+          ON b.molecule_id = m.molecule_pid
+        """
 
         self.c.execute(cmd)
         fetch = self.c.fetchall()
 
         molecules = {}
-        for index, tag, node_data, edge_data in fetch:
+        for index, chemical_tag, bonds_tag, node_data, edge_data in fetch:
 
-            molecule = nx.Graph(index=index)
+            molecule = nx.MultiGraph(index=index)
 
             node_data = np.array([_.split(',')
-                                  for _ in node_data.split(';')], dtype=int)
+                                  for _ in node_data.split(';')],
+                                 dtype=int)
             nodes = [(node, {'atomic_number': n, 'symbol': cs[n]})
                      for node, n in node_data]
             molecule.add_nodes_from(nodes)
 
             if edge_data:
                 edges = np.array([_.split(',')
-                                  for _ in edge_data.split(';')], dtype=int)
+                                  for _ in edge_data.split(';')],
+                                 dtype=int)
                 molecule.add_edges_from(edges)
 
-            if tag not in list(molecules.keys()):
-                molecules[tag] = []
+            if chemical_tag not in molecules:
+                molecules[chemical_tag] = {}
 
-            molecules[tag] += [molecule]
+            if bonds_tag not in molecules[chemical_tag]:
+                molecules[chemical_tag][bonds_tag] = []
+
+            molecules[chemical_tag][bonds_tag] += [molecule]
 
         return molecules
-
-    def plot_molecule(self, molecule, file_name=None):
-
-        colors = {'H': 'w', 'C': 'grey', 'O': 'r'}
-
-        symbols = nx.get_node_attributes(molecule, 'symbol')
-        color = [colors[sym] for _, sym in symbols.items()]
-
-        plt.figure(figsize=(3, 3))
-        nx.draw_networkx(
-            molecule,
-            labels=nx.get_node_attributes(molecule, 'symbol'),
-            node_color=color)
-        plt.draw()
-        plt.axis('off')
-
-        if file_name:
-            plt.savefig(file_name)
 
     def plot_reaction_network(self, file_name=None):
 
@@ -347,7 +451,8 @@ class ReactionNetwork():
 
         molecules = []
         for molecule in fetch:
-            molecules += [(molecule[0], {'tag': molecule[1]})]
+            molecules += [(molecule[0],
+                           {'tag': molecule[1], 'id': molecule[0]})]
 
         cmd = """SELECT
         product || ',' || reactant1  AS path1,
@@ -359,20 +464,22 @@ class ReactionNetwork():
 
         pathways = []
         for paths in fetch:
-            pathways += [path.split(',') for path in paths]
+            pathways += [path.split(',') for path in paths if path is not None]
 
         pathways = np.array(pathways, dtype=int)
 
-        network = nx.Graph()
+        network = nx.MultiGraph()
         network.add_nodes_from(molecules)
         network.add_edges_from(pathways)
 
         plt.figure(figsize=(6, 6))
         nx.draw_networkx(
             network,
-            labels=nx.get_node_attributes(network, 'tag'))
+            labels=nx.get_node_attributes(network, 'id'))
         plt.draw()
         plt.axis('off')
 
         if file_name:
             plt.savefig(file_name)
+
+        plt.close()

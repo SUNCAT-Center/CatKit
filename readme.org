@@ -11,54 +11,63 @@ Welcome to CatKit! A staging ground for computational tools which are generally 
 Currently, the only utility is an enumeration of molecular structures in graph from. What makes this tool useful? Its goal is to be a comprehensive search of all possible chemical structures and the reaction mechanisms which connect them. This includes searching for:
 
 ** Thermodynamics:
-[X] - Various chemical species (C, H, and O currently tested)
-[X] - Molecules with single bonds
-[ ] - Molecules with double bonds
-[ ] - Molecules with triple bonds
+[X] Various chemical species (C, H, and O currently tested)
 
-[ ] - Molecules with single cyclical groups
-[ ] - Molecules with double cyclical groups
-[ ] - Molecules with triple cyclical groups
+[X] Molecules with single bonds
 
-[ ] - Chiral carbon molecules
-[ ] - cis-trans isomers
+[X] Molecules with double bonds
+
+[X] Molecules with triple bonds
+
+[X] Molecules with single cyclical groups
+
+[X] Molecules with double cyclical groups
+
+[X] Molecules with triple cyclical groups
+
+[ ] Chiral carbon molecules
+
+[ ] cis-trans isomers
 
 ** Kinetics:
+[X] Addition and Reduction reactions (R1 + R2 <--> P1)
 
-[X] - Addition and Reduction reactions (R1 + R2 <--> P1)
-[ ] - Bond formation / breaking pathways (R1 <--> P1)
+[X] Bond formation / breaking pathways (R1 <--> P1)
+
 [ ] - Reconfiguration reactions (R1 <--> R1*)
+
 [ ] - Substitution reactions (R1 + R2 <--> P1 + P2)
 
 X - Currently implemented features
 
-Example usage:
+** Example usage:
 
 Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2 H6.
 
 #+BEGIN_SRC python :results output org drawer
-from pathways import ReactionNetwork
+from pathways import ReactionNetwork, plot_molecule
 import time
 
 start = time.time()
 
-db_name = 'networks/single-bonds-C2H6.db'
+db_name = 'networks/example-C2H6.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
     molecules = rn.molecule_search(
-        element_pool={'C': 2, 'H': 6})
+        element_pool={'C': 2, 'H': 6},
+        multiple_bond_search=False)
     rn.save_molecules(molecules)
 
     molecule_data = rn.load_molecules()
 
-    cnt = 0
-    for tag, molecules in molecule_data.items():
-        for molecule in molecules:
-            rn.plot_molecule(
-                molecule,
-                file_name='./images/tmp-molecule-{}.png'.format(cnt))
-            print('[[./images/tmp-molecule-{}.png]]'.format(cnt))
-            cnt += 1
+    for data in molecule_data.values():
+        for molecule_list in data.values():
+            for molecule in molecule_list:
+                i = molecule.graph['index']
+                plot_molecule(
+                    molecule,
+                    file_name='./images/tmp-molecule-{}.png'.format(i))
+                print('[[./images/tmp-molecule-{}.png]]'.format(i))
 
     pathways = rn.path_search()
     rn.save_pathways(pathways)
@@ -68,7 +77,8 @@ with ReactionNetwork(db_name=db_name) as rn:
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
-[[./images/tmp-molecule-0.png]]
+#+RESULTS:
+:RESULTS:
 [[./images/tmp-molecule-1.png]]
 [[./images/tmp-molecule-2.png]]
 [[./images/tmp-molecule-3.png]]
@@ -85,5 +95,26 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 [[./images/tmp-molecule-14.png]]
 [[./images/tmp-molecule-15.png]]
 [[./images/tmp-molecule-16.png]]
-Process completed in 3.2s
+[[./images/tmp-molecule-17.png]]
+Process completed in 2.6s
 :END:
+
+
+[[./images/tmp-molecule-1.png]]
+[[./images/tmp-molecule-2.png]]
+[[./images/tmp-molecule-3.png]]
+[[./images/tmp-molecule-4.png]]
+[[./images/tmp-molecule-5.png]]
+[[./images/tmp-molecule-6.png]]
+[[./images/tmp-molecule-7.png]]
+[[./images/tmp-molecule-8.png]]
+[[./images/tmp-molecule-9.png]]
+[[./images/tmp-molecule-10.png]]
+[[./images/tmp-molecule-11.png]]
+[[./images/tmp-molecule-12.png]]
+[[./images/tmp-molecule-13.png]]
+[[./images/tmp-molecule-14.png]]
+[[./images/tmp-molecule-15.png]]
+[[./images/tmp-molecule-16.png]]
+[[./images/tmp-molecule-17.png]]
+Process completed in 3.2s
