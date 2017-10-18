@@ -34,7 +34,7 @@ Currently, the only utility is an enumeration of molecular structures in graph f
 
 [X] Bond formation / breaking pathways (R1 <--> P1)
 
-[ ] - Reconfiguration reactions (R1 <--> R1*)
+[X] - Reconfiguration reactions (R1 <--> R1*)
 
 [ ] - Substitution reactions (R1 + R2 <--> P1 + P2)
 
@@ -46,53 +46,109 @@ Below is an example script which generates some simple figures using [[https://n
 
 #+BEGIN_SRC python :results output org drawer
 from pathways import ReactionNetwork, plot_molecule
+from rdkit import Chem
 import time
+import os
 
 start = time.time()
 
-db_name = 'networks/multiple-bonds-C2H6.db'
+db_name = 'networks/multiple-bonds-ex.db'
+
+if os.path.exists(db_name):
+    os.unlink(db_name)
 
 with ReactionNetwork(db_name=db_name) as rn:
     molecules = rn.molecule_search(
-        element_pool={'C': 2, 'H': 6},
+        element_pool={'C': 1, 'H': 4},
+        multiple_bond_search=False)
+    rn.save_molecules(molecules)
+
+    molecules = rn.molecule_search(
+        element_pool={'S': 1, 'H': 4},
+        multiple_bond_search=False)
+    rn.save_molecules(molecules)
+
+    molecules = rn.molecule_search(
+        element_pool={'N': 1, 'H': 4},
+        multiple_bond_search=False)
+    rn.save_molecules(molecules)
+
+    molecules = rn.molecule_search(
+        element_pool={'O': 1, 'H': 4},
         multiple_bond_search=False)
     rn.save_molecules(molecules)
 
     molecule_data = rn.load_molecules()
 
-    for data in molecule_data.values():
-        for molecule_list in data.values():
-            for molecule in molecule_list:
-                i = molecule.graph['index']
-                plot_molecule(
-                    molecule,
-                    file_name='./images/tmp-molecule-{}.png'.format(i))
-                print('[[./images/tmp-molecule-{}.png]]'.format(i))
+    # for i, molecule in molecule_data.items():
+    #     plot_molecule(
+    #         molecule,
+    #         file_name='./images/tmp-molecule-{}.png'.format(i))
+
+    #     print('[[./images/tmp-molecule-{}.png]]'.format(i))
 
     pathways = rn.path_search()
-    rn.save_pathways(pathways)
 
-    rn.plot_reaction_network(file_name='./images/reaction-network.png')
+    # rn.plot_reaction_network(file_name='./images/reaction-network.png')
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
+#+RESULTS:
+:RESULTS:
+Process completed in 1.4s
+:END:
 
-[[./images/tmp-molecule-1.png]]
-[[./images/tmp-molecule-2.png]]
-[[./images/tmp-molecule-3.png]]
-[[./images/tmp-molecule-4.png]]
-[[./images/tmp-molecule-5.png]]
-[[./images/tmp-molecule-6.png]]
-[[./images/tmp-molecule-7.png]]
-[[./images/tmp-molecule-8.png]]
-[[./images/tmp-molecule-9.png]]
-[[./images/tmp-molecule-10.png]]
-[[./images/tmp-molecule-11.png]]
-[[./images/tmp-molecule-12.png]]
-[[./images/tmp-molecule-13.png]]
-[[./images/tmp-molecule-14.png]]
-[[./images/tmp-molecule-15.png]]
-[[./images/tmp-molecule-16.png]]
-[[./images/tmp-molecule-17.png]]
-Process completed in 3.2s
+* Make smiles
+#+BEGIN_SRC python :results output org drawer
+from pathways import ReactionNetwork, plot_molecule, get_rdkit_graph
+import time
+import os
+import networkx as nx
+from rdkit.Chem import AllChem as Chem
+from rdkit.Chem.Draw import MolToFile
+from ase import Atom, Atoms
+import numpy as np
+
+
+def rdkit_to_ase(m3):
+    block = Chem.MolToMolBlock(m3)
+
+    positions = np.empty((m3.GetNumAtoms(), 3))
+    symbols = np.empty(m3.GetNumAtoms(), dtype=str)
+    for i, atom in enumerate(block.split('\n')[4:m3.GetNumAtoms()+4]):
+        data = atom.split()
+        positions[i] = np.array(data[:3], dtype=float)
+        symbols[i] = data[3]
+
+    return Atoms(symbols, positions)
+
+db_name = 'networks/multiple-bonds-ex.db'
+
+atoms = []
+with ReactionNetwork(db_name=db_name) as rn:
+
+    molecule_data = rn.load_molecules()
+
+    for i, molecule in molecule_data.items():
+        G = get_rdkit_graph(molecule)
+        G = Chem.AddHs(G)
+        cids = Chem.EmbedMultipleConfs(G, 50, Chem.ETKDG())
+        atoms += [rdkit_to_ase(G)]
+
+# # atoms = []
+# # for m in m3.GetConformers():
+# #     print(m)
+# #     # atoms += rdkit_to_ase(m)
+
+# MolToFile(mol, './images/tmp.png')
+# #print('[[./images/tmp.png]]')
+
+
+from ase.visualize import view
+view(atoms)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+:END:
