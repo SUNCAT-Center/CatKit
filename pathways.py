@@ -7,6 +7,35 @@ from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
 from rdkit.Chem.Draw import MolToFile
 from rdkit.Chem import AllChem as Chem
+from ase import Atoms
+
+
+def rdkit_to_ase(m3):
+    block = Chem.MolToMolBlock(m3)
+
+    positions = np.empty((m3.GetNumAtoms(), 3))
+    symbols = []
+    for i, atom in enumerate(block.split('\n')[4:m3.GetNumAtoms()+4]):
+        data = atom.split()
+        positions[i] = np.array(data[:3], dtype=float)
+        symbols += [data[3]]
+
+    return Atoms(symbols, positions)
+
+
+def get_unsaturated_nodes(molecule, screen=None):
+
+    unsaturated = []
+    for node, data in molecule.nodes_iter(data=True):
+        radicals = data['radicals']
+
+        if screen in data:
+            continue
+
+        if radicals > 0:
+            unsaturated += [node]
+
+    return np.array(unsaturated)
 
 
 def isomorphic_molecules(molecule1, molecule2):
@@ -32,8 +61,9 @@ def get_bonds(G, u):
 
 def plot_molecule(molecule, file_name=None):
 
-    rdkG = get_rdkit_graph(molecule)
-    MolToFile(rdkG, file_name)
+    G = get_rdkit_graph(molecule)
+    G = Chem.RemoveHs(G)
+    MolToFile(G, file_name, size=(200, 200))
 
 
 def get_chemical_descriptor(graph, rank=1):
@@ -72,11 +102,14 @@ def get_rdkit_graph(molecule):
 
     for u, v, data in molecule.edges_iter(data=True):
 
-        order = orders[str(data['bonds'])]
+        try:
+            order = orders[str(data['bonds'])]
+        except(KeyError):
+            print(molecule.node, molecule.edge)
+            exit()
         rdkitmol.AddBond(int(u), int(v), order)
 
     rdkitmol = rdkitmol.GetMol()
-    rdkitmol = Chem.RemoveHs(rdkitmol)
 
     return rdkitmol
 
@@ -112,12 +145,19 @@ class ReactionNetwork():
         """
 
         self.db_name = db_name
+        self.molecules = {}
         self.base_free_radicals = {
             'H': 1,
             'C': 4,
             'O': 2,
             'N': 3,
             'S': 2}
+
+        self.max_bond_limits = {
+            'C': {'C': 3},
+            'O': {'O': 0},
+            'N': {'N': 0},
+            'S': {'S': 0}}
 
     def __enter__(self):
         """ This function is automatically called whenever the class
@@ -183,19 +223,19 @@ class ReactionNetwork():
         )""")
 
         self.c.execute("""CREATE TABLE IF NOT EXISTS positions(
-        atom_pid INTEGER PRIMARY KEY AUTOINCREMENT,
+        position_pid INTEGER PRIMARY KEY AUTOINCREMENT,
         molecule_id INT NOT NULL,
         atom_id INT NOT NULL,
         x_coord REAL NOT NULL,
         y_coord REAL NOT NULL,
         z_coord REAL NOT NULL,
-        radicals INT NOT NULL,
+        symbol CHAR NOT NULL,
         FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid),
-        FOREIGN KEY(node_id1) REFERENCES atoms(atom_pid)
+        FOREIGN KEY(atom_id) REFERENCES atoms(atom_pid)
         )""")
 
         self.c.execute("""CREATE TABLE IF NOT EXISTS energies(
-        atom_pid INTEGER PRIMARY KEY AUTOINCREMENT,
+        energy_pid INTEGER PRIMARY KEY AUTOINCREMENT,
         molecule_id INT NOT NULL,
         energy REAL NOT NULL,
         calculator CHAR,
@@ -205,14 +245,23 @@ class ReactionNetwork():
     def molecule_search(
             self,
             element_pool={'C': 2, 'H': 6},
+            load_molecules=True,
             multiple_bond_search=False):
 
-        self.multiple_bond_search = multiple_bond_search
         self.element_pool = element_pool
+        self.multiple_bond_search = multiple_bond_search
 
         molecules = {}
+
+        if load_molecules:
+            self.molecules = self.load_molecules(binned=True)
+
         search_molecules = []
         for el in self.element_pool:
+
+            if el in self.molecules:
+                continue
+
             molecule = nx.Graph()
             molecule.add_node(
                 0,
@@ -311,15 +360,20 @@ class ReactionNetwork():
                     if radicals_new <= 0:
                         continue
 
-                    # Oxygen shouldn't bond to itself.
-                    if base_el == 'O' and el == 'O':
+                    if self.maximum_bond_limit(
+                            molecule,
+                            base_node,
+                            existing_node):
                         continue
 
                     G = molecule.copy()
 
                     G.node[base_node]['radicals'] -= 1
                     G.node[existing_node]['radicals'] -= 1
-                    G[base_node][existing_node]['bonds'] += 1
+                    if G.has_edge(base_node, existing_node):
+                        G[base_node][existing_node]['bonds'] += 1
+                    else:
+                        G.add_edge(base_node, existing_node, bonds=1)
 
                     chemical_tag = ''.join(sorted(symbols))
                     bonds_tag = ''.join(sorted(bonds + base_el + el))
@@ -486,10 +540,14 @@ class ReactionNetwork():
         for index, chemical_tag, bonds_tag, node_data, edge_data in fetch:
 
             molecule = nx.Graph(index=index)
+            try:
+                node_data = np.array([_.split(',')
+                                      for _ in node_data.split(';')],
+                                     dtype=int)
+            except(ValueError):
+                print([_.split(',') for _ in node_data.split(';')])
+                exit()
 
-            node_data = np.array([_.split(',')
-                                  for _ in node_data.split(';')],
-                                 dtype=int)
             nodes = [(node, {
                 'atomic_number': n,
                 'symbol': cs[n],
@@ -530,7 +588,7 @@ class ReactionNetwork():
 
         pathways = []
         for path in fetch:
-            pathways += [[int(_) for _ in path if _]]
+            pathways += [[int(_) if _ is not None else None for _ in path]]
 
         pathways = np.array(pathways)
 
@@ -553,7 +611,7 @@ class ReactionNetwork():
         for path in self.load_pathways():
             for R in path[:2]:
                 for P in path[2:]:
-                    if not R and not P:
+                    if R and P:
                         pathways += [[R, P]]
 
         network = nx.Graph()
@@ -572,19 +630,19 @@ class ReactionNetwork():
 
         plt.close()
 
-    def get_unsaturated_nodes(self, molecule, screen=None):
+    def maximum_bond_limit(self, molecule, n1, n2):
 
-        unsaturated = []
-        for node, data in molecule.nodes_iter(data=True):
-            radicals = data['radicals']
+        el1 = molecule.node[n1]['symbol']
+        el2 = molecule.node[n2]['symbol']
 
-            if screen in data:
-                continue
+        bonds = 0
+        if molecule.has_edge(n1, n2):
+            bonds = molecule[n1][n2]['bonds']
 
-            if radicals > 0:
-                unsaturated += [node]
+        if self.max_bond_limits[el1][el2] == bonds:
+            return True
 
-        return np.array(unsaturated)
+        return False
 
     def get_cyclical_groups(self, molecule):
         """ Return a list of nodes that make up cyclical
@@ -609,7 +667,7 @@ class ReactionNetwork():
             # Chirality is difficult to define correctly for
             # all molecules which contain multiple cycles.
             cycles = len(self.get_cyclical_groups(molecule))
-            if cycles > 1:
+            if cycles > 0:
                 continue
 
             broken_molecule = molecule.copy()
@@ -621,7 +679,6 @@ class ReactionNetwork():
             for i in range(n_pieces):
                 piece = pieces.pop()
                 for comparison_piece in pieces:
-
                     if isomorphic_molecules(
                             piece,
                             comparison_piece):
@@ -707,10 +764,10 @@ class ReactionNetwork():
             reconfigurations = [ind_mol[P1]]
 
             # Find potential bonding sites
-            p1_bonds = self.get_unsaturated_nodes(
+            p1_bonds = get_unsaturated_nodes(
                 ind_mol[R1])
 
-            p2_bonds = self.get_unsaturated_nodes(
+            p2_bonds = get_unsaturated_nodes(
                 ind_mol[R2]) + nx.number_of_nodes(ind_mol[R1])
 
             for b1 in p1_bonds:
@@ -744,6 +801,48 @@ class ReactionNetwork():
                     new_pathways += [reconfig_pathway]
 
         return new_pathways
+
+    def save_3d_uff(self, molecule):
+            G = get_rdkit_graph(molecule)
+            Chem.EmbedMolecule(G, Chem.ETKDG())
+
+            block = Chem.MolToMolBlock(G)
+            for j, atom in enumerate(block.split('\n')[4:G.GetNumAtoms()+4]):
+                data = atom.split()
+                x, y, z = np.array(data[:3], dtype=float)
+
+                self.c.execute("""INSERT INTO positions
+                (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)
+                VALUES(?, ?, ?, ?, ?, ?)""",
+                               (molecule.graph['index'],
+                                j, x, y, z, data[3]))
+
+    def load_3d_ase(self, molecule_id):
+        images = []
+        if isinstance(molecule_id, list):
+            molecule_id = ','.join([str(_) for _ in molecule_id])
+
+        cmd = """SELECT
+         GROUP_CONCAT(x_coord || ',' || y_coord || ',' || z_coord, ';'),
+         GROUP_CONCAT(symbol, ';')
+         FROM positions
+         WHERE molecule_id IN ({})
+         GROUP BY molecule_id
+        """.format(molecule_id)
+
+        self.c.execute(cmd)
+        fetch = self.c.fetchall()
+
+        for out in fetch:
+
+            symbols = out[1].split(';')
+            positions = np.array(
+                [_.split(',')
+                 for _ in out[0].split(';')], dtype=float)
+
+            images += [Atoms(symbols, positions)]
+
+        return images
 
 #### NOT YET IMPLEMENTED ###
     

@@ -27,18 +27,30 @@ Currently, the only utility is an enumeration of molecular structures in graph f
 
 [ ] Chiral carbon molecules
 
-[ ] cis-trans isomers
+[ ] Cis-Trans isomers
 
 ** Kinetics:
 [X] Addition and Reduction reactions (R1 + R2 <--> P1)
 
 [X] Bond formation / breaking pathways (R1 <--> P1)
 
-[X] - Reconfiguration reactions (R1 <--> R1*)
+[X] Reconfiguration reactions (R1 <--> R1*)
 
-[ ] - Substitution reactions (R1 + R2 <--> P1 + P2)
+[ ] Substitution reactions (R1 + R2 <--> P1 + P2)
+
+
+** 3D Structure
+[X] UFF force-field optimized
+
+[X] ASE visualization
+
+** Other
+
+[X] Integration with RDKit
+
 
 X - Currently implemented features
+
 
 ** Example usage:
 
@@ -46,109 +58,354 @@ Below is an example script which generates some simple figures using [[https://n
 
 #+BEGIN_SRC python :results output org drawer
 from pathways import ReactionNetwork, plot_molecule
-from rdkit import Chem
+from ase.visualize import view
 import time
-import os
 
 start = time.time()
 
 db_name = 'networks/multiple-bonds-ex.db'
 
+import os
 if os.path.exists(db_name):
     os.unlink(db_name)
 
 with ReactionNetwork(db_name=db_name) as rn:
-    molecules = rn.molecule_search(
-        element_pool={'C': 1, 'H': 4},
-        multiple_bond_search=False)
-    rn.save_molecules(molecules)
 
     molecules = rn.molecule_search(
-        element_pool={'S': 1, 'H': 4},
-        multiple_bond_search=False)
-    rn.save_molecules(molecules)
-
-    molecules = rn.molecule_search(
-        element_pool={'N': 1, 'H': 4},
-        multiple_bond_search=False)
-    rn.save_molecules(molecules)
-
-    molecules = rn.molecule_search(
-        element_pool={'O': 1, 'H': 4},
-        multiple_bond_search=False)
+        element_pool={'C': 2, 'H': 6},
+        multiple_bond_search=True)
     rn.save_molecules(molecules)
 
     molecule_data = rn.load_molecules()
 
-    # for i, molecule in molecule_data.items():
-    #     plot_molecule(
-    #         molecule,
-    #         file_name='./images/tmp-molecule-{}.png'.format(i))
+    for i, molecule in molecule_data.items():
+        rn.save_3d_uff(molecule)
+        plot_molecule(
+            molecule,
+            file_name='./images/tmp-molecule-{}.png'.format(i))
 
-    #     print('[[./images/tmp-molecule-{}.png]]'.format(i))
+        print('{0} [[./images/tmp-molecule-{0}.png]]'.format(i))
 
-    pathways = rn.path_search()
+    pathways = rn.path_search(reconfiguration=True)
 
-    # rn.plot_reaction_network(file_name='./images/reaction-network.png')
+    rn.plot_reaction_network(file_name='./images/reaction-network.png')
+
+    images = rn.load_3d_ase(list(range(len(molecule_data))))
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
+
+view(images)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-Process completed in 1.4s
+1 [[./images/tmp-molecule-1.png]]
+2 [[./images/tmp-molecule-2.png]]
+3 [[./images/tmp-molecule-3.png]]
+4 [[./images/tmp-molecule-4.png]]
+5 [[./images/tmp-molecule-5.png]]
+6 [[./images/tmp-molecule-6.png]]
+7 [[./images/tmp-molecule-7.png]]
+8 [[./images/tmp-molecule-8.png]]
+9 [[./images/tmp-molecule-9.png]]
+10 [[./images/tmp-molecule-10.png]]
+11 [[./images/tmp-molecule-11.png]]
+12 [[./images/tmp-molecule-12.png]]
+13 [[./images/tmp-molecule-13.png]]
+14 [[./images/tmp-molecule-14.png]]
+15 [[./images/tmp-molecule-15.png]]
+16 [[./images/tmp-molecule-16.png]]
+17 [[./images/tmp-molecule-17.png]]
+18 [[./images/tmp-molecule-18.png]]
+19 [[./images/tmp-molecule-19.png]]
+20 [[./images/tmp-molecule-20.png]]
+21 [[./images/tmp-molecule-21.png]]
+22 [[./images/tmp-molecule-22.png]]
+23 [[./images/tmp-molecule-23.png]]
+24 [[./images/tmp-molecule-24.png]]
+25 [[./images/tmp-molecule-25.png]]
+26 [[./images/tmp-molecule-26.png]]
+Process completed in 19.0s
 :END:
 
 * Make smiles
 #+BEGIN_SRC python :results output org drawer
-from pathways import ReactionNetwork, plot_molecule, get_rdkit_graph
+from pathways import ReactionNetwork, plot_molecule, get_rdkit_graph, get_unsaturated_nodes, rdkit_to_ase
 import time
 import os
 import networkx as nx
 from rdkit.Chem import AllChem as Chem
 from rdkit.Chem.Draw import MolToFile
-from ase import Atom, Atoms
 import numpy as np
+from ase.io import write
+from ase import Atoms
+from ase.visualize import view
 
 
-def rdkit_to_ase(m3):
-    block = Chem.MolToMolBlock(m3)
-
-    positions = np.empty((m3.GetNumAtoms(), 3))
-    symbols = np.empty(m3.GetNumAtoms(), dtype=str)
-    for i, atom in enumerate(block.split('\n')[4:m3.GetNumAtoms()+4]):
-        data = atom.split()
-        positions[i] = np.array(data[:3], dtype=float)
-        symbols[i] = data[3]
-
-    return Atoms(symbols, positions)
 
 db_name = 'networks/multiple-bonds-ex.db'
-
-atoms = []
 with ReactionNetwork(db_name=db_name) as rn:
-
     molecule_data = rn.load_molecules()
 
-    for i, molecule in molecule_data.items():
-        G = get_rdkit_graph(molecule)
-        G = Chem.AddHs(G)
-        cids = Chem.EmbedMultipleConfs(G, 50, Chem.ETKDG())
-        atoms += [rdkit_to_ase(G)]
+    # i = 100
+    # molecule = molecule_data[i]
 
-# # atoms = []
-# # for m in m3.GetConformers():
-# #     print(m)
-# #     # atoms += rdkit_to_ase(m)
+    # for i, molecules in molecule_data.items():
 
-# MolToFile(mol, './images/tmp.png')
-# #print('[[./images/tmp.png]]')
+    molecule_id = [2, 100]
 
 
-from ase.visualize import view
-view(atoms)
+    images = []
+    if isinstance(molecule_id, list):
+        molecule_id = ','.join([str(_) for _ in molecule_id])
+
+    cmd = """SELECT
+     GROUP_CONCAT(x_coord || ',' || y_coord || ',' || z_coord, ';'),
+     GROUP_CONCAT(symbol, ';')
+     FROM positions
+     WHERE molecule_id IN ({})
+     GROUP BY molecule_id
+    """.format(molecule_id)
+
+    rn.c.execute(cmd)
+    fetch = rn.c.fetchall()
+
+    for out in fetch:
+
+        symbols = out[1].split(';')
+        positions = np.array([_.split(',') for _ in out[0].split(';')], dtype=float)
+
+        images += [Atoms(symbols, positions)]
+
+view(images)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
 :END:
+
+#+BEGIN_SRC python :results output org drawer
+from ase.data import covalent_radii as radius
+from ase.data import atomic_numbers as numb
+import matplotlib.pyplot as plt
+import numpy as np
+from ase.build import fcc111, fcc111_root
+from itertools import product
+import networkx.algorithms.isomorphism as iso
+import networkx as nx
+from ase.neighborlist import NeighborList
+from ase.visualize import view
+from ase.io import read
+from ase.visualize import view
+import numpy as np
+import math
+import transforms3d
+from ase.build import fcc111, add_adsorbate
+from ase.data import covalent_radii as cr
+from itertools import combinations
+from ase.constraints import FixAtoms, FixCartesian
+
+
+def get_rotation_matrix(i_v, unit=None):
+    # From http://www.j3d.org/matrix_faq/matrfaq_latest.html#Q38
+    if unit is None:
+        unit = [0.0, 0.0, 1.0]
+    # Normalize vector length
+    i_v /= np.linalg.norm(i_v)
+
+    # Get axis
+    uvw = np.cross(i_v, unit)
+
+    # compute trig values - no need to go through arccos and back
+    rcos = np.dot(i_v, unit)
+    rsin = np.linalg.norm(uvw)
+
+    #normalize and unpack axis
+    if not np.isclose(rsin, 0):
+        uvw /= rsin
+    u, v, w = uvw
+ 
+    # Compute rotation matrix - re-expressed to show structure
+    return (
+        rcos * np.eye(3) +
+        rsin * np.array([
+            [ 0,  w, -v],
+            [-w,  0,  u],
+            [ v, -u,  0]
+        ]) +
+        (1.0 - rcos) * uvw[:,None] * uvw[None,:]
+    )
+
+
+images = read('images.traj', ':')
+
+a = 2
+
+atoms = fcc111('Pd', [2, 2, 1], a=a)
+# atoms = fcc111_root('Pd', 3, [1, 1, 1], a=a)
+
+nl = NeighborList(
+    [np.sqrt(2) * a / 4] * len(atoms),
+    bothways=True,
+    self_interaction=False)
+nl.update(atoms)
+
+nn_list = []
+for i in range(len(atoms)):
+    nn_list += [nl.get_neighbors(i)[0]]
+
+pos = np.array([_.position[:2] for _ in atoms if _.tag == 1])
+
+G = nx.MultiGraph()
+for i, nn in enumerate(nn_list):
+    G.add_node(i)
+    G.add_edges_from([[i, _] for _ in nn])
+
+dist = []
+n = len(atoms)
+
+max_cnt = 0
+cnt = 0
+
+graphs = {}
+values = [0, 1, 2] #  range(n + 1)
+for c in product(values, repeat=len(pos)):
+
+    C0 = ','.join([str(c.count(_)) for _ in values])
+
+    for i, j in enumerate(c):
+        G.node[i]['key'] = j
+
+    C1 = []
+    for u, v in G.edges_iter():
+        C1 += [G.node[u]['key'], G.node[v]['key']]
+    C1 = ','.join([str(C1.count(_)) for _ in values])
+
+    if C0 not in graphs:
+        graphs[C0] = {}
+
+    if C1 not in graphs[C0]:
+        graphs[C0][C1] = []
+
+    iso_found = False
+    for G0 in graphs[C0][C1]:
+        isomorph = nx.is_isomorphic(
+            G0,
+            G,
+            node_match=iso.numerical_node_match('key', 1))
+
+        if isomorph:
+            iso_found = True
+            break
+
+    if not iso_found:
+        graphs[C0][C1] += [G.copy()]
+        dist += [c]
+
+dist.pop(0)
+
+ads_sites = ['fcc', 'ontop', 'bridge']
+offsets = [(0, 0), (0, 1), (1, 0), (1, 1)]
+
+metals = np.load('../co-ads/db/calculation-lattice-constants.npy')[()]
+
+
+
+nimg = []
+for atoms in images:
+    rotate = ['x', 'y', 'z']
+
+    V = atoms[0].position - atoms.get_center_of_mass()
+
+    if atoms.get_chemical_formula() == 'CH3':
+        V = -V
+
+    Ir = get_rotation_matrix(V)
+    transform = np.rad2deg(transforms3d.euler.mat2euler(Ir))
+    for i, t in enumerate(transform):
+        if not np.isnan(t):
+            atoms.rotate(t, rotate[i])
+
+    nimg += [atoms]
+
+images = nimg
+
+
+slab_images = []
+cnt = 0
+for adsorbates in combinations(range(len(images)), r=2):
+    A0, A1 = adsorbates
+    ads = [images[A0], images[A1]]
+
+    for M, a in metals.items():
+
+        for ads_site in ads_sites:
+
+            for sites in dist:
+
+                atoms = fcc111(M, (2, 2, 4), a=a)
+
+                for off, site in enumerate(sites):
+                    if site == 0:
+                        continue
+
+                    r1 = radius[numb[M]]
+                    r2 = radius[numb[ads[site - 1][0].symbol]]
+
+                    if site == 'ontop':
+                        height = r1 + r2
+                    elif site == 'bridge':
+                        height = np.sqrt((r1 + r2) ** 2 - (r1) ** 2)
+                    else:
+                        length = np.sqrt(3) / 3. * (r1 * 2)
+                        height = np.sqrt((r1 + r2) ** 2 - (length) ** 2)
+
+                    add_adsorbate(atoms, ads[site - 1], height, ads_site, offset=offsets[off])
+
+                cnt += 1
+                atoms.center(vacuum=7, axis=2)
+
+                constraints = [FixAtoms(mask=[atom.tag > 2 for atom in atoms])]
+                constraints += [
+                    FixCartesian(_.index, [1, 1, 0])
+                    for _ in atoms
+                    if _.symbol not in ['H', M]]
+                atoms.set_constraint(constraints)
+
+                slab_images += [atoms]
+
+print(cnt)
+
+from ase.io import write
+write('coverage-enum.traj', slab_images)
+
+# GRAPHS = []
+# for i, data in graphs.items():
+#     for j, G in data.items():
+#         GRAPHS += [G]
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+19404
+:END:
+
+57,288
+14,322
+
+#+BEGIN_SRC python :results output org drawer
+print((12 * 11) / 2 * (14) * 7 * 3)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+19404.0
+:END:
+
+#+BEGIN_SRC python :results output org drawer
+from ase.io import read
+from ase.visualize import view
+
+images = read('coverage-enum.traj', ':')
+view(images)
+#+END_SRC
