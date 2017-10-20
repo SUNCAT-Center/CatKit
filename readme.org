@@ -38,7 +38,6 @@ Currently, the only utility is an enumeration of molecular structures in graph f
 
 [ ] Substitution reactions (R1 + R2 <--> P1 + P2)
 
-
 ** 3D Structure
 [X] UFF force-field optimized
 
@@ -92,7 +91,6 @@ view(images)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
 1 [[./images/tmp-molecule-1.png]]
 2 [[./images/tmp-molecule-2.png]]
 3 [[./images/tmp-molecule-3.png]]
@@ -120,6 +118,3 @@ view(images)
 25 [[./images/tmp-molecule-25.png]]
 26 [[./images/tmp-molecule-26.png]]
 Process completed in 18.9s
-:END:
-
-
