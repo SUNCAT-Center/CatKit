@@ -27,16 +27,27 @@ Currently, the only utility is an enumeration of molecular structures in graph f
 
 [ ] Chiral carbon molecules
 
-[ ] cis-trans isomers
+[ ] Cis-Trans isomers
 
 ** Kinetics:
 [X] Addition and Reduction reactions (R1 + R2 <--> P1)
 
 [X] Bond formation / breaking pathways (R1 <--> P1)
 
-[ ] - Reconfiguration reactions (R1 <--> R1*)
+[X] Reconfiguration reactions (R1 <--> R1*)
 
-[ ] - Substitution reactions (R1 + R2 <--> P1 + P2)
+[ ] Substitution reactions (R1 + R2 <--> P1 + P2)
+
+
+** 3D Structure
+[X] UFF force-field optimized
+
+[X] ASE visualization
+
+** Other
+
+[X] Integration with RDKit
+
 
 X - Currently implemented features
 
@@ -46,6 +57,7 @@ Below is an example script which generates some simple figures using [[https://n
 
 #+BEGIN_SRC python :results output org drawer
 from pathways import ReactionNetwork, plot_molecule
+from ase.visualize import view
 import time
 
 start = time.time()
@@ -53,68 +65,61 @@ start = time.time()
 db_name = 'networks/example-C2H6.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
+
     molecules = rn.molecule_search(
         element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=False)
+        multiple_bond_search=True)
     rn.save_molecules(molecules)
 
     molecule_data = rn.load_molecules()
 
-    for data in molecule_data.values():
-        for molecule_list in data.values():
-            for molecule in molecule_list:
-                i = molecule.graph['index']
-                plot_molecule(
-                    molecule,
-                    file_name='./images/tmp-molecule-{}.png'.format(i))
-                print('[[./images/tmp-molecule-{}.png]]'.format(i))
+    for i, molecule in molecule_data.items():
+        rn.save_3d_uff(molecule)
+        plot_molecule(
+            molecule,
+            file_name='./images/tmp-molecule-{}.png'.format(i))
 
-    pathways = rn.path_search()
-    rn.save_pathways(pathways)
+        print('{0} [[./images/tmp-molecule-{0}.png]]'.format(i))
 
+    pathways = rn.path_search(reconfiguration=True)
     rn.plot_reaction_network(file_name='./images/reaction-network.png')
 
+    images = rn.load_3d_ase(list(range(len(molecule_data))))
+
 print('Process completed in {:.1f}s'.format(time.time() - start))
+
+view(images)
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-[[./images/tmp-molecule-1.png]]
-[[./images/tmp-molecule-2.png]]
-[[./images/tmp-molecule-3.png]]
-[[./images/tmp-molecule-4.png]]
-[[./images/tmp-molecule-5.png]]
-[[./images/tmp-molecule-6.png]]
-[[./images/tmp-molecule-7.png]]
-[[./images/tmp-molecule-8.png]]
-[[./images/tmp-molecule-9.png]]
-[[./images/tmp-molecule-10.png]]
-[[./images/tmp-molecule-11.png]]
-[[./images/tmp-molecule-12.png]]
-[[./images/tmp-molecule-13.png]]
-[[./images/tmp-molecule-14.png]]
-[[./images/tmp-molecule-15.png]]
-[[./images/tmp-molecule-16.png]]
-[[./images/tmp-molecule-17.png]]
-Process completed in 2.6s
+1 [[./images/tmp-molecule-1.png]]
+2 [[./images/tmp-molecule-2.png]]
+3 [[./images/tmp-molecule-3.png]]
+4 [[./images/tmp-molecule-4.png]]
+5 [[./images/tmp-molecule-5.png]]
+6 [[./images/tmp-molecule-6.png]]
+7 [[./images/tmp-molecule-7.png]]
+8 [[./images/tmp-molecule-8.png]]
+9 [[./images/tmp-molecule-9.png]]
+10 [[./images/tmp-molecule-10.png]]
+11 [[./images/tmp-molecule-11.png]]
+12 [[./images/tmp-molecule-12.png]]
+13 [[./images/tmp-molecule-13.png]]
+14 [[./images/tmp-molecule-14.png]]
+15 [[./images/tmp-molecule-15.png]]
+16 [[./images/tmp-molecule-16.png]]
+17 [[./images/tmp-molecule-17.png]]
+18 [[./images/tmp-molecule-18.png]]
+19 [[./images/tmp-molecule-19.png]]
+20 [[./images/tmp-molecule-20.png]]
+21 [[./images/tmp-molecule-21.png]]
+22 [[./images/tmp-molecule-22.png]]
+23 [[./images/tmp-molecule-23.png]]
+24 [[./images/tmp-molecule-24.png]]
+25 [[./images/tmp-molecule-25.png]]
+26 [[./images/tmp-molecule-26.png]]
+Process completed in 18.9s
 :END:
 
 
-[[./images/tmp-molecule-1.png]]
-[[./images/tmp-molecule-2.png]]
-[[./images/tmp-molecule-3.png]]
-[[./images/tmp-molecule-4.png]]
-[[./images/tmp-molecule-5.png]]
-[[./images/tmp-molecule-6.png]]
-[[./images/tmp-molecule-7.png]]
-[[./images/tmp-molecule-8.png]]
-[[./images/tmp-molecule-9.png]]
-[[./images/tmp-molecule-10.png]]
-[[./images/tmp-molecule-11.png]]
-[[./images/tmp-molecule-12.png]]
-[[./images/tmp-molecule-13.png]]
-[[./images/tmp-molecule-14.png]]
-[[./images/tmp-molecule-15.png]]
-[[./images/tmp-molecule-16.png]]
-[[./images/tmp-molecule-17.png]]
-Process completed in 3.2s
