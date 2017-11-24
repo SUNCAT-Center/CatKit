@@ -1,2 +1,8 @@
-networks/*
+database/*
+*.ini
+*.pov
+
+# Temporary files
 workbook.org
+testing.db
+catkit/tmp_adsorbates.py

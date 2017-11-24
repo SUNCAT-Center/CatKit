@@ -4,13 +4,24 @@
 
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis.
 
-* Molecule enumeration
+Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations can rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined by bond-formation rules.
 
-[[./images/reaction-network.png]]
+By conserving bond-formation order and pairing it with bulk symmetry enumerations, a comprehensive mapping tools of all possible relevant chemical pathways can be produced. This information can then be aggregated and used to gain insights into catalytic systems in ways beyond their original intention.
 
-Currently, the only utility is an enumeration of molecular structures in graph from. What makes this tool useful? Its goal is to be a comprehensive search of all possible chemical structures and the reaction mechanisms which connect them. This includes searching for:
+Currently included enumerations include:
 
-** Thermodynamics:
+[X] Gas-phase molecules
+
+[ ] Bulk structures
+
+[X] Surfaces structure
+
+[ ] Catalytic structures
+
+[X] Reaction pathways
+
+* Enumeration
+** Gas-phase:
 [X] Various chemical species (C, H, and O currently tested)
 
 [X] Molecules with single bonds
@@ -25,37 +36,31 @@ Currently, the only utility is an enumeration of molecular structures in graph f
 
 [X] Molecules with triple cyclical groups
 
-[ ] Chiral carbon molecules
+[X] UFF 3D structure predictions
 
-[ ] Cis-Trans isomers
+*** Example usage:
+Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2H6.
 
-** Kinetics:
-[X] Addition and Reduction reactions (R1 + R2 <--> P1)
-
-[X] Bond formation / breaking pathways (R1 <--> P1)
-
-[X] Reconfiguration reactions (R1 <--> R1*)
-
-[ ] Substitution reactions (R1 + R2 <--> P1 + P2)
-
-** 3D Structure
-[X] UFF force-field optimized
-
-[X] ASE visualization
-
-** Other
-
-[X] Integration with RDKit
-
-
-X - Currently implemented features
-
-** Example usage:
-
-Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2 H6.
+1 [[./images/molecule-1.png]]
+2 [[./images/molecule-2.png]]
+3 [[./images/molecule-3.png]]
+4 [[./images/molecule-4.png]]
+5 [[./images/molecule-5.png]]
+6 [[./images/molecule-6.png]]
+7 [[./images/molecule-7.png]]
+8 [[./images/molecule-8.png]]
+9 [[./images/molecule-9.png]]
+10 [[./images/molecule-10.png]]
+11 [[./images/molecule-11.png]]
+12 [[./images/molecule-12.png]]
+13 [[./images/molecule-13.png]]
+14 [[./images/molecule-14.png]]
+15 [[./images/molecule-15.png]]
+16 [[./images/molecule-16.png]]
+17 [[./images/molecule-17.png]]
 
 #+BEGIN_SRC python :results output org drawer
-from pathways import ReactionNetwork, plot_molecule
+from catkit.pathways import ReactionNetwork, plot_molecule
 from ase.visualize import view
 import time
 
@@ -67,54 +72,132 @@ with ReactionNetwork(db_name=db_name) as rn:
 
     molecules = rn.molecule_search(
         element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=True)
+        multiple_bond_search=False)
     rn.save_molecules(molecules)
 
+    # 3D optimization step. Moderatly time intensive.
     molecule_data = rn.load_molecules()
-
     for i, molecule in molecule_data.items():
-        rn.save_3d_uff(molecule)
+        rn.save_3d_structure(molecule, uff=50)
         plot_molecule(
             molecule,
-            file_name='./images/tmp-molecule-{}.png'.format(i))
+            file_name='./images/molecule-{}.png'.format(i))
 
-        print('[[./images/tmp-molecule-{0}.png]]'.format(i))
-
-    pathways = rn.path_search(reconfiguration=True)
-    rn.plot_reaction_network(file_name='./images/reaction-network.png')
-
-    images = rn.load_3d_ase(list(range(len(molecule_data))))
+    images = rn.load_3d_structures(list(molecule_data.keys()))
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
 
-# view(images)
+view(images)
 #+END_SRC
 
-#+RESULTS:
-[[./images/tmp-molecule-1.png]]
-[[./images/tmp-molecule-2.png]]
-[[./images/tmp-molecule-3.png]]
-[[./images/tmp-molecule-4.png]]
-[[./images/tmp-molecule-5.png]]
-[[./images/tmp-molecule-6.png]]
-[[./images/tmp-molecule-7.png]]
-[[./images/tmp-molecule-8.png]]
-[[./images/tmp-molecule-9.png]]
-[[./images/tmp-molecule-10.png]]
-[[./images/tmp-molecule-11.png]]
-[[./images/tmp-molecule-12.png]]
-[[./images/tmp-molecule-13.png]]
-[[./images/tmp-molecule-14.png]]
-[[./images/tmp-molecule-15.png]]
-[[./images/tmp-molecule-16.png]]
-[[./images/tmp-molecule-17.png]]
-[[./images/tmp-molecule-18.png]]
-[[./images/tmp-molecule-19.png]]
-[[./images/tmp-molecule-20.png]]
-[[./images/tmp-molecule-21.png]]
-[[./images/tmp-molecule-22.png]]
-[[./images/tmp-molecule-23.png]]
-[[./images/tmp-molecule-24.png]]
-[[./images/tmp-molecule-25.png]]
-[[./images/tmp-molecule-26.png]]
-Process completed in 17.3s
+Process completed in 16.8s
+
+** Surfaces:
+[X] Surfaces produced from all user defined bulk lattices
+
+[X] All Miller index
+
+[X] Unique terminations of possible surfaces
+
+*** Example usage:
+Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1$_{0}$ CuPd3 cubic alloy.
+
+#+caption: First termination of 9 layer slab of CuPd3.
+[[./images/slab0-CuPd3.png]] [[./images/slab0-CuPd3-top.png]]
+
+#+caption: Second termination of 9 layer slab of CuPd3.
+[[./images/slab1-CuPd3.png]] [[./images/slab1-CuPd3-top.png]]
+
+#+BEGIN_SRC python :results output org drawer
+from catkit.surface import SlabGenerator
+from ase.visualize import view
+from ase.io import write
+from ase.build import bulk
+
+home = os.getcwd()
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+Gen = SlabGenerator(atoms, miller_index=[2, 1, 1])
+terminations = Gen.get_unique_terminations()
+
+images = []
+for i, t in enumerate(terminations):
+    slab = Gen.get_slab(layers=9, fixed=5, iterm=0)
+    slab.center(axis=2, vacuum=5)
+
+    images += [slab]
+
+# Create side and top-down visuals of the problem structures
+img_name = './images/slab0-{}.png'.format(atoms.get_chemical_formula())
+write(
+    img_name.replace('.png', '.pov'),
+    slab * (2, 2, 1),
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+
+write(
+    img_name.replace('.png', '-top.pov'),
+    slab * (2, 2, 1),
+    show_unit_cell=2,
+    run_povray=True)
+
+view(images)
+#+END_SRC
+
+** Reaction pathways:
+[X] Addition and Reduction reactions (R1 + R2 <--> P1)
+
+[X] Bond formation / breaking pathways (R1 <--> P1)
+
+[X] Reconfiguration reactions (R1 <--> R1*)
+
+[X] Substitution reactions (R1 + R2 <--> P1 + P2)
+
+*** Example usage:
+Enumeration of possible elementary reaction steps for gas-phase C2H6 species.
+
+#+caption: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
+[[./images/reaction-network.png]]
+
+Pathway exploration is currently integrated with gas-phase molecule search. See the gas-phase molecule search example for further details on molecule generations. Below, a reaction network is generated.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit.pathways import ReactionNetwork
+import time
+
+start = time.time()
+
+# Load existing database
+db_name = 'C2H6-example.db'
+
+with ReactionNetwork(db_name=db_name) as rn:
+
+    # Substitution pathway search is expensive!
+    pathways = rn.path_search(
+        reconfiguration=False,
+        substitution=False)
+
+    rn.plot_reaction_network(file_name='./images/reaction-network.png')
+
+print('Process completed in {:.1f}s'.format(time.time() - start))
+#+END_SRC
+
+Process completed in 0.2s
+
+* Dependencies
+CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
+
+- [[https://wiki.fysik.dtu.dk/ase/][Atomic Simulation Environment]]
+Atomic Simulation Environment (ASE) is a convenient platform with many good conventions for atoms objects, which CatKit relies heavily upon.
+
+- [[https://atztogo.github.io/spglib/index.html][Spglib]]
+A Bulk symmetry library with functionality for identifying rotational and translation symmetries in bulk lattice structures.
+
+- [[http://www.rdkit.org/][RDKit]]
+RDKit is a well developed gas-phase molecule enumeration software for SMILES representation of gas-phase molecules and simple UFF integration.
+
+- [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]]
+- Code for Graph theory implementation used to identify redundant structures.
