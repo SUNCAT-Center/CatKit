@@ -1,8 +1,15 @@
 database/*
 *.ini
 *.pov
+*__pycache_*
+*.pyc
 
 # Temporary files
 workbook.org
 testing.db
 catkit/tmp_adsorbates.py
+.Python
+/bin
+/lib
+/share
+/include
