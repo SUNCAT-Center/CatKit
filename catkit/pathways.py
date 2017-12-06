@@ -5,7 +5,6 @@ from __future__ import absolute_import
 from builtins import str
 from builtins import int
 from future import standard_library
-standard_library.install_aliases()
 from builtins import object
 import sqlite3
 import numpy as np
@@ -17,6 +16,7 @@ import matplotlib.pyplot as plt
 from rdkit.Chem.Draw import MolToFile
 from rdkit.Chem import AllChem as Chem
 from ase import Atoms
+standard_library.install_aliases()
 
 
 def rdkit_to_ase(rdG):
@@ -195,20 +195,20 @@ class ReactionNetwork(object):
 
         # Prevent formation of bond type YX
         # If X is bonded to species in list
-        self.prevent_bond_chains = {
-            'OO': ['C', 'N', 'S'],
-            'CO': ['O', 'N', 'S'],
-            'SS': ['C', 'N', 'O'],
-            'CS': ['S', 'N'],
-            'NN': ['C', 'O', 'S'],
-            'CN': ['N', 'S'],
-            'SO': ['C', 'N', 'S', 'O'],
-            'NO': ['C', 'N', 'S', 'O'],
-            'OS': ['C', 'N', 'S', 'O'],
-            'ON': ['C', 'N', 'S', 'O'],
-            'SN': ['C', 'N', 'S', 'O'],
-            'NS': ['C', 'N', 'S', 'O']
-        }
+        self.prevent_bond_chains = {}
+        #     'OO': ['C', 'N', 'S'],
+        #     'CO': ['O', 'N', 'S'],
+        #     'SS': ['C', 'N', 'O'],
+        #     'CS': ['S', 'N'],
+        #     'NN': ['C', 'O', 'S'],
+        #     'CN': ['N', 'S'],
+        #     'SO': ['C', 'N', 'S', 'O'],
+        #     'NO': ['C', 'N', 'S', 'O'],
+        #     'OS': ['C', 'N', 'S', 'O'],
+        #     'ON': ['C', 'N', 'S', 'O'],
+        #     'SN': ['C', 'N', 'S', 'O'],
+        #     'NS': ['C', 'N', 'S', 'O']
+        # }
 
 
     def __enter__(self):
