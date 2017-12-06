@@ -1,3 +1,12 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from builtins import str
+from builtins import int
+from future import standard_library
+standard_library.install_aliases()
+from builtins import object
 import sqlite3
 import numpy as np
 import networkx as nx
@@ -119,7 +128,7 @@ def get_smiles(molecule):
     return Chem.MolToSmiles(rdkG)
 
 
-class ReactionNetwork():
+class ReactionNetwork(object):
     """ A class for accessing a temporary SQLite database. This
     function works as a context manager and should be used as follows:
 
