@@ -76,6 +76,8 @@ with ReactionNetwork(db_name=db_name) as rn:
     rn.save_molecules(molecules)
 
     # 3D optimization step. Moderatly time intensive.
+    # The remainging indented lines will only work with a
+    # functioning installation of RDKit.
     molecule_data = rn.load_molecules()
     for i, molecule in molecule_data.items():
         rn.save_3d_structure(molecule, uff=50)
@@ -89,12 +91,6 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 view(images)
 #+END_SRC
-
-#+RESULTS:
-:RESULTS:
-Process completed in 21.9s
-:END:
-
 
 ** Surfaces:
 [X] Surfaces produced from all user defined bulk lattices
@@ -175,7 +171,7 @@ import time
 start = time.time()
 
 # Load existing database
-db_name = 'C2H6-example.db'
+db_name = 'example-C2H6.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
 
@@ -189,7 +185,10 @@ with ReactionNetwork(db_name=db_name) as rn:
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
-Process completed in 0.2s
+#+RESULTS:
+:RESULTS:
+Process completed in 0.3s
+:END:
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
@@ -205,3 +204,14 @@ RDKit is a well developed gas-phase molecule enumeration software for SMILES rep
 
 - [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]]
 - Code for Graph theory implementation used to identify redundant structures.
+
+
+#+BEGIN_SRC python :results output org drawer
+import networkx
+print(networkx.__version__)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+2.0
+:END:
