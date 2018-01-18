@@ -1,8 +1,11 @@
-database/*
+# Temporary files
 *.ini
 *.pov
+#*
+.#*
+*.pyc
 
-# Temporary files
+# Scratch work
+database/*
 workbook.org
-testing.db
-catkit/tmp_adsorbates.py
+dev/

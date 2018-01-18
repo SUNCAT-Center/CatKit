@@ -5,14 +5,9 @@ from ase.data import atomic_numbers as an
 import networkx.algorithms.isomorphism as iso
 from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
+from rdkit.Chem.Draw import MolToFile
+from rdkit.Chem import AllChem as Chem
 from ase import Atoms
-
-try:
-    # Needed for 3D molecule functionality
-    from rdkit.Chem.Draw import MolToFile
-    from rdkit.Chem import AllChem as Chem
-except(ImportError):
-    pass
 
 
 def rdkit_to_ase(rdG):

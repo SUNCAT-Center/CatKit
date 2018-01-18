@@ -60,13 +60,12 @@ Below is an example script which generates some simple figures using [[https://n
 17 [[./images/molecule-17.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports both
-from catkit.pathways import ReactionNetwork, plot_molecule
-from ase.visualize import view
+from catkit.pathways import ReactionNetwork, 
 import time
 
 start = time.time()
 
-db_name = 'example-C2H6.db'
+db_name = 'C2H6-example.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
 
@@ -76,21 +75,26 @@ with ReactionNetwork(db_name=db_name) as rn:
     rn.save_molecules(molecules)
 
     # 3D optimization step. Moderatly time intensive.
-    # The remainging indented lines will only work with a
-    # functioning installation of RDKit.
-    molecule_data = rn.load_molecules()
-    for i, molecule in molecule_data.items():
-        rn.save_3d_structure(molecule, uff=50)
-        plot_molecule(
-            molecule,
-            file_name='./images/molecule-{}.png'.format(i))
+    try:
+        # Needed for 3D molecule functionality (requires RDKit)
+        from catkit.pathways import plot_molecule, get_rdkit_graph
 
-    images = rn.load_3d_structures(list(molecule_data.keys()))
+        molecule_data = rn.load_molecules()
+        for i, molecule in molecule_data.items():
+            rn.save_3d_structure(molecule, uff=50)
+            plot_molecule(
+                molecule,
+                file_name='./images/molecule-{}.png'.format(i))
+
+        images = rn.load_3d_structures(list(molecule_data.keys()))
+
+    except(ImportError):
+        pass
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
-
-view(images)
 #+END_SRC
+
+Process completed in 16.8s
 
 ** Surfaces:
 [X] Surfaces produced from all user defined bulk lattices
@@ -100,52 +104,63 @@ view(images)
 [X] Unique terminations of possible surfaces
 
 *** Example usage:
-Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1$_{0}$ CuPd3 cubic alloy.
+Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
 #+caption: First termination of 9 layer slab of CuPd3.
-[[./images/slab0-CuPd3.png]] [[./images/slab0-CuPd3-top.png]]
+#+attr_html: :width 100px
+[[./images/CuPd3-term-0.png]] [[./images/CuPd3-term-0-top.png]]
 
 #+caption: Second termination of 9 layer slab of CuPd3.
-[[./images/slab1-CuPd3.png]] [[./images/slab1-CuPd3-top.png]]
+#+attr_html: :width 100px
+[[./images/CuPd3-term-1.png]] [[./images/CuPd3-term-1-top.png]]
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python :results output org drawer :exports code
 from catkit.surface import SlabGenerator
-from ase.visualize import view
 from ase.io import write
 from ase.build import bulk
+import time
 
-home = os.getcwd()
+start = time.time()
 
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
 
-Gen = SlabGenerator(atoms, miller_index=[2, 1, 1])
+Gen = SlabGenerator(
+    atoms,
+    miller_index=[2, 1, 1],
+    layers=9,
+    fixed=5,
+    vacuum=10,
+)
+
 terminations = Gen.get_unique_terminations()
 
 images = []
 for i, t in enumerate(terminations):
-    slab = Gen.get_slab(layers=9, fixed=5, iterm=0)
+    slab = Gen.get_slab(iterm=i)
     slab.center(axis=2, vacuum=5)
 
     images += [slab]
 
-# Create side and top-down visuals of the problem structures
-img_name = './images/slab0-{}.png'.format(atoms.get_chemical_formula())
-write(
-    img_name.replace('.png', '.pov'),
-    slab * (2, 2, 1),
-    show_unit_cell=2,
-    rotation='-90x',
-    run_povray=True)
+    # Create side and top-down visuals
+    img_name = './images/CuPd3-term-{}.png'.format(i)
+    write(
+        img_name,
+        slab * (2, 2, 1),
+        show_unit_cell=2,
+        rotation='-90x',
+    )
 
-write(
-    img_name.replace('.png', '-top.pov'),
-    slab * (2, 2, 1),
-    show_unit_cell=2,
-    run_povray=True)
-
-view(images)
+    write(
+        img_name.replace('.png', '-top.png'),
+        slab * (2, 2, 1),
+        show_unit_cell=2,
+    )
 #+END_SRC
+
+#+RESULTS:
+:RESULTS:
+:END:
 
 ** Reaction pathways:
 [X] Addition and Reduction reactions (R1 + R2 <--> P1)
@@ -164,14 +179,15 @@ Enumeration of possible elementary reaction steps for gas-phase C2H6 species.
 
 Pathway exploration is currently integrated with gas-phase molecule search. See the gas-phase molecule search example for further details on molecule generations. Below, a reaction network is generated.
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python :results output org drawer :exports both
 from catkit.pathways import ReactionNetwork
 import time
 
 start = time.time()
 
 # Load existing database
-db_name = 'example-C2H6.db'
+db_name = 'C2H6-example.db'
+
 
 with ReactionNetwork(db_name=db_name) as rn:
 
@@ -185,10 +201,7 @@ with ReactionNetwork(db_name=db_name) as rn:
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
-#+RESULTS:
-:RESULTS:
-Process completed in 0.3s
-:END:
+Process completed in 0.2s
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
@@ -203,15 +216,4 @@ A Bulk symmetry library with functionality for identifying rotational and transl
 RDKit is a well developed gas-phase molecule enumeration software for SMILES representation of gas-phase molecules and simple UFF integration.
 
 - [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]]
-- Code for Graph theory implementation used to identify redundant structures.
-
-
-#+BEGIN_SRC python :results output org drawer
-import networkx
-print(networkx.__version__)
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-2.0
-:END:
+Code for Graph theory implementation used to identify redundant structures.
