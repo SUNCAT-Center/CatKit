@@ -59,14 +59,14 @@ Below is an example script which generates some simple figures using [[https://n
 16 [[./images/molecule-16.png]]
 17 [[./images/molecule-17.png]]
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python :results output org drawer :exports both
 from catkit.pathways import ReactionNetwork, plot_molecule
 from ase.visualize import view
 import time
 
 start = time.time()
 
-db_name = 'networks/example-C2H6.db'
+db_name = 'example-C2H6.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
 
@@ -90,7 +90,11 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 view(images)
 #+END_SRC
 
-Process completed in 16.8s
+#+RESULTS:
+:RESULTS:
+Process completed in 21.9s
+:END:
+
 
 ** Surfaces:
 [X] Surfaces produced from all user defined bulk lattices
