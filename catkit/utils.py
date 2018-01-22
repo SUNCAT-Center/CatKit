@@ -10,7 +10,7 @@ def expand_cell(atoms, r=6):
     which contains spheres of specified cutoff radius around
     all atom positions.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
@@ -66,7 +66,7 @@ def get_voronoi_neighbors(atoms, r=10):
     """ Return the nearest-neighbors list from the Voronoi
     method.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
@@ -117,7 +117,8 @@ def get_cutoff_neighbors(atoms, cutoff=4, atol=1e-8):
 
     cutoff = cutoff + atol
 
-    index, coords = expand_cell(atoms, cutoff * 2)
+    # TODO fix bug with 110
+    index, coords = expand_cell(atoms, cutoff * 2.0)
 
     indices = np.zeros(len(atoms))
     edges = {}
@@ -152,7 +153,7 @@ def get_neighbors(
     Use of the cutoff matrix provides more fine-tuned control
     over the interaction parameters.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to return.
 
@@ -265,7 +266,7 @@ def get_primitive_cell(
     """ ASE atoms-object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for a primitive unit cell.
 
@@ -299,7 +300,7 @@ def get_symmetry(
     """ ASE atoms-object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for symmetric structures of.
 
@@ -329,7 +330,7 @@ def get_unique_coordinates(
     """ Return unique coordinate values of a given atoms object
     for a specified axis.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for unique values along.
 
@@ -369,309 +370,3 @@ def get_unique_coordinates(
         atoms.set_tags(tags)
 
     return values
-
-
-# tmp for adsorption testing
-from ase.io import read
-from ase import Atoms, Atom
-from ase.constraints import FixAtoms
-from ase.data import covalent_radii, atomic_numbers
-
-
-def read_structure(filename):
-    '''
-      Description: Read the alat and basis from given path...
-      Input:
-        filename: traj file to be read
-      Output:
-        alat: lattice vectors
-        basis: basis for structure
-    '''
-
-    alat = None
-    basis = None
-
-    out = read(filename, index=-1)
-    symbols = out.get_chemical_symbols()
-    positions = out.get_positions()
-    cell = out.get_cell()
-    _tags = []
-
-    try:
-        _tags = out.constraints[0].index
-    except BaseException:
-        pass
-
-    tags = [-1 for s in positions]
-    for i in _tags:
-        tags[i] = 1
-
-    alat = cell
-    inv_alat = np.linalg.inv(alat)
-    basis = []
-    for i in range(len(positions)):
-        symbol = symbols[i]
-        pos_cart = positions[i]
-        pos_direct = np.matmul(pos_cart, inv_alat)
-        if_fix = tags[i]
-        basis.append({'symbol': symbol, 'pos_cart': np.array(
-            pos_cart), 'pos_direct': np.array(pos_direct), 'if_fix': if_fix})
-
-    return alat, basis
-
-
-def get_closest_image_of_atom(atom_i, atom_j, alat):
-    ''' Return the minimum distance image (by considering PBC)
-    of atom_j by considering atom_i as center.
-    '''
-
-    dist = 1e+6
-    image = [0, 0, 0]
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            for k in range(-1, 2):
-                pos_direct = np.add(atom_j['pos_direct'], [i, j, k])
-                pos_cart = np.matmul(pos_direct, alat)
-                dist_ = np.sum(
-                    (np.add(atom_i['pos_cart'], -pos_cart))**2)
-                if(dist_ < dist):
-                    dist = dist_
-                    image = [i, j, k]
-
-    pos_direct = np.add(atom_j['pos_direct'], image)
-    pos_cart = np.matmul(pos_direct, alat)
-    atom = {
-        'symbol': atom_j['symbol'],
-        'if_fix': atom_j['if_fix'],
-        'pos_direct': pos_direct,
-        'pos_cart': pos_cart}
-
-    return atom
-
-
-def get_distance_between_atoms(atom_i, atom_j):
-    "return the distance between two atoms"
-
-    dist = np.sqrt(np.sum(
-        np.add(atom_i['pos_cart'], -np.array(atom_j['pos_cart']))**2))
-
-    return dist
-
-
-def get_cartesian_coordinate_from_direct_coordinate(alat, _basis):
-    '''
-      Description: given basis, populate cartesian positions from direct
-      Input:
-        alat: lattice_vectors
-        _basis: basis to convert
-      output:
-        basis: converted basis
-    '''
-
-    basis = []
-    for b in _basis:
-        pos_direct = b['pos_direct']
-        pos_cart = np.matmul(pos_direct, alat)
-        basis.append({'symbol': b['symbol'],
-                      'pos_cart': np.array(pos_cart),
-                      'pos_direct': np.array(pos_direct),
-                      'if_fix': b['if_fix']})
-
-    return basis
-
-
-def get_center_of_structure(alat, basis):
-    '''
-      Description: find the cneter of given structure
-      Input:
-        alat: lattice vectors of structure
-        basis: baiss of structure
-      Output:
-        [x,y,z] cartesian coordinate of cenetr given structure
-    '''
-
-    center = [0, 0, 0]
-    for b in basis:
-        center = np.add(center, b['pos_cart'])
-    center = center * (1.0 / len(basis))
-
-    return center
-
-
-def get_bottom_of_structure(alat, basis):
-    '''
-      Description: find the bottom of given structure
-      Input:
-        alat: lattice vectors of structure
-        basis: baiss of structure
-      Output:
-        z-coordinate (in cartesian) of bottom of given structure
-    '''
-
-    bottom = 1e+6
-    for b in basis:
-        bottom = min(bottom, b['pos_cart'][2])
-
-    return bottom
-
-
-def get_direct_coordinate_from_cartesian_coordinate(alat, _basis):
-    '''
-      Description: given basis, populate direct positions from cart positions
-      Input:
-        alat: lattice_vectors
-        _basis: basis to convert
-      output:
-        basis: converted basis
-    '''
-
-    inv_alat = np.linalg.inv(alat)
-    basis = []
-    for b in _basis:
-        pos_cart = b['pos_cart']
-        pos_direct = np.matmul(pos_cart, inv_alat)
-        basis.append({'symbol': b['symbol'],
-                      'pos_cart': np.array(pos_cart),
-                      'pos_direct': np.array(pos_direct),
-                      'if_fix': b['if_fix']})
-
-    return basis
-
-
-def get_ase_atoms_object(alat, basis):
-    # generae ase atoms object
-
-    atoms = Atoms([Atom(atom['symbol'],
-                        (atom['pos_cart']),
-                        tag=atom['if_fix']) for atom in basis])
-    atoms.set_cell(np.array(alat))
-    atoms.set_pbc(['True', 'True', 'True'])
-    constraint = FixAtoms(
-        indices=[atom.index for atom in atoms if atom.tag == 1])
-    atoms.set_constraint(constraint)
-
-    return atoms
-
-
-def get_atomic_radius(atom):
-    "return the radius of atom"
-
-    return covalent_radii[atomic_numbers[atom]]
-
-
-def get_surface_supercell(alat, basis):
-    "return the surface supercell with size [3*3*1]"
-
-    supercell = []
-    for i in range(-1, 2):
-        for j in range(-1, 2):
-            for b in basis:
-                supercell.append({
-                    'symbol': b['symbol'],
-                    'pos_direct': np.add(b['pos_direct'], [i, j, 0]),
-                    'size': get_atomic_radius(b['symbol']),
-                    'pos_cart': [],
-                    'if_fix': b['if_fix']})
-
-    for b in supercell:
-        b['pos_cart'] = np.matmul(b['pos_direct'], alat)
-
-    return supercell
-
-
-def get_rotation_matrix(u, theta):
-    "return rotation matrix around u with angle theta. theta is in radians"
-
-    ct = float(np.cos(theta))
-    st = float(np.sin(theta))
-    ux = u[0]
-    uy = u[1]
-    uz = u[2]
-
-    R = [[ct + ux * ux * (1 - ct),
-          ux * uy * (1 - ct) - uz * st,
-          ux * uz * (1 - ct) + uy * st],
-         [uy * ux * (1 - ct) + uz * st,
-          ct + uy * uy * (1 - ct),
-          uy * uz * (1 - ct) - ux * st],
-         [uz * ux * (1 - ct) - uy * st,
-          uz * uy * (1 - ct) + ux * st,
-          ct + uz * uz * (1 - ct)]]
-
-    return R
-
-
-def sortkey_distance(item):
-    "sort the list by dist"
-
-    return item['dist']
-
-
-def if_same_atom_based_on_neighbors(neighbor_i, neighbor_j, symprec=1e-8):
-    '''
-      Description: check if given neighborlists corresponds to same atom
-      Input:
-        neighbors_i, neighbors_j: neighbor_list of atom_i, atom_j
-        symprec: precision for floating point math
-      Output:
-        True if same neighbor_list
-    '''
-
-    # print(len(neighbor_i))
-
-    if(len(neighbor_i) != len(neighbor_j)):
-        return False
-
-    # check if all neighbor of i are in j
-    for ii in range(len(neighbor_i)):
-        if_neighbor_found = 0
-
-        for jj in range(len(neighbor_j)):
-
-            if(neighbor_i[ii]['symbol'] != neighbor_j[jj]['symbol']):
-                continue
-            if(abs(neighbor_i[ii]['dist'] - neighbor_j[jj]['dist']) > symprec):
-                continue
-            if_neighbor_found = 1
-            break
-
-        if(if_neighbor_found == 0):
-            return False
-
-    # check if all neighbors of j are in i
-    for jj in range(len(neighbor_j)):
-        if_neighbor_found = 0
-
-        for ii in range(len(neighbor_i)):
-
-            if(neighbor_i[ii]['symbol'] != neighbor_j[jj]['symbol']):
-                continue
-            if(abs(neighbor_i[ii]['dist'] - neighbor_j[jj]['dist']) > symprec):
-                continue
-            if_neighbor_found = 1
-            break
-
-        if(if_neighbor_found == 0):
-            return False
-
-    return True
-
-
-def get_neighbors_of_given_atom(
-        atom,
-        basis,
-        neighbor_cutoff=4.0,
-        symprec=1e-8):
-    ''' find all neighbors of given atom in the given basis within
-    neighbor_cutoff distance'''
-
-    neighbor = []
-    for _atom in basis:
-        dist = np.sum(np.add(atom['pos_cart'], -_atom['pos_cart'])**2)
-
-        if(dist < (neighbor_cutoff + symprec)**2):
-            neighbor.append({'symbol': _atom['symbol'], 'dist': dist, 'pos_direct': np.array(
-                _atom['pos_direct']), 'pos_cart': np.array(_atom['pos_cart'])})
-
-    neighbor.sort(key=sortkey_distance)
-    return neighbor

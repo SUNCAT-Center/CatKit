@@ -21,81 +21,6 @@ Currently included enumerations include:
 [X] Reaction pathways
 
 * Enumeration
-** Gas-phase:
-[X] Various chemical species (C, H, and O currently tested)
-
-[X] Molecules with single bonds
-
-[X] Molecules with double bonds
-
-[X] Molecules with triple bonds
-
-[X] Molecules with single cyclical groups
-
-[X] Molecules with double cyclical groups
-
-[X] Molecules with triple cyclical groups
-
-[X] UFF 3D structure predictions
-
-*** Example usage:
-Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2H6.
-
-1 [[./images/molecule-1.png]]
-2 [[./images/molecule-2.png]]
-3 [[./images/molecule-3.png]]
-4 [[./images/molecule-4.png]]
-5 [[./images/molecule-5.png]]
-6 [[./images/molecule-6.png]]
-7 [[./images/molecule-7.png]]
-8 [[./images/molecule-8.png]]
-9 [[./images/molecule-9.png]]
-10 [[./images/molecule-10.png]]
-11 [[./images/molecule-11.png]]
-12 [[./images/molecule-12.png]]
-13 [[./images/molecule-13.png]]
-14 [[./images/molecule-14.png]]
-15 [[./images/molecule-15.png]]
-16 [[./images/molecule-16.png]]
-17 [[./images/molecule-17.png]]
-
-#+BEGIN_SRC python :results output org drawer :exports both
-from catkit.pathways import ReactionNetwork, 
-import time
-
-start = time.time()
-
-db_name = 'C2H6-example.db'
-
-with ReactionNetwork(db_name=db_name) as rn:
-
-    molecules = rn.molecule_search(
-        element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=False)
-    rn.save_molecules(molecules)
-
-    # 3D optimization step. Moderatly time intensive.
-    try:
-        # Needed for 3D molecule functionality (requires RDKit)
-        from catkit.pathways import plot_molecule, get_rdkit_graph
-
-        molecule_data = rn.load_molecules()
-        for i, molecule in molecule_data.items():
-            rn.save_3d_structure(molecule, uff=50)
-            plot_molecule(
-                molecule,
-                file_name='./images/molecule-{}.png'.format(i))
-
-        images = rn.load_3d_structures(list(molecule_data.keys()))
-
-    except(ImportError):
-        pass
-
-print('Process completed in {:.1f}s'.format(time.time() - start))
-#+END_SRC
-
-Process completed in 16.8s
-
 ** Surfaces:
 [X] Surfaces produced from all user defined bulk lattices
 
@@ -103,7 +28,9 @@ Process completed in 16.8s
 
 [X] Unique terminations of possible surfaces
 
-*** Example usage:
+[X] Surface sites
+
+*** Example slab enumeration:
 Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
 #+caption: First termination of 9 layer slab of CuPd3.
@@ -158,8 +85,172 @@ for i, t in enumerate(terminations):
     )
 #+END_SRC
 
+*** Example site enumeration:
+
+With a generated slab, we can also generate the
+
+#+captions: Symmetry unique sites of CuPd_{3} (111). C (grey) denote 3-fold hollows, H (white) are bridge, and X (red) are top sites.
+[[./images/CuPd3_111-sites.png]]
+
+#+BEGIN_SRC python :results silent
+from catkit.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
+# Make a test slab
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=[1, 1, 1],
+    layers=3,
+    fixed=2,
+    vacuum=10,
+)
+
+atoms = gen.get_slab(
+    # Reduce the slab to a primitive form.
+    primitive=True,
+)
+
+sites = gen.get_adsorption_sites(
+    atoms,
+    symmetry_reduced=True,
+)
+
+atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
+col = {'top': 'k', 'hollow': 'b', '4fold': 'g', 'bridge': 'y'}
+for k, v in sites.items():
+    positions, points = v
+
+    for s in positions:
+        atoms += Atom(atm[k], s + [0, 0, 1])
+
+write('./images/CuPd3_111-sites.png', atoms)
+#+END_SRC
+
+We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces will be implemented in a future release.
+
+#+captions: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
+[[./images/CuPd3_321-sites.png]]
+
+#+BEGIN_SRC python :results silent
+from catkit.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
+# Make a test slab
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=[3, 2, 1],
+    layers=14,
+    fixed=6,
+    vacuum=10,
+)
+
+atoms = gen.get_slab(
+    # Reduce the slab to a primitive form.
+    primitive=True,
+)
+
+sites = gen.get_adsorption_sites(
+    atoms,
+    symmetry_reduced=False,
+)
+
+atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
+col = {'top': 'k', 'hollow': 'b', '4fold': 'g', 'bridge': 'y'}
+for k, v in sites.items():
+    positions, points = v
+
+    for s in positions:
+        atoms += Atom(atm[k], s + [0, 0, 1])
+
+write('./images/CuPd3_321-sites.png', atoms)
+#+END_SRC
+
+** Gas-phase:
+[X] Various chemical species (C, H, and O currently tested)
+
+[X] Molecules with single bonds
+
+[X] Molecules with double bonds
+
+[X] Molecules with triple bonds
+
+[X] Molecules with single cyclical groups
+
+[X] Molecules with double cyclical groups
+
+[X] Molecules with triple cyclical groups
+
+[X] UFF 3D structure predictions
+
+*** Example usage:
+Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2H6.
+
+1 [[./images/molecule-1.png]]
+2 [[./images/molecule-2.png]]
+3 [[./images/molecule-3.png]]
+4 [[./images/molecule-4.png]]
+5 [[./images/molecule-5.png]]
+6 [[./images/molecule-6.png]]
+7 [[./images/molecule-7.png]]
+8 [[./images/molecule-8.png]]
+9 [[./images/molecule-9.png]]
+10 [[./images/molecule-10.png]]
+11 [[./images/molecule-11.png]]
+12 [[./images/molecule-12.png]]
+13 [[./images/molecule-13.png]]
+14 [[./images/molecule-14.png]]
+15 [[./images/molecule-15.png]]
+16 [[./images/molecule-16.png]]
+17 [[./images/molecule-17.png]]
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pathways import ReactionNetwork
+import time
+
+start = time.time()
+
+db_name = 'C2H6-example.db'
+
+with ReactionNetwork(db_name=db_name) as rn:
+
+    molecules = rn.molecule_search(
+        element_pool={'C': 2, 'H': 6},
+        multiple_bond_search=False)
+    rn.save_molecules(molecules)
+
+    # 3D optimization step. Moderatly time intensive.
+    try:
+        # Needed for 3D molecule functionality (requires RDKit)
+        from catkit.pathways import plot_molecule, get_rdkit_graph
+
+        molecule_data = rn.load_molecules()
+        for i, molecule in molecule_data.items():
+            rn.save_3d_structure(molecule, uff=50)
+            plot_molecule(
+                molecule,
+                file_name='./images/molecule-{}.png'.format(i))
+
+        images = rn.load_3d_structures(list(molecule_data.keys()))
+
+    except(ImportError):
+        pass
+
+print('Process completed in {:.1f}s'.format(time.time() - start))
+#+END_SRC
+
 #+RESULTS:
 :RESULTS:
+Process completed in 21.7s
 :END:
 
 ** Reaction pathways:
@@ -171,7 +262,7 @@ for i, t in enumerate(terminations):
 
 [X] Substitution reactions (R1 + R2 <--> P1 + P2)
 
-*** Example usage:
+*** Example network:
 Enumeration of possible elementary reaction steps for gas-phase C2H6 species.
 
 #+caption: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
@@ -188,7 +279,6 @@ start = time.time()
 # Load existing database
 db_name = 'C2H6-example.db'
 
-
 with ReactionNetwork(db_name=db_name) as rn:
 
     # Substitution pathway search is expensive!
@@ -201,7 +291,69 @@ with ReactionNetwork(db_name=db_name) as rn:
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
-Process completed in 0.2s
+#+RESULTS:
+:RESULTS:
+Process completed in 0.4s
+:END:
+
+*** Example network access
+Once the reaction network has been produce, we can illustrate the potential pathways using the following code.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pathways import ReactionNetwork
+import numpy as np
+import networkx as nx
+from ase.utils import formula_hill
+
+with ReactionNetwork(db_name='C2H6-example.db') as rn:
+ 
+    molecules = rn.load_molecules()
+    pathways = rn.load_pathways()
+
+    names = np.empty(len(molecules) + 1, dtype='a5')
+    names[0] = ''
+    for k, v in molecules.items():
+        atn = nx.get_node_attributes(v, 'atomic_number')
+
+        # These are not always unique identifiers
+        hill = formula_hill(list(atn.values()))
+        names[k] = hill
+
+    for path in pathways:
+        print('{} + {} --> {} + {}'.format(*names[path]))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+b'C' + b'C' --> b'' + b'C2'
+b'C' + b'H' --> b'' + b'CH'
+b'C' + b'CH' --> b'' + b'C2H'
+b'C' + b'CH2' --> b'' + b'C2H2'
+b'C' + b'CH3' --> b'' + b'C2H3'
+b'H' + b'H' --> b'' + b'H2'
+b'H' + b'C2' --> b'' + b'C2H'
+b'H' + b'CH' --> b'' + b'CH2'
+b'H' + b'C2H' --> b'' + b'C2H2'
+b'H' + b'C2H' --> b'' + b'C2H2'
+b'H' + b'CH2' --> b'' + b'CH3'
+b'H' + b'C2H2' --> b'' + b'C2H3'
+b'H' + b'C2H2' --> b'' + b'C2H3'
+b'H' + b'C2H2' --> b'' + b'C2H3'
+b'H' + b'CH3' --> b'' + b'CH4'
+b'H' + b'C2H3' --> b'' + b'C2H4'
+b'H' + b'C2H3' --> b'' + b'C2H4'
+b'H' + b'C2H3' --> b'' + b'C2H4'
+b'H' + b'C2H4' --> b'' + b'C2H5'
+b'H' + b'C2H4' --> b'' + b'C2H5'
+b'H' + b'C2H5' --> b'' + b'C2H6'
+b'CH' + b'CH' --> b'' + b'C2H2'
+b'CH' + b'CH2' --> b'' + b'C2H3'
+b'CH' + b'CH3' --> b'' + b'C2H4'
+b'CH2' + b'CH2' --> b'' + b'C2H4'
+b'CH2' + b'CH3' --> b'' + b'C2H5'
+b'CH3' + b'CH3' --> b'' + b'C2H6'
+:END:
+
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
