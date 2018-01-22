@@ -33,11 +33,11 @@ Currently included enumerations include:
 *** Example slab enumeration:
 Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
-#+caption: First termination of 9 layer slab of CuPd3.
+#+CAPTION: First termination of 9 layer slab of CuPd3.
 #+attr_html: :width 100px
 [[./images/CuPd3-term-0.png]] [[./images/CuPd3-term-0-top.png]]
 
-#+caption: Second termination of 9 layer slab of CuPd3.
+#+CAPTION: Second termination of 9 layer slab of CuPd3.
 #+attr_html: :width 100px
 [[./images/CuPd3-term-1.png]] [[./images/CuPd3-term-1-top.png]]
 
@@ -86,10 +86,9 @@ for i, t in enumerate(terminations):
 #+END_SRC
 
 *** Example site enumeration:
+With a generated slab, we can also produce the unique adsorption sites which would be preasent on any given surface.
 
-With a generated slab, we can also generate the
-
-#+captions: Symmetry unique sites of CuPd_{3} (111). C (grey) denote 3-fold hollows, H (white) are bridge, and X (red) are top sites.
+#+CAPTION: Symmetry unique sites of CuPd_{3} (111). C (grey) denote 3-fold hollows, H (white) are bridge, and X (red) are top sites.
 [[./images/CuPd3_111-sites.png]]
 
 #+BEGIN_SRC python :results silent
@@ -133,7 +132,7 @@ write('./images/CuPd3_111-sites.png', atoms)
 
 We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces will be implemented in a future release.
 
-#+captions: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
+#+CAPTION: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
 [[./images/CuPd3_321-sites.png]]
 
 #+BEGIN_SRC python :results silent
@@ -320,40 +319,39 @@ with ReactionNetwork(db_name='C2H6-example.db') as rn:
         names[k] = hill
 
     for path in pathways:
-        print('{} + {} --> {} + {}'.format(*names[path]))
+        print('|{} + {} --> {} + {}|'.format(*names[path]))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-b'C' + b'C' --> b'' + b'C2'
-b'C' + b'H' --> b'' + b'CH'
-b'C' + b'CH' --> b'' + b'C2H'
-b'C' + b'CH2' --> b'' + b'C2H2'
-b'C' + b'CH3' --> b'' + b'C2H3'
-b'H' + b'H' --> b'' + b'H2'
-b'H' + b'C2' --> b'' + b'C2H'
-b'H' + b'CH' --> b'' + b'CH2'
-b'H' + b'C2H' --> b'' + b'C2H2'
-b'H' + b'C2H' --> b'' + b'C2H2'
-b'H' + b'CH2' --> b'' + b'CH3'
-b'H' + b'C2H2' --> b'' + b'C2H3'
-b'H' + b'C2H2' --> b'' + b'C2H3'
-b'H' + b'C2H2' --> b'' + b'C2H3'
-b'H' + b'CH3' --> b'' + b'CH4'
-b'H' + b'C2H3' --> b'' + b'C2H4'
-b'H' + b'C2H3' --> b'' + b'C2H4'
-b'H' + b'C2H3' --> b'' + b'C2H4'
-b'H' + b'C2H4' --> b'' + b'C2H5'
-b'H' + b'C2H4' --> b'' + b'C2H5'
-b'H' + b'C2H5' --> b'' + b'C2H6'
-b'CH' + b'CH' --> b'' + b'C2H2'
-b'CH' + b'CH2' --> b'' + b'C2H3'
-b'CH' + b'CH3' --> b'' + b'C2H4'
-b'CH2' + b'CH2' --> b'' + b'C2H4'
-b'CH2' + b'CH3' --> b'' + b'C2H5'
-b'CH3' + b'CH3' --> b'' + b'C2H6'
+| b'C' + b'C' --> b'' + b'C2'       |
+| b'C' + b'H' --> b'' + b'CH'       |
+| b'C' + b'CH' --> b'' + b'C2H'     |
+| b'C' + b'CH2' --> b'' + b'C2H2'   |
+| b'C' + b'CH3' --> b'' + b'C2H3'   |
+| b'H' + b'H' --> b'' + b'H2'       |
+| b'H' + b'C2' --> b'' + b'C2H'     |
+| b'H' + b'CH' --> b'' + b'CH2'     |
+| b'H' + b'C2H' --> b'' + b'C2H2'   |
+| b'H' + b'C2H' --> b'' + b'C2H2'   |
+| b'H' + b'CH2' --> b'' + b'CH3'    |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'CH3' --> b'' + b'CH4'    |
+| b'H' + b'C2H3' --> b'' + b'C2H4'  |
+| b'H' + b'C2H3' --> b'' + b'C2H4'  |
+| b'H' + b'C2H3' --> b'' + b'C2H4'  |
+| b'H' + b'C2H4' --> b'' + b'C2H5'  |
+| b'H' + b'C2H4' --> b'' + b'C2H5'  |
+| b'H' + b'C2H5' --> b'' + b'C2H6'  |
+| b'CH' + b'CH' --> b'' + b'C2H2'   |
+| b'CH' + b'CH2' --> b'' + b'C2H3'  |
+| b'CH' + b'CH3' --> b'' + b'C2H4'  |
+| b'CH2' + b'CH2' --> b'' + b'C2H4' |
+| b'CH2' + b'CH3' --> b'' + b'C2H5' |
+| b'CH3' + b'CH3' --> b'' + b'C2H6' |
 :END:
-
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
