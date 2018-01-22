@@ -2,7 +2,10 @@ import networkx as nx
 from ase.neighborlist import NeighborList as NL
 from ase.data import atomic_numbers as an
 from ase.data import covalent_radii as r
-from catkit.util import get_neighbors
+from catkit.utils import get_neighbors
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 class Classifier(object):
@@ -46,9 +49,6 @@ class Classifier(object):
         """
 
         if cutoff is None:
-            # Reduce the radius of sulfur
-            r[16] *= 0.80  # S
-            r[1] *= 0.80  # H
             cutoff = r[self.atoms.get_atomic_numbers()]
 
         # Build a nearest neighbor list
@@ -97,21 +97,24 @@ class Classifier(object):
         for atom in atoms:
 
             # Assumes no adsorbates have atomic numbers greater than 21
-            if an[atom.symbol] >= 21:
+            if an[atom.symbol] >= 21 or an[atom.symbol] == 13:
                 continue
 
             a = atom.index
             neighbor_atoms = self.neighbor_list.get_neighbors(a)
 
-            G.add_node(a, symbol=atoms[a].symbol)
+            G.add_node(
+                a,
+                atomic_number=atom.number,
+                symbol=atom.symbol)
 
             for n in neighbor_atoms[0]:
 
                 # Assumes no adsorbates have atomic numbers greater than 21
-                if an[atoms[n].symbol] >= 21:
+                if an[atoms[n].symbol] >= 21 or an[atom.symbol] == 13:
                     continue
 
-                G.add_edge(a, n)
+                G.add_edge(a, n, bonds=1)
 
         molecules = list(nx.connected_component_subgraphs(G))
         self.molecules = molecules
@@ -156,3 +159,59 @@ class Classifier(object):
                     sites[i][j][n] = atoms[n].symbol
 
         return sites
+
+
+def id_reconstruction(
+        images,
+        rmean=4,
+        save=False):
+    """ Identify a reconstruction even analyzing changes in the forces.
+
+    Parameters:
+      images: list of ASE atoms objects
+        Relaxation trajectory.
+
+      rmean: int
+        Number of values to use for rolling mean.
+
+      show: bool
+        Create a figure to display the events located.
+
+    Returns:
+      predicted_events: list of int
+        index of images predicted before the event occurs.
+    """
+
+    forces = []
+    for i, atoms in enumerate(images):
+        forces += [np.sqrt((atoms.get_forces() ** 2).sum())]
+    forces = np.array(forces)
+
+    frm = pd.rolling_mean(forces, 4)
+    fdiff = np.diff(frm)
+    fterm = np.array([fdiff > 0.25 * frm[:-1]]).astype(int)[0]
+    predicted_events = np.where(fterm[:-1] < fterm[1:])[0]
+
+    if save:
+        fig, ax = plt.subplots(figsize=(6, 4))
+        l, = plt.plot(range(1, len(images) + 1), frm)
+        ax.fill_between(
+            range(1, len(images) + 1),
+            np.zeros(len(images)),
+            frm,
+            facecolor=l.get_color(),
+            alpha=0.5,
+            interpolate=True)
+        for i in predicted_events:
+            plt.text(i - 1, 0.9, i)
+            plt.axvline(i, ls='--', color='0.4')
+
+        ylim = ax.get_ylim()
+        plt.xlim(4, len(images))
+        plt.ylim(0, ylim[1])
+        plt.xlabel('Relaxation step')
+        plt.ylabel('Force running mean (eV/$\AA$)')
+        plt.savefig(save)
+        plt.close()
+
+    return predicted_events

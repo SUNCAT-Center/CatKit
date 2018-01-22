@@ -1,7 +1,146 @@
+from scipy.spatial import Voronoi
 from ase.data import covalent_radii as radii
 import numpy as np
 import spglib
 from ase import Atoms
+
+
+def expand_cell(atoms, r=6):
+    """ Return Cartesian coordinates atoms within a supercell
+    which contains spheres of specified cutoff radius around
+    all atom positions.
+
+    Args:
+      atoms: ASE atoms-object
+        Atoms object with the periodic boundary conditions and
+        unit cell information to use.
+
+      r: float
+        Radius of the spheres to expand around each atom.
+
+    Returns:
+      index: ndarray of int
+        Indices associated with the original unit cell positions.
+
+      coords: ndarray of (3,) array
+        Cartesian coordinates associated with positions in the
+        supercell.
+    """
+
+    cell = atoms.get_cell()
+    recp_len = np.diag(np.linalg.pinv(cell))
+    nmax = float(r) * recp_len + 0.01
+
+    pbc = atoms.get_pbc()
+    low = np.floor(-nmax * pbc)
+    high = np.ceil(nmax * pbc + 1)
+
+    arange = np.arange(low[0], high[0])
+    brange = np.arange(low[1], high[1])
+    crange = np.arange(low[2], high[2])
+
+    arange = arange[:, None] * np.array([1, 0, 0])[None, :]
+    brange = brange[:, None] * np.array([0, 1, 0])[None, :]
+    crange = crange[:, None] * np.array([0, 0, 1])[None, :]
+
+    images = arange[:, None, None] + \
+             brange[None, :, None] + \
+             crange[None, None, :]
+
+    cart_images = np.dot(images, cell)
+
+    coords = atoms.positions[:, None, None, None, :] + \
+             cart_images[None, :, :, :, :]
+
+    index = np.where(coords.sum(axis=4))[0]
+    index = np.append([0], index)
+
+    coords = coords.flatten()
+    n = int(coords.shape[0] / 3)
+    coords = coords.reshape((n, 3))
+
+    return index, coords
+
+
+def get_voronoi_neighbors(atoms, r=10):
+    """ Return the nearest-neighbors list from the Voronoi
+    method.
+
+    Args:
+      atoms: ASE atoms-object
+        Atoms object with the periodic boundary conditions and
+        unit cell information to use.
+
+      r: float
+        Radius of the spheres to expand around each atom.
+
+    Returns:
+      neighbors: dict
+        Edge tuples notation denoting bonds between the atoms of
+        the corresponding indices and values of the number of
+        those bonds.
+
+        Multi-bonding occurs through periodic boundary conditions.
+    """
+
+    index, coords = expand_cell(atoms, r)
+
+    oind = np.empty(len(atoms))
+    for i, A in enumerate(atoms.positions):
+        for j, B in enumerate(coords):
+            if np.allclose(A, B):
+                oind[i] = j
+                break
+
+    voronoi = Voronoi(coords)
+    edges = {}
+    indices = np.zeros(len(atoms))
+    for nn, vind in voronoi.ridge_dict.items():
+        if -1 in vind:
+            continue
+
+        for n in nn:
+            if n in oind:
+                indices[index[n]] += 1
+                e = tuple(sorted((index[nn[0]], index[nn[1]])))
+                if e not in edges:
+                    edges[e] = 0.5
+                else:
+                    edges[e] += 0.5
+
+    return indices, edges
+
+
+def get_cutoff_neighbors(atoms, cutoff=4, atol=1e-8):
+    """ I can haz documentation?
+    """
+
+    cutoff = cutoff + atol
+
+    # TODO fix bug with 110
+    index, coords = expand_cell(atoms, cutoff * 2.0)
+
+    indices = np.zeros(len(atoms))
+    edges = {}
+    for i, center in enumerate(atoms.positions):
+        norm = coords - center
+        d2 = (norm ** 2).sum(axis=1)
+        srt = np.argsort(d2)
+
+        d2 = d2[srt][1:]
+        nindex = index[srt][1:]
+
+        inner = np.where(d2 <= cutoff ** 2)[0]
+
+        for j in nindex[inner]:
+            indices[i] += 1
+            e = tuple(sorted((i, j)))
+            if e not in edges:
+                edges[e] = 0.5
+            else:
+                edges[e] += 0.5
+
+    return indices, edges
 
 
 def get_neighbors(
@@ -14,7 +153,7 @@ def get_neighbors(
     Use of the cutoff matrix provides more fine-tuned control
     over the interaction parameters.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to return.
 
@@ -45,14 +184,16 @@ def get_neighbors(
             [77, 1.1],  # Ir
             [46, 1.1],  # Pd
             [78, 1.2],  # Pt
-            [45, 1.1]]  # Rh
+            [45, 1.1],  # Rh
+        ]
 
         adsorbates = [
             [1, 1.0],
             [6, 1.0],
             [7, 1.0],
             [8, 1.0],
-            [16, 1.0]]
+            [16, 1.0]
+        ]
 
         for i, f in metals:
             r[i] *= f
@@ -125,7 +266,7 @@ def get_primitive_cell(
     """ ASE atoms-object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for a primitive unit cell.
 
@@ -159,7 +300,7 @@ def get_symmetry(
     """ ASE atoms-object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for symmetric structures of.
 
@@ -184,11 +325,12 @@ def get_unique_coordinates(
         atoms,
         axis=2,
         direct=True,
+        tag=False,
         tol=1e-5):
     """ Return unique coordinate values of a given atoms object
     for a specified axis.
 
-    Parameters:
+    Args:
       atoms: ASE atoms-object
         Atoms object to search for unique values along.
 
@@ -197,6 +339,9 @@ def get_unique_coordinates(
 
       direct: bool
         Whether to use direct coordinates or Cartesian.
+
+      tag: bool
+        Assign ase-like tags to each layer of the slab.
 
       tol: float
         The tolerance to search for unique values within.
@@ -215,52 +360,13 @@ def get_unique_coordinates(
     for d in positions[1:, axis]:
         if not np.isclose(d, values, rtol=tol).any():
             values += [d]
+    values = np.sort(values)
 
-    return np.array(values)
+    if tag:
+        tags = []
+        for p in positions[:, axis]:
+            close = np.isclose(p, values[::-1], rtol=tol)
+            tags += [np.where(close)[0][0] + 1]
+        atoms.set_tags(tags)
 
-
-def vector_search(
-        miller_index,
-        limits):
-    """ Try to find surface vectors within given range
-        need to satisfy three conditions:
-         - P.(h, k, l) = 0
-         - Q.(h, k, l) = 0
-         - PxQ = (h, k, l)
-
-    Parameters:
-      miller_index: list (3,)
-        Three integers representing the miller indices.
-
-      limits: list (2,)
-        limits to search for surface vectors within.
-
-    Returns:
-      surface vectors: ndarray (2, 3)
-        Array of surface vectors.
-    """
-
-    h, k, l = miller_index
-    i0, i1 = limits
-
-    for p1 in range(i0, i1 + 1):
-        for p2 in range(i0, i1 + 1):
-            for p3 in range(i0, i1 + 1):
-
-                if(h * p1 + k * p2 + l * p3 != 0):
-                    continue
-
-                for q1 in range(i0, i1 + 1):
-                    for q2 in range(i0, i1 + 1):
-                        for q3 in range(i0, i1 + 1):
-
-                            if h * q1 + k * q2 + l * q3 != 0:
-                                continue
-                            if p1 * q2 - p2 * q1 != l:
-                                continue
-                            if p3 * q1 - p1 * q3 != k:
-                                continue
-                            if p2 * q3 - p3 * q2 != h:
-                                continue
-
-                            return np.array([[p1, p2, p3], [q1, q2, q3]])
+    return values
