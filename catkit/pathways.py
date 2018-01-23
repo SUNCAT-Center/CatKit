@@ -5,8 +5,11 @@ from ase.data import atomic_numbers as an
 import networkx.algorithms.isomorphism as iso
 from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
-from rdkit.Chem.Draw import MolToFile
-from rdkit.Chem import AllChem as Chem
+try:
+    from rdkit.Chem.Draw import MolToFile
+    from rdkit.Chem import AllChem as Chem
+except ImportError:
+    print("RDKit not available.")
 from ase import Atoms
 
 
