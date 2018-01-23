@@ -75,7 +75,7 @@ class catmap_api():
         c = Counter({})
         for s in symbols.values():
             c += Counter({s: 1})
-        return {self._get_species_name(index): dict(c)}
+        return {self._get_species_name(index): {'composition': dict(c)}}
 
     def _get_state(self, index):
         """Return a list of species names from a list of molecular indices.
