@@ -4,19 +4,19 @@
 
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis.
 
-Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations can rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined by bond-formation rules.
+Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined by bond-formation rules.
 
 By conserving bond-formation order and pairing it with bulk symmetry enumerations, a comprehensive mapping tools of all possible relevant chemical pathways can be produced. This information can then be aggregated and used to gain insights into catalytic systems in ways beyond their original intention.
 
 Currently included enumerations include:
 
-[X] Gas-phase molecules
-
-[ ] Bulk structures
-
 [X] Surfaces structure
 
+[X] Adsorption sites
+
 [ ] Catalytic structures
+
+[X] Gas-phase molecules
 
 [X] Reaction pathways
 
@@ -31,23 +31,18 @@ Currently included enumerations include:
 [X] Surface sites
 
 *** Example slab enumeration:
-Example surface generation for the 2 terminations of a fcc(2,1,1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
+Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
-#+CAPTION: First termination of 9 layer slab of CuPd3.
-#+attr_html: :width 100px
+#+CAPTION: First termination of 9 layer slab of CuPd_{3}.
 [[./images/CuPd3-term-0.png]] [[./images/CuPd3-term-0-top.png]]
 
-#+CAPTION: Second termination of 9 layer slab of CuPd3.
-#+attr_html: :width 100px
+#+CAPTION: Second termination of 9 layer slab of CuPd_{3}.
 [[./images/CuPd3-term-1.png]] [[./images/CuPd3-term-1-top.png]]
 
-#+BEGIN_SRC python :results output org drawer :exports code
+#+BEGIN_SRC python :results silent :exports none
 from catkit.surface import SlabGenerator
 from ase.io import write
 from ase.build import bulk
-import time
-
-start = time.time()
 
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
@@ -70,20 +65,21 @@ for i, t in enumerate(terminations):
     images += [slab]
 
     # Create side and top-down visuals
-    img_name = './images/CuPd3-term-{}.png'.format(i)
+    img_name = './images/CuPd3-term-{}.pov'.format(i)
     write(
         img_name,
-        slab * (2, 2, 1),
+        slab,
         show_unit_cell=2,
         rotation='-90x',
     )
 
     write(
-        img_name.replace('.png', '-top.png'),
-        slab * (2, 2, 1),
+        img_name.replace('.pov', '-top.pov'),
+        slab,
         show_unit_cell=2,
     )
 #+END_SRC
+
 
 *** Example site enumeration:
 With a generated slab, we can also produce the unique adsorption sites which would be preasent on any given surface.
@@ -103,7 +99,7 @@ bulk[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     bulk,
-    miller_index=[1, 1, 1],
+    miller_index=(1, 1, 1),
     layers=3,
     fixed=2,
     vacuum=10,
@@ -120,14 +116,17 @@ sites = gen.get_adsorption_sites(
 )
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
-col = {'top': 'k', 'hollow': 'b', '4fold': 'g', 'bridge': 'y'}
 for k, v in sites.items():
     positions, points = v
 
     for s in positions:
-        atoms += Atom(atm[k], s + [0, 0, 1])
+        atoms += Atom(atm[k], s + [0, 0, 2])
 
-write('./images/CuPd3_111-sites.png', atoms)
+write(
+    './images/CuPd3_111-sites.pov',
+    atoms,
+    show_unit_cell=2,
+)
 #+END_SRC
 
 We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces will be implemented in a future release.
@@ -164,14 +163,17 @@ sites = gen.get_adsorption_sites(
 )
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
-col = {'top': 'k', 'hollow': 'b', '4fold': 'g', 'bridge': 'y'}
 for k, v in sites.items():
     positions, points = v
 
     for s in positions:
-        atoms += Atom(atm[k], s + [0, 0, 1])
+        atoms += Atom(atm[k], s + [0, 0, 1.5])
 
-write('./images/CuPd3_321-sites.png', atoms)
+write(
+    './images/CuPd3_321-sites.pov',
+    atoms,
+    show_unit_cell=2,
+)
 #+END_SRC
 
 ** Gas-phase:
@@ -192,7 +194,7 @@ write('./images/CuPd3_321-sites.png', atoms)
 [X] UFF 3D structure predictions
 
 *** Example usage:
-Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C2H6.
+Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C_{2}H_{6}.
 
 1 [[./images/molecule-1.png]]
 2 [[./images/molecule-2.png]]
@@ -239,7 +241,7 @@ with ReactionNetwork(db_name=db_name) as rn:
                 molecule,
                 file_name='./images/molecule-{}.png'.format(i))
 
-        images = rn.load_3d_structures(list(molecule_data.keys()))
+            images = rn.load_3d_structures(list(molecule_data.keys()))
 
     except(ImportError):
         pass
@@ -249,7 +251,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 21.7s
+Process completed in 21.9s
 :END:
 
 ** Reaction pathways:
@@ -262,9 +264,9 @@ Process completed in 21.7s
 [X] Substitution reactions (R1 + R2 <--> P1 + P2)
 
 *** Example network:
-Enumeration of possible elementary reaction steps for gas-phase C2H6 species.
+Enumeration of possible elementary reaction steps for gas-phase C_{2}H_{6} species.
 
-#+caption: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
+#+CAPTION: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
 [[./images/reaction-network.png]]
 
 Pathway exploration is currently integrated with gas-phase molecule search. See the gas-phase molecule search example for further details on molecule generations. Below, a reaction network is generated.
