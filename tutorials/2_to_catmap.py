@@ -7,6 +7,6 @@ rxn = catmap.rxn_expressions()
 for r in rxn:
     print(r)
 # Get species definitions.
-# species = catmap.species_definitions()
-# for s in species.keys():
-#     print(s, species[s])
+species = catmap.species_definitions()
+for s in species.keys():
+    print(s, species[s])

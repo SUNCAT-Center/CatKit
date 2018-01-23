@@ -39,9 +39,11 @@ class catmap_api():
             rxn_expressions.append(self._rxn_equation(R, P))
         return rxn_expressions
 
-    # def species_definitions(self):
-    #     species_definitions = {}
-    #     return species_definitions
+    def species_definitions(self):
+        species_definitions = {}
+        for index in self.molecules:
+            species_definitions.update(self._species_definition(index))
+        return species_definitions
 
     def _rxn_equation(self, R, P, ts=False, formula='hill'):
         """Return a reaction equation in catmap format.
@@ -64,16 +66,16 @@ class catmap_api():
         else:
             return ' + '.join(reactants) + ' <-> ' + ' + '.join(products)
 
-    def _species_definition(self, molecule):
+    def _species_definition(self, index):
         """Return a dictionary with species definitions for catmap.
         Catmap needs information about the composition of species,
         if they are not named in either hill notation or
         condensed structural notation."""
-        # symbols = nx.get_node_attributes(molecule, 'symbol')
-        # c = Counter({})
-        # for s in symbols.values():
-        #    c += Counter({s: 1})
-        raise NotImplementedError("Species definitions.")
+        symbols = nx.get_node_attributes(self.molecules[index], 'symbol')
+        c = Counter({})
+        for s in symbols.values():
+            c += Counter({s: 1})
+        return {self._get_species_name(index): dict(c)}
 
     def _get_state(self, index):
         """Return a list of species names from a list of molecular indices.
@@ -86,20 +88,22 @@ class catmap_api():
         """
         state = []
         for mol in index:
-            site = self._get_site_index(self.molecules[mol])
-            if self.formula == 'hill':
-                n = nx.get_node_attributes(self.molecules[mol],
-                                           'atomic_number')
-                hill = formula_hill(list(n.values()))
-                state.append('_'.join([hill, site]))
-            elif self.formula == 'smiles':
-                smiles = get_smiles(self.molecules[mol])
-                state.append('_'.join([smiles, site]))
-            else:
-                raise NotImplementedError(str(self.formula))
+            species = self._get_species_name(mol)
+            state.append(species)
         return state
 
-    def _get_site_index(self, molecule):
+    def _get_species_name(self, index):
+        site = self._get_site_index(index)
+        if self.formula == 'hill':
+            n = nx.get_node_attributes(self.molecules[index], 'atomic_number')
+            name = formula_hill(list(n.values()))
+        elif self.formula == 'smiles':
+            name = get_smiles(self.molecules[index])
+        else:
+            raise NotImplementedError(str(self.formula))
+        return '_'.join([name, site])
+
+    def _get_site_index(self, index):
         """Return the site of a molecule.
         Parameters
         ----------
