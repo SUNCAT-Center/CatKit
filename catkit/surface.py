@@ -256,33 +256,36 @@ class SlabGenerator(object):
               norm(np.cross(a1, a2)) ** 2)
         slab.cell[2] = a3
 
-        if self.vacuum:
-            # Requires vacuum
-            slab.center(vacuum=self.vacuum, axis=2)
-
-            if primitive:
-                slab = utils.get_primitive_cell(slab)
-                zlayers = utils.get_unique_coordinates(
-                    slab,
-                    direct=False,
-                    tag=True,
-                    tol=self.tol
+        if primitive:
+            if self.vacuum:
+                # Requires vacuum
+                slab.center(vacuum=self.vacuum, axis=2)
+            else:
+                raise(
+                    NotImplementedError,
+                    'Primitive slab generation requires vacuum'
                 )
-                slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
-                # spglib ocassionally returns a bimodal slab
-                zpos = slab.get_scaled_positions().T[2]
-                if zpos.max() > 0.9:
-                    translate = slab.positions.T[2][zpos > 0.5].min()
-                    slab.positions -= [0, 0, translate + self.tol]
-                    slab.wrap(pbc=True)
-                    slab.center(vacuum=self.vacuum, axis=2)
+            slab = utils.get_primitive_cell(slab)
 
-        elif primitive:
-            raise(
-                NotImplementedError,
-                'Primitive slab generation requires vacuum'
-            )
+            # For hcp(1, 1, 0), primitive alters z-axis
+            d = norm(slab.cell, axis=0)
+            maxd = np.argwhere(d == d.max())[0][0]
+            if maxd != 2:
+                slab.rotate(slab.cell[maxd], 'z', rotate_cell=True)
+                slab.cell[[maxd, 2]] = slab.cell[[2, maxd]]
+                slab.cell[maxd] = -slab.cell[maxd]
+                slab.wrap(pbc=True)
+
+            slab.rotate(slab.cell[0], 'x', rotate_cell=True)
+
+            # spglib ocassionally returns a bimodal slab
+            zpos = slab.get_scaled_positions().T[2]
+            if zpos.max() > 0.9:
+                translate = slab.positions.T[2][zpos > 0.5].min()
+                slab.positions -= [0, 0, translate + self.tol]
+                slab.wrap(pbc=True)
+                slab.center(vacuum=self.vacuum, axis=2)
 
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(
@@ -335,13 +338,11 @@ class SlabGenerator(object):
         if slab is None:
             slab = self.get_slab(primitive=True)
 
-        ind, N = utils.get_voronoi_neighbors(self.bulk)
-
-        radii = [self.bulk.get_distance(u, v, mic=True) for u, v in N.keys()]
-
-        ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=max(radii))
+        ind, N, mcut = utils.get_voronoi_neighbors(self.bulk)
+        ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=mcut)
 
         ind = np.repeat(ind, np.ceil(len(ind0) / len(ind)))
+
         surf_atoms = np.nonzero(ind0 - ind[:len(ind0)])[0]
 
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
@@ -455,11 +456,11 @@ def find_adsorption_sites(
     for i, v in enumerate(simplices):
 
         cir = circulant(v)
-        cornors = cir[2]
+        corners = cir[2]
         edges = cir[:2]
 
         # Inner angle of each triangle corner
-        vec = sites['top'][0][edges] - sites['top'][0][cornors]
+        vec = sites['top'][0][edges] - sites['top'][0][corners]
         uvec = vec.T / norm(vec, axis=2).T
         angles = np.sum(uvec.T[0] * uvec.T[1], axis=1)
 
@@ -467,20 +468,20 @@ def find_adsorption_sites(
         right = np.isclose(angles, 0)
         obtuse = (angles < -tol)
 
-        rh_corner = cornors[right]
+        rh_corner = corners[right]
         edge_neighbors = neighbors[i][::-1]
 
         if obtuse.any():
             # Assumption: All simplices with obtuse angles
-            # are irrelevent boundrys.
+            # are irrelevent boundaries.
             continue
 
         bridge = np.sum(sites['top'][0][edges], axis=0) / 2.0
 
-        # Looping through cornors allows for elimination of
+        # Looping through corners allows for elimination of
         # redundent points, identification of 4-fold hollows,
         # and collection of bridge neigbors.
-        for j, c in enumerate(cornors):
+        for j, c in enumerate(corners):
 
             edge = sorted(edges.T[j])
 
