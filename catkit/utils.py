@@ -3,6 +3,50 @@ from ase.data import covalent_radii as radii
 import numpy as np
 import spglib
 from ase import Atoms
+import os
+import contextlib
+
+
+@contextlib.contextmanager
+def cd(path):
+    """ Does path management: if the path doesn't exists, create it
+    otherwise, move into it until the intentation is borken.
+
+    Args:
+      path: str
+        Directory path to create and change into.
+    """
+
+    cwd = os.getcwd()
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path)
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(cwd)
+
+
+def rmean(x, N=5):
+    """ Calculate the running mean of array x for N instances.
+
+    Args:
+      x: list or ndarray (n,)
+        Array of values to have a average taken from.
+      N: int
+        Number of values to take an average with.
+
+    Returns: ndarray (n + 1,)
+      Mean value of the running average.
+    """
+
+    length = len(x)
+    if length < N:
+        N = length
+
+    cumsum = np.cumsum(np.insert(x, 0, 0))
+    mean = (cumsum[N:] - cumsum[:-N]) / float(N)
+    return mean
 
 
 def expand_cell(atoms, r=6):
@@ -14,14 +58,12 @@ def expand_cell(atoms, r=6):
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-
       r: float
         Radius of the spheres to expand around each atom.
 
     Returns:
       index: ndarray of int
         Indices associated with the original unit cell positions.
-
       coords: ndarray of (3,) array
         Cartesian coordinates associated with positions in the
         supercell.
@@ -52,8 +94,8 @@ def expand_cell(atoms, r=6):
     coords = atoms.positions[:, None, None, None, :] + \
              cart_images[None, :, :, :, :]
 
-    index = np.where(coords.sum(axis=4))[0]
-    index = np.append([0], index)
+    index = np.arange(coords.shape[0])
+    index = np.repeat(index, np.prod(coords.shape[1:4]))
 
     coords = coords.flatten()
     n = int(coords.shape[0] / 3)
@@ -64,60 +106,71 @@ def expand_cell(atoms, r=6):
 
 def get_voronoi_neighbors(atoms, r=10):
     """ Return the nearest-neighbors list from the Voronoi
-    method.
+    method. Multi-bonding occurs through periodic boundary conditions.
 
     Args:
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-
       r: float
         Radius of the spheres to expand around each atom.
 
     Returns:
-      neighbors: dict
-        Edge tuples notation denoting bonds between the atoms of
-        the corresponding indices and values of the number of
-        those bonds.
-
-        Multi-bonding occurs through periodic boundary conditions.
+      indices: list (n,)
+        Number of neighboring atoms for each atom.
+      edges: dict
+        Tuples of bonds between two atoms and the count.
+      maximum_cutoff: (n,)
+        The maximum distance of all neighboring atoms.
     """
 
     index, coords = expand_cell(atoms, r)
 
-    oind = np.empty(len(atoms))
-    for i, A in enumerate(atoms.positions):
-        for j, B in enumerate(coords):
-            if np.allclose(A, B):
-                oind[i] = j
-                break
+    pos = atoms.positions
+    pos = pos.reshape(pos.shape[0], 1, 3)
+    ssd = np.abs(pos - coords).sum(axis=2)
+    oind = np.where(ssd < 1e-5)[1]
 
     voronoi = Voronoi(coords)
-    edges = {}
+
     indices = np.zeros(len(atoms))
-    for nn, vind in voronoi.ridge_dict.items():
-        if -1 in vind:
-            continue
 
-        for n in nn:
-            if n in oind:
-                indices[index[n]] += 1
-                e = tuple(sorted((index[nn[0]], index[nn[1]])))
-                if e not in edges:
-                    edges[e] = 0.5
-                else:
-                    edges[e] += 0.5
+    edges = {}
+    maximum_cutoff = []
+    points = voronoi.ridge_points
 
-    return indices, edges
+    for i, n in enumerate(oind):
+        neighbors = np.where(points == n)[0]
+
+        p = points[neighbors]
+
+        d = np.sqrt(((coords[p][:, 0] - coords[p][:, 1]) ** 2).sum(axis=1))
+        maximum_cutoff += [d.max()]
+
+        unique, counts = np.unique(
+            np.sort(index[p]),
+            return_counts=True,
+            axis=0,
+        )
+
+        indices[i] = len(p)
+        for j, u in enumerate(unique):
+            u = tuple(u)
+
+            if u not in edges:
+                edges[u] = counts[j] / 2
+            else:
+                edges[u] += counts[j] / 2
+
+    return indices, edges, maximum_cutoff
 
 
-def get_cutoff_neighbors(atoms, cutoff=4, atol=1e-8):
+def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
     """ I can haz documentation?
     """
 
-    cutoff = cutoff + atol
+    cutoff = max(cutoff) + atol
 
-    # TODO fix bug with 110
     index, coords = expand_cell(atoms, cutoff * 2.0)
 
     indices = np.zeros(len(atoms))
