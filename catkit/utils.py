@@ -1,10 +1,38 @@
 from scipy.spatial import Voronoi
+from scipy.linalg import lstsq
 from ase.data import covalent_radii as radii
 import numpy as np
 import spglib
 from ase import Atoms
 import os
 import contextlib
+from numpy.linalg import norm
+
+
+def trilaterate(centers, r):
+    """ Find the intersection of three spheres
+    P1,P2,P3 are the centers, r1,r2,r3 are the radii
+    Implementaton based on Wikipedia Trilateration article.
+    """
+
+    plane1 = centers[1] - centers[0]
+    plane2 = centers[2] - centers[0]
+
+    e_x = plane1 / norm(plane1)
+    i = np.dot(e_x, plane2)
+    plane3 = plane2 - i*e_x
+
+    e_y = plane3 / norm(plane3)
+    e_z = np.cross(e_x, e_y)
+    d = norm(plane1)
+
+    j = np.dot(e_y, plane2)
+    x = (r[0]**2 - r[1]**2 + d**2) / (2*d)
+    y = (r[0]**2 - r[2]**2 - 2*i*x + i**2 + j**2) / (2*j)
+    z = np.sqrt(r[0]**2 - x**2 - y**2)
+    intersection = centers[0] + x*e_x + y*e_y + z*e_z
+
+    return intersection
 
 
 @contextlib.contextmanager
@@ -12,7 +40,7 @@ def cd(path):
     """ Does path management: if the path doesn't exists, create it
     otherwise, move into it until the intentation is borken.
 
-    Args:
+    Parameters:
       path: str
         Directory path to create and change into.
     """
@@ -30,7 +58,7 @@ def cd(path):
 def rmean(x, N=5):
     """ Calculate the running mean of array x for N instances.
 
-    Args:
+    Parameters:
       x: list or ndarray (n,)
         Array of values to have a average taken from.
       N: int
@@ -54,7 +82,7 @@ def expand_cell(atoms, r=6):
     which contains spheres of specified cutoff radius around
     all atom positions.
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
@@ -66,7 +94,7 @@ def expand_cell(atoms, r=6):
         Indices associated with the original unit cell positions.
       coords: ndarray of (3,) array
         Cartesian coordinates associated with positions in the
-        supercell.
+        super-cell.
     """
 
     cell = atoms.get_cell()
@@ -77,38 +105,29 @@ def expand_cell(atoms, r=6):
     low = np.floor(-nmax * pbc)
     high = np.ceil(nmax * pbc + 1)
 
-    arange = np.arange(low[0], high[0])
-    brange = np.arange(low[1], high[1])
-    crange = np.arange(low[2], high[2])
+    offsets = np.mgrid[
+        low[0]:high[0],
+        low[1]:high[1],
+        low[2]:high[2],
+    ].T
+    ncell = np.prod(offsets.shape[:-1])
 
-    arange = arange[:, None] * np.array([1, 0, 0])[None, :]
-    brange = brange[:, None] * np.array([0, 1, 0])[None, :]
-    crange = crange[:, None] * np.array([0, 0, 1])[None, :]
+    cart = np.dot(offsets, atoms.cell)
 
-    images = arange[:, None, None] + \
-             brange[None, :, None] + \
-             crange[None, None, :]
+    coords = atoms.positions[None, None, None, :, :] + cart[:, :, :, None, :]
 
-    cart_images = np.dot(images, cell)
+    index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
+    coords = coords.reshape(np.prod(coords.shape[:-1]), 3)
+    offsets = offsets.reshape(ncell, 3)
 
-    coords = atoms.positions[:, None, None, None, :] + \
-             cart_images[None, :, :, :, :]
-
-    index = np.arange(coords.shape[0])
-    index = np.repeat(index, np.prod(coords.shape[1:4]))
-
-    coords = coords.flatten()
-    n = int(coords.shape[0] / 3)
-    coords = coords.reshape((n, 3))
-
-    return index, coords
+    return index, coords, offsets
 
 
 def get_voronoi_neighbors(atoms, r=10):
     """ Return the nearest-neighbors list from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
@@ -124,7 +143,7 @@ def get_voronoi_neighbors(atoms, r=10):
         The maximum distance of all neighboring atoms.
     """
 
-    index, coords = expand_cell(atoms, r)
+    index, coords, _ = expand_cell(atoms, r)
 
     pos = atoms.positions
     pos = pos.reshape(pos.shape[0], 1, 3)
@@ -171,7 +190,7 @@ def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
 
     cutoff = max(cutoff) + atol
 
-    index, coords = expand_cell(atoms, cutoff * 2.0)
+    index, coords, _ = expand_cell(atoms, cutoff * 2.0)
 
     indices = np.zeros(len(atoms))
     edges = {}
@@ -206,7 +225,7 @@ def get_neighbors(
     Use of the cutoff matrix provides more fine-tuned control
     over the interaction parameters.
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object to return.
 
@@ -319,7 +338,7 @@ def get_primitive_cell(
     """ ASE atoms-object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object to search for a primitive unit cell.
 
@@ -353,7 +372,7 @@ def get_symmetry(
     """ ASE atoms-object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object to search for symmetric structures of.
 
@@ -383,19 +402,15 @@ def get_unique_coordinates(
     """ Return unique coordinate values of a given atoms object
     for a specified axis.
 
-    Args:
+    Parameters:
       atoms: ASE atoms-object
         Atoms object to search for unique values along.
-
       axis: int
         Value of 0, 1, or 2 associated with x, y, and z coordinates.
-
       direct: bool
         Whether to use direct coordinates or Cartesian.
-
       tag: bool
         Assign ase-like tags to each layer of the slab.
-
       tol: float
         The tolerance to search for unique values within.
 
@@ -423,3 +438,23 @@ def get_unique_coordinates(
         atoms.set_tags(tags)
 
     return values
+
+
+def plane_normal(xyz):
+    """ Return the surface normal vector to a plane of best fit.
+
+    Parameters:
+      xyz: ndarray (n, 3)
+        3D points to fit plane to.
+
+    Returns: ndarray (1, 3)
+        Unit vector normal to the plane of best fit.
+    """
+
+    A = np.c_[xyz[:, 0], xyz[:, 1], np.ones(xyz.shape[0])]
+    vec, _, _, _ = lstsq(A, xyz[:, 2])
+    vec[2] = -1.0
+
+    vec /= np.linalg.norm(vec)
+
+    return -vec

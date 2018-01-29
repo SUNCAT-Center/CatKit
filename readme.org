@@ -65,7 +65,7 @@ for i, t in enumerate(terminations):
     images += [slab]
 
     # Create side and top-down visuals
-    img_name = './images/CuPd3-term-{}.pov'.format(i)
+    img_name = './images/CuPd3-term-{}.png'.format(i)
     write(
         img_name,
         slab,
@@ -74,12 +74,11 @@ for i, t in enumerate(terminations):
     )
 
     write(
-        img_name.replace('.pov', '-top.pov'),
+        img_name.replace('.png', '-top.png'),
         slab,
         show_unit_cell=2,
     )
 #+END_SRC
-
 
 *** Example site enumeration:
 With a generated slab, we can also produce the unique adsorption sites which would be preasent on any given surface.
@@ -117,13 +116,13 @@ sites = gen.get_adsorption_sites(
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
 for k, v in sites.items():
-    positions, points = v
+    positions, points, _ = v
 
     for s in positions:
         atoms += Atom(atm[k], s + [0, 0, 2])
 
 write(
-    './images/CuPd3_111-sites.pov',
+    './images/CuPd3_111-sites.png',
     atoms,
     show_unit_cell=2,
 )
@@ -164,17 +163,68 @@ sites = gen.get_adsorption_sites(
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
 for k, v in sites.items():
-    positions, points = v
+    positions, points, _ = v
 
     for s in positions:
         atoms += Atom(atm[k], s + [0, 0, 1.5])
 
 write(
-    './images/CuPd3_321-sites.pov',
+    './images/CuPd3_321-sites.png',
     atoms,
     show_unit_cell=2,
 )
 #+END_SRC
+
+**** Automated adsorption vectors
+The most commonly studied surfaces, such as (1, 1, 1), are perpendicular to the miller index at all adsorption sites. This means the most favorable angle of adsorption will always be perpendicular to the surface. For higher miller indices, this is no longer the case.
+
+#+CAPTION: Illustration of adsorption vectors (red dots) on a CuPd_{3} (2, 1, 1) surface.
+[[./images/adsorption-vectors.png]]
+
+This is the first step to further reducing symmetrically equivalent sites in 3D space for more complex structures. It can also provide the used with better initial guesses for adsorption locations.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.surface import SlabGenerator
+from ase.build import bulk
+from ase import Atom
+from ase.io import write
+import numpy as np
+
+# Make a test slab
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(2, 1, 1),
+    layers=10,
+    fixed=2,
+    vacuum=10,
+)
+
+slab = gen.get_slab(primitive=True)
+sites = gen.get_adsorption_sites(
+    slab,
+    vectors=True
+)
+
+for k, v in sites.items():
+    coords, points, avec = v
+
+    # Generae a visual of the vectors.
+    for i, origin in enumerate(coords):
+        for d in np.arange(0, 2, 0.25):
+            slab += Atom('X', origin + avec[i] * d)
+
+slab.wrap()
+write(
+    './images/adsorption-vectors.png',
+    slab * (2, 2, 1),
+    show_unit_cell=2,
+    rotation='-60x',
+)
+#+END_SRC
+
 
 ** Gas-phase:
 [X] Various chemical species (C, H, and O currently tested)
@@ -251,7 +301,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 21.9s
+Process completed in 21.8s
 :END:
 
 ** Reaction pathways:

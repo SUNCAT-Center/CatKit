@@ -5,9 +5,12 @@ from ase.data import atomic_numbers as an
 import networkx.algorithms.isomorphism as iso
 from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
-from rdkit.Chem.Draw import MolToFile
-from rdkit.Chem import AllChem as Chem
 from ase import Atoms
+try:
+    from rdkit.Chem.Draw import MolToFile
+    from rdkit.Chem import AllChem as Chem
+except(ImportError):
+    pass
 
 
 def rdkit_to_ase(rdG):
@@ -139,7 +142,7 @@ class ReactionNetwork():
         """ The __init__ function is automatically called when the
         class is referenced.
 
-        Args:
+        Parameters:
             db_name (str): Name of the database file to access. Will
             connect to 'reaction-network.db' by default.
         """
