@@ -2,6 +2,11 @@
 #+Author:Jacob Boes
 #+OPTIONS: toc:nil
 
+#+BEGIN_HTML
+<a href='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'><img src='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'/></a>
+<a href='https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master'><img src='https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master' alt='Coverage Status' /></a>
+#+END_HTML
+
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis.
 
 Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined by bond-formation rules.
@@ -10,25 +15,18 @@ By conserving bond-formation order and pairing it with bulk symmetry enumeration
 
 Currently included enumerations include:
 
-[X] Surfaces structure
-
-[X] Adsorption sites
-
-[ ] Catalytic structures
-
-[X] Gas-phase molecules
-
-[X] Reaction pathways
+- [X] Surfaces structure
+- [X] Adsorption sites
+- [ ] Catalytic structures
+- [X] Gas-phase molecules
+- [X] Reaction pathways
 
 * Enumeration
 ** Surfaces:
-[X] Surfaces produced from all user defined bulk lattices
-
-[X] All Miller index
-
-[X] Unique terminations of possible surfaces
-
-[X] Surface sites
+- [X] Surfaces produced from all user defined bulk lattices
+- [X] All Miller index
+- [X] Unique terminations of possible surfaces
+- [X] Surface sites
 
 *** Example slab enumeration:
 Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
@@ -227,21 +225,14 @@ write(
 #+END_SRC
 
 ** Gas-phase:
-[X] Various chemical species (C, H, and O currently tested)
-
-[X] Molecules with single bonds
-
-[X] Molecules with double bonds
-
-[X] Molecules with triple bonds
-
-[X] Molecules with single cyclical groups
-
-[X] Molecules with double cyclical groups
-
-[X] Molecules with triple cyclical groups
-
-[X] UFF 3D structure predictions
+- [X] Various chemical species (C, H, and O currently tested)
+- [X] Molecules with single bonds
+- [X] Molecules with double bonds
+- [X] Molecules with triple bonds
+- [X] Molecules with single cyclical groups
+- [X] Molecules with double cyclical groups
+- [X] Molecules with triple cyclical groups
+- [X] UFF 3D structure predictions
 
 *** Example usage:
 Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C_{2}H_{6}.
@@ -305,13 +296,10 @@ Process completed in 21.8s
 :END:
 
 ** Reaction pathways:
-[X] Addition and Reduction reactions (R1 + R2 <--> P1)
-
-[X] Bond formation / breaking pathways (R1 <--> P1)
-
-[X] Reconfiguration reactions (R1 <--> R1*)
-
-[X] Substitution reactions (R1 + R2 <--> P1 + P2)
+- [X] Addition and Reduction reactions (R1 + R2 <--> P1)
+- [X] Bond formation / breaking pathways (R1 <--> P1)
+- [X] Reconfiguration reactions (R1 <--> R1*)
+- [X] Substitution reactions (R1 + R2 <--> P1 + P2)
 
 *** Example network:
 Enumeration of possible elementary reaction steps for gas-phase C_{2}H_{6} species.
@@ -419,3 +407,5 @@ RDKit is a well developed gas-phase molecule enumeration software for SMILES rep
 
 - [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]]
 Code for Graph theory implementation used to identify redundant structures.
+
+A full list of required packaged can be found in [[./requirements.txt]].
