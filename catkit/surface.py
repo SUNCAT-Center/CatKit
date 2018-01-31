@@ -2,9 +2,6 @@ from . import utils
 from . import adsorption
 import numpy as np
 from numpy.linalg import norm, solve
-from ase.neighborlist import NeighborList
-import networkx as nx
-import networkx.algorithms.isomorphism as iso
 from ase.build import rotate
 from ase.constraints import FixAtoms
 try:
@@ -166,52 +163,9 @@ class SlabGenerator(object):
         if len(unique_shift) == 1:
             return unique_shift
 
-        # Now search symmetrically unique planes
-        # For nearest-neighbor uniqueness
-        unique_terminations, graphs = [], []
-        for i, z_shift in enumerate(unique_shift):
-            tmp_slab = self._basis.copy()
-            tmp_slab.translate([0, 0, -z_shift])
-            tmp_slab.wrap(pbc=[1, 1, 1])
+        self.unique_terminations = unique_shift
 
-            zpos = tmp_slab.get_scaled_positions()[:, 2]
-            index = np.arange(len(tmp_slab))
-            del tmp_slab[index[zpos < 0.5]]
-
-            nl = NeighborList(
-                [2] * len(tmp_slab),
-                skin=0.0,
-                bothways=True,
-                self_interaction=False)
-            nl.build(tmp_slab)
-
-            G = nx.MultiGraph()
-            symbols = tmp_slab.get_chemical_symbols()
-            for node, neighbors in enumerate(nl.neighbors):
-                G.add_node(node, symbols=symbols[node])
-                d = tmp_slab.get_distances(node, neighbors, mic=True)
-                edges = [[node, _, {'distance': d[i]}] for i, _ in
-                         enumerate(nl.get_neighbors(node)[0])]
-                G.add_edges_from(edges)
-
-            isomorph = False
-            for G0 in graphs:
-                nm = iso.categorical_node_match('symbols', 'X')
-                em = iso.numerical_multiedge_match('distance', 1)
-                if nx.is_isomorphic(
-                        G, G0,
-                        edge_match=em,
-                        node_match=nm):
-                    isomorph = True
-                    break
-
-            if not isomorph:
-                graphs += [G]
-                unique_terminations += [z_shift]
-
-        self.unique_terminations = unique_terminations
-
-        return unique_terminations
+        return unique_shift
 
     def get_slab(self, iterm=None, primitive=False):
         """ Generate a slab object with a certain number of layers.
