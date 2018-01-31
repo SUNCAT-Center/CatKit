@@ -4,6 +4,4 @@
 #*
 .#*
 *.pyc
-
-# Scratch work
-workbook.org
+*.db
