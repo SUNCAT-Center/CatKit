@@ -65,7 +65,7 @@ for i, t in enumerate(terminations):
     images += [slab]
 
     # Create side and top-down visuals
-    img_name = './images/CuPd3-term-{}.png'.format(i)
+    img_name = './images/CuPd3-term-{}.pov'.format(i)
     write(
         img_name,
         slab,
@@ -74,7 +74,7 @@ for i, t in enumerate(terminations):
     )
 
     write(
-        img_name.replace('.png', '-top.png'),
+        img_name.replace('.pov', '-top.pov'),
         slab,
         show_unit_cell=2,
     )
@@ -88,6 +88,7 @@ With a generated slab, we can also produce the unique adsorption sites which wou
 
 #+BEGIN_SRC python :results silent
 from catkit.surface import SlabGenerator
+from catkit.adsorption import get_adsorption_sites
 from ase.build import bulk
 from ase.io import write
 from ase import Atom
@@ -109,7 +110,7 @@ atoms = gen.get_slab(
     primitive=True,
 )
 
-sites = gen.get_adsorption_sites(
+sites = gen.adsorption_sites(
     atoms,
     symmetry_reduced=True,
 )
@@ -122,7 +123,7 @@ for k, v in sites.items():
         atoms += Atom(atm[k], s + [0, 0, 2])
 
 write(
-    './images/CuPd3_111-sites.png',
+    './images/CuPd3_111-sites.pov',
     atoms,
     show_unit_cell=2,
 )
@@ -156,7 +157,7 @@ atoms = gen.get_slab(
     primitive=True,
 )
 
-sites = gen.get_adsorption_sites(
+sites = gen.adsorption_sites(
     atoms,
     symmetry_reduced=False,
 )
@@ -169,7 +170,7 @@ for k, v in sites.items():
         atoms += Atom(atm[k], s + [0, 0, 1.5])
 
 write(
-    './images/CuPd3_321-sites.png',
+    './images/CuPd3_321-sites.pov',
     atoms,
     show_unit_cell=2,
 )
@@ -183,7 +184,7 @@ The most commonly studied surfaces, such as (1, 1, 1), are perpendicular to the 
 
 This is the first step to further reducing symmetrically equivalent sites in 3D space for more complex structures. It can also provide the used with better initial guesses for adsorption locations.
 
-#+BEGIN_SRC python :results output org drawer :exports both
+#+BEGIN_SRC python :results output org drawer :exports code
 from catkit.surface import SlabGenerator
 from ase.build import bulk
 from ase import Atom
@@ -203,7 +204,7 @@ gen = SlabGenerator(
 )
 
 slab = gen.get_slab(primitive=True)
-sites = gen.get_adsorption_sites(
+sites = gen.adsorption_sites(
     slab,
     vectors=True
 )
@@ -218,13 +219,12 @@ for k, v in sites.items():
 
 slab.wrap()
 write(
-    './images/adsorption-vectors.png',
+    './images/adsorption-vectors.pov',
     slab * (2, 2, 1),
     show_unit_cell=2,
     rotation='-60x',
 )
 #+END_SRC
-
 
 ** Gas-phase:
 [X] Various chemical species (C, H, and O currently tested)
