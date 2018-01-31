@@ -6,6 +6,4 @@
 *.pyc
 
 # Scratch work
-database/*
 workbook.org
-dev/
