@@ -20,6 +20,8 @@ The code loads `example-C2H6.db` and prints the list of reactions.
      catmap = catmap_api(db_name='example-C2H6.db')
      
      rxn = catmap.rxn_expressions()
+     species = catmap.species_definitions()
   ```
 
-`rxn` is a list of strings, which can be appended to a catmap setup file.
+`rxn` is a list of strings, and `species` is a list of species definitions.
+Both will need to be appended to a catmap setup file.
