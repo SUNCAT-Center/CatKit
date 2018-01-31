@@ -6,8 +6,10 @@ import networkx as nx
 import networkx.algorithms.isomorphism as iso
 from ase.build import rotate
 from ase.constraints import FixAtoms
+from ase import Atoms
 from scipy.spatial import Delaunay
 from scipy.linalg import circulant
+from itertools import product
 try:
     from math import gcd
 except ImportError:
@@ -29,7 +31,7 @@ class SlabGenerator(object):
     ):
         """ Generate a slab from an ASE bulk atoms-object.
 
-        Args:
+        Parameters:
           bulk: ASE atoms-object
             Bulk structure to produce the slab from.
           miller_index: list (3,)
@@ -216,7 +218,7 @@ class SlabGenerator(object):
     def get_slab(self, iterm=None, primitive=False):
         """ Generate a slab object with a certain number of layers.
 
-        Args:
+        Parameters:
           primitive: bool
             Whether to reduce the unit cell to its primitive form.
           iterm: int
@@ -249,40 +251,43 @@ class SlabGenerator(object):
         z_repetitions = np.ceil(self.layers / len(zlayers))
         slab *= (1, 1, int(z_repetitions))
 
-        # Orthogonolize the z-coordinate
+        # Orthogonalize the z-coordinate
         # Warning: bulk symmetry is lost at this point
         a1, a2, a3 = slab.cell
         a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) /
               norm(np.cross(a1, a2)) ** 2)
         slab.cell[2] = a3
 
-        if self.vacuum:
-            # Requires vacuum
-            slab.center(vacuum=self.vacuum, axis=2)
+        if primitive:
+            if self.vacuum:
 
-            if primitive:
-                slab = utils.get_primitive_cell(slab)
-                zlayers = utils.get_unique_coordinates(
-                    slab,
-                    direct=False,
-                    tag=True,
-                    tol=self.tol
+                slab.center(vacuum=self.vacuum, axis=2)
+            else:
+                raise(
+                    NotImplementedError,
+                    'Primitive slab generation requires vacuum'
                 )
-                slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
-                # spglib ocassionally returns a bimodal slab
-                zpos = slab.get_scaled_positions().T[2]
-                if zpos.max() > 0.9:
-                    translate = slab.positions.T[2][zpos > 0.5].min()
-                    slab.positions -= [0, 0, translate + self.tol]
-                    slab.wrap(pbc=True)
-                    slab.center(vacuum=self.vacuum, axis=2)
+            slab = utils.get_primitive_cell(slab)
 
-        elif primitive:
-            raise(
-                NotImplementedError,
-                'Primitive slab generation requires vacuum'
-            )
+            # For hcp(1, 1, 0), primitive alters z-axis
+            d = norm(slab.cell, axis=0)
+            maxd = np.argwhere(d == d.max())[0][0]
+            if maxd != 2:
+                slab.rotate(slab.cell[maxd], 'z', rotate_cell=True)
+                slab.cell[[maxd, 2]] = slab.cell[[2, maxd]]
+                slab.cell[maxd] = -slab.cell[maxd]
+                slab.wrap(pbc=True)
+
+            slab.rotate(slab.cell[0], 'x', rotate_cell=True)
+
+            # spglib occasionally returns a bimodal slab
+            zpos = slab.get_scaled_positions().T[2]
+            if zpos.max() > 0.9 or zpos.min() < 0.1:
+                translate = slab.positions.T[2][zpos > 0.5].min()
+                slab.positions -= [0, 0, translate + self.tol]
+                slab.wrap(pbc=True)
+                slab.center(vacuum=self.vacuum, axis=2)
 
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(
@@ -317,31 +322,29 @@ class SlabGenerator(object):
         return slab
 
     def get_surface_atoms(self, slab=None):
-        """ Find the undercoordinated atoms at the upper and lower
+        """ Find the under-coordinated atoms at the upper and lower
         fraction of a given unit cell based on the bulk structure it
-        origionated from.
+        originated from.
 
-        Assumes the xy-plane is perpendicualr to the miller index.
+        Assumes the xy-plane is perpendicular to the miller index.
 
-        Args:
+        Parameters:
           slab: ASE atoms-object
             The slab to find top layer atoms from.
 
         Returns: ndarray (n,), ndarray (m,)
-          Array of atom indecies corresponding to the top and bottom
+          Array of atom indices corresponding to the top and bottom
           layers of the slab.
         """
 
         if slab is None:
             slab = self.get_slab(primitive=True)
 
-        ind, N = utils.get_voronoi_neighbors(self.bulk)
-
-        radii = [self.bulk.get_distance(u, v, mic=True) for u, v in N.keys()]
-
-        ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=max(radii))
+        ind, N, mcut = utils.get_voronoi_neighbors(self.bulk)
+        ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=mcut)
 
         ind = np.repeat(ind, np.ceil(len(ind0) / len(ind)))
+
         surf_atoms = np.nonzero(ind0 - ind[:len(ind0)])[0]
 
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
@@ -357,23 +360,28 @@ class SlabGenerator(object):
             slab=None,
             surface_sites=None,
             symmetry_reduced=True,
+            vectors=False,
+            return_proxy=False,
     ):
         """ Helper function for getting the adsorption sites of a
         slab as defined by surface atom symmetries.
 
-        Args:
+        Parameters:
           slab: ASE atoms-object
             The slab to find adsorption sites for.
           surface_sites: ndarray (n,)
             surface sites of the provided slab.
-          unit_cell_rep: int
-            Number of times to repeat the unit cell.
-          tol: float
-            Absolute tolerance for floating point errors.
+          symmetry_reduced: int
+            Whether to return the symmetrically unique sites only.
+          vectors: bool
+            Whether to compute the adsorption vectors.
+          return_proxy: bool
+            Whether to return the proxy_slab for adsorption work.
 
-        Returns: dict of 2 lists
-          Dictionary of top, bridge, hollow, and 4fold sites containing
-          two lists (positions and points) of the supercell.
+        Returns: dict of 3 lists
+          Dictionary of top, bridge, hollow, and 4-fold sites containing
+          positions, points, and neighbor lists. If adsorption vectors
+          are requested, the third list is replaced.
         """
 
         if slab is None:
@@ -383,17 +391,16 @@ class SlabGenerator(object):
             if self.surface_atoms is None:
                 surface_sites, _ = self.get_surface_atoms(slab)
 
-        sites = find_adsorption_sites(
+        sites, vslab = find_adsorption_sites(
             slab=slab,
             surface_sites=surface_sites,
-            unit_cell_rep=5,
+            trim=0.5,
             tol=self.tol,
         )
 
         sites = get_reduced_sites(
             sites=sites,
             slab=slab,
-            trim=[0., 4.],
             tol=self.tol,
         )
 
@@ -404,62 +411,121 @@ class SlabGenerator(object):
                 tol=self.tol,
             )
 
+        if vectors:
+            sites = self._get_adsorption_vectors(vslab, sites)
+
+        if return_proxy:
+            return sites, vslab
+
+        return sites
+
+    def _get_adsorption_vectors(
+            self,
+            vslab,
+            sites,
+    ):
+        """ Returns the vectors representing the furthest distance from
+        the neighboring atoms.
+
+        (TODO: This input is complex and confusing. Would be nice to simplify.)
+
+        Parameters:
+          vslab: ASE atoms-object
+            The virtual surface produced from find_adsorption_sites.
+          sites: dict of 3 lists
+            Dictionary of top, bridge, hollow, and 4-fold sites containing
+            positions, points, and neighbor lists.
+
+        Returns: dict of 3 lists
+          Dictionary of top, bridge, hollow, and 4-fold sites containing
+          positions, points, and adsorption vector lists.
+        """
+
+        pos = vslab.positions
+        for k, v in sites.items():
+            coordinates, points, neighbors = v
+
+            vectors = []
+            for i, s in enumerate(coordinates):
+
+                if len(neighbors):
+                    direct = pos[np.append(points[i], neighbors[i])]
+                else:
+                    direct = pos[points[i]]
+
+                vectors += [utils.plane_normal(direct)]
+
+            sites[k][2] = np.array(vectors)
+
         return sites
 
 
 def find_adsorption_sites(
         slab,
         surface_sites,
-        unit_cell_rep=5,
+        trim=0.5,
         tol=1e-5,
 ):
     """ Find all bridge and hollow sites (3-fold and 4-fold) given an
-    input slab based Delaunay triangulaton of surface atoms of a
-    supercell.
+    input slab based Delaunay triangulation of surface atoms of a
+    super-cell.
 
-    Args:
+    Parameters:
       slab: ASE atoms-object
         The slab to find adsorption sites for.
       surface_sites: ndarray (n,)
         surface sites of the provided slab.
-      unit_cell_rep: int
-        Number of times to repeat the unit cell.
+      trim: float
+        Percentage of fractional coordinates to remove.
       tol: float
         Absolute tolerance for floating point errors.
 
-    Returns: dict of 2 lists
-      Dictionary of top, bridge, hollow, and 4fold sites containing
-      two lists (positions and points) of the supercell.
+    Returns: dict of 3 lists
+      Dictionary of top, bridge, hollow, and 4-fold sites containing
+      positions, points, and neighbors of the super-cell.
     """
 
     # Top sites projected into expanded unit cell
+    index, coords, offsets = utils.expand_cell(slab, r=8)
+
+    # Some magic to get the top sites indices
     n = len(slab)
-    x = unit_cell_rep ** 2
-    rtop = (np.arange(0, x*n, n).reshape(x, 1) + surface_sites).flatten()
-    ratoms = slab * (unit_cell_rep, unit_cell_rep, 1)
+    rtop = surface_sites[:, None].repeat(len(offsets), axis=1)
+    rtop = (rtop + np.arange(0, len(coords), n)).T.flatten()
+
+    top_coords = coords[rtop]
+    numbers = slab.get_atomic_numbers().tolist() * len(offsets)
+
+    vslab = Atoms(
+        positions=top_coords,
+        symbols=np.array(numbers)[rtop],
+        cell=slab.cell,
+        tags=rtop,
+    )
 
     # Dict of 2 lists (positions, site_id)
     sites = {
-        'top': [ratoms.positions[rtop], rtop],
-        'bridge': [[], []],
-        'hollow': [[], []],
-        '4fold': [[], []],
+        'top': [
+            top_coords,
+            np.arange(rtop.shape[0]),
+            [[] for _ in range(rtop.shape[0])]
+        ],
+        'bridge': [[], [], []],
+        'hollow': [[], [], []],
+        '4fold': [[], [], []],
     }
 
-    dt = Delaunay(sites['top'][0].T[:2].T)
+    dt = Delaunay(sites['top'][0][:, :2])
     neighbors = dt.neighbors
     simplices = dt.simplices
 
-    bridge_neighbors = []
+    for i, corners in enumerate(simplices):
 
-    for i, v in enumerate(simplices):
-
-        cir = circulant(v)
-        cornors = cir[2]
-        edges = cir[:2]
+        cir = circulant(corners)
+        edges = cir[:, 1:]
 
         # Inner angle of each triangle corner
-        vec = sites['top'][0][edges] - sites['top'][0][cornors]
+        vec = sites['top'][0][edges.T] - sites['top'][0][corners]
         uvec = vec.T / norm(vec, axis=2).T
         angles = np.sum(uvec.T[0] * uvec.T[1], axis=1)
 
@@ -467,22 +533,22 @@ def find_adsorption_sites(
         right = np.isclose(angles, 0)
         obtuse = (angles < -tol)
 
-        rh_corner = cornors[right]
-        edge_neighbors = neighbors[i][::-1]
+        rh_corner = corners[right]
+        edge_neighbors = neighbors[i]
 
         if obtuse.any():
             # Assumption: All simplices with obtuse angles
-            # are irrelevent boundrys.
+            # are irrelevant boundaries.
             continue
 
-        bridge = np.sum(sites['top'][0][edges], axis=0) / 2.0
+        bridge = np.sum(sites['top'][0][edges], axis=1) / 2.0
 
-        # Looping through cornors allows for elimination of
-        # redundent points, identification of 4-fold hollows,
-        # and collection of bridge neigbors.
-        for j, c in enumerate(cornors):
+        # Looping through corners allows for elimination of
+        # redundant points, identification of 4-fold hollows,
+        # and collection of bridge neighbors.
+        for j, c in enumerate(corners):
 
-            edge = sorted(edges.T[j])
+            edge = sorted(edges[j])
 
             if edge in sites['bridge'][1]:
                 continue
@@ -492,14 +558,15 @@ def find_adsorption_sites(
             oc = list(set(neighbor_simplex) - set(edge))[0]
 
             # Right angles potentially indicate 4-fold hollow
-            potential_hollow = sorted(edge + [c, oc])
+            potential_hollow = edge + sorted([c, oc])
+            # print(potential_hollow)
             if c in rh_corner:
 
                 if potential_hollow in sites['4fold'][1]:
                     continue
 
                 # Assumption: If not 4-fold, this suggests
-                # no hollow OR brige side is preasent.
+                # no hollow OR bridge site is present.
 
                 ovec = sites['top'][0][edge] - sites['top'][0][oc]
                 ouvec = ovec / norm(ovec)
@@ -507,96 +574,113 @@ def find_adsorption_sites(
                 oright = np.isclose(oangle, 0)
                 if oright:
                     sites['4fold'][0] += [bridge[j]]
-                    sites['4fold'][1] += [rtop[potential_hollow].tolist()]
-
+                    sites['4fold'][1] += [potential_hollow]
+                    sites['top'][2][c] += [oc]
             else:
                 sites['bridge'][0] += [bridge[j]]
-                sites['bridge'][1] += [rtop[edge].tolist()]
-                bridge_neighbors += [[c, oc]]
+                sites['bridge'][1] += [edge]
+                sites['bridge'][2] += [[c, oc]]
+
+            sites['top'][2][edge[0]] += [edge[1]]
+            sites['top'][2][edge[1]] += [edge[0]]
 
         if not right.any():
-            hollow = np.average(sites['top'][0][v], axis=0)
-
+            hollow = np.average(sites['top'][0][corners], axis=0)
             sites['hollow'][0] += [hollow]
-            sites['hollow'][1] += [rtop[v].tolist()]
+            sites['hollow'][1] += [corners.tolist()]
 
-    # Set the reduced top sites
-    sites['top'] = [slab.positions[surface_sites], surface_sites]
+    # For collecting missed bridge neighbors
+    for s in sites['4fold'][1]:
 
-    # Convert lists to arrays and sort
+        for edge in product(s[:2], s[2:]):
+            edge = sorted(edge)
+            i = sites['bridge'][1].index(edge)
+            n, m = sites['bridge'][1][i], sites['bridge'][2][i]
+            nn = (set(s) - set(n + m))
+            sites['bridge'][2][i] += [list(nn)[0]]
+
+    xlim = offsets.T[0].max()
+    ylim = offsets.T[1].max()
+
+    # Convert lists to arrays
     for k, v in sites.items():
-        positions, points = v
-
-        if len(positions) == 0:
-            continue
-
-        positions = np.array(positions)
-        srt = np.lexsort((positions[:, 1], positions[:, 0]))
-
-        sites[k][0] = positions[srt]
-        sites[k][1] = np.array(points)[srt]
-
-    return sites
-
-
-def get_reduced_sites(
-        sites,
-        slab,
-        trim=None,
-        tol=1e-5,
-):
-    """ Reduce overlapping points via fractional coords. Intended
-    for use after finding supercell sites.
-
-    Args:
-      sites: dict
-        Dictionary of cartesian coordinates to provide reduced sites from.
-        Must have the form {'site': [[positions], [points]]}.
-      slab: ASE atoms-object
-        slab to determine symmetry operations from.
-      trim: list or tuple (2,)
-        Lower and upper bounds of x and y coordinates to ommit.
-      tol: float
-        Absolute tolerance for floating point errors.
-
-    Returns: dict of 2 lists
-      Dictionary sites containing two lists (positions and points)
-      of the supercell.
-    """
-
-    for k, v in sites.items():
-        positions, points = v
+        positions, points, _ = v
 
         if len(positions) == 0:
             continue
 
         frac_coords = np.dot(positions, pinv(slab.cell))
 
-        if isinstance(trim, (list, tuple)) and k != 'top':
-            screen = (
-                frac_coords.T[:2] > trim[0]).all(axis=0) & \
-                (frac_coords.T[:2] < trim[1]).all(axis=0)
+        screen = (
+            frac_coords[:, 0] < xlim + 1 - (trim * xlim)) & \
+            (frac_coords[:, 0] > -xlim + (trim * xlim)) & \
+            (frac_coords[:, 1] < ylim + 1 - (trim * ylim)) & \
+            (frac_coords[:, 1] > -ylim + (trim * ylim))
 
-            frac_coords = frac_coords[screen]
+        sites[k][0] = np.array(positions)[screen]
+        sites[k][1] = np.array(points)[screen]
 
-        non_unique, unique_points, unique_positions = [], [], []
+        if k in ['top', 'bridge']:
+            sites[k][2] = np.array(sites[k][2])[screen]
+
+    return sites, vslab
+
+
+def get_reduced_sites(
+        sites,
+        slab,
+        tol=1e-5,
+):
+    """ Reduce overlapping points via fractional coordinates. Intended
+    for use after finding super-cell sites.
+
+    Parameters:
+      sites: dict
+        Dictionary of cartesian coordinates to provide reduced sites from.
+        Must have the form {'site': [[positions], [points], [neighbors]]}.
+      slab: ASE atoms-object
+        slab to determine symmetry operations from.
+      tol: float
+        Absolute tolerance for floating point errors.
+
+    Returns: dict of 3 lists
+      Dictionary sites containing positions, points, and neighbor lists.
+    """
+
+    for k, v in sites.items():
+        positions, points, nnneighbors = v
+
+        if len(positions) == 0:
+            continue
+
+        frac_coords = np.dot(positions, pinv(slab.cell))
+
+        non_unique, unique = [], []
         for i, xyz in enumerate(frac_coords):
             if i in non_unique:
                 continue
 
             non_unique += matching_sites(xyz, frac_coords).tolist()
-            unique_positions += [xyz]
-            unique_points += [points[i]]
+            unique += [i]
+
+        unique = np.array(unique)
+        unique_positions = frac_coords[unique]
 
         shift = [tol, tol, 0]
-        unique_positions = np.array(unique_positions)
         unique_positions += shift
-
         unique_positions %= 1
         unique_positions -= shift
 
-        sites[k][0] = np.dot(unique_positions, slab.cell)
-        sites[k][1] = np.array(unique_points)
+        srt = np.lexsort((
+            unique_positions[:, 0],
+            unique_positions[:, 1]
+        ))
+
+        sites[k][0] = np.dot(unique_positions, slab.cell)[srt]
+        sites[k][1] = points[unique][srt]
+
+        if isinstance(nnneighbors, np.ndarray):
+            sites[k][2] = nnneighbors[unique][srt]
 
     return sites
 
@@ -609,18 +693,17 @@ def get_symmetric_sites(
     """ Determine the symmetrically unique adsorption sites
     from a dictionary of possible sites for a given slab.
 
-    Args:
+    Parameters:
       sites: dict
-        Dictionary of cartesian coordinates to provide reduced sites from.
-        Must have the form {'site': [[positions], [points]]}.
+        Dictionary of Cartesian coordinates to provide reduced sites from.
+        Must have the form {'site': [[positions], [points], [neighbors]]}.
       slab: ASE atoms-object
         slab to determine symmetry operations from.
       tol: float
         Absolute tolerance for floating point errors.
 
-    Returns: dict of 2 lists
-      Dictionary sites containing two lists (positions and points)
-      of the supercell.
+    Returns: dict of 3 lists
+      Dictionary sites containing positions, points, and neighbor lists.
     """
 
     symmetry = utils.get_symmetry(slab, tol=tol)
@@ -628,7 +711,7 @@ def get_symmetric_sites(
     translations = symmetry['translations']
 
     for k, v in sites.items():
-        positions, points = v
+        positions, points, nnneighbors = v
 
         if len(positions) == 0:
             continue
@@ -636,7 +719,7 @@ def get_symmetric_sites(
         frac_coords = np.dot(positions, pinv(slab.cell))
 
         # Convert to fractional
-        unique_positions, unique_points = [], []
+        unique_positions, unique = [], []
         for i, xyz in enumerate(frac_coords):
 
             symmetry_match = False
@@ -656,10 +739,14 @@ def get_symmetric_sites(
 
             if not symmetry_match:
                 unique_positions += [xyz]
-                unique_points += [points[i]]
+                unique += [i]
 
+        unique = np.array(unique)
         sites[k][0] = np.dot(unique_positions, slab.cell)
-        sites[k][1] = np.array(unique_points)
+        sites[k][1] = np.array(points[unique])
+
+        if isinstance(nnneighbors, np.ndarray):
+            sites[k][2] = nnneighbors[unique]
 
     return sites
 
@@ -667,9 +754,9 @@ def get_symmetric_sites(
 def matching_sites(position, comparators, tol=1e-8):
     """ Get the indices of all points in a comparator list that are
     equal to a fractional coordinate (with a tolerance), taking into
-    account periodic boundary conditions. (adaptation from pymatgen).
+    account periodic boundary conditions (adaptation from Pymatgen).
 
-    Args:
+    Parameters:
       position: list (3,)
         Fractional coordinate to compare to list.
       comparators: list (3, n)
