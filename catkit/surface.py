@@ -19,6 +19,7 @@ class SlabGenerator(object):
             bulk,
             miller_index=[1, 1, 1],
             layers=4,
+            min_width=None,
             fixed=2,
             vacuum=0,
             tol=1e-8
@@ -32,6 +33,8 @@ class SlabGenerator(object):
             Miller index to construct surface from.
           layers: int
             Number of layers to include in the slab.
+          min_width: float
+            Minimum width of slabs produce (Ang). Will override layers.
           fixed: int
             Number of layers to fix in the slab.
           vacuum: float
@@ -44,6 +47,7 @@ class SlabGenerator(object):
         self.miller_index = np.array(miller_index)
         self.layers = layers
         self.fixed = fixed
+        self.min_width = min_width
         self.vacuum = vacuum
         self.tol = tol
 
@@ -200,7 +204,13 @@ class SlabGenerator(object):
             direct=False,
             tol=self.tol
         )
-        z_repetitions = np.ceil(self.layers / len(zlayers))
+
+        if self.min_width:
+            width = slab.cell[2][2]
+            z_repetitions = np.ceil(width / len(zlayers) * self.min_width)
+        else:
+            z_repetitions = np.ceil(self.layers / len(zlayers))
+
         slab *= (1, 1, int(z_repetitions))
 
         # Orthogonalize the z-coordinate
@@ -248,7 +258,14 @@ class SlabGenerator(object):
             tag=True,
             tol=self.tol
         )
-        ncut = sorted(zlayers)[::-1][:self.layers][-1]
+
+        reverse_sort = np.sort(zlayers)[::-1]
+
+        if self.min_width:
+            n = np.where(zlayers < self.min_width, 1, 0).sum()
+            ncut = reverse_sort[n]
+        else:
+            ncut = reverse_sort[:self.layers][-1]
 
         zpos = slab.positions[:, 2]
         index = np.arange(len(slab))
@@ -298,8 +315,17 @@ class SlabGenerator(object):
 
         surf_atoms = np.nonzero(ind0 - ind[:len(ind0)])[0]
 
+        bulk_atoms = set(np.arange(len(slab))) - set(surf_atoms)
+
+        if len(bulk_atoms) == 0:
+            raise ValueError(
+                ("Your slab has no bulk atoms and is likely too thin "
+                 "to identify surface atoms correctly.")
+            )
+
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
         top = surf_atoms[hwp.T[2] > 0]
+
         bottom = surf_atoms[hwp.T[2] < 0]
 
         self.surface_atoms = top
@@ -323,6 +349,7 @@ class SlabGenerator(object):
 
         if slab != self.slab or self.surface_atoms is None:
             surface_sites = self.get_surface_atoms(slab)[0]
+            self.slab = slab
         else:
             surface_sites = self.surface_atoms
 

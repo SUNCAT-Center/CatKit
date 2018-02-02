@@ -45,7 +45,7 @@ from ase.build import bulk
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
 
-Gen = SlabGenerator(
+gen = SlabGenerator(
     atoms,
     miller_index=[2, 1, 1],
     layers=9,
@@ -53,13 +53,11 @@ Gen = SlabGenerator(
     vacuum=10,
 )
 
-terminations = Gen.get_unique_terminations()
+terminations = gen.get_unique_terminations()
 
 images = []
 for i, t in enumerate(terminations):
-    slab = Gen.get_slab(iterm=i)
-    slab.center(axis=2, vacuum=5)
-
+    slab = gen.get_slab(iterm=i)
     images += [slab]
 
     # Create side and top-down visuals
