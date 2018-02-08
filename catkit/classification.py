@@ -245,7 +245,7 @@ def reactant_indices(R1, R2, P, broken_bond):
     Pgraph = P.copy()
     u, v = broken_bond
     Pgraph.remove_edge(u, v)
-    Rgraph = nx.disjoint_union(R1, R2)
+    Rgraph = nx.disjoint_union(R2, R1)
 
     gm = GM(
         Pgraph,

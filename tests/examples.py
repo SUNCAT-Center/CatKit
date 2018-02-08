@@ -91,7 +91,7 @@ def test_molecule_generation():
 
             rn.load_3d_structures()
 
-    rn.plot_reaction_network(file_name='./temp/reaction-network.png')
+        rn.plot_reaction_network(file_name='./temp/reaction-network.png')
 
     # Cleanup
     shutil.rmtree('temp')
