@@ -5,8 +5,6 @@ from ase import Atom
 from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
 from catkit import Gratoms
-import matplotlib
-matplotlib.use('Agg')
 try:
     from rdkit.Chem.Draw import MolToFile
     from rdkit.Chem import AllChem as Chem

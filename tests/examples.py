@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from catkit.surface import SlabGenerator
 from catkit.pathways import plot_molecule
 from catkit.pathways import ReactionNetwork
