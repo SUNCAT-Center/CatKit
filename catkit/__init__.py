@@ -1,0 +1,9 @@
+# Copyright 2017
+# (see accompanying license files for details).
+
+"""Catalysis Kit."""
+
+from catkit.gratoms import Gratoms
+
+__all__ = ['Gratoms']
+__version__ = '0.1.0'
