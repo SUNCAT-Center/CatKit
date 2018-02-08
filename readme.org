@@ -255,6 +255,7 @@ Below is an example script which generates some simple figures using [[https://n
 
 #+BEGIN_SRC python :results output org drawer :exports both
 from catkit.pathways import ReactionNetwork
+from ase.visualize import view
 import time
 
 start = time.time()
@@ -265,13 +266,13 @@ with ReactionNetwork(db_name=db_name) as rn:
 
     molecules = rn.molecule_search(
         element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=False)
+        multiple_bond_search=True)
     rn.save_molecules(molecules)
 
     # 3D optimization step. Moderatly time intensive.
     try:
         # Needed for 3D molecule functionality (requires RDKit)
-        from catkit.pathways import plot_molecule, get_rdkit_graph
+        from catkit.pathways import plot_molecule
 
         molecule_data = rn.load_molecules()
         for i, molecule in molecule_data.items():
@@ -280,17 +281,18 @@ with ReactionNetwork(db_name=db_name) as rn:
                 molecule,
                 file_name='./images/molecule-{}.png'.format(i))
 
-            images = rn.load_3d_structures(list(molecule_data.keys()))
+            images = rn.load_3d_structures()
 
     except(ImportError):
         pass
 
+view(images)
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-Process completed in 21.8s
+Process completed in 22.1s
 :END:
 
 ** Reaction pathways:
@@ -320,8 +322,9 @@ with ReactionNetwork(db_name=db_name) as rn:
 
     # Substitution pathway search is expensive!
     pathways = rn.path_search(
-        reconfiguration=False,
-        substitution=False)
+        reconfiguration=True,
+        substitution=True
+    )
 
     rn.plot_reaction_network(file_name='./images/reaction-network.png')
 
@@ -330,7 +333,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 0.4s
+Process completed in 2.4s
 :END:
 
 *** Example network access

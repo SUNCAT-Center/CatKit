@@ -7,4 +7,5 @@ networkx
 pandas
 sqlalchemy
 spglib
+future
 python-coveralls

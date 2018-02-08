@@ -9,6 +9,7 @@ from collections import Counter
 class catmap_api():
     """This class contains information and functions for exporting
     input to catmap."""
+
     def __init__(self, pathways=None, molecules=None, db_name=None,
                  formula='hill'):
         if pathways is not None and molecules is not None:

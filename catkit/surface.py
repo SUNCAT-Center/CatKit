@@ -139,7 +139,7 @@ class SlabGenerator(object):
                 abs(rotation[2][1]) < self.tol and
                 abs(rotation[0][2]) < self.tol and
                 abs(rotation[1][2]) < self.tol and
-                abs(rotation[2][2] - 1.0) < self.tol):
+                    abs(rotation[2][2] - 1.0) < self.tol):
 
                 if not np.isclose(
                         translations[i][2],
@@ -225,10 +225,7 @@ class SlabGenerator(object):
 
                 slab.center(vacuum=self.vacuum, axis=2)
             else:
-                raise(
-                    NotImplementedError,
-                    'Primitive slab generation requires vacuum'
-                )
+                raise ValueError('Primitive slab generation requires vacuum')
 
             slab = utils.get_primitive_cell(slab)
 
@@ -358,7 +355,7 @@ class SlabGenerator(object):
                 slab=slab,
                 surface_sites=surface_sites,
                 **kwargs
-                )
+            )
 
             return sites, vslab
 
@@ -366,7 +363,7 @@ class SlabGenerator(object):
             slab=slab,
             surface_sites=surface_sites,
             **kwargs
-            )
+        )
 
         return sites
 

@@ -38,8 +38,7 @@ install:
   - source activate test-environment
 
   - pip install -r requirements.txt
-  - pip install coverage
-  - conda install --channel rdkit
+  - conda install --channel rdkit rdkit
 
 
 script:
