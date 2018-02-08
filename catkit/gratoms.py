@@ -94,6 +94,7 @@ class Gratoms(Atoms):
             return composition[2:]
 
         for adj in self.adj.items():
+
             num = self.arrays['numbers'][list(adj[1].keys())]
             cnt += np.bincount(num, minlength=len(cnt))
 
@@ -161,3 +162,37 @@ class Gratoms(Atoms):
         self._graph = nx.disjoint_union(self._graph, other._graph)
 
         return self
+
+    def __delitem__(self, i):
+        from ase.constraints import FixAtoms
+        for c in self._constraints:
+            if not isinstance(c, FixAtoms):
+                raise RuntimeError('Remove constraint using set_constraint() '
+                                   'before deleting atoms.')
+
+        if isinstance(i, (list, int)):
+            # Make sure a list of booleans will work correctly and not be
+            # interpreted at 0 and 1 indices.
+            i = np.atleast_1d(i)
+
+        if len(self._constraints) > 0:
+            n = len(self)
+            i = np.arange(n)[i]
+            if isinstance(i, int):
+                i = [i]
+            constraints = []
+            for c in self._constraints:
+                c = c.delete_atoms(i, n)
+                if c is not None:
+                    constraints.append(c)
+            self.constraints = constraints
+
+        mask = np.ones(len(self), bool)
+        mask[i] = False
+
+        for name, a in self.arrays.items():
+            self.arrays[name] = a[mask]
+
+        self._graph.remove_nodes_from(i)
+        mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
+        nx.relabel_nodes(self._graph, mapping, copy=False)

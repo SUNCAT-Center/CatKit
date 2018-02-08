@@ -108,34 +108,6 @@ class ReactionNetwork():
             nbond_limits[6, [6, 7]] = 3
             self.nbond_limits = nbond_limits
 
-        # Prevent formation of bond type YX
-        # If X is bonded to species in list
-        self.prevent_bond_chains = {}
-        #     'OO': ['C', 'N', 'S'],
-        #     'CO': ['O', 'N', 'S'],
-        #     'SS': ['C', 'N', 'O'],
-        #     'CS': ['S', 'N'],
-        #     'NN': ['C', 'O', 'S'],
-        #     'CN': ['N', 'S'],
-        #     'SO': ['C', 'N', 'S', 'O'],
-        #     'NO': ['C', 'N', 'S', 'O'],
-        #     'OS': ['C', 'N', 'S', 'O'],
-        #     'ON': ['C', 'N', 'S', 'O'],
-        #     'SN': ['C', 'N', 'S', 'O'],
-        #     'NS': ['C', 'N', 'S', 'O']
-        # }
-
-        # This will make terminations symmetric
-        # tpbc = self.prevent_bond_chains.copy()
-        # for YX, Z in tpbc.items():
-        #     y, x = YX
-        #     for z in Z:
-        #         rchain = z + x
-        #         if rchain not in self.prevent_bond_chains:
-        #             self.prevent_bond_chains[rchain] = [y]
-        #         elif y not in self.prevent_bond_chains[rchain]:
-        #             self.prevent_bond_chains[rchain] += [y]
-
     def __enter__(self):
         """ This function is automatically called whenever the class
         is used together with a 'with' statement.
@@ -245,9 +217,9 @@ class ReactionNetwork():
 
             search_molecules += [molecule]
 
-            comp_tag = molecule.get_chemical_tags(rank=0)
+            comp_tag, bond_tag = molecule.get_chemical_tags()
             if comp_tag not in self.molecules:
-                molecules[comp_tag] = {'': [molecule]}
+                molecules[comp_tag] = {bond_tag: [molecule]}
 
         for molecule in search_molecules:
 
@@ -290,24 +262,7 @@ class ReactionNetwork():
                 if self.nbond_limits[base_el, el] == 0:
                     continue
 
-                # Prevent user prohibited chains
-                # TODO: This needs to be fixed
-                string_tag = np.array(sorted([base_el, el]), dtype=str)
-                new_bond = ''.join(string_tag)
-                if new_bond in self.prevent_bond_chains:
-
-                    # Needs to be integers
-                    neighbor_symbols = molecule.get_neighbor_symbols(
-                        base_node)
-
-                    terminate = [
-                        _ in neighbor_symbols for _ in
-                        self.prevent_bond_chains[new_bond]]
-                    if True in terminate:
-                        continue
-
                 G = molecule.copy()
-
                 node_index = len(G)
 
                 G.nodes[base_node]['valence'] -= 1
@@ -338,6 +293,9 @@ class ReactionNetwork():
             if self.multiple_bond_search:
                 for existing_node in nodes:
 
+                    if valence <= 0:
+                        continue
+
                     # Atoms don't bond to themselves
                     if existing_node == base_node:
                         continue
@@ -353,19 +311,6 @@ class ReactionNetwork():
                             base_node,
                             existing_node):
                         continue
-
-                    # Prevent user prohibited chains
-                    # TODO: Needs to be fixed.
-                    string_tag = np.array(sorted([base_el, el]), dtype=str)
-                    new_bond = ''.join(string_tag)
-                    if new_bond in self.prevent_bond_chains:
-                        neighbor_symbols = molecule.get_neighbor_symbols(
-                            existing_node)
-
-                        term = [_ in neighbor_symbols for _ in
-                                self.prevent_bond_chains[new_bond]]
-                        if True in term:
-                            continue
 
                     G = molecule.copy()
 
@@ -440,9 +385,9 @@ class ReactionNetwork():
 
             cut_molecule = molecule.copy()
 
-            cut_molecule[u][v]['bonds'] -= 1
-            if not cut_molecule[u][v]['bonds']:
-                cut_molecule.remove_edge(u, v)
+            cut_molecule.graph[u][v]['bonds'] -= 1
+            if not cut_molecule.graph[u][v]['bonds']:
+                cut_molecule.graph.remove_edge(u, v)
 
             isomorph_found = False
             for disjoint in disjoints:
@@ -454,19 +399,25 @@ class ReactionNetwork():
                 disjoints += [cut_molecule]
                 broken_bonds += ['{},{}'.format(u, v)]
 
-                product_index = cut_molecule.graph['index']
-                pieces = list(nx.connected_component_subgraphs(cut_molecule))
+                product_index = cut_molecule.graph.name
+                pieces = list(nx.connected_components(cut_molecule.graph))
 
                 addition_pathway = np.array([
                     [0, 0],
                     [product_index, 0]])
                 for i, piece in enumerate(pieces):
 
-                    comp_tag, bond_tag = piece.get_chemical_tags()
+                    if len(pieces) == 2:
+                        G = molecule.copy()
+                        del G[list(piece)]
+                    else:
+                        G = cut_molecule.copy()
+
+                    comp_tag, bond_tag = G.get_chemical_tags()
 
                     for reactant in molecules[comp_tag][bond_tag]:
-                        if piece.is_isomorph(reactant):
-                            pindex = reactant.graph['index']
+                        if G.is_isomorph(reactant):
+                            pindex = reactant.graph.name
                             addition_pathway[0][i] = pindex
                             break
 
@@ -568,14 +519,14 @@ class ReactionNetwork():
                 dtype=int
             )
 
-            nodes = [(node, {
-                'number': n,
-                'valence': valence})
-                     for node, n, valence in node_data]
+            data, symbols = {}, []
+            for node, n, valence in node_data:
+                data.update({node: valence})
+                symbols += [n]
 
-            molecule = Gratoms()
+            molecule = Gratoms(symbols)
             molecule.graph.name = index
-            molecule.graph.add_nodes_from(nodes)
+            nx.set_node_attributes(molecule.graph, data, 'valence')
 
             if edge_data:
                 edges = np.array(
@@ -633,157 +584,6 @@ class ReactionNetwork():
 
         return pathways
 
-    def plot_reaction_network(self, file_name=None):
-
-        cmd = """SELECT molecule_pid, chemical_tag
-        FROM molecules"""
-
-        self.c.execute(cmd)
-        fetch = self.c.fetchall()
-
-        molecules = []
-        for molecule in fetch:
-            molecules += [(molecule[0],
-                           {'tag': molecule[1], 'id': molecule[0]})]
-
-        pathways = []
-        for path in self.load_pathways():
-            for R in path[:2]:
-                for P in path[2:]:
-                    if R and P:
-                        pathways += [[R, P]]
-
-        network = nx.Graph()
-        network.add_nodes_from(molecules)
-        network.add_edges_from(pathways)
-
-        plt.figure(figsize=(6, 6))
-        nx.draw_networkx(
-            network,
-            labels=nx.get_node_attributes(network, 'id'))
-        plt.draw()
-        plt.axis('off')
-
-        if file_name:
-            plt.savefig(file_name)
-
-        plt.close()
-
-    def maximum_bond_limit(self, molecule, n1, n2):
-
-        el1 = molecule.nodes[n1]['number']
-        el2 = molecule.nodes[n2]['number']
-
-        bonds = 0
-        if molecule.graph.has_edge(n1, n2):
-            bonds = molecule.graph[n1][n2]['bonds']
-
-        if self.nbond_limits[el1][el2] == bonds:
-            return True
-
-        return False
-
-    def get_cyclical_groups(self, molecule):
-        """Return a list of nodes that make up cyclical
-        groups present in a molecule.
-        """
-
-        return nx.cycle_basis(molecule)
-
-    def get_chirality(self, molecule):
-        """Incomplete"""
-
-        symbols = nx.get_node_attributes(molecule, 'symbol')
-
-        for node, symbol in symbols.items():
-            if symbol != 'C':
-                continue
-
-            neighbor_count = len(molecule.neighbors(node))
-
-            if neighbor_count != 4:
-                continue
-
-            # Chirality is difficult to define correctly for
-            # all molecules which contain multiple cycles.
-            cycles = len(self.get_cyclical_groups(molecule))
-            if cycles > 0:
-                continue
-
-            broken_molecule = molecule.copy()
-            broken_molecule.remove_node(node)
-            pieces = list(nx.connected_component_subgraphs(broken_molecule))
-            n_pieces = len(pieces)
-
-            chiral = True
-            for i in range(n_pieces):
-                piece = pieces.pop()
-                for comparison_piece in pieces:
-                    if piece.is_isomorph(comparison_piece):
-                        chiral = False
-                        break
-
-            if chiral:
-                molecule.node[node]['chiral'] = 1
-
-        return molecule
-
-    def get_isomer_bonds(self, molecule):
-        """Incomplete"""
-
-        symbols = nx.get_node_attributes(molecule, 'symbol')
-
-        for u, v, data in molecule.edges(data=True):
-            if data['bonds'] == 2:
-                if symbols[u] == 'C' and symbols[v] == 'C':
-
-                    cycles = len(self.get_cyclical_groups(molecule))
-                    if cycles > 0:
-                        continue
-
-                    vbroken_molecule = molecule.copy()
-                    vbroken_molecule.remove_node(u)
-
-                    for node in vbroken_molecule.node_iter():
-                        if not False:  # Check if node is connected to v
-                            vbroken_molecule.remove_node()
-                    vbroken_molecule.remove_node(v)
-
-                    ubroken_molecule = molecule.copy()
-                    ubroken_molecule.remove_node(v)
-
-                    for node in ubroken_molecule.node_iter():
-                        if not False:  # Check if node is connected to u
-                            vbroken_molecule.remove_node(u)
-                    vbroken_molecule.remove_node(u)
-
-                    vpieces = list(nx.connected_component_subgraphs(
-                        vbroken_molecule))
-                    upieces = list(nx.connected_component_subgraphs(
-                        ubroken_molecule))
-
-                    if len(vpieces) == 2 and len(upieces) == 2:
-
-                        isomer = False
-                        if nx.is_isomorphic(
-                                vpieces[0],
-                                vpieces[1],
-                                node_match=iso.numerical_node_match(
-                                    'atomic_number', 1)):
-                            isomer = False
-                            break
-
-                        if nx.is_isomorphic(
-                                upieces[0],
-                                upieces[1],
-                                node_match=iso.numerical_node_match(
-                                    'atomic_number', 1)):
-                            isomer = False
-
-                    if isomer:
-                        # Store a bond as being chiral
-                        molecule.node[node]['chiral'] = 1
-
     def get_reconfiguration_paths(
             self,
             molecules,
@@ -806,11 +606,10 @@ class ReactionNetwork():
             reconfigurations = [ind_mol[P2]]
 
             # Find potential bonding sites
-            p1_bonds = get_unsaturated_nodes(
-                ind_mol[R1])
+            p1_bonds = ind_mol[R1].get_unsaturated_nodes()
 
-            p2_bonds = get_unsaturated_nodes(
-                ind_mol[R2]) + nx.number_of_nodes(ind_mol[R1])
+            p2_bonds = ind_mol[R2].get_unsaturated_nodes() + \
+                       nx.number_of_nodes(ind_mol[R1])
 
             for b1 in p1_bonds:
                 for b2 in p2_bonds:
@@ -852,6 +651,94 @@ class ReactionNetwork():
             [path.sort() for path in new_pathways]
         return new_pathways
 
+    def get_substitution_paths(
+            self,
+            molecules,
+            pathways):
+        # Follows the form:
+        # R1(-P1) + R2(-P1) --> P1 + P2
+
+        substitution_set = set()
+        new_pathways = []
+
+        ind_mol = self.load_molecules()
+
+        # Get the maximum number of nodes
+        maxn = 0
+        for i in ind_mol:
+            G = ind_mol[i]
+            n = G.number_of_nodes()
+            if n > maxn:
+                maxn = n
+
+        # Need to eliminate isomorphs to
+        # not count double bonds
+        for iP1 in ind_mol:
+
+            P1 = ind_mol[iP1]
+            P1_bonds = P1.get_unsaturated_nodes()
+            nP1 = P1.number_of_nodes()
+
+            if len(P1_bonds) == 0:
+                continue
+
+            for iRa, iPa in pathways:
+                iR1, iR2 = iRa
+                _, iP2 = iPa
+
+                # Ignore bonding pathways
+                if not iR1:
+                    continue
+
+                for i, iR in enumerate(iRa):
+                    R = ind_mol[iR]
+                    nR = R.number_of_nodes()
+
+                    # Don't create larger molecules
+                    if nR + nP1 > maxn:
+                        continue
+
+                    R_bonds = R.get_unsaturated_nodes() + nP1
+
+                    for b1 in P1_bonds:
+                        for b2 in R_bonds:
+
+                            R_P1 = nx.disjoint_union(P1, R)
+                            R_P1.add_edge(b1, b2, bonds=1)
+
+                            comp_tag, bond_tag = R_P1.get_chemical_tags()
+
+                            # Bond structure has not been enumerated
+                            if comp_tag not in molecules or \
+                               bond_tag not in molecules[comp_tag]:
+                                continue
+
+                            subst_pathway = np.array([
+                                sorted([0, iRa[::-1][i]]),
+                                sorted([iP1, iP2])])
+
+                            for G in molecules[comp_tag][bond_tag]:
+                                if R_P1.is_isomorph(G):
+                                    iR_P1 = G.graph.name
+
+                                    subst_pathway = np.array([
+                                        sorted([iR_P1, iRa[::-1][i]]),
+                                        sorted([iP1, iP2])])
+
+                                    sum_index = (
+                                        ','.join(subst_pathway[0].astype(str)),
+                                        ','.join(subst_pathway[1].astype(str)))
+
+                                    if sum_index not in substitution_set:
+                                        # These are identical
+                                        substitution_set.add(sum_index)
+                                        substitution_set.add(sum_index[::-1])
+
+                                        new_pathways += [subst_pathway]
+                                    break
+
+        return new_pathways
+
     def save_3d_structure(self, molecule, uff=0):
         G = get_rdkit_graph(molecule)
         Chem.EmbedMolecule(G, Chem.ETKDG())
@@ -880,98 +767,6 @@ class ReactionNetwork():
                 VALUES(?, ?, ?, ?, ?, ?)""",
                 (molecule.graph.name,
                  j, x, y, z, data[3]))
-
-    def get_substitution_paths(
-            self,
-            molecules,
-            pathways):
-        # Follows the form:
-        # R1(-P1) + R2(-P1) --> P1 + P2
-
-        substitution_set = set()
-        new_pathways = []
-
-        ind_mol = self.load_molecules()
-
-        # Get the maximum number of nodes
-        maxn = 0
-        for i in ind_mol:
-            G = ind_mol[i]
-            n = G.number_of_nodes()
-            if n > maxn:
-                maxn = n
-
-        # Need to eliminate isomorphs to
-        # not count double bonds
-        for iP1 in ind_mol:
-
-            P1 = ind_mol[iP1]
-            P1_bonds = get_unsaturated_nodes(P1)
-            nP1 = P1.number_of_nodes()
-
-            if len(P1_bonds) == 0:
-                continue
-
-            for iRa, iPa in pathways:
-                iR1, iR2 = iRa
-                _, iP2 = iPa
-
-                # Ignore bonding pathways
-                if not iR1:
-                    continue
-
-                for i, iR in enumerate(iRa):
-                    R = ind_mol[iR]
-                    nR = R.number_of_nodes()
-
-                    # Don't create larger molecules
-                    if nR + nP1 > maxn:
-                        continue
-
-                    R_bonds = get_unsaturated_nodes(R) + nP1
-
-                    for b1 in P1_bonds:
-                        for b2 in R_bonds:
-
-                            R_P1 = nx.disjoint_union(P1, R)
-                            R_P1.add_edge(b1, b2, bonds=1)
-
-                            (chemical_tag,
-                             bonds_tag) = get_chemical_descriptor(R_P1)
-
-                            # Bond structure has not been enumerated
-                            if chemical_tag not in molecules:
-                                continue
-
-                            # Bond structure has not been enumerated
-                            if bonds_tag not in molecules[chemical_tag]:
-                                continue
-
-                            subst_pathway = np.array([
-                                sorted([0, iRa[::-1][i]]),
-                                sorted([iP1, iP2])])
-
-                            for G in molecules[chemical_tag][bonds_tag]:
-                                if isomorphic_molecules(R_P1, G):
-                                    iR_P1 = G.graph['index']
-
-                                    subst_pathway = np.array([
-                                        sorted([iR_P1, iRa[::-1][i]]),
-                                        sorted([iP1, iP2])])
-
-                                    sum_index = (
-                                        ','.join(subst_pathway[0].astype(str)),
-                                        ','.join(subst_pathway[1].astype(str)))
-
-                                    if sum_index not in substitution_set:
-                                        # These are identical
-                                        substitution_set.add(sum_index)
-                                        substitution_set.add(sum_index[::-1])
-
-                                        new_pathways += [subst_pathway]
-                                    break
-
-        return new_pathways
 
     def load_3d_structures(self, molecule_id=None):
         images = []
@@ -1007,3 +802,39 @@ class ReactionNetwork():
             images += [Gratoms(symbols, positions)]
 
         return images
+
+    def plot_reaction_network(self, file_name=None):
+
+        pathways = []
+        load_paths = self.load_pathways()
+        for path in load_paths:
+            for R in path[:2]:
+                for P in path[2:]:
+                    if R and P:
+                        pathways += [[R, P]]
+
+        network = nx.Graph(pathways)
+
+        plt.figure(figsize=(6, 6))
+        nx.draw_networkx(network)
+        plt.draw()
+        plt.axis('off')
+
+        if file_name:
+            plt.savefig(file_name)
+
+        plt.close()
+
+    def maximum_bond_limit(self, molecule, n1, n2):
+
+        el1 = molecule.nodes[n1]['number']
+        el2 = molecule.nodes[n2]['number']
+
+        bonds = 0
+        if molecule.graph.has_edge(n1, n2):
+            bonds = molecule.graph[n1][n2]['bonds']
+
+        if self.nbond_limits[el1][el2] == bonds:
+            return True
+
+        return False
