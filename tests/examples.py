@@ -1,6 +1,8 @@
 from catkit.surface import SlabGenerator
+from catkit.pathways import plot_molecule
 from catkit.pathways import ReactionNetwork
 from ase.build import bulk
+import shutil
 import os
 
 
@@ -47,6 +49,7 @@ def test_adsorption_sites():
     sites = gen.adsorption_sites(
         slab,
         symmetry_reduced=True,
+        vectors=True,
     )
 
     expected_number = {'top': 2, 'bridge': 3, 'hollow': 4, '4fold': 0}
@@ -57,18 +60,19 @@ def test_adsorption_sites():
 
 
 def test_molecule_generation():
-    db_name = 'temp.db'
+    os.makedirs('temp')
+    db_name = 'temp\temp.db'
 
     with ReactionNetwork(db_name=db_name) as rn:
 
         molecules = rn.molecule_search(
             element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=False)
+            multiple_bond_search=True)
         rn.save_molecules(molecules)
 
         molecules = rn.load_molecules()
 
-        assert(len(molecules) == 17)
+        assert(len(molecules) == 26)
 
         pathways = rn.path_search(
             reconfiguration=True,
@@ -76,9 +80,21 @@ def test_molecule_generation():
 
         pathways = rn.load_pathways()
 
-        assert(len(pathways) == 240)
+        assert(len(pathways) == 437)
 
-    os.unlink('temp.db')
+        molecules = rn.load_molecules()
+        for i, molecule in molecules.items():
+            rn.save_3d_structure(molecule, uff=50)
+            plot_molecule(
+                molecule,
+                file_name='./temp/molecule-{}.png'.format(i))
+
+            rn.load_3d_structures()
+
+    rn.plot_reaction_network(file_name='./temp/reaction-network.png')
+
+    # Cleanup
+    shutil.rmtree('temp')
 
 
 if __name__ == "__main__":

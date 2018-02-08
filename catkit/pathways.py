@@ -609,13 +609,13 @@ class ReactionNetwork():
             p1_bonds = ind_mol[R1].get_unsaturated_nodes()
 
             p2_bonds = ind_mol[R2].get_unsaturated_nodes() + \
-                       nx.number_of_nodes(ind_mol[R1])
+                       len(ind_mol[R1])
 
             for b1 in p1_bonds:
                 for b2 in p2_bonds:
 
-                    Pt = nx.disjoint_union(mol_R1, mol_R2)
-                    Pt.add_edge(b1, b2, bonds=1)
+                    Pt = mol_R1 + mol_R2
+                    Pt.graph.add_edge(b1, b2, bonds=1)
 
                     isomorph_found = False
                     for P in reconfigurations:
@@ -639,8 +639,8 @@ class ReactionNetwork():
 
                 for P in molecules[comp_tag][bond_tag]:
                     if P.is_isomorph(Pt):
-                        reconfig_pathway[1][0] = P.graph['index']
-                        pc = tuple(sorted([P.graph['index'], P2]))
+                        reconfig_pathway[1][0] = P.graph.name
+                        pc = tuple(sorted([P.graph.name, P2]))
                         break
 
                 if pc not in reconfig:
@@ -667,7 +667,7 @@ class ReactionNetwork():
         maxn = 0
         for i in ind_mol:
             G = ind_mol[i]
-            n = G.number_of_nodes()
+            n = len(G)
             if n > maxn:
                 maxn = n
 
@@ -677,7 +677,7 @@ class ReactionNetwork():
 
             P1 = ind_mol[iP1]
             P1_bonds = P1.get_unsaturated_nodes()
-            nP1 = P1.number_of_nodes()
+            nP1 = len(P1)
 
             if len(P1_bonds) == 0:
                 continue
@@ -692,7 +692,7 @@ class ReactionNetwork():
 
                 for i, iR in enumerate(iRa):
                     R = ind_mol[iR]
-                    nR = R.number_of_nodes()
+                    nR = len(R)
 
                     # Don't create larger molecules
                     if nR + nP1 > maxn:
@@ -703,8 +703,8 @@ class ReactionNetwork():
                     for b1 in P1_bonds:
                         for b2 in R_bonds:
 
-                            R_P1 = nx.disjoint_union(P1, R)
-                            R_P1.add_edge(b1, b2, bonds=1)
+                            R_P1 = P1 + R
+                            R_P1.graph.add_edge(b1, b2, bonds=1)
 
                             comp_tag, bond_tag = R_P1.get_chemical_tags()
 
