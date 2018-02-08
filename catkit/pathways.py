@@ -2,10 +2,11 @@ import sqlite3
 import numpy as np
 import networkx as nx
 from ase import Atom
-import networkx.algorithms.isomorphism as iso
 from ase.data import chemical_symbols as cs
 import matplotlib.pyplot as plt
 from catkit import Gratoms
+import matplotlib
+matplotlib.use('Agg')
 try:
     from rdkit.Chem.Draw import MolToFile
     from rdkit.Chem import AllChem as Chem
