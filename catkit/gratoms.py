@@ -1,3 +1,4 @@
+from builtins import super
 from ase import Atoms, Atom
 import networkx as nx
 from networkx import Graph, MultiGraph
@@ -76,10 +77,10 @@ class Gratoms(Atoms):
     def is_isomorph(self, other):
         """Check if isomorphic by bond count and atomic number."""
         isomorphic = nx.is_isomorphic(
-                self._graph,
-                other._graph,
-                edge_match=em,
-                node_match=nm)
+            self._graph,
+            other._graph,
+            edge_match=em,
+            node_match=nm)
 
         return isomorphic
 

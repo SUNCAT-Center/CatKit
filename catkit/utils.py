@@ -20,17 +20,17 @@ def trilaterate(centers, r):
 
     e_x = plane1 / norm(plane1)
     i = np.dot(e_x, plane2)
-    plane3 = plane2 - i*e_x
+    plane3 = plane2 - i * e_x
 
     e_y = plane3 / norm(plane3)
     e_z = np.cross(e_x, e_y)
     d = norm(plane1)
 
     j = np.dot(e_y, plane2)
-    x = (r[0]**2 - r[1]**2 + d**2) / (2*d)
-    y = (r[0]**2 - r[2]**2 - 2*i*x + i**2 + j**2) / (2*j)
+    x = (r[0]**2 - r[1]**2 + d**2) / (2 * d)
+    y = (r[0]**2 - r[2]**2 - 2 * i * x + i**2 + j**2) / (2 * j)
     z = np.sqrt(r[0]**2 - x**2 - y**2)
-    intersection = centers[0] + x*e_x + y*e_y + z*e_z
+    intersection = centers[0] + x * e_x + y * e_y + z * e_z
 
     return intersection
 

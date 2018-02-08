@@ -66,7 +66,7 @@ functions = [
     fingerprinter.ads_av,
     fingerprinter.primary_surf_nn,
     fingerprinter.primary_surfatom,
-    ]
+]
 # This list is passed on to the following setup functions,
 #    along with a list of atoms.
 

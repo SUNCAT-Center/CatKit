@@ -608,7 +608,7 @@ class ReactionNetwork():
             p1_bonds = ind_mol[R1].get_unsaturated_nodes()
 
             p2_bonds = ind_mol[R2].get_unsaturated_nodes() + \
-                       len(ind_mol[R1])
+                len(ind_mol[R1])
 
             for b1 in p1_bonds:
                 for b2 in p2_bonds:
@@ -756,7 +756,7 @@ class ReactionNetwork():
             lec = np.argmin(energies)
 
         block = Chem.MolToMolBlock(G, confId=int(lec))
-        for j, atom in enumerate(block.split('\n')[4:G.GetNumAtoms()+4]):
+        for j, atom in enumerate(block.split('\n')[4:G.GetNumAtoms() + 4]):
             data = atom.split()
             x, y, z = np.array(data[:3], dtype=float)
 
