@@ -277,7 +277,7 @@ with ReactionNetwork(db_name=db_name) as rn:
 
     # Get 3D structure estimates (requires RDKit)
     try:
-        from catkit.api.rdkit import plot_molecule, get_uff_coordinates
+        from catkit.api.rd_kit import plot_molecule, get_uff_coordinates
 
         for i, molecule in molecules.items():
             plot_molecule(
