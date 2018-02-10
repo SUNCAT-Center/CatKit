@@ -1,8 +1,8 @@
 import matplotlib
 matplotlib.use('Agg')
 from catkit.surface import SlabGenerator
-from catkit.api.rdkit import plot_molecule
-from catkit.api.rdkit import get_uff_coordinates
+from catkit.api.rd_kit import plot_molecule
+from catkit.api.rd_kit import get_uff_coordinates
 from catkit.pathways import ReactionNetwork
 from ase.build import bulk
 import shutil
