@@ -1,7 +1,7 @@
 from builtins import super
-from ase import Atoms, Atom
 import networkx as nx
 from networkx import Graph, MultiGraph
+from ase import Atoms, Atom
 from ase.data import chemical_symbols
 import networkx.algorithms.isomorphism as iso
 import numpy as np

@@ -1,9 +1,9 @@
+from .utils import get_neighbors
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
 from ase.neighborlist import NeighborList as NL
 from ase.data import atomic_numbers as an
 from ase.data import covalent_radii as r
-from catkit.utils import get_neighbors
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
