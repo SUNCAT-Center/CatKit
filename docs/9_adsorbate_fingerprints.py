@@ -9,7 +9,7 @@ from ase.build import bulk
 from catkit.surface import SlabGenerator
 from ase.build import add_adsorbate
 from ase.data import covalent_radii
-from atoml.fingerprint.db2thermo import get_radius, attach_adsorbate_info
+from atoml.fingerprint.database_adsorbate_api import get_radius, attach_adsorbate_info
 from atoml.fingerprint.setup import return_fpv, get_combined_descriptors
 from atoml.fingerprint import AdsorbateFingerprintGenerator
 from atoml.utilities.clean_data import clean_infinite
@@ -36,7 +36,7 @@ for i, t in enumerate(terminations):
     slab = Gen.get_slab(iterm=i)
     slab.center(axis=2, vacuum=5)
     # Add an adsorbate to each slab.
-    radii = np.average([get_radius(a.symbol) for a in slab])
+    radii = np.average([get_radius(a.number) for a in slab])
     height = radii + covalent_radii[6]
     add_adsorbate(slab, ads, height, position=slab.get_positions()[-1, :2])
     # Some help is needed for AtoML to positively identify the adsorbate.
