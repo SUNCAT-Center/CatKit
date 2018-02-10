@@ -1,12 +1,12 @@
 from scipy.spatial import Voronoi
 from scipy.linalg import lstsq
 from ase.data import covalent_radii as radii
-import numpy as np
-import spglib
 from ase import Atoms
+import numpy as np
+from numpy.linalg import norm
+import spglib
 import os
 import contextlib
-from numpy.linalg import norm
 
 
 def trilaterate(centers, r):

@@ -1,8 +1,8 @@
+from .pathways import ReactionNetwork
+from .pathways import get_smiles
 import numpy as np
 import networkx as nx
 from ase.utils import formula_hill
-from catkit.pathways import ReactionNetwork
-from catkit.pathways import get_smiles
 from collections import Counter
 
 

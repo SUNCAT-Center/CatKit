@@ -8,7 +8,6 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 import numpy as np
 import json
-
 Base = declarative_base()
 
 

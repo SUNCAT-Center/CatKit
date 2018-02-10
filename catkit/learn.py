@@ -1,4 +1,5 @@
-from scipy.optimize import minimize, basinhopping
+from scipy.optimize import minimize
+from scipy.optimize import basinhopping
 
 
 def optimizer(
