@@ -74,7 +74,6 @@ class ReactionNetwork():
         """Commit and close the database upon exiting indentation."""
         self.con.commit()
         self.con.close()
-
     def create_table(self):
         """Create the SQLite database table framework."""
 
@@ -775,15 +774,48 @@ class ReactionNetwork():
 
         return pathways
 
-    def save_3d_structure(self, gratoms):
+    def save_3d_structure(self, gratoms, overwrite=False):
         """Save Cartesian coordinates into the ReactionNetwork database.
 
         Parameters:
         -----------
         gratoms: Gratoms or Atoms object
             Object with Cartesian coordinates to be saved.
+        overwrite: bool
+            Allow the database to overwrite a matching index.
         """
-        for j, atom in enumerate(gratoms):
+        name = gratoms.graph.name
+
+        if overwrite:
+            cmd = """SELECT GROUP_CONCAT(position_pid)
+            FROM positions
+            WHERE molecule_id = ({})
+            GROUP BY molecule_id
+            """.format(name)
+
+            self.c.execute(cmd)
+            match = self.c.fetchone()
+
+            if match:
+                match = match[0].split(',')
+
+                assert(len(match) == len(gratoms))
+
+                for i, atom in enumerate(gratoms):
+                    x, y, z = atom.position
+
+                    self.c.execute(
+                        """UPDATE positions
+                        SET x_coord = ?,
+                            y_coord = ?,
+                            z_coord = ?
+                        WHERE position_pid = ?
+                        """, (x, y, z, match[i])
+                    )
+
+                return
+
+        for i, atom in enumerate(gratoms):
             x, y, z = atom.position
             symbol = atom.get('symbol')
 
@@ -791,7 +823,7 @@ class ReactionNetwork():
                 """INSERT INTO positions
                 (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)
                 VALUES(?, ?, ?, ?, ?, ?)""",
-                (gratoms.graph.name, j, x, y, z, symbol)
+                (name, i, x, y, z, symbol)
             )
 
     def load_3d_structures(self, ids=None):
@@ -799,9 +831,10 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        ids: str or list of str
+        ids: int or list of int
             Identifier of the molecule in the database. If None, return all
             structure.
+
         Returns:
         --------
         images: list
@@ -817,6 +850,25 @@ class ReactionNetwork():
              FROM positions
              GROUP BY molecule_id
             """
+
+            self.c.execute(cmd)
+            fetch = self.c.fetchall()
+
+            images = []
+            for i, out in enumerate(fetch):
+
+                symbols = out[1].split(';')
+                positions = np.array(
+                    [_.split(',')
+                     for _ in out[0].split(';')], dtype=float)
+
+                gratoms = Gratoms(symbols, positions)
+                gratoms.graph.name = i
+
+                images += [gratoms]
+
+            return images
+
         else:
             cmd = """SELECT
              GROUP_CONCAT(x_coord || ',' || y_coord || ',' || z_coord, ';'),
@@ -826,20 +878,21 @@ class ReactionNetwork():
              GROUP BY molecule_id
             """.format(ids)
 
-        self.c.execute(cmd)
-        fetch = self.c.fetchall()
+            self.c.execute(cmd)
+            out = self.c.fetchone()
 
-        images = []
-        for out in fetch:
+            if out is None:
+                raise ValueError('No matching index found')
 
             symbols = out[1].split(';')
             positions = np.array(
                 [_.split(',')
                  for _ in out[0].split(';')], dtype=float)
 
-            images += [Gratoms(symbols, positions)]
+            gratoms = Gratoms(symbols, positions)
+            gratoms.graph.name = int(ids)
 
-        return images
+            return gratoms
 
     def plot_reaction_network(self, file_name=None):
         """Plot the reaction network present in the database."""
