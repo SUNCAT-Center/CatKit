@@ -10,11 +10,10 @@ import contextlib
 
 
 def trilaterate(centers, r):
-    """ Find the intersection of three spheres
-    P1,P2,P3 are the centers, r1,r2,r3 are the radii
-    Implementaton based on Wikipedia Trilateration article.
+    """Find the intersection of three spheres
+    P1, P2, P3 are the centers, r1, r2, r3 are the radii
+    Implementation based on Wikipedia Trilateration article.
     """
-
     plane1 = centers[1] - centers[0]
     plane2 = centers[2] - centers[0]
 
@@ -37,14 +36,13 @@ def trilaterate(centers, r):
 
 @contextlib.contextmanager
 def cd(path):
-    """ Does path management: if the path doesn't exists, create it
+    """Does path management: if the path doesn't exists, create it
     otherwise, move into it until the intentation is borken.
 
     Parameters:
       path: str
         Directory path to create and change into.
     """
-
     cwd = os.getcwd()
     try:
         if not os.path.exists(path):
@@ -56,16 +54,19 @@ def cd(path):
 
 
 def rmean(x, N=5):
-    """ Calculate the running mean of array x for N instances.
+    """Calculate the running mean of array x for N instances.
 
     Parameters:
-      x: list or ndarray (n,)
+    -----------
+    x : list or ndarray (n,)
         Array of values to have a average taken from.
-      N: int
+    N : int
         Number of values to take an average with.
 
-    Returns: ndarray (n + 1,)
-      Mean value of the running average.
+    Returns:
+    --------
+    rmean : ndarray (n + 1,)
+        Mean value of the running average.
     """
 
     length = len(x)
@@ -74,11 +75,12 @@ def rmean(x, N=5):
 
     cumsum = np.cumsum(np.insert(x, 0, 0))
     mean = (cumsum[N:] - cumsum[:-N]) / float(N)
+
     return mean
 
 
 def expand_cell(atoms, r=6):
-    """ Return Cartesian coordinates atoms within a supercell
+    """Return Cartesian coordinates atoms within a supercell
     which contains spheres of specified cutoff radius around
     all atom positions.
 
@@ -96,7 +98,6 @@ def expand_cell(atoms, r=6):
         Cartesian coordinates associated with positions in the
         super-cell.
     """
-
     cell = atoms.get_cell()
     recp_len = np.diag(np.linalg.pinv(cell))
     nmax = float(r) * recp_len + 0.01
@@ -124,7 +125,7 @@ def expand_cell(atoms, r=6):
 
 
 def get_voronoi_neighbors(atoms, r=10):
-    """ Return the nearest-neighbors list from the Voronoi
+    """Return the nearest-neighbors list from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
     Parameters:
@@ -142,7 +143,6 @@ def get_voronoi_neighbors(atoms, r=10):
       maximum_cutoff: (n,)
         The maximum distance of all neighboring atoms.
     """
-
     index, coords, _ = expand_cell(atoms, r)
 
     pos = atoms.positions
@@ -185,9 +185,7 @@ def get_voronoi_neighbors(atoms, r=10):
 
 
 def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
-    """ I can haz documentation?
-    """
-
+    """I can haz documentation?"""
     cutoff = max(cutoff) + atol
 
     index, coords, _ = expand_cell(atoms, cutoff * 2.0)
@@ -243,12 +241,11 @@ def get_neighbors(
       neighbors: dict
         Keys of each point and an array of each neighboring atoms index.
     """
-
     if cutoff_matrix is None:
 
         r = radii.copy()
-        # TODO: develop an SVM to parameterize this for me
-        # Will need reliable training data or an unsupervised approach
+        # TODO: Develop an SVM to parameterize this for me
+        # Will need reliable training data for an supervised approach
         metals = [
             [47, 1.1],  # Ag
             [79, 1.2],  # Au
@@ -339,17 +336,17 @@ def get_primitive_cell(
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms : object
         Atoms object to search for a primitive unit cell.
-
-      tol: float
+    tol : float
         Tolerance for floating point rounding errors.
 
     Returns:
-      primitive cell: ASE atoms-object
+    --------
+    primitive cell : object
         The primitive unit cell returned by spglib if one is found.
     """
-
     lattice = atoms.cell
     positions = atoms.get_scaled_positions()
     numbers = atoms.get_atomic_numbers()
@@ -373,17 +370,17 @@ def get_symmetry(
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms : object
         Atoms object to search for symmetric structures of.
-
-      tol: float
+    tol : float
         Tolerance for floating point rounding errors.
 
     Returns:
-      symmetry operations: ndarray (N, N)
+    --------
+    symmetry operations: ndarray (n, n)
         Symmetry operations from spglib.
     """
-
     lattice = atoms.cell
     positions = atoms.get_scaled_positions()
     numbers = atoms.get_atomic_numbers()
@@ -403,22 +400,23 @@ def get_unique_coordinates(
     for a specified axis.
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms: object
         Atoms object to search for unique values along.
-      axis: int
+    axis: int
         Value of 0, 1, or 2 associated with x, y, and z coordinates.
-      direct: bool
+    direct: bool
         Whether to use direct coordinates or Cartesian.
-      tag: bool
+    tag: bool
         Assign ase-like tags to each layer of the slab.
-      tol: float
+    tol: float
         The tolerance to search for unique values within.
 
     Returns:
-      values: ndarray (N,)
+    --------
+    values : ndarray (n,)
         Array of unique values.
     """
-
     if direct:
         positions = atoms.get_scaled_positions()
     else:
@@ -444,17 +442,19 @@ def plane_normal(xyz):
     """ Return the surface normal vector to a plane of best fit.
 
     Parameters:
-      xyz: ndarray (n, 3)
+    -----------
+    xyz : ndarray (n, 3)
         3D points to fit plane to.
 
-    Returns: ndarray (1, 3)
+    Returns:
+    --------
+    vec : ndarray (1, 3)
         Unit vector normal to the plane of best fit.
     """
-
     A = np.c_[xyz[:, 0], xyz[:, 1], np.ones(xyz.shape[0])]
     vec, _, _, _ = lstsq(A, xyz[:, 2])
     vec[2] = -1.0
 
-    vec /= np.linalg.norm(vec)
+    vec /= -np.linalg.norm(vec)
 
-    return -vec
+    return vec

@@ -2,11 +2,8 @@ from .. import Gratoms
 from ase.data import chemical_symbols
 import numpy as np
 import networkx as nx
-try:
-    from rdkit.Chem.Draw import MolToFile
-    from rdkit.Chem import AllChem as Chem
-except(ImportError):
-    pass
+from rdkit.Chem.Draw import MolToFile
+from rdkit.Chem import AllChem as Chem
 
 
 def get_graph(molecule, sanitize=True):

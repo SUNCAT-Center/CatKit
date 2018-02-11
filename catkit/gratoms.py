@@ -197,3 +197,45 @@ class Gratoms(Atoms):
         self._graph.remove_nodes_from(i)
         mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
         nx.relabel_nodes(self._graph, mapping, copy=False)
+
+    def __imul__(self, m):
+        """In-place repeat of atoms."""
+        if isinstance(m, int):
+            m = (m, m, m)
+
+        for x, vec in zip(m, self._cell):
+            if x != 1 and not vec.any():
+                raise ValueError(
+                    'Cannot repeat along undefined lattice vector')
+
+        if self.pbc.any() and len(self.edges) > 0:
+            raise ValueError(
+                "Edge conservation not currently supported with "
+                "pbc. Remove pbc or edges first."
+            )
+
+        M = np.product(m)
+        n = len(self)
+
+        for name, a in self.arrays.items():
+            self.arrays[name] = np.tile(a, (M,) + (1,) * (len(a.shape) - 1))
+            cgraph = self._graph.copy()
+
+        positions = self.arrays['positions']
+        i0 = 0
+
+        for m0 in range(m[0]):
+            for m1 in range(m[1]):
+                for m2 in range(m[2]):
+                    i1 = i0 + n
+                    positions[i0:i1] += np.dot((m0, m1, m2), self._cell)
+                    i0 = i1
+                    if m0 + m1 + m2 != 0:
+                        self._graph = nx.disjoint_union(self._graph, cgraph)
+
+        if self.constraints is not None:
+            self.constraints = [c.repeat(m, n) for c in self.constraints]
+
+        self._cell = np.array([m[c] * self._cell[c] for c in range(3)])
+
+        return self

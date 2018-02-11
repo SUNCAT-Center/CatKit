@@ -222,10 +222,6 @@ write(
 )
 #+END_SRC
 
-#+RESULTS:
-:RESULTS:
-:END:
-
 ** Gas-phase:
 - [X] Various chemical species (C, H, and O currently tested)
 - [X] Molecules with single bonds
