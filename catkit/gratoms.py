@@ -176,8 +176,6 @@ class Gratoms(Atoms):
             # interpreted at 0 and 1 indices.
             i = np.atleast_1d(i)
 
-        n = len(self)
-
         if len(self._constraints) > 0:
             n = len(self)
             i = np.arange(n)[i]

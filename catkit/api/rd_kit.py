@@ -95,8 +95,7 @@ def get_uff_coordinates(gratoms, steps=10):
 
         lec = int(np.argmin(energies))
 
-    valence = nx.get_node_attributes(gratoms.graph, 'valence')
     name = gratoms.graph.name
-    gratoms = rdkit_to_gratoms(rdkG, name, valence, confid=lec)
+    gratoms = rdkit_to_gratoms(rdkG, name, confid=lec)
 
     return gratoms
