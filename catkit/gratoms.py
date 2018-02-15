@@ -194,6 +194,9 @@ class Gratoms(Atoms):
         for name, a in self.arrays.items():
             self.arrays[name] = a[mask]
 
+        if isinstance(i, slice):
+            i = np.arange(n)[i]
+
         self._graph.remove_nodes_from(i)
         mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
         nx.relabel_nodes(self._graph, mapping, copy=False)

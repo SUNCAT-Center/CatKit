@@ -106,7 +106,7 @@ class Classifier(object):
 
             G.add_node(
                 a,
-                atomic_number=atom.number,
+                number=atom.number,
                 symbol=atom.symbol)
 
             for n in neighbor_atoms[0]:
@@ -240,21 +240,24 @@ def reactant_indices(R1, R2, P, broken_bond):
 
     GM = nx.algorithms.isomorphism.GraphMatcher
     em = iso.numerical_edge_match('bonds', 1)
-    nm = iso.numerical_node_match('atomic_number', 1)
+    nm = iso.numerical_node_match('number', 1)
 
     Pgraph = P.copy()
     u, v = broken_bond
-    Pgraph.remove_edge(u, v)
-    Rgraph = nx.disjoint_union(R2, R1)
+    Pgraph.graph.remove_edge(u, v)
+    Rgraph = R1 + R2
 
     gm = GM(
-        Pgraph,
-        Rgraph,
+        Pgraph.graph,
+        Rgraph.graph,
         edge_match=em,
         node_match=nm
     )
 
     gm.is_isomorphic()
-    pindex = np.array(list(gm.mapping.keys()))
+
+    pindex = np.empty(len(Pgraph), dtype=int)
+    for k, v in gm.mapping.items():
+        pindex[k] = v
 
     return pindex

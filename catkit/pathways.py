@@ -74,6 +74,7 @@ class ReactionNetwork():
         """Commit and close the database upon exiting indentation."""
         self.con.commit()
         self.con.close()
+
     def create_table(self):
         """Create the SQLite database table framework."""
 
@@ -582,8 +583,8 @@ class ReactionNetwork():
         molecules: dict
             Molecules to be saved to the database.
         """
-        for comp_tag, data in list(molecules.items()):
-            for bond_tag, molecule_list in list(data.items()):
+        for comp_tag, data in molecules.items():
+            for bond_tag, molecule_list in data.items():
                 for molecule in molecule_list:
 
                     self.c.execute(
@@ -599,19 +600,23 @@ class ReactionNetwork():
                         self.c.execute(
                             """INSERT INTO bonds
                             (molecule_id, node_id1, node_id2, nbonds)
-                            VALUES(?, ?, ?, ?)""", (molecule_pid, u, v, bonds))
+                            VALUES(?, ?, ?, ?)""",
+                            (molecule_pid, int(u), int(v), int(bonds))
+                        )
 
                     for node, data in molecule.nodes(data=True):
-                        number = data['number']
-                        valence = data['valence']
+                        number = int(data.get('number'))
+                        valence = data.get('valence')
+
+                        if valence is None:
+                            valence = -1
+
                         self.c.execute(
                             """INSERT INTO atoms
                             (molecule_id, node_id, atom_num, valence)
                             VALUES(?, ?, ?, ?)""",
-                            (molecule_pid,
-                             node,
-                             int(number),
-                             valence))
+                            (molecule_pid, int(node), number, int(valence))
+                        )
 
     def save_pathways(self, pathways, broken_bonds=None):
         """Save enumerated pathways the ReactionNetwork database.
@@ -645,9 +650,8 @@ class ReactionNetwork():
             except(sqlite3.IntegrityError):
                 pass
 
-    def load_molecules(self, binned=False):
-        """Save enumerated pathways the ReactionNetwork database.
-        More than two reactants or two products is not supported.
+    def load_molecules(self, ids=None, binned=False):
+        """Load 2D molecule graphs from the database.
 
         Parameters:
         -----------
@@ -660,6 +664,9 @@ class ReactionNetwork():
         molecules: dict
             All molecules present in the database.
         """
+        if isinstance(ids, list):
+            ids = ','.join([str(_) for _ in ids])
+
         cmd = """SELECT m.molecule_pid,
                         m.comp_tag,
                         m.bond_tag,
@@ -683,6 +690,10 @@ class ReactionNetwork():
         ) b
           ON b.molecule_id = m.molecule_pid
         """
+
+        if ids:
+            cmd += """WHERE m.molecule_pid IN ({})""".format(ids)
+
         self.c.execute(cmd)
         fetch = self.c.fetchall()
 
