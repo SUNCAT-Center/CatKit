@@ -69,7 +69,7 @@ class Gratoms(Atoms):
         return self._graph.adj
 
     def get_neighbor_symbols(self, u):
-        """ Get chemical symbols for neighboring atoms of u."""
+        """Get chemical symbols for neighboring atoms of u."""
         neighbors = list(self._graph[u])
 
         return sym[self.arrays['numbers'][neighbors]]
