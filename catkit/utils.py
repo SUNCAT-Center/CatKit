@@ -37,10 +37,11 @@ def trilaterate(centers, r):
 @contextlib.contextmanager
 def cd(path):
     """Does path management: if the path doesn't exists, create it
-    otherwise, move into it until the intentation is borken.
+    otherwise, move into it until the intentation is broken.
 
     Parameters:
-      path: str
+    -----------
+    path : str
         Directory path to create and change into.
     """
     cwd = os.getcwd()
@@ -85,16 +86,18 @@ def expand_cell(atoms, r=6):
     all atom positions.
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms: atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-      r: float
+    r: float
         Radius of the spheres to expand around each atom.
 
     Returns:
-      index: ndarray of int
+    --------
+    index: ndarray of int
         Indices associated with the original unit cell positions.
-      coords: ndarray of (3,) array
+    coords: ndarray of (3,) array
         Cartesian coordinates associated with positions in the
         super-cell.
     """
@@ -129,25 +132,26 @@ def get_voronoi_neighbors(atoms, r=10):
     method. Multi-bonding occurs through periodic boundary conditions.
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms: atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-      r: float
+    r: float
         Radius of the spheres to expand around each atom.
 
     Returns:
-      indices: list (n,)
+    --------
+    indices: list (n,)
         Number of neighboring atoms for each atom.
-      edges: dict
+    edges: dict
         Tuples of bonds between two atoms and the count.
-      maximum_cutoff: (n,)
+    maximum_cutoff: (n,)
         The maximum distance of all neighboring atoms.
     """
     index, coords, _ = expand_cell(atoms, r)
 
     pos = atoms.positions
-    pos = pos.reshape(pos.shape[0], 1, 3)
-    ssd = np.abs(pos - coords).sum(axis=2)
+    ssd = np.abs(pos[:, None, :] - coords).sum(axis=2)
     oind = np.where(ssd < 1e-5)[1]
 
     voronoi = Voronoi(coords)
