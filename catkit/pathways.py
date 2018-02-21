@@ -25,7 +25,7 @@ class ReactionNetwork():
             base_valence=None,
             nbond_limits=None,
     ):
-        """ The __init__ function is automatically called when the
+        """The __init__ function is automatically called when the
         class is referenced.
 
         Parameters:
@@ -201,16 +201,16 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        molecule: Gratoms object
+        molecule : Gratoms object
             Molecule to create branching structures from.
-        molecules: dict
+        molecules : dict
             Molecule structures to check for unique matches against.
 
         Returns:
         --------
-        new_molecules: list
+        new_molecules : list
             All unique molecules discovered while branching.
-        molecules: dict
+        molecules : dict
             Molecule structures to check for unique matches updated with
             new_molecules.
         """
@@ -333,10 +333,10 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        reconfiguration: bool
+        reconfiguration : bool
             Search for reconfiguration paths. Reconfiguration paths are
             all those where only the bond order is changed. R1 --> P1.
-        substitution: bool
+        substitution : bool
             Search for substitution paths. Substitution paths are all
             those where one bond is broken and one bond is formed
             simultaneously. R1 + R2 --> P1 + P2.
@@ -690,7 +690,6 @@ class ReactionNetwork():
         ) b
           ON b.molecule_id = m.molecule_pid
         """
-
         if ids:
             cmd += """WHERE m.molecule_pid IN ({})""".format(ids)
 
@@ -929,7 +928,6 @@ class ReactionNetwork():
 
     def _maximum_bond_limit(self, molecule, n1, n2):
         """Return whether a maximum bonding limit has been met."""
-
         el1 = molecule.nodes[n1]['number']
         el2 = molecule.nodes[n2]['number']
 

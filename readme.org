@@ -125,7 +125,7 @@ write(
 )
 #+END_SRC
 
-We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces will be implemented in a future release.
+We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces can be achieved using the adsorption vectors described in the next section.
 
 #+CAPTION: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
 [[./images/CuPd3_321-sites.png]]

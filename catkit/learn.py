@@ -19,25 +19,25 @@ def optimizer(
 
     Parameters:
     -----------
-    obj_func: function
-      scikit-learn objective function.
-    initial_theta: array (n,)
-      Hyperparameters to be optimized against.
-    bounds: list of tuples (n, 2)
-      lower and upper bounds for each hyper parameter.
-    gradient: bool
-      Include the gradient for the optimization function.
-    minimizer: str
-      a scipy minimization method.
-    hopping: int
-      Perform a number of basin hopping steps.
+    obj_func : function
+        scikit-learn objective function.
+    initial_theta : array (n,)
+        Hyperparameters to be optimized against.
+    bounds : list of tuples (n, 2)
+        Lower and upper bounds for each hyper parameter.
+    gradient : bool
+        Include the gradient for the optimization function.
+    minimizer : str
+        A scipy minimization method.
+    hopping : int
+        Perform a number of basin hopping steps.
 
     Returns:
     --------
-    theta_opt: list (n,)
-      Optimized hyperparameters.
-    func_min: float
-      Value of the minimized objective function.
+    theta_opt : list (n,)
+        Optimized hyperparameters.
+    func_min : float
+        Value of the minimized objective function.
     """
     margs = {
         'method': minimizer,
