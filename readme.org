@@ -88,6 +88,7 @@ from catkit.adsorption import get_adsorption_sites
 from ase.build import bulk
 from ase.io import write
 from ase import Atom
+import numpy as np
 
 # Make a test slab
 bulk = bulk('Pd', 'fcc', a=5, cubic=True)
@@ -113,7 +114,13 @@ sites = gen.adsorption_sites(
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
 for k, v in sites.items():
-    positions, points, _ = v
+    positions, _, _, pairings = v
+
+    if not list(pairings):
+        continue
+
+    unique = np.unique(pairings, return_index=True)[-1]
+    positions = positions[unique]
 
     for s in positions:
         atoms += Atom(atm[k], s + [0, 0, 2])
@@ -122,8 +129,11 @@ write(
     './images/CuPd3_111-sites.pov',
     atoms,
     show_unit_cell=2,
+    run_povray=True
 )
 #+END_SRC
+
+#+RESULTS:
 
 We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces can be achieved using the adsorption vectors described in the next section.
 
@@ -160,7 +170,7 @@ sites = gen.adsorption_sites(
 
 atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
 for k, v in sites.items():
-    positions, points, _ = v
+    positions = v[0]
 
     for s in positions:
         atoms += Atom(atm[k], s + [0, 0, 1.5])
@@ -168,7 +178,7 @@ for k, v in sites.items():
 write(
     './images/CuPd3_321-sites.pov',
     atoms,
-    show_unit_cell=2,
+    show_unit_cell=2
 )
 #+END_SRC
 

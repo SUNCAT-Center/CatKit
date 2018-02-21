@@ -15,27 +15,29 @@ def get_adsorption_sites(
         return_proxy=False,
         tol=1e-5,
 ):
-    """ Get the adsorption sites of a slab as defined by surface
+    """Get the adsorption sites of a slab as defined by surface
     atom symmetries.
 
     Parameters:
-      slab: ASE atoms-object
+    -----------
+    slab : atoms object
         The slab to find adsorption sites for.
-      surface_sites: ndarray (n,)
+    surface_sites : ndarray (n,)
         surface sites of the provided slab.
-      symmetry_reduced: int
+    symmetry_reduced : int
         Whether to return the symmetrically unique sites only.
-      vectors: bool
+    vectors : bool
         Whether to compute the adsorption vectors.
-      return_proxy: bool
+    return_proxy : bool
         Whether to return the proxy_slab for adsorption work.
 
-    Returns: dict of 3 lists
-      Dictionary of top, bridge, hollow, and 4-fold sites containing
-      positions, points, and neighbor lists. If adsorption vectors
-      are requested, the third list is replaced.
+    Returns:
+    --------
+    sites : dict of 3 lists
+        Dictionary of top, bridge, hollow, and 4-fold sites containing
+        positions, points, and neighbor lists. If adsorption vectors
+        are requested, the third list is replaced.
     """
-
     sites, vslab = find_adsorption_sites(
         slab=slab,
         surface_sites=surface_sites,
@@ -71,25 +73,27 @@ def find_adsorption_sites(
         trim=0.5,
         tol=1e-5,
 ):
-    """ Find all bridge and hollow sites (3-fold and 4-fold) given an
+    """Find all bridge and hollow sites (3-fold and 4-fold) given an
     input slab based Delaunay triangulation of surface atoms of a
     super-cell.
 
     Parameters:
-      slab: ASE atoms-object
+    -----------
+    slab : atoms object
         The slab to find adsorption sites for.
-      surface_sites: ndarray (n,)
+    surface_sites : ndarray (n,)
         surface sites of the provided slab.
-      trim: float
+    trim : float
         Percentage of fractional coordinates to remove.
-      tol: float
+    tol : float
         Absolute tolerance for floating point errors.
 
-    Returns: dict of 3 lists
-      Dictionary of top, bridge, hollow, and 4-fold sites containing
-      positions, points, and neighbors of the super-cell.
+    Returns:
+    --------
+    sites : dict of 3 lists
+        Dictionary of top, bridge, hollow, and 4-fold sites containing
+        positions, points, and neighbors of the super-cell.
     """
-
     # Top sites projected into expanded unit cell
     index, coords, offsets = utils.expand_cell(slab, r=8)
 
@@ -116,11 +120,12 @@ def find_adsorption_sites(
         'top': [
             top_coords,
             np.arange(rtop.shape[0]),
-            [[] for _ in range(rtop.shape[0])]
+            [[] for _ in range(rtop.shape[0])],
+            []
         ],
-        'bridge': [[], [], []],
-        'hollow': [[], [], []],
-        '4fold': [[], [], []],
+        'bridge': [[], [], [], []],
+        'hollow': [[], [], [], []],
+        '4fold': [[], [], [], []],
     }
 
     dt = Delaunay(sites['top'][0][:, :2])
@@ -212,7 +217,7 @@ def find_adsorption_sites(
 
     # Convert lists to arrays
     for k, v in sites.items():
-        positions, points, _ = v
+        positions, points = v[:2]
 
         if len(positions) == 0:
             continue
@@ -239,24 +244,26 @@ def get_reduced_sites(
         slab,
         tol=1e-5,
 ):
-    """ Reduce overlapping points via fractional coordinates. Intended
+    """Reduce overlapping points via fractional coordinates. Intended
     for use after finding super-cell sites.
 
     Parameters:
-      sites: dict
+    -----------
+    sites : dict
         Dictionary of cartesian coordinates to provide reduced sites from.
         Must have the form {'site': [[positions], [points], [neighbors]]}.
-      slab: ASE atoms-object
+    slab : ASE atoms-object
         slab to determine symmetry operations from.
-      tol: float
+    tol : float
         Absolute tolerance for floating point errors.
 
-    Returns: dict of 3 lists
-      Dictionary sites containing positions, points, and neighbor lists.
+    Returns:
+    --------
+    sites : dict of 3 lists
+        Dictionary sites containing positions, points, and neighbor lists.
     """
-
     for k, v in sites.items():
-        positions, points, nnneighbors = v
+        positions, points, nnneighbors = v[:3]
 
         if len(positions) == 0:
             continue
@@ -298,113 +305,104 @@ def get_symmetric_sites(
         slab,
         tol=1e-5
 ):
-    """ Determine the symmetrically unique adsorption sites
+    """Determine the symmetrically unique adsorption sites
     from a dictionary of possible sites for a given slab.
 
     Parameters:
-      sites: dict
+    -----------
+    sites : dict
         Dictionary of Cartesian coordinates to provide reduced sites from.
         Must have the form {'site': [[positions], [points], [neighbors]]}.
-      slab: ASE atoms-object
+    slab : ASE atoms-object
         slab to determine symmetry operations from.
-      tol: float
+    tol : float
         Absolute tolerance for floating point errors.
 
-    Returns: dict of 3 lists
-      Dictionary sites containing positions, points, and neighbor lists.
+    Returns:
+    --------
+    sites : dict of lists
+        Dictionary of sites containing index of site
     """
-
     symmetry = utils.get_symmetry(slab, tol=tol)
-    rotations = symmetry['rotations']
+    rotations = np.swapaxes(symmetry['rotations'], 1, 2)
     translations = symmetry['translations']
+    affine = np.append(rotations, translations[:, None], axis=1)
 
     for k, v in sites.items():
-        positions, points, nnneighbors = v
+        positions, points, nnneighbors = v[:3]
 
         if len(positions) == 0:
             continue
 
         frac_coords = np.dot(positions, pinv(slab.cell))
+        affine_points = np.insert(frac_coords, 3, 1, axis=1)
+        operations = np.dot(affine_points, affine)
 
-        # Convert to fractional
-        unique_positions, unique = [], []
-        for i, xyz in enumerate(frac_coords):
+        matched = np.arange(frac_coords.shape[0])
+        for i, j in enumerate(matched):
+            if i != j:
+                continue
 
-            symmetry_match = False
-            for j, rotation in enumerate(rotations):
-                translation = translations[j]
+            d = operations[i, :, None] - frac_coords
+            d -= np.round(d)
+            matches = set(np.where((np.abs(d) < tol).all(axis=2))[-1])
 
-                affine_matrix = np.eye(4)
-                affine_matrix[0:3][:, 0:3] = rotation
-                affine_matrix[0:3][:, 3] = translation
-
-                affine_point = np.array([xyz[0], xyz[1], xyz[2], 1])
-                operation = np.dot(affine_matrix, affine_point)[0:3]
-
-                if len(matching_sites(operation, unique_positions)) > 0:
-                    symmetry_match = True
-                    break
-
-            if not symmetry_match:
-                unique_positions += [xyz]
-                unique += [i]
-
-        unique = np.array(unique)
-        sites[k][0] = np.dot(unique_positions, slab.cell)
-        sites[k][1] = np.array(points[unique])
-
-        if isinstance(nnneighbors, np.ndarray):
-            sites[k][2] = nnneighbors[unique]
+            for m in matches:
+                matched[m] = i
+        sites[k][3] = matched
 
     return sites
 
 
 def matching_sites(position, comparators, tol=1e-8):
-    """ Get the indices of all points in a comparator list that are
-    equal to a fractional coordinate (with a tolerance), taking into
+    """Get the indices of all points in a comparator list that are
+    equal to a given position (with a tolerance), taking into
     account periodic boundary conditions (adaptation from Pymatgen).
 
     Parameters:
-      position: list (3,)
+    -----------
+    position : list (3,)
         Fractional coordinate to compare to list.
-      comparators: list (3, n)
+    comparators : list (3, n)
         Fractional coordinates to compare against.
-      tol: float
+    tol : float
         Absolute tolerance.
 
-    Returns: list (n,)
+    Returns:
+    --------
+    match : list (n,)
         Indices of matches.
     """
-
     if len(comparators) == 0:
         return []
 
     fdist = comparators - position
     fdist -= np.round(fdist)
-    return np.where((np.abs(fdist) < tol).all(axis=1))[0]
+    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+
+    return match
 
 
-def _get_adsorption_vectors(
-        vslab,
-        sites,
-):
-    """ Returns the vectors representing the furthest distance from
+def _get_adsorption_vectors(vslab, sites):
+    """Returns the vectors representing the furthest distance from
     the neighboring atoms.
 
     (TODO: This input is complex and confusing. Would be nice to simplify.)
 
     Parameters:
-      vslab: ASE atoms-object
+    -----------
+    vslab: object
         The virtual surface produced from find_adsorption_sites.
-      sites: dict of 3 lists
+    sites: dict of 3 lists
         Dictionary of top, bridge, hollow, and 4-fold sites containing
         positions, points, and neighbor lists.
 
-    Returns: dict of 3 lists
-      Dictionary of top, bridge, hollow, and 4-fold sites containing
-      positions, points, and adsorption vector lists.
+    Returns:
+    --------
+    sites: dict of 3 lists
+        Dictionary of top, bridge, hollow, and 4-fold sites containing
+        positions, points, and adsorption vector lists.
     """
-
     pos = vslab.positions
     for k, v in sites.items():
         coordinates, points, neighbors = v
@@ -413,7 +411,7 @@ def _get_adsorption_vectors(
         for i, s in enumerate(coordinates):
 
             if len(neighbors):
-                direct = pos[np.append(points[i], neighbors[i])]
+                direct = pos[np.append(points[i], neighbors[i]).astype(int)]
             else:
                 direct = pos[points[i]]
 
