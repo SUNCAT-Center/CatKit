@@ -30,14 +30,14 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        db_name: str
+        db_name : str
             Name of the database file to access. Will connect to
             'reaction-network.db' by default.
-        base_valence: array (n,)
+        base_valence : array (n,)
             The maximum number of bonds each chemical species may form. Each
             entry of the array is the bond limit of the corresponding atomic
             number. The 0th entry of the array is ignored.
-        nbond_limits: array (n, n):
+        nbond_limits : array (n, n):
             The maximum number of bonds that can be formed when species of
             index 0 is bonding to a species of index 1. Each entry of the array
             is the bond limit of the corresponding atomic number. The 0th entry
@@ -77,7 +77,6 @@ class ReactionNetwork():
 
     def create_table(self):
         """Create the SQLite database table framework."""
-
         self.c.execute("""CREATE TABLE IF NOT EXISTS molecules(
         molecule_pid INTEGER PRIMARY KEY AUTOINCREMENT,
         comp_tag CHAR NOT NULL,
@@ -150,11 +149,11 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        element_pool: dict
+        element_pool : dict
             Atomic symbols keys paired with the maximum number of that atom.
-        load_molecules: bool
+        load_molecules : bool
             Load any existing molecules from the database.
-        multiple_bond_search: bool
+        multiple_bond_search : bool
             Allow atoms to form bonds with other atoms in the molecule.
         """
         numbers = np.zeros(len(self.base_valence))

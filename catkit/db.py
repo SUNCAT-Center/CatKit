@@ -613,7 +613,7 @@ class FingerprintDB():
         self.c.execute("""INSERT INTO fingerprints (image_id, param_id, value)
         VALUES(?, ?, ?)""", (int(image_id), int(param_id), float(value)))
 
-    def get_fingerprints(self, ase_ids, params=[]):
+    def get_fingerprints(self, ase_ids=None, params=[]):
         """ Get the array of values associated with the provided parameters
         for each ase_id provided.
 
@@ -636,17 +636,25 @@ class FingerprintDB():
         elif isinstance(params[0], int):
             psel = ','.join(np.array(params).astype(str))
 
-        asel = ','.join(np.array(ase_ids).astype(str))
+        if ase_ids is None:
+            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
+            JOIN images on fingerprints.image_id = images.iid
+            WHERE param_id IN ({})
+            GROUP BY ase_id
+            ORDER BY images.iid""".format(psel)
 
-        cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
-        JOIN images on fingerprints.image_id = images.iid
-        WHERE param_id IN ({}) AND ase_id IN ({})
-        GROUP BY ase_id""".format(psel, asel)
+        else:
+            asel = ','.join(np.array(ase_ids).astype(str))
+
+            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
+            JOIN images on fingerprints.image_id = images.iid
+            WHERE param_id IN ({}) AND ase_id IN ({})
+            GROUP BY ase_id""".format(psel, asel)
 
         self.c.execute(cmd)
         fetch = self.c.fetchall()
 
-        fingerprint = np.zeros((len(ase_ids), len(params)))
+        fingerprint = np.zeros((len(fetch), len(params)))
         for i, f in enumerate(fetch):
             fingerprint[i] = f[0].split(',')
 
