@@ -1,7 +1,7 @@
+from . import Gratoms
 from scipy.spatial import Voronoi
 from scipy.linalg import lstsq
 from ase.data import covalent_radii as radii
-from ase import Atoms
 import numpy as np
 from numpy.linalg import norm
 import spglib
@@ -12,7 +12,7 @@ import contextlib
 def trilaterate(centers, r):
     """Find the intersection of three spheres
     P1, P2, P3 are the centers, r1, r2, r3 are the radii
-    Implementation based on Wikipedia Trilateration article.
+    Implementation based on Wikipedia trilateration article.
     """
     plane1 = centers[1] - centers[0]
     plane2 = centers[2] - centers[0]
@@ -87,17 +87,17 @@ def expand_cell(atoms, r=6):
 
     Parameters:
     -----------
-    atoms: atoms object
+    atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-    r: float
+    r : float
         Radius of the spheres to expand around each atom.
 
     Returns:
     --------
-    index: ndarray of int
+    index : ndarray of int
         Indices associated with the original unit cell positions.
-    coords: ndarray of (3,) array
+    coords : ndarray of (3,) array
         Cartesian coordinates associated with positions in the
         super-cell.
     """
@@ -127,122 +127,114 @@ def expand_cell(atoms, r=6):
     return index, coords, offsets
 
 
-def get_voronoi_neighbors(atoms, r=10):
-    """Return the nearest-neighbors list from the Voronoi
+def get_voronoi_neighbors(atoms, r=8):
+    """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
     Parameters:
     -----------
-    atoms: atoms object
+    atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-    r: float
+    r : float
         Radius of the spheres to expand around each atom.
 
     Returns:
     --------
-    indices: list (n,)
-        Number of neighboring atoms for each atom.
-    edges: dict
-        Tuples of bonds between two atoms and the count.
-    maximum_cutoff: (n,)
-        The maximum distance of all neighboring atoms.
+    connectivity : ndarray (n, n)
+        Number of edges formed between atoms in a system.
     """
-    index, coords, _ = expand_cell(atoms, r)
-
-    pos = atoms.positions
-    ssd = np.abs(pos[:, None, :] - coords).sum(axis=2)
-    oind = np.where(ssd < 1e-5)[1]
+    index, coords, offsets = expand_cell(atoms, r)
+    L = int(len(offsets) / 2)
+    oind = np.arange(L * len(atoms), (L + 1) * len(atoms))
 
     voronoi = Voronoi(coords)
-
-    indices = np.zeros(len(atoms))
-
-    edges = {}
-    maximum_cutoff = []
     points = voronoi.ridge_points
 
+    connectivity = np.zeros((len(atoms), len(atoms)), dtype=int)
     for i, n in enumerate(oind):
-        neighbors = np.where(points == n)[0]
+        p = points[np.where(points == n)[0]]
+        edges = np.sort(index[p])
 
-        p = points[neighbors]
-
-        d = np.sqrt(((coords[p][:, 0] - coords[p][:, 1]) ** 2).sum(axis=1))
-        maximum_cutoff += [d.max()]
-
-        unique, counts = np.unique(
-            np.sort(index[p]),
+        unique_edge, edge_counts = np.unique(
+            edges,
             return_counts=True,
             axis=0,
         )
 
-        indices[i] = len(p)
-        for j, u in enumerate(unique):
-            u = tuple(u)
+        for j, edge in enumerate(unique_edge):
+            u, v = edge
+            connectivity[u][v] += edge_counts[j] / 2
+            connectivity[v][u] += edge_counts[j] / 2
 
-            if u not in edges:
-                edges[u] = counts[j] / 2
-            else:
-                edges[u] += counts[j] / 2
-
-    return indices, edges, maximum_cutoff
+    return connectivity
 
 
 def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
-    """I can haz documentation?"""
-    cutoff = max(cutoff) + atol
+    """Return the connectivity matrix from a simple radial cutoff.
+    Multi-bonding occurs through periodic boundary conditions.
 
-    index, coords, _ = expand_cell(atoms, cutoff * 2.0)
+    Parameters:
+    -----------
+    atoms : atoms object
+        Atoms object with the periodic boundary conditions and
+        unit cell information to use.
+    cutoff : float
+        Cutoff radius to use when determining neighbors.
+    atol: float
+        Absolute tolerance to use when computing distances.
 
-    indices = np.zeros(len(atoms))
-    edges = {}
-    for i, center in enumerate(atoms.positions):
-        norm = coords - center
-        d2 = (norm ** 2).sum(axis=1)
-        srt = np.argsort(d2)
+    Returns:
+    --------
+    connectivity : ndarray (n, n)
+        Number of edges formed between atoms in a system.
+    """
+    cutoff += atol
 
-        d2 = d2[srt][1:]
-        nindex = index[srt][1:]
+    index, coords = expand_cell(atoms, cutoff * 2.0)[:2]
 
-        inner = np.where(d2 <= cutoff ** 2)[0]
+    connectivity = np.zeros((len(atoms), len(atoms)))
+    for u, center in enumerate(atoms.positions):
+        norm = np.linalg.norm(coords - center, axis=1)
+        neighbors = index[np.where(norm < cutoff)]
 
-        for j in nindex[inner]:
-            indices[i] += 1
-            e = tuple(sorted((i, j)))
-            if e not in edges:
-                edges[e] = 0.5
-            else:
-                edges[e] += 0.5
+        unique, counts = np.unique(
+            neighbors,
+            return_counts=True
+        )
+        connectivity[u, unique] = counts
+        # Remove self-interaction
+        connectivity[u, u] -= 1
 
-    return indices, edges
+    return connectivity
 
 
 def get_neighbors(
         atoms,
         points=None,
         cutoff_matrix=None):
-    """ Returns the neighboring atoms within a specified cutoff matrix
+    """Returns the neighboring atoms within a specified cutoff matrix
     criteria for requested points.
 
     Use of the cutoff matrix provides more fine-tuned control
     over the interaction parameters.
 
     Parameters:
-      atoms: ASE atoms-object
+    -----------
+    atoms : atoms object
         Atoms object to return.
-
-      points: list (N,) or None
+    points : list (N,) or None
         Points to locate neighboring points of. If not provided, all
         atom points in the atoms-object will be used.
-
-      cutoff_matrix: ndarray (96, 96) or None
+    cutoff_matrix : ndarray (96, 96) or None
         A matrix of interaction distances for the first 96 elements
         of the periodic table. These interactions are separated into
         individual i, j interactions. If None, defaults from ASE
         will be used.
 
     Returns:
-      neighbors: dict
+    --------
+    neighbors : dict
         Keys of each point and an array of each neighboring atoms index.
     """
     if cutoff_matrix is None:
@@ -333,10 +325,8 @@ def get_neighbors(
     return neighbors
 
 
-def get_primitive_cell(
-        atoms,
-        tol=1e-8):
-    """ ASE atoms-object interface with spglib primitive cell finder:
+def get_primitive_cell(atoms, tol=1e-8):
+    """Atoms object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
     Parameters:
@@ -361,16 +351,14 @@ def get_primitive_cell(
         cell,
         symprec=tol)
 
-    atoms = Atoms(symbols=_numbers, cell=_lattice)
+    atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
     atoms.set_scaled_positions(_positions)
 
     return atoms
 
 
-def get_symmetry(
-        atoms,
-        tol=1e-8):
-    """ ASE atoms-object interface with spglib symmetry finder:
+def get_symmetry(atoms, tol=1e-8):
+    """Atoms object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
     Parameters:
@@ -400,20 +388,20 @@ def get_unique_coordinates(
         direct=True,
         tag=False,
         tol=1e-5):
-    """ Return unique coordinate values of a given atoms object
+    """Return unique coordinate values of a given atoms object
     for a specified axis.
 
     Parameters:
     -----------
-    atoms: object
+    atoms : object
         Atoms object to search for unique values along.
-    axis: int
+    axis : int
         Value of 0, 1, or 2 associated with x, y, and z coordinates.
-    direct: bool
+    direct : bool
         Whether to use direct coordinates or Cartesian.
-    tag: bool
+    tag : bool
         Assign ase-like tags to each layer of the slab.
-    tol: float
+    tol : float
         The tolerance to search for unique values within.
 
     Returns:
@@ -443,7 +431,7 @@ def get_unique_coordinates(
 
 
 def plane_normal(xyz):
-    """ Return the surface normal vector to a plane of best fit.
+    """Return the surface normal vector to a plane of best fit.
 
     Parameters:
     -----------
@@ -462,3 +450,16 @@ def plane_normal(xyz):
     vec /= -np.linalg.norm(vec)
 
     return vec
+
+
+def connectivity_to_edges(connectivity):
+    """Convert a Numpy connectivity matrix into a list of
+    NetworkX compatible edges
+    """
+    edges = []
+    for i, c in enumerate(connectivity):
+        lower_diagonal = c[:i]
+        for j, v in enumerate(lower_diagonal):
+            edges += [(i, j, 1)] * v
+
+    return edges

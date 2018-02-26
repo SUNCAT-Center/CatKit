@@ -579,7 +579,7 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        molecules: dict
+        molecules : dict
             Molecules to be saved to the database.
         """
         for comp_tag, data in molecules.items():
@@ -623,9 +623,9 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        pathways: list
+        pathways : list
             Sorted pathways in the form [R1, R2, P1, P2].
-        broken_bonds: list
+        broken_bonds : list
             Comma separated strings of index associated with the
             two atoms whos bond is broken. List order must match
             pathways.
@@ -654,13 +654,13 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        binned: bool
+        binned : bool
             Return the molecules in sub-dictionaries of their
             corresponding composition and bonding tags.
 
         Returns:
         --------
-        molecules: dict
+        molecules : dict
             All molecules present in the database.
         """
         if isinstance(ids, list):
@@ -740,13 +740,13 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        broken_bonds: bool
+        broken_bonds : bool
             Return the index information of which bond was broken.
             Only supported for elementary steps.
 
         Returns:
         --------
-        pathways: list
+        pathways : list
             All pathways present in the database.
         """
         if broken_bonds:
@@ -788,9 +788,9 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        gratoms: Gratoms or Atoms object
+        gratoms : Gratoms or Atoms object
             Object with Cartesian coordinates to be saved.
-        overwrite: bool
+        overwrite : bool
             Allow the database to overwrite a matching index.
         """
         name = gratoms.graph.name
@@ -840,13 +840,13 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        ids: int or list of int
+        ids : int or list of int
             Identifier of the molecule in the database. If None, return all
             structure.
 
         Returns:
         --------
-        images: list
+        images : list
             All Gratoms objects in the database.
         """
         if isinstance(ids, list):

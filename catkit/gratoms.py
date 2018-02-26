@@ -46,11 +46,15 @@ class Gratoms(Atoms):
             self._graph = MultiGraph()
         else:
             self._graph = Graph()
-        if edges:
-            self._graph.add_edges_from(edges, bonds=1)
+
         nodes = [[i, {'number': n}]
                  for i, n in enumerate(self.arrays['numbers'])]
         self._graph.add_nodes_from(nodes)
+
+        if edges:
+            self._graph.add_edges_from(edges, bonds=1)
+
+        self._surface_atoms = None
 
     @property
     def graph(self):
@@ -67,6 +71,14 @@ class Gratoms(Atoms):
     @property
     def adj(self):
         return self._graph.adj
+
+    def get_surface_atoms(self):
+        """Return surface atoms."""
+        return self._surface_atoms
+
+    def set_surface_atoms(self, surface_atoms):
+        """Assign surface atoms."""
+        self._surface_atoms = surface_atoms
 
     def get_neighbor_symbols(self, u):
         """Get chemical symbols for neighboring atoms of u."""
@@ -160,7 +172,8 @@ class Gratoms(Atoms):
 
             self.set_array(name, a)
 
-        self._graph = nx.disjoint_union(self._graph, other._graph)
+        if isinstance(other, Gratoms):
+            self._graph = nx.disjoint_union(self._graph, other._graph)
 
         return self
 
