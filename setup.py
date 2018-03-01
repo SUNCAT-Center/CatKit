@@ -12,7 +12,7 @@ with open('LICENSE') as f:
 setup(
     name='CatKit',
     version='0.1.0',
-    packages=['catkit'],
+    packages=['catkit', 'catkit.api'],
     author='Jacob Boes',
     author_email='jrboes@stanford.edu',
     license=license,

@@ -14,6 +14,7 @@ from atoml.fingerprint.database_adsorbate_api import (get_radius,
 from atoml.fingerprint import FeatureGenerator
 from atoml.preprocess.clean_data import clean_infinite
 
+
 # Define an adsorbate.
 ads = 'C'
 
@@ -65,8 +66,8 @@ functions = [
     fingerprinter.Z_add,
     fingerprinter.ads_av,
     fingerprinter.primary_surf_nn,
-    # fingerprinter.primary_surfatom,
-    # fingerprinter.bulk
+    fingerprinter.primary_surfatom,
+    fingerprinter.primary_surfatom_sum,
     ]
 
 # This list is passed on to the following setup functions,

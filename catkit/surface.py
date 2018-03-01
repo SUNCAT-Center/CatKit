@@ -4,6 +4,7 @@ import numpy as np
 from numpy.linalg import norm, solve
 from ase.build import rotate
 from ase.constraints import FixAtoms
+import warnings
 try:
     from math import gcd
 except ImportError:
@@ -11,8 +12,7 @@ except ImportError:
 
 
 class SlabGenerator(object):
-    """ Class for generation of slab unit cells from bulk unit cells.
-    """
+    """Class for generation of slab unit cells from bulk unit cells."""
 
     def __init__(
             self,
@@ -24,25 +24,25 @@ class SlabGenerator(object):
             vacuum=0,
             tol=1e-8
     ):
-        """ Generate a slab from an ASE bulk atoms-object.
+        """Generate a slab from an ASE bulk atoms-object.
 
         Parameters:
-          bulk: ASE atoms-object
+        -----------
+        bulk : atoms object
             Bulk structure to produce the slab from.
-          miller_index: list (3,)
+        miller_index : list (3,)
             Miller index to construct surface from.
-          layers: int
+        layers : int
             Number of layers to include in the slab.
-          min_width: float
+        min_width : float
             Minimum width of slabs produce (Ang). Will override layers.
-          fixed: int
+        fixed : int
             Number of layers to fix in the slab.
-          vacuum: float
+        vacuum : float
             Angstroms of vacuum to add to the slab.
-          tol: float
+        tol : float
             Tolerance for floating point rounding errors.
         """
-
         self.bulk = bulk
         self.miller_index = np.array(miller_index)
         self.layers = layers
@@ -58,7 +58,7 @@ class SlabGenerator(object):
         self._basis = self.build_basis()
 
     def build_basis(self):
-        """ Get the basis unit cell from bulk unit cell. This
+        """Get the basis unit cell from bulk unit cell. This
         basis is effectively the same as the bulk, but rotated such
         that the z-axis is aligned with the surface termination.
 
@@ -66,10 +66,10 @@ class SlabGenerator(object):
         is temporary until a slab class is created.
 
         Returns:
-          basis: ASE atoms-object
+        --------
+        basis : atoms object
             The basis slab corresponding to the provided bulk.
         """
-
         h, k, l = self.miller_index
         h0, k0, l0 = (self.miller_index == 0)
         if h0 and k0 or h0 and l0 or k0 and l0:
@@ -116,15 +116,14 @@ class SlabGenerator(object):
         return slab
 
     def get_unique_terminations(self):
-        """ Return smallest unit cell corresponding to given surface and
+        """Return smallest unit cell corresponding to given surface and
         unique surface terminations based on symmetry and nearest neighbors.
 
         Returns:
-          unique_terminations: list
+        --------
+        unique_shift : list
             Unique terminations of a surface.
         """
-
-        # Find all different planes as simply different z-coordinates
         z_planes = utils.get_unique_coordinates(self._basis, tol=self.tol)
 
         # now get the symmetries of lattice
@@ -139,7 +138,8 @@ class SlabGenerator(object):
                 abs(rotation[2][1]) < self.tol and
                 abs(rotation[0][2]) < self.tol and
                 abs(rotation[1][2]) < self.tol and
-                abs(rotation[2][2] - 1.0) < self.tol):
+                abs(rotation[2][2] - 1.0) < self.tol
+            ):
 
                 if not np.isclose(
                         translations[i][2],
@@ -172,20 +172,22 @@ class SlabGenerator(object):
         return unique_shift
 
     def get_slab(self, iterm=None, primitive=False):
-        """ Generate a slab object with a certain number of layers.
+        """Generate a slab object with a certain number of layers.
 
         Parameters:
-          primitive: bool
-            Whether to reduce the unit cell to its primitive form.
-          iterm: int
+        -----------
+        iterm : int
             A termination index in reference to the list of possible
             terminations.
+        primitive : bool
+            Whether to reduce the unit cell to its primitive form.
 
-        Returns: ASE atoms-object
-          The modified basis slab produced based on the layer specifications
-          given.
+        Returns:
+        --------
+        slab : atoms object
+            The modified basis slab produced based on the layer specifications
+            given.
         """
-
         slab = self._basis.copy()
 
         if iterm:
@@ -225,10 +227,7 @@ class SlabGenerator(object):
 
                 slab.center(vacuum=self.vacuum, axis=2)
             else:
-                raise(
-                    NotImplementedError,
-                    'Primitive slab generation requires vacuum'
-                )
+                raise ValueError('Primitive slab generation requires vacuum')
 
             slab = utils.get_primitive_cell(slab)
 
@@ -293,21 +292,25 @@ class SlabGenerator(object):
         return slab
 
     def get_surface_atoms(self, slab=None):
-        """ Find the under-coordinated atoms at the upper and lower
+        """Find the under-coordinated atoms at the upper and lower
         fraction of a given unit cell based on the bulk structure it
         originated from.
 
         Assumes the xy-plane is perpendicular to the miller index.
 
         Parameters:
-          slab: ASE atoms-object
+        -----------
+        slab : atoms object
             The slab to find top layer atoms from.
 
-        Returns: ndarray (n,), ndarray (m,)
-          Array of atom indices corresponding to the top and bottom
-          layers of the slab.
+        Returns:
+        --------
+        top : ndarray (n,)
+            Array of atom indices corresponding to the top layer of the slab.
+        bottom : ndarray (m,)
+            Array of atom indices corresponding to the bottom layer of
+            the slab.
         """
-
         ind, N, mcut = utils.get_voronoi_neighbors(self.bulk)
         ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=mcut)
 
@@ -318,9 +321,10 @@ class SlabGenerator(object):
         bulk_atoms = set(np.arange(len(slab))) - set(surf_atoms)
 
         if len(bulk_atoms) == 0:
-            raise ValueError(
+            warnings.warn(
                 ("Your slab has no bulk atoms and is likely too thin "
-                 "to identify surface atoms correctly.")
+                 "to identify surface atoms correctly. This may cause "
+                 "surface adsorption site identification to fail.")
             )
 
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
@@ -333,20 +337,22 @@ class SlabGenerator(object):
         return top, bottom
 
     def adsorption_sites(self, slab, **kwargs):
-        """ Helper function to return the adsorption sites
+        """Helper function to return the adsorption sites
         of the provided slab.
 
         Parameters:
-          slab: ASE atoms-object
+        -----------
+        slab : atoms object
             The slab to find adsorption sites for. Assumes you are using
             the same basis.
 
-        Returns: dict of 3 lists
-          Dictionary of top, bridge, hollow, and 4-fold sites containing
-          positions, points, and neighbor lists. If adsorption vectors
-          are requested, the third list is replaced.
+        Returns:
+        --------
+        sites : dict of 3 lists
+            Dictionary of top, bridge, hollow, and 4-fold sites containing
+            positions, points, and neighbor lists. If adsorption vectors
+            are requested, the third list is replaced.
         """
-
         if slab != self.slab or self.surface_atoms is None:
             surface_sites = self.get_surface_atoms(slab)[0]
             self.slab = slab
@@ -358,7 +364,7 @@ class SlabGenerator(object):
                 slab=slab,
                 surface_sites=surface_sites,
                 **kwargs
-                )
+            )
 
             return sites, vslab
 
@@ -366,12 +372,13 @@ class SlabGenerator(object):
             slab=slab,
             surface_sites=surface_sites,
             **kwargs
-            )
+        )
 
         return sites
 
 
 def ext_gcd(a, b):
+    """Extension of greatest common denominator."""
     if b == 0:
         return 1, 0
     elif a % b == 0:

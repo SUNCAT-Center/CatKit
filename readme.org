@@ -125,7 +125,7 @@ write(
 )
 #+END_SRC
 
-We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces will be implemented in a future release.
+We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces can be achieved using the adsorption vectors described in the next section.
 
 #+CAPTION: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
 [[./images/CuPd3_321-sites.png]]
@@ -260,37 +260,40 @@ import time
 start = time.time()
 
 db_name = 'C2H6-example.db'
-
 with ReactionNetwork(db_name=db_name) as rn:
 
-    molecules = rn.molecule_search(
+    # Run a molecule search
+    rn.molecule_search(
         element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=False)
-    rn.save_molecules(molecules)
+        multiple_bond_search=True
+    )
 
-    # 3D optimization step. Moderatly time intensive.
+    # Load the molecules
+    molecules = rn.load_molecules()
+
+    # Get 3D structure estimates (requires RDKit)
     try:
-        # Needed for 3D molecule functionality (requires RDKit)
-        from catkit.pathways import plot_molecule, get_rdkit_graph
+        from catkit.api.rd_kit import plot_molecule, get_uff_coordinates
 
-        molecule_data = rn.load_molecules()
-        for i, molecule in molecule_data.items():
-            rn.save_3d_structure(molecule, uff=50)
+        for i, molecule in molecules.items():
             plot_molecule(
                 molecule,
-                file_name='./images/molecule-{}.png'.format(i))
+                file_name='./images/molecule-{}.png'.format(i)
+            )
 
-            images = rn.load_3d_structures(list(molecule_data.keys()))
+            molecule = get_uff_coordinates(molecule, steps=50)
+            rn.save_3d_structure(molecule)
 
+        images = rn.load_3d_structures()
     except(ImportError):
-        pass
+       pass
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-Process completed in 21.8s
+Process completed in 22.6s
 :END:
 
 ** Reaction pathways:
@@ -319,9 +322,10 @@ db_name = 'C2H6-example.db'
 with ReactionNetwork(db_name=db_name) as rn:
 
     # Substitution pathway search is expensive!
-    pathways = rn.path_search(
-        reconfiguration=False,
-        substitution=False)
+    rn.path_search(
+        reconfiguration=True,
+        substitution=True
+    )
 
     rn.plot_reaction_network(file_name='./images/reaction-network.png')
 
@@ -330,7 +334,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 0.4s
+Process completed in 2.4s
 :END:
 
 *** Example network access
@@ -350,7 +354,7 @@ with ReactionNetwork(db_name='C2H6-example.db') as rn:
     names = np.empty(len(molecules) + 1, dtype='a5')
     names[0] = ''
     for k, v in molecules.items():
-        atn = nx.get_node_attributes(v, 'atomic_number')
+        atn = nx.get_node_attributes(v, 'number')
 
         # These are not always unique identifiers
         hill = formula_hill(list(atn.values()))
