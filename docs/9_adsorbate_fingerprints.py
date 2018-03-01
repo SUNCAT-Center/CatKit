@@ -9,10 +9,10 @@ from ase.build import bulk
 from catkit.surface import SlabGenerator
 from ase.build import add_adsorbate
 from ase.data import covalent_radii
-from atoml.fingerprint.database_adsorbate_api import get_radius, attach_adsorbate_info
-from atoml.fingerprint.setup import return_fpv, get_combined_descriptors
-from atoml.fingerprint import AdsorbateFingerprintGenerator
-from atoml.utilities.clean_data import clean_infinite
+from atoml.fingerprint.database_adsorbate_api import (get_radius,
+                                                      attach_adsorbate_info)
+from atoml.fingerprint import FeatureGenerator
+from atoml.preprocess.clean_data import clean_infinite
 
 # Define an adsorbate.
 ads = 'C'
@@ -54,7 +54,7 @@ AtoML_atoms = attach_adsorbate_info(images)
 # This is where checks should be made
 
 # Instantiate the fingerprint generator for adsorbate structures.
-fingerprinter = AdsorbateFingerprintGenerator()
+fingerprinter = FeatureGenerator()
 
 # All user methods under the fingerprinter accepts an atoms object and
 #   returns a vector.
@@ -65,18 +65,20 @@ functions = [
     fingerprinter.Z_add,
     fingerprinter.ads_av,
     fingerprinter.primary_surf_nn,
-    fingerprinter.primary_surfatom,
+    # fingerprinter.primary_surfatom,
+    # fingerprinter.bulk
     ]
+
 # This list is passed on to the following setup functions,
 #    along with a list of atoms.
 
 # Get and print the names of features.
-features_labels = get_combined_descriptors(functions)
+features_labels = fingerprinter.return_names(functions)
 for l in range(len(features_labels)):
     print(l, features_labels[l])
 
 # Get a matrix containing the fingerprints.
-unlabeled_data_matrix = return_fpv(AtoML_atoms, functions)
+unlabeled_data_matrix = fingerprinter.return_vec(AtoML_atoms, functions)
 print(np.shape(unlabeled_data_matrix), 'data matrix created.')
 
 # Cleanup in case some of the functions are returning NaNs or Infs
