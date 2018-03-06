@@ -7,29 +7,54 @@ from numpy.linalg import norm
 import spglib
 import os
 import contextlib
+import networkx as nx
+import networkx.algorithms.isomorphism as iso
 
 
 def trilaterate(centers, r):
-    """Find the intersection of three spheres
-    P1, P2, P3 are the centers, r1, r2, r3 are the radii
-    Implementation based on Wikipedia trilateration article.
+    """Find the intersection of two or three spheres. In the case
+    of two sphere intersection, the z-coordinate is assumed to be
+    an intersection of a plane whose normal is aligned with the
+    points and perpendicular to the positive z coordinate.
+
+    Parameters:
+    -----------
+    centers : list or ndarray (n,)
+        Array of values to have a average taken from.
+    r : int
+        Number of values to take an average with.
+
+    Returns:
+    --------
+    intersection : ndarray (3,)
+        The point where all spheres/planes intersect.
     """
-    plane1 = centers[1] - centers[0]
-    plane2 = centers[2] - centers[0]
+    if len(r) == 1:
+        return centers[0] + [0, 0, r[0]]
 
-    e_x = plane1 / norm(plane1)
-    i = np.dot(e_x, plane2)
-    plane3 = plane2 - i * e_x
+    vec1 = centers[1] - centers[0]
+    uvec1 = vec1 / norm(vec1)
+    d = norm(vec1)
 
-    e_y = plane3 / norm(plane3)
-    e_z = np.cross(e_x, e_y)
-    d = norm(plane1)
+    if len(r) == 2:
+        x = (d**2 - r[0]**2 + r[1]**2) / (2 * d)
+        a = np.sqrt(4 * d**2 * r[0]**2 - (d**2 - r[0]**2 + r[1]**2)**2)
+        h = [0, 0, 0.5 * (1 / d) * a]
+        intersection = centers[1] - uvec1 * x + h
 
-    j = np.dot(e_y, plane2)
-    x = (r[0]**2 - r[1]**2 + d**2) / (2 * d)
-    y = (r[0]**2 - r[2]**2 - 2 * i * x + i**2 + j**2) / (2 * j)
-    z = np.sqrt(r[0]**2 - x**2 - y**2)
-    intersection = centers[0] + x * e_x + y * e_y + z * e_z
+    if len(r) == 3:
+        vec2 = centers[2] - centers[0]
+        i = np.dot(uvec1, vec2)
+        vec2 = vec2 - i * uvec1
+
+        uvec2 = vec2 / norm(vec2)
+        uvec3 = np.cross(uvec1, uvec2)
+        j = np.dot(uvec2, vec2)
+
+        x = (r[0]**2 - r[1]**2 + d**2) / (2 * d)
+        y = (r[0]**2 - r[2]**2 - 2 * i * x + i**2 + j**2) / (2 * j)
+        z = np.sqrt(r[0]**2 - x**2 - y**2)
+        intersection = centers[0] + x * uvec1 + y * uvec2 + z * uvec3
 
     return intersection
 
@@ -37,7 +62,7 @@ def trilaterate(centers, r):
 @contextlib.contextmanager
 def cd(path):
     """Does path management: if the path doesn't exists, create it
-    otherwise, move into it until the intentation is broken.
+    otherwise, move into it until the indentation is broken.
 
     Parameters:
     -----------
@@ -69,7 +94,6 @@ def rmean(x, N=5):
     rmean : ndarray (n + 1,)
         Mean value of the running average.
     """
-
     length = len(x)
     if length < N:
         N = length
@@ -463,3 +487,18 @@ def connectivity_to_edges(connectivity):
             edges += [(i, j, 1)] * v
 
     return edges
+
+
+def isomorphic_molecules(graph0, graph1):
+    """Check whether two molecule graphs are isomorphic."""
+    em = iso.numerical_edge_match('bonds', 1)
+    nm = iso.numerical_node_match('number', 1)
+
+    isomorphic = nx.is_isomorphic(
+        graph0,
+        graph1,
+        edge_match=em,
+        node_match=nm
+    )
+
+    return isomorphic

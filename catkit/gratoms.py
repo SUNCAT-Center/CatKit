@@ -173,6 +173,8 @@ class Gratoms(Atoms):
             self.set_array(name, a)
 
         if isinstance(other, Gratoms):
+            # if isinstance(self._graph, other._graph.__class__):
+            #     print()
             self._graph = nx.disjoint_union(self._graph, other._graph)
 
         return self

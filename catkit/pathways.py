@@ -284,12 +284,16 @@ class ReactionNetwork():
                     if valence_new <= 0:
                         continue
 
-                    if self._maximum_bond_limit(
-                            molecule,
-                            base_node,
-                            existing_node
-                    ):
-                        continue
+                    try:
+                        if self._maximum_bond_limit(
+                                molecule,
+                                base_node,
+                                existing_node
+                        ):
+                            continue
+                    except(KeyError):
+                        print(molecule.edges(data=True))
+                        exit()
 
                     G = molecule.copy()
 

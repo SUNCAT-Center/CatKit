@@ -108,10 +108,7 @@ class Classifier(object):
             a = atom.index
             neighbor_atoms = self.neighbor_list.get_neighbors(a)
 
-            G.add_node(
-                a,
-                number=atom.number,
-                symbol=atom.symbol)
+            G.add_node(a, number=atom.number)
 
             for n in neighbor_atoms[0]:
 
