@@ -42,9 +42,7 @@ class AdsorptionSites():
         self.r1_topology = [[i] for i in np.arange(len(extended_top))]
         self.index = index[extended_top]
 
-        sites = self.get_higher_coordination_sites(
-            coords[extended_top]
-        )
+        sites = self.get_higher_coordination_sites(coords[extended_top])
         self.r2_topology = sites['top'][2]
 
         # Put data into array format
@@ -76,11 +74,7 @@ class AdsorptionSites():
 
         self.screen = screen
 
-    def get_higher_coordination_sites(
-            self,
-            top_coordinates,
-            allow_obtuse=True
-    ):
+    def get_higher_coordination_sites(self, top_coordinates, allow_obtuse=True):
         """Find all bridge and hollow sites (3-fold and 4-fold) given an
         input slab based Delaunay triangulation of surface atoms of a
         super-cell.
@@ -96,11 +90,7 @@ class AdsorptionSites():
             Dictionary sites containing positions, points, and neighbor lists.
         """
         sites = {
-            'top': [
-                top_coordinates,
-                [],
-                [[] for _ in top_coordinates]
-            ],
+            'top': [top_coordinates, [], [[] for _ in top_coordinates]],
             'bridge': [[], [], []],
             'hollow': [[], [], []],
             '4fold': [[], [], []],
@@ -274,8 +264,7 @@ class AdsorptionSites():
         for i, s in enumerate(self.coordinates):
             plane_points = np.array(
                 list(self.r1_topology[i]) + list(self.r2_topology[i]),
-                dtype=int
-            )
+                dtype=int)
             vectors[i] = utils.plane_normal(top_coords[plane_points])
 
         return vectors
@@ -338,8 +327,7 @@ class AdsorptionSites():
         dt = Delaunay(self.coordinates[:, :2][top])
         plt.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
         plt.plot(dt.points[:, 0], dt.points[:, 1], 'o')
-        plt.plot(self.coordinates[:, 0][other],
-                 self.coordinates[:, 1][other],
+        plt.plot(self.coordinates[:, 0][other], self.coordinates[:, 1][other],
                  'o')
         plt.show()
 

@@ -21,9 +21,8 @@ class Connect():
         (Perform operation here)
 
     """
-    def __init__(
-            self,
-            engine='sqlite:///example.db'):
+
+    def __init__(self, engine='sqlite:///example.db'):
         """ The __init__ function is automatically called when the
         class is referenced.
         """
@@ -108,29 +107,18 @@ class Connect():
             atoms.constraints = None
             stress = atoms.get_stress()
 
-            structure_result = Structure_Result(
-                calculator,
-                structure,
-                energy,
-                stress)
+            structure_result = Structure_Result(calculator, structure, energy,
+                                                stress)
             self.cursor.add(structure_result)
 
         for i, atom in enumerate(atoms):
 
-            tmp_atom = Atom(
-                structure,
-                atom.number,
-                atom.position,
-                constraints[i],
-                atom.magmom,
-                atom.charge)
+            tmp_atom = Atom(structure, atom.number, atom.position,
+                            constraints[i], atom.magmom, atom.charge)
             self.cursor.add(tmp_atom)
 
             if atoms._calc and calculator:
-                atom_result = Atom_Result(
-                    calculator,
-                    tmp_atom,
-                    forces[i])
+                atom_result = Atom_Result(calculator, tmp_atom, forces[i])
                 self.cursor.add(atom_result)
 
         return structure
@@ -163,10 +151,7 @@ class Element(Base):
     mass = Column(Numeric, nullable=False)
     covalent_radii = Column(Numeric, nullable=False)
 
-    atom = relationship(
-        'Atom',
-        uselist=False,
-        back_populates='element')
+    atom = relationship('Atom', uselist=False, back_populates='element')
 
     def __init__(self, i):
         self.id = int(i)
@@ -191,24 +176,12 @@ class Atom(Base):
     magmom = Column(Numeric)
     charge = Column(Numeric)
 
-    element = relationship(
-        'Element',
-        back_populates='atom')
-    structure = relationship(
-        'Structure',
-        back_populates='atoms')
-    atom_result = relationship(
-        'Atom_Result',
-        back_populates='atom')
+    element = relationship('Element', back_populates='atom')
+    structure = relationship('Structure', back_populates='atoms')
+    atom_result = relationship('Atom_Result', back_populates='atom')
 
-    def __init__(
-            self,
-            structure,
-            number,
-            coordinates,
-            constraints,
-            magmom,
-            charge):
+    def __init__(self, structure, number, coordinates, constraints, magmom,
+                 charge):
         self.structure = structure
         self.element_id = int(number)
         self.x_coordinate = coordinates[0]
@@ -237,15 +210,10 @@ class Structure(Base):
     z3_cell = Column(Numeric, nullable=False)
     pbc = Column(Integer, nullable=False)
 
-    atoms = relationship(
-        'Atom',
-        back_populates='structure')
+    atoms = relationship('Atom', back_populates='structure')
     structure_result = relationship(
-        'Structure_Result',
-        back_populates='structure')
-    entry = relationship(
-        'Entry',
-        back_populates='structure')
+        'Structure_Result', back_populates='structure')
+    entry = relationship('Entry', back_populates='structure')
 
     def __init__(self, cell, pbc):
         self.x1_cell = cell[0][0]
@@ -273,25 +241,18 @@ class Calculator(Base):
     energy_cutoff = Column(Numeric)
     parameters = Column(JSONB)
 
-    entry = relationship(
-        'Entry',
-        back_populates='calculator')
+    entry = relationship('Entry', back_populates='calculator')
     atom_result = relationship(
-        'Atom_Result',
-        uselist=False,
-        back_populates='calculator')
+        'Atom_Result', uselist=False, back_populates='calculator')
     structure_result = relationship(
-        'Structure_Result',
-        uselist=False,
-        back_populates='calculator')
+        'Structure_Result', uselist=False, back_populates='calculator')
 
-    def __init__(
-            self,
-            name,
-            xc=None,
-            kpoints=None,
-            energy_cutoff=None,
-            parameters=None):
+    def __init__(self,
+                 name,
+                 xc=None,
+                 kpoints=None,
+                 energy_cutoff=None,
+                 parameters=None):
         self.name = name
         self.xc = xc
         self.energy_cutoff = energy_cutoff
@@ -314,12 +275,8 @@ class Atom_Result(Base):
     y_force = Column(Numeric)
     z_force = Column(Numeric)
 
-    calculator = relationship(
-        'Calculator',
-        back_populates='atom_result')
-    atom = relationship(
-        'Atom',
-        back_populates='atom_result')
+    calculator = relationship('Calculator', back_populates='atom_result')
+    atom = relationship('Atom', back_populates='atom_result')
 
     def __init__(self, calculator, atom, forces=None):
         self.calculator = calculator
@@ -348,12 +305,8 @@ class Structure_Result(Base):
     xz_stress = Column(Numeric)
     xy_stress = Column(Numeric)
 
-    calculator = relationship(
-        'Calculator',
-        back_populates='structure_result')
-    structure = relationship(
-        'Structure',
-        back_populates='structure_result')
+    calculator = relationship('Calculator', back_populates='structure_result')
+    structure = relationship('Structure', back_populates='structure_result')
 
     def __init__(self, calculator, structure, energy, stress=None):
         self.calculator = calculator
@@ -384,27 +337,19 @@ class Entry(Base):
     smax = Column(Numeric)
     search_keys = Column(JSONB)
 
-    structure = relationship(
-        'Structure',
-        back_populates='entry')
-    calculator = relationship(
-        'Calculator',
-        back_populates='entry')
-    trajectory = relationship(
-        'Structure',
-        secondary='trajectories')
+    structure = relationship('Structure', back_populates='entry')
+    calculator = relationship('Calculator', back_populates='entry')
+    trajectory = relationship('Structure', secondary='trajectories')
 
-    def __init__(
-            self,
-            structure,
-            calculator,
-            trajectory,
-            natoms,
-            energy,
-            fmax,
-            smax=None,
-            search_keys=None
-    ):
+    def __init__(self,
+                 structure,
+                 calculator,
+                 trajectory,
+                 natoms,
+                 energy,
+                 fmax,
+                 smax=None,
+                 search_keys=None):
         self.structure = structure
         self.calculator = calculator
         self.trajectory = trajectory
@@ -517,11 +462,10 @@ class FingerprintDB():
         try:
             self.c.execute("""INSERT INTO images (ase_id, identity)
             VALUES(?, ?)""", (d.id, identity))
-        except(IntegrityError):
+        except (IntegrityError):
             if self.verbose:
                 print('ASE ID with identifier already defined: {} {}'.format(
-                    d.id,
-                    identity))
+                    d.id, identity))
 
         return d.id
 
@@ -543,7 +487,7 @@ class FingerprintDB():
         try:
             self.c.execute("""INSERT INTO parameters (symbol, description)
             VALUES(?, ?)""", (symbol, description))
-        except(IntegrityError):
+        except (IntegrityError):
             if self.verbose:
                 print('Symbol already defined: {}'.format(symbol))
 
@@ -604,7 +548,7 @@ class FingerprintDB():
             if param_id:
                 param_id = param_id[0]
             else:
-                raise(KeyError, 'parameter symbol not found')
+                raise (KeyError, 'parameter symbol not found')
 
         self.c.execute("""SELECT iid FROM images
         WHERE ase_id = {}""".format(ase_id))

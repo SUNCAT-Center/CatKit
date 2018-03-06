@@ -30,7 +30,7 @@ def test_slab_generation():
 
         images += [slab]
 
-    assert(len(images) == 2)
+    assert (len(images) == 2)
 
 
 def test_adsorption_sites():
@@ -45,9 +45,7 @@ def test_adsorption_sites():
         vacuum=10,
     )
 
-    slab = gen.get_slab(
-        primitive=True,
-    )
+    slab = gen.get_slab(primitive=True,)
 
     sites = gen.adsorption_sites(
         slab,
@@ -59,7 +57,7 @@ def test_adsorption_sites():
 
     for k, v in sites.items():
         positions, points, _ = v
-        assert(len(positions) == expected_number[k])
+        assert (len(positions) == expected_number[k])
 
 
 def test_molecule_generation():
@@ -69,26 +67,22 @@ def test_molecule_generation():
     with ReactionNetwork(db_name=db_name) as rn:
 
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=True
-        )
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=True)
 
         molecules = rn.load_molecules()
-        assert(len(molecules) == 26)
+        assert (len(molecules) == 26)
 
-        rn.path_search(
-            reconfiguration=True,
-            substitution=True
-        )
+        rn.path_search(reconfiguration=True, substitution=True)
 
         pathways = rn.load_pathways()
-        assert(len(pathways) == 437)
+        assert (len(pathways) == 437)
 
         for i, molecule in molecules.items():
             plot_molecule(
-                molecule,
-                file_name='./temp/molecule-{}.png'.format(i)
-            )
+                molecule, file_name='./temp/molecule-{}.png'.format(i))
 
             molecule = get_uff_coordinates(molecule, steps=50)
             rn.save_3d_structure(molecule)

@@ -16,11 +16,7 @@ def get_graph(molecule, sanitize=True):
         rdkG.AddAtom(rdAtom)
 
     rdBonds = Chem.rdchem.BondType
-    orders = {
-        '1': rdBonds.SINGLE,
-        '2': rdBonds.DOUBLE,
-        '3': rdBonds.TRIPLE
-    }
+    orders = {'1': rdBonds.SINGLE, '2': rdBonds.DOUBLE, '3': rdBonds.TRIPLE}
 
     for u, v, data in molecule.edges(data=True):
         order = orders[str(data['bonds'])]

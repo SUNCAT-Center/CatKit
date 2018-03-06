@@ -20,16 +20,14 @@ class SlabGenerator(object):
     is designed to house these operations.
     """
 
-    def __init__(
-            self,
-            bulk,
-            miller_index=[1, 1, 1],
-            layers=4,
-            min_width=None,
-            fixed=2,
-            vacuum=0,
-            tol=1e-8
-    ):
+    def __init__(self,
+                 bulk,
+                 miller_index=[1, 1, 1],
+                 layers=4,
+                 min_width=None,
+                 fixed=2,
+                 vacuum=0,
+                 tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
         Parameters:
@@ -109,8 +107,7 @@ class SlabGenerator(object):
             positions=bulk.positions,
             numbers=bulk.get_atomic_numbers(),
             cell=bulk.cell,
-            pbc=True
-        )
+            pbc=True)
         basis = np.array([c1, c2, c3])
 
         scaled = solve(basis.T, basis_atoms.get_scaled_positions().T).T
@@ -144,16 +141,13 @@ class SlabGenerator(object):
         z_symmetry = []
         for i, rotation in enumerate(rotations):
             if (abs(rotation[2][0]) < self.tol and
-                abs(rotation[2][1]) < self.tol and
-                abs(rotation[0][2]) < self.tol and
-                abs(rotation[1][2]) < self.tol and
-                abs(rotation[2][2] - 1.0) < self.tol
-            ):
+                    abs(rotation[2][1]) < self.tol and
+                    abs(rotation[0][2]) < self.tol and
+                    abs(rotation[1][2]) < self.tol and
+                    abs(rotation[2][2] - 1.0) < self.tol):
 
                 if not np.isclose(
-                        translations[i][2],
-                        z_symmetry,
-                        rtol=self.tol).any():
+                        translations[i][2], z_symmetry, rtol=self.tol).any():
                     z_symmetry += [translations[i][2]]
 
         # Find all unique z-shifts
@@ -207,11 +201,7 @@ class SlabGenerator(object):
             slab.wrap(pbc=True)
 
         # Get the minimum number of layers needed
-        zlayers = utils.get_unique_coordinates(
-            slab,
-            direct=False,
-            tol=self.tol
-        )
+        zlayers = utils.get_unique_coordinates(slab, direct=False, tol=self.tol)
 
         if self.min_width:
             width = slab.cell[2][2]
@@ -224,8 +214,8 @@ class SlabGenerator(object):
         # Orthogonalize the z-coordinate
         # Warning: bulk symmetry is lost at this point
         a1, a2, a3 = slab.cell
-        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) /
-              norm(np.cross(a1, a2)) ** 2)
+        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
+            np.cross(a1, a2))**2)
         slab.cell[2] = a3
 
         if primitive:
@@ -258,11 +248,7 @@ class SlabGenerator(object):
 
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(
-            slab,
-            direct=False,
-            tag=True,
-            tol=self.tol
-        )
+            slab, direct=False, tag=True, tol=self.tol)
 
         reverse_sort = np.sort(zlayers)[::-1]
 
@@ -369,8 +355,7 @@ class SlabGenerator(object):
             warnings.warn(
                 ("Your slab has no bulk atoms and is likely too thin "
                  "to identify surface atoms correctly. This may cause "
-                 "surface adsorption site identification to fail.")
-            )
+                 "surface adsorption site identification to fail."))
 
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
         top = surf_atoms[hwp.T[2] > 0]
@@ -400,17 +385,11 @@ class SlabGenerator(object):
             self.slab = slab
 
         if kwargs.get('return_proxy'):
-            sites, vslab = adsorption.get_adsorption_sites(
-                slab=slab,
-                **kwargs
-            )
+            sites, vslab = adsorption.get_adsorption_sites(slab=slab, **kwargs)
 
             return sites, vslab
 
-        sites = adsorption.get_adsorption_sites(
-            slab=slab,
-            **kwargs
-        )
+        sites = adsorption.get_adsorption_sites(slab=slab, **kwargs)
 
         return sites
 

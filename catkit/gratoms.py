@@ -18,37 +18,35 @@ class Gratoms(Atoms):
     Networkx Graph.
     """
 
-    def __init__(
-            self,
-            symbols=None,
-            positions=None,
-            numbers=None,
-            tags=None,
-            momenta=None,
-            masses=None,
-            magmoms=None,
-            charges=None,
-            scaled_positions=None,
-            cell=None,
-            pbc=None,
-            celldisp=None,
-            constraint=None,
-            calculator=None,
-            info=None,
-            edges=None
-    ):
-        super().__init__(
-            symbols, positions, numbers, tags, momenta, masses,
-            magmoms, charges, scaled_positions, cell, pbc, celldisp,
-            constraint, calculator, info)
+    def __init__(self,
+                 symbols=None,
+                 positions=None,
+                 numbers=None,
+                 tags=None,
+                 momenta=None,
+                 masses=None,
+                 magmoms=None,
+                 charges=None,
+                 scaled_positions=None,
+                 cell=None,
+                 pbc=None,
+                 celldisp=None,
+                 constraint=None,
+                 calculator=None,
+                 info=None,
+                 edges=None):
+        super().__init__(symbols, positions, numbers, tags, momenta, masses,
+                         magmoms, charges, scaled_positions, cell, pbc,
+                         celldisp, constraint, calculator, info)
 
         if self.pbc.any():
             self._graph = MultiGraph()
         else:
             self._graph = Graph()
 
-        nodes = [[i, {'number': n}]
-                 for i, n in enumerate(self.arrays['numbers'])]
+        nodes = [[i, {
+            'number': n
+        }] for i, n in enumerate(self.arrays['numbers'])]
         self._graph.add_nodes_from(nodes)
 
         if edges:
@@ -89,10 +87,7 @@ class Gratoms(Atoms):
     def is_isomorph(self, other):
         """Check if isomorphic by bond count and atomic number."""
         isomorphic = nx.is_isomorphic(
-            self._graph,
-            other._graph,
-            edge_match=em,
-            node_match=nm)
+            self._graph, other._graph, edge_match=em, node_match=nm)
 
         return isomorphic
 
@@ -223,14 +218,11 @@ class Gratoms(Atoms):
 
         for x, vec in zip(m, self._cell):
             if x != 1 and not vec.any():
-                raise ValueError(
-                    'Cannot repeat along undefined lattice vector')
+                raise ValueError('Cannot repeat along undefined lattice vector')
 
         if self.pbc.any() and len(self.edges) > 0:
-            raise ValueError(
-                "Edge conservation not currently supported with "
-                "pbc. Remove pbc or edges first."
-            )
+            raise ValueError("Edge conservation not currently supported with "
+                             "pbc. Remove pbc or edges first.")
 
         M = np.product(m)
         n = len(self)

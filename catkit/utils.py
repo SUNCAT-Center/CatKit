@@ -133,11 +133,7 @@ def expand_cell(atoms, r=6):
     low = np.floor(-nmax * pbc)
     high = np.ceil(nmax * pbc + 1)
 
-    offsets = np.mgrid[
-        low[0]:high[0],
-        low[1]:high[1],
-        low[2]:high[2],
-    ].T
+    offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2],].T
     ncell = np.prod(offsets.shape[:-1])
 
     cart = np.dot(offsets, atoms.cell)
@@ -222,10 +218,7 @@ def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
         norm = np.linalg.norm(coords - center, axis=1)
         neighbors = index[np.where(norm < cutoff)]
 
-        unique, counts = np.unique(
-            neighbors,
-            return_counts=True
-        )
+        unique, counts = np.unique(neighbors, return_counts=True)
         connectivity[u, unique] = counts
         # Remove self-interaction
         connectivity[u, u] -= 1
@@ -233,10 +226,7 @@ def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
     return connectivity
 
 
-def get_neighbors(
-        atoms,
-        points=None,
-        cutoff_matrix=None):
+def get_neighbors(atoms, points=None, cutoff_matrix=None):
     """Returns the neighboring atoms within a specified cutoff matrix
     criteria for requested points.
 
@@ -276,13 +266,7 @@ def get_neighbors(
             [45, 1.1],  # Rh
         ]
 
-        adsorbates = [
-            [1, 1.0],
-            [6, 1.0],
-            [7, 1.0],
-            [8, 1.0],
-            [16, 1.0]
-        ]
+        adsorbates = [[1, 1.0], [6, 1.0], [7, 1.0], [8, 1.0], [16, 1.0]]
 
         for i, f in metals:
             r[i] *= f
@@ -343,8 +327,7 @@ def get_neighbors(
                     if a in i:
                         i = np.delete(i, np.where(i == a)[0])
 
-                    neighbors[a] = np.concatenate(
-                        (neighbors[a], i))
+                    neighbors[a] = np.concatenate((neighbors[a], i))
 
     return neighbors
 
@@ -371,9 +354,7 @@ def get_primitive_cell(atoms, tol=1e-8):
 
     cell = (lattice, positions, numbers)
 
-    _lattice, _positions, _numbers = spglib.find_primitive(
-        cell,
-        symprec=tol)
+    _lattice, _positions, _numbers = spglib.find_primitive(cell, symprec=tol)
 
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
     atoms.set_scaled_positions(_positions)
@@ -406,12 +387,7 @@ def get_symmetry(atoms, tol=1e-8):
     return spglib.get_symmetry(cell, symprec=tol)
 
 
-def get_unique_coordinates(
-        atoms,
-        axis=2,
-        direct=True,
-        tag=False,
-        tol=1e-5):
+def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
@@ -494,11 +470,6 @@ def isomorphic_molecules(graph0, graph1):
     em = iso.numerical_edge_match('bonds', 1)
     nm = iso.numerical_node_match('number', 1)
 
-    isomorphic = nx.is_isomorphic(
-        graph0,
-        graph1,
-        edge_match=em,
-        node_match=nm
-    )
+    isomorphic = nx.is_isomorphic(graph0, graph1, edge_match=em, node_match=nm)
 
     return isomorphic

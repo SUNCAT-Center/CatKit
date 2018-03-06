@@ -2,15 +2,13 @@ from scipy.optimize import minimize
 from scipy.optimize import basinhopping
 
 
-def optimizer(
-        obj_func,
-        initial_theta,
-        bounds,
-        gradient=True,
-        minimizer='L-BFGS-B',
-        hopping=0,
-        **kwargs
-):
+def optimizer(obj_func,
+              initial_theta,
+              bounds,
+              gradient=True,
+              minimizer='L-BFGS-B',
+              hopping=0,
+              **kwargs):
     """Substitute optimizer in scikit-learn Gaussian Process function.
 
     Note 'L-BFGS-B' is equivalent to the standard optimizer used in
@@ -56,11 +54,7 @@ def optimizer(
             stepsize=2,
         )
     else:
-        m = minimize(
-            obj_func,
-            initial_theta,
-            **margs
-        )
+        m = minimize(obj_func, initial_theta, **margs)
     theta_opt = m.x
     func_min = m.fun
 
