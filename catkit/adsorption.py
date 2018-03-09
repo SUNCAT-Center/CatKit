@@ -74,7 +74,33 @@ class AdsorptionSites():
 
         self.screen = screen
 
-    def get_higher_coordination_sites(self, top_coordinates, allow_obtuse=True):
+    def get_connectivity(self, screen=True):
+        """Return the number of connections associated with each site."""
+        if screen:
+            return self.connectivity[self.screen]
+        else:
+            return self.connectivity
+
+    def get_coordinates(self, screen=True):
+        """Return the 3D coordinates associated with each site."""
+        if screen:
+            return self.coordinates[self.screen]
+        else:
+            return self.coordinates
+
+    def get_topology(self, screen=True):
+        """Return the 3D coordinates associated with each site."""
+        topology = [self.index[top] for top in self.r1_topology]
+        topology = np.array(topology)
+        if screen:
+            return topology[self.screen]
+        else:
+            return topology
+
+    def get_higher_coordination_sites(
+            self,
+            top_coordinates,
+            allow_obtuse=True):
         """Find all bridge and hollow sites (3-fold and 4-fold) given an
         input slab based Delaunay triangulation of surface atoms of a
         super-cell.
@@ -178,14 +204,14 @@ class AdsorptionSites():
 
         return sites
 
-    def get_periodic_sites(self, unique=True):
+    def get_periodic_sites(self, screen=True):
         """Return an index of the coordinates which are unique by
         periodic boundary conditions.
 
         Parameters:
         -----------
-        unique : bool
-            Return only the unique periodically reduced sites.
+        screen : bool
+            Return only sites inside the unit cell.
 
         Returns:
         --------
@@ -193,18 +219,22 @@ class AdsorptionSites():
             Indices of the coordinates which are identical by
             periodic boundary conditions.
         """
-        periodic_match = np.arange(self.frac_coords.shape[0])
+        if screen:
+            original_index = np.arange(self.frac_coords.shape[0])[self.screen]
+            coords = self.frac_coords[self.screen]
+        else:
+            original_index = np.arange(self.frac_coords.shape[0])
+            coords = self.frac_coords
+        periodic_match = original_index.copy()
         for i, j in enumerate(periodic_match):
-            if i != j:
+            ind = original_index[i]
+            if ind != j:
                 continue
 
-            new_match = matching_sites(self.frac_coords[i], self.frac_coords)
-            periodic_match[new_match] = i
+            new_match = matching_sites(self.frac_coords[j], coords)
+            periodic_match[new_match] = ind
 
-        if unique:
-            return np.unique(periodic_match)
-        else:
-            return periodic_match
+        return periodic_match
 
     def get_symmetric_sites(self, unique=True, screen=True):
         """Determine the symmetrically unique adsorption sites
@@ -214,19 +244,25 @@ class AdsorptionSites():
         -----------
         unique : bool
             Return only the unique symmetrically reduced sites.
+        screen : bool
+            Return only sites inside the unit cell.
 
         Returns:
         --------
         sites : dict of lists
             Dictionary of sites containing index of site
         """
+        if screen is False:
+            unique = False
+
         symmetry = utils.get_symmetry(self.slab, tol=self.tol)
         rotations = np.swapaxes(symmetry['rotations'], 1, 2)
         translations = symmetry['translations']
         affine = np.append(rotations, translations[:, None], axis=1)
 
         if screen:
-            points = self.frac_coords[self.screen]
+            periodic = self.get_periodic_sites()
+            points = self.frac_coords[periodic]
             true_index = np.where(self.screen)[0]
         else:
             points = self.frac_coords
@@ -365,10 +401,10 @@ def get_adsorption_sites(
         slab,
         symmetry_reduced=True,
         adsorption_vectors=False,
-        tol=1e-5,
+        tol=1e-5
 ):
     """Get the adsorption sites of a slab as defined by surface
-    atom symmetries.
+    symmetries of the surface atoms.
 
     Parameters:
     -----------
@@ -399,7 +435,7 @@ def get_adsorption_sites(
     coordinates = sites.coordinates[s]
     connectivity = sites.connectivity[s]
     if adsorption_vectors:
-        vectors = sites.get_adsorption_vectors()
+        vectors = sites.get_adsorption_vectors()[s]
 
         return coordinates, connectivity, vectors
 

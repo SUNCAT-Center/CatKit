@@ -168,8 +168,10 @@ class Gratoms(Atoms):
             self.set_array(name, a)
 
         if isinstance(other, Gratoms):
-            # if isinstance(self._graph, other._graph.__class__):
-            #     print()
+            if isinstance(self._graph, nx.MultiGraph) & \
+               isinstance(other._graph, nx.Graph):
+                other._graph = nx.MultiGraph(other._graph)
+
             self._graph = nx.disjoint_union(self._graph, other._graph)
 
         return self
@@ -220,7 +222,7 @@ class Gratoms(Atoms):
             if x != 1 and not vec.any():
                 raise ValueError('Cannot repeat along undefined lattice vector')
 
-        if self.pbc.any() and len(self.edges) > 0:
+        if self.pbc.any() and len(self.edges()) > 0:
             raise ValueError("Edge conservation not currently supported with "
                              "pbc. Remove pbc or edges first.")
 

@@ -5,6 +5,7 @@ import numpy as np
 from numpy.linalg import norm, solve
 from ase.build import rotate
 from ase.constraints import FixAtoms
+import networkx as nx
 import warnings
 try:
     from math import gcd
@@ -283,7 +284,7 @@ class SlabGenerator(object):
 
         return slab
 
-    def get_connectivity_from_bulk(self, slab):
+    def get_graph_from_bulk(self, slab, attach=False):
         """Return the surface connectivity of a slab based on information
         from the bulk basis is was constructed from.
 
@@ -308,9 +309,13 @@ class SlabGenerator(object):
 
         surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
 
+        if attach:
+            G = nx.MultiGraph(surf_con)
+            slab.graph.add_edges_from(G.edges(data=True))
+
         return surf_con
 
-    def get_voronoi_surface_atoms(self, slab, attach_graph=False):
+    def get_voronoi_surface_atoms(self, slab, attach_graph=True):
         """Find the under-coordinated atoms at the upper and lower
         fraction of a given unit cell based on the bulk structure it
         originated from.

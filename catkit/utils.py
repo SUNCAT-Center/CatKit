@@ -133,7 +133,7 @@ def expand_cell(atoms, r=6):
     low = np.floor(-nmax * pbc)
     high = np.ceil(nmax * pbc + 1)
 
-    offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2],].T
+    offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
     ncell = np.prod(offsets.shape[:-1])
 
     cart = np.dot(offsets, atoms.cell)
@@ -460,7 +460,7 @@ def connectivity_to_edges(connectivity):
     for i, c in enumerate(connectivity):
         lower_diagonal = c[:i]
         for j, v in enumerate(lower_diagonal):
-            edges += [(i, j, 1)] * v
+            edges += [(int(i), int(j), 1)] * int(v)
 
     return edges
 
@@ -473,3 +473,19 @@ def isomorphic_molecules(graph0, graph1):
     isomorphic = nx.is_isomorphic(graph0, graph1, edge_match=em, node_match=nm)
 
     return isomorphic
+
+
+def to_gratoms(atoms):
+    """Convert and atom object to a gratoms object."""
+
+    gratoms = Gratoms(
+        numbers=atoms.numbers,
+        positions=atoms.positions,
+        pbc=atoms.pbc,
+        cell=atoms.cell
+    )
+
+    if atoms.constraints:
+        gratoms.set_constraint(atoms.constraints)
+
+    return gratoms
