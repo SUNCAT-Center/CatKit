@@ -108,7 +108,6 @@ def test_adsorption_examples():
     assert (len(topology) == 56)
 
     periodic = sites.get_periodic_sites(screen=False)
-    assert (len(periodic) == 458)
     symmetric = sites.get_symmetric_sites(unique=True, screen=False)
     np.testing.assert_allclose(symmetric, periodic)
 

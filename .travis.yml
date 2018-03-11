@@ -30,11 +30,11 @@ install:
   - sudo apt-get update
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -y
   - source activate test-environment
 
   - pip install -r requirements.txt
-  - conda install --channel rdkit rdkit
+  - conda install --channel rdkit rdkit -y
 
 
 script:

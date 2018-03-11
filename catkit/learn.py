@@ -83,7 +83,10 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
     kernel = ConstantKernel(1, (1e-7, 1e7)) * RBF() + WhiteKernel()
     # kernel = DotProduct() + WhiteKernel()
     regressor = GaussianProcessRegressor(
-        kernel=kernel, n_restarts_optimizer=12, alpha=0)
+        kernel=kernel,
+        n_restarts_optimizer=5,
+        alpha=0
+    )
 
     step = 0
     while step < nsteps:
