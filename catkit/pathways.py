@@ -175,7 +175,7 @@ class ReactionNetwork():
                 continue
 
             molecule = Gratoms(symbols=[el])
-            molecule.nodes[0]['valence'] = self.base_valence[el]
+            molecule.graph.node[0]['valence'] = self.base_valence[el]
 
             search_molecules += [molecule]
 
@@ -213,7 +213,7 @@ class ReactionNetwork():
             new_molecules.
         """
         new_molecules = []
-        nodes = molecule.nodes
+        nodes = molecule.graph.node
         counter = np.bincount(
             molecule.get_atomic_numbers(), minlength=len(self.base_valence))
 
@@ -221,7 +221,7 @@ class ReactionNetwork():
 
             # Check if an additional bond can be formed
             valence = nodes[base_node]['valence']
-            base_el = molecule.nodes[base_node]['number']
+            base_el = nodes[base_node]['number']
 
             # Creating new nodes
             for el, cnt in enumerate(self.element_pool):
@@ -240,9 +240,9 @@ class ReactionNetwork():
                 G = molecule.copy()
                 node_index = len(G)
 
-                G.nodes[base_node]['valence'] -= 1
+                G.graph.node[base_node]['valence'] -= 1
                 G += Atom(el)
-                G.nodes[node_index]['valence'] = self.base_valence[el] - 1
+                G.graph.node[node_index]['valence'] = self.base_valence[el] - 1
                 G.graph.add_edge(base_node, node_index, bonds=1)
 
                 comp_tag, bond_tag = G.get_chemical_tags()
@@ -276,23 +276,19 @@ class ReactionNetwork():
                         continue
 
                     valence_new = nodes[existing_node]['valence']
-                    el = molecule.nodes[existing_node]['number']
+                    el = nodes[existing_node]['number']
 
                     if valence_new <= 0:
                         continue
 
-                    try:
-                        if self._maximum_bond_limit(molecule, base_node,
-                                                    existing_node):
-                            continue
-                    except (KeyError):
-                        print(molecule.edges(data=True))
-                        exit()
+                    if self._maximum_bond_limit(molecule, base_node,
+                                                existing_node):
+                        continue
 
                     G = molecule.copy()
 
-                    G.nodes[base_node]['valence'] -= 1
-                    G.nodes[existing_node]['valence'] -= 1
+                    G.graph.node[base_node]['valence'] -= 1
+                    G.graph.node[existing_node]['valence'] -= 1
                     if G.graph.has_edge(base_node, existing_node):
                         G.graph[base_node][existing_node]['bonds'] += 1
                     else:
@@ -429,7 +425,6 @@ class ReactionNetwork():
 
             for b1 in p1_bonds:
                 for b2 in p2_bonds:
-
                     Pt = mol_R1 + mol_R2
                     Pt.graph.add_edge(b1, b2, bonds=1)
 
@@ -496,15 +491,15 @@ class ReactionNetwork():
                 continue
 
             for iRa, iPa in pathways:
-                iR1, iR2 = iRa
-                _, iP2 = iPa
+                iR1, iR2 = iRa.astype(int)
+                _, iP2 = iPa.astype(int)
 
                 # Ignore bonding pathways
                 if not iR1:
                     continue
 
                 for i, iR in enumerate(iRa):
-                    R = ind_mol[iR]
+                    R = ind_mol[int(iR)]
                     nR = len(R)
 
                     # Don't create larger molecules
@@ -526,9 +521,10 @@ class ReactionNetwork():
                                bond_tag not in molecules[comp_tag]:
                                 continue
 
-                            subst_pathway = np.array(
-                                [sorted([0, iRa[::-1][i]]),
-                                 sorted([iP1, iP2])])
+                            subst_pathway = np.array([
+                                sorted([0, iRa.astype(int)[::-1][i]]),
+                                sorted([iP1, iP2])
+                            ])
 
                             for G in molecules[comp_tag][bond_tag]:
                                 if R_P1.is_isomorph(G):
@@ -684,8 +680,8 @@ class ReactionNetwork():
                 symbols += [n]
 
             molecule = Gratoms(symbols)
-            molecule.graph.name = index
-            nx.set_node_attributes(molecule.graph, data, 'valence')
+            molecule.graph.name = str(index)
+            nx.set_node_attributes(molecule.graph, values=data, name='valence')
 
             if edge_data:
                 edges = np.array(
@@ -880,19 +876,20 @@ class ReactionNetwork():
 
         network = nx.Graph(pathways)
 
-        plt.figure(figsize=(6, 6))
+        fig = plt.figure(figsize=(4, 4), frameon=False)
+        fig.add_axes([0, 0, 1, 1])
         nx.draw_networkx(network)
         plt.draw()
         plt.axis('off')
 
         if file_name:
-            plt.savefig(file_name)
+            plt.savefig(file_name, transparent=True)
         plt.close()
 
     def _maximum_bond_limit(self, molecule, n1, n2):
         """Return whether a maximum bonding limit has been met."""
-        el1 = molecule.nodes[n1]['number']
-        el2 = molecule.nodes[n2]['number']
+        el1 = molecule.graph.node[n1]['number']
+        el2 = molecule.graph.node[n2]['number']
 
         bonds = 0
         if molecule.graph.has_edge(n1, n2):

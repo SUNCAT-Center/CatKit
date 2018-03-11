@@ -482,8 +482,7 @@ def to_gratoms(atoms):
         numbers=atoms.numbers,
         positions=atoms.positions,
         pbc=atoms.pbc,
-        cell=atoms.cell
-    )
+        cell=atoms.cell)
 
     if atoms.constraints:
         gratoms.set_constraint(atoms.constraints)

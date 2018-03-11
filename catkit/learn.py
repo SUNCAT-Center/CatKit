@@ -80,13 +80,10 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
     """
     ids = np.arange(len(y))
 
-    # kernel = ConstantKernel(1, (1e-7, 1e7)) * RBF() + WhiteKernel()
-    kernel = DotProduct() + WhiteKernel()
+    kernel = ConstantKernel(1, (1e-7, 1e7)) * RBF() + WhiteKernel()
+    # kernel = DotProduct() + WhiteKernel()
     regressor = GaussianProcessRegressor(
-        kernel=kernel,
-        n_restarts_optimizer=12,
-        alpha=0
-    )
+        kernel=kernel, n_restarts_optimizer=12, alpha=0)
 
     step = 0
     while step < nsteps:
@@ -118,7 +115,7 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
             ylim = ax.get_ylim()
             ax.text(xlim[0] / 9.0, ylim[0] / 9.0, mae)
             plt.tight_layout()
-            plt.savefig('./images/online-learning-{}.png'.format(step))
+            plt.savefig('./images/online-learning-RBF-{}.png'.format(step))
             plt.close()
 
         step += 1

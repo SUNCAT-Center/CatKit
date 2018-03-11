@@ -297,11 +297,9 @@ class SlabGenerator(object):
 
         Returns:
         --------
-        top : ndarray (n,)
-            Array of atom indices corresponding to the top layer of the slab.
-        bottom : ndarray (m,)
-            Array of atom indices corresponding to the bottom layer of
-            the slab.
+        surf_con : ndarray (n, n)
+            Connectivity matrix of the surface atoms with periodic boundary
+            conditions.
         """
         bulk_con = utils.get_voronoi_neighbors(self._basis)
         d = self._basis.get_all_distances(mic=True)
@@ -379,24 +377,20 @@ class SlabGenerator(object):
 
         Returns:
         --------
-        sites : dict of 3 lists
-            Dictionary of top, bridge, hollow, and 4-fold sites containing
-            positions, points, and neighbor lists. If adsorption vectors
-            are requested, the third list is replaced.
+        coordinates : ndarray (n,)
+            Coordinates of the adsorption sites
+        connectivity : ndarray (n,)
+            Connectivity of the adsorption sites
         """
         if slab != self.slab or slab.get_surface_atoms() is None:
             surface_sites = self.get_voronoi_surface_atoms(slab)[0]
             slab.set_surface_atoms(surface_sites)
             self.slab = slab
 
-        if kwargs.get('return_proxy'):
-            sites, vslab = adsorption.get_adsorption_sites(slab=slab, **kwargs)
+        coordinates, connectivity = adsorption.get_adsorption_sites(
+            slab=slab, **kwargs)
 
-            return sites, vslab
-
-        sites = adsorption.get_adsorption_sites(slab=slab, **kwargs)
-
-        return sites
+        return coordinates, connectivity
 
 
 def ext_gcd(a, b):

@@ -15,9 +15,6 @@ class AdsorptionSites():
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
-        TODO: Determine if this can be made more efficient by
-        removing the 'sites' dictionary.
-
         Parameters:
         -----------
         slab : atoms object
@@ -42,7 +39,7 @@ class AdsorptionSites():
         self.r1_topology = [[i] for i in np.arange(len(extended_top))]
         self.index = index[extended_top]
 
-        sites = self.get_higher_coordination_sites(coords[extended_top])
+        sites = self._get_higher_coordination_sites(coords[extended_top])
         self.r2_topology = sites['top'][2]
 
         # Put data into array format
@@ -89,7 +86,7 @@ class AdsorptionSites():
             return self.coordinates
 
     def get_topology(self, screen=True):
-        """Return the 3D coordinates associated with each site."""
+        """Return the indices of adjacent surface atoms."""
         topology = [self.index[top] for top in self.r1_topology]
         topology = np.array(topology)
         if screen:
@@ -97,13 +94,14 @@ class AdsorptionSites():
         else:
             return topology
 
-    def get_higher_coordination_sites(
-            self,
-            top_coordinates,
-            allow_obtuse=True):
+    def _get_higher_coordination_sites(self, top_coordinates,
+                                       allow_obtuse=True):
         """Find all bridge and hollow sites (3-fold and 4-fold) given an
         input slab based Delaunay triangulation of surface atoms of a
         super-cell.
+
+        TODO: Determine if this can be made more efficient by
+        removing the 'sites' dictionary.
 
         Parameters:
         -----------
@@ -285,7 +283,7 @@ class AdsorptionSites():
         else:
             return symmetry_match
 
-    def get_adsorption_vectors(self):
+    def get_adsorption_vectors(self, screen=True):
         """Returns the vectors representing the furthest distance from
         the neighboring atoms.
 
@@ -295,12 +293,18 @@ class AdsorptionSites():
             Adsorption vectors for surface sites.
         """
         top_coords = self.coordinates[self.connectivity == 1]
-        vectors = np.empty((self.coordinates.shape[0], 3))
+        if screen:
+            coords = self.coordinates[self.screen]
+            r1top = self.r1_topology[self.screen]
+            r2top = self.r2_topology[self.screen]
+        else:
+            coords = self.coordinates
+            r1top = self.r1_topology
+            r2top = self.r2_topology
 
-        for i, s in enumerate(self.coordinates):
-            plane_points = np.array(
-                list(self.r1_topology[i]) + list(self.r2_topology[i]),
-                dtype=int)
+        vectors = np.empty((coords.shape[0], 3))
+        for i, s in enumerate(coords):
+            plane_points = np.array(list(r1top[i]) + list(r2top[i]), dtype=int)
             vectors[i] = utils.plane_normal(top_coords[plane_points])
 
         return vectors
@@ -356,16 +360,25 @@ class AdsorptionSites():
 
         return edges
 
-    def view(self):
+    def plot(self, savefile=None):
         """Create a visualization of the sites."""
         top = self.connectivity == 1
         other = self.connectivity != 1
         dt = Delaunay(self.coordinates[:, :2][top])
-        plt.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
-        plt.plot(dt.points[:, 0], dt.points[:, 1], 'o')
-        plt.plot(self.coordinates[:, 0][other], self.coordinates[:, 1][other],
-                 'o')
-        plt.show()
+
+        fig = plt.figure(figsize=(6, 3.5), frameon=False)
+        ax = fig.add_axes([0, 0, 1, 1])
+
+        ax.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
+        ax.plot(dt.points[:, 0], dt.points[:, 1], 'o')
+        ax.plot(self.coordinates[:, 0][other], self.coordinates[:, 1][other],
+                'o')
+        ax.axis('off')
+
+        if savefile:
+            plt.savefig(savefile, transparent=True)
+        else:
+            plt.show()
 
 
 def matching_sites(position, comparators, tol=1e-8):
@@ -397,12 +410,10 @@ def matching_sites(position, comparators, tol=1e-8):
     return match
 
 
-def get_adsorption_sites(
-        slab,
-        symmetry_reduced=True,
-        adsorption_vectors=False,
-        tol=1e-5
-):
+def get_adsorption_sites(slab,
+                         symmetry_reduced=True,
+                         adsorption_vectors=False,
+                         tol=1e-5):
     """Get the adsorption sites of a slab as defined by surface
     symmetries of the surface atoms.
 

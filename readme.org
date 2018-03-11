@@ -9,32 +9,42 @@
 
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis.
 
-Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined by bond-formation rules.
+Currently, the primary function of CatKit is for controlled atomic structure enumeration. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined through bonds formation rules.
 
-By conserving bond-formation order and pairing it with bulk symmetry enumerations, a comprehensive mapping tools of all possible relevant chemical pathways can be produced. This information can then be aggregated and used to gain insights into catalytic systems in ways beyond their original intention.
+By conserving bond-formation order and pairing it with bulk symmetry enumerations, a comprehensive mapping tools of all possible relevant chemical pathways can be produced. This information can then be aggregated and used to gain insights into catalytic systems.
 
-Currently included enumerations include:
+Current enumerations include:
 
 - [X] Surfaces structure
 - [X] Adsorption sites
-- [ ] Catalytic structures
-- [X] Gas-phase molecules
+- [X] Simple gas-phase molecules
 - [X] Reaction pathways
 
-* Enumeration
-** Surfaces:
-- [X] Surfaces produced from all user defined bulk lattices
-- [X] All Miller index
-- [X] Unique terminations of possible surfaces
-- [X] Surface sites
+Similar to ASE, modules in CatKit are designed to be completely independent of one another. The =Gratoms= object is the single exception to the rule. 
 
-*** Example slab enumeration:
+* Gratoms object
+The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
+
+TODO: I can haz documentation?
+
+* Enumeration
+** Surface module:
+The surface module is designed to leverage information about the bulk structure which a slab is derived from.
+
+- [X] Surfaces produced from all user defined bulk lattices
+- [X] Any miller indices
+- [X] Unique terminations of possible surfaces
+- [X] Surface atom identification
+- [X] Voronoi connectivity of slab atoms
+- [X] Enumerate surface adsorption sites
+
+*** Slab enumeration:
 Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
-#+CAPTION: First termination of 9 layer slab of CuPd_{3}.
+First termination of 9 layer slab of CuPd_{3}.
 [[./images/CuPd3-term-0.png]] [[./images/CuPd3-term-0-top.png]]
 
-#+CAPTION: Second termination of 9 layer slab of CuPd_{3}.
+Second termination of 9 layer slab of CuPd_{3}.
 [[./images/CuPd3-term-1.png]] [[./images/CuPd3-term-1-top.png]]
 
 #+BEGIN_SRC python :results silent :exports code
@@ -42,23 +52,20 @@ from catkit.surface import SlabGenerator
 from ase.io import write
 from ase.build import bulk
 
+# Make a test slab
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     atoms,
-    miller_index=[2, 1, 1],
+    miller_index=(2, 1, 1),
     layers=9,
     fixed=5,
-    vacuum=10,
-)
+    vacuum=4)
 
 terminations = gen.get_unique_terminations()
-
-images = []
 for i, t in enumerate(terminations):
     slab = gen.get_slab(iterm=i)
-    images += [slab]
 
     # Create side and top-down visuals
     img_name = './images/CuPd3-term-{}.pov'.format(i)
@@ -67,30 +74,85 @@ for i, t in enumerate(terminations):
         slab,
         show_unit_cell=2,
         rotation='-90x',
-    )
+        run_povray=True)
 
     write(
         img_name.replace('.pov', '-top.pov'),
         slab,
         show_unit_cell=2,
-    )
+        run_povray=True)
 #+END_SRC
 
-*** Example site enumeration:
-With a generated slab, we can also produce the unique adsorption sites which would be preasent on any given surface.
+*** Slab graph and surface atoms:
+One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-#+CAPTION: Symmetry unique sites of CuPd_{3} (111). C (grey) denote 3-fold hollows, H (white) are bridge, and X (red) are top sites.
-[[./images/CuPd3_111-sites.png]]
+Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au. 
+[[./images/Pd-surface-atoms.png]]
 
-#+BEGIN_SRC python :results silent
+#+BEGIN_SRC python  :results output org drawer :exports both
 from catkit.surface import SlabGenerator
-from catkit.adsorption import get_adsorption_sites
 from ase.build import bulk
 from ase.io import write
 from ase import Atom
-import numpy as np
 
-# Make a test slab
+bulk = bulk('Pd', 'hcp', a=3, cubic=True)
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(1, 1, 0),
+    layers=6,
+    fixed=2,
+    vacuum=4)
+
+atoms = gen.get_slab()
+con_matrix = gen.get_graph_from_bulk(atoms, attach=True)
+print(con_matrix)
+
+# We can identify both top and bottom sites.
+top, bottom = gen.get_voronoi_surface_atoms(atoms)
+atoms.set_surface_atoms(top)
+
+for i in top:
+    atoms[i].symbol = 'Au'
+
+write(
+    './images/Pd-surface-atoms.pov',
+    atoms,
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[0. 2. 2. 2. 1. 0. 0. 0. 0. 0. 0. 0.]
+ [2. 0. 2. 2. 0. 1. 0. 0. 0. 0. 0. 0.]
+ [2. 2. 0. 2. 2. 2. 1. 0. 0. 0. 0. 0.]
+ [2. 2. 2. 0. 2. 2. 0. 1. 0. 0. 0. 0.]
+ [1. 0. 2. 2. 0. 2. 2. 2. 1. 0. 0. 0.]
+ [0. 1. 2. 2. 2. 0. 2. 2. 0. 1. 0. 0.]
+ [0. 0. 1. 0. 2. 2. 0. 2. 2. 2. 1. 0.]
+ [0. 0. 0. 1. 2. 2. 2. 0. 2. 2. 0. 1.]
+ [0. 0. 0. 0. 1. 0. 2. 2. 0. 2. 2. 2.]
+ [0. 0. 0. 0. 0. 1. 2. 2. 2. 0. 2. 2.]
+ [0. 0. 0. 0. 0. 0. 1. 0. 2. 2. 0. 2.]
+ [0. 0. 0. 0. 0. 0. 0. 1. 2. 2. 2. 0.]]
+:END:
+
+By using the ``attach'' flag this connectivity matrix has already been converted into a NetworkX graph and attached to the Gratoms object for future use.
+
+*** Simple site enumeration:
+With a generated slab, we can also produce the unique adsorption sites which would be present on a given surface.
+
+#+CAPTION: Symmetry unique sites of CuPd_{3} (111). Green denote 3-fold hollows, white are bridge, and red are top sites.
+[[./images/CuPd3_111-sites.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
 bulk = bulk('Pd', 'fcc', a=5, cubic=True)
 bulk[3].symbol = 'Cu'
 
@@ -99,105 +161,187 @@ gen = SlabGenerator(
     miller_index=(1, 1, 1),
     layers=3,
     fixed=2,
-    vacuum=10,
-)
+    vacuum=10)
 
-atoms = gen.get_slab(
-    # Reduce the slab to a primitive form.
-    primitive=True,
-)
+atoms = gen.get_slab(primitive=True)
+coordinates, connectivity = gen.adsorption_sites(atoms)
 
-sites = gen.adsorption_sites(
-    atoms,
-    symmetry_reduced=True,
-)
-
-atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
-for k, v in sites.items():
-    positions, _, _, pairings = v
-
-    if not list(pairings):
-        continue
-
-    unique = np.unique(pairings, return_index=True)[-1]
-    positions = positions[unique]
-
-    for s in positions:
-        atoms += Atom(atm[k], s + [0, 0, 2])
+atm = {1: 'X', 2: 'He', 3: 'F'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
 
 write(
     './images/CuPd3_111-sites.pov',
     atoms,
     show_unit_cell=2,
-    run_povray=True
-)
+    run_pvoray=True)
 #+END_SRC
 
-#+RESULTS:
+** Adsorption module
+Using the =AdsorptionSites= class form the adsorption module provides more powerful tools for surface site enumeration.
 
-We can similarly produce produce all sites of higher index planes. This is potentially useful for adsorption interaction studies. Good adsorption placement for higher miller index surfaces can be achieved using the adsorption vectors described in the next section.
+- [X] Adsorption site enumeration based on user defined surface atoms.
+- [X] 1st and 2nd (rank) nearest neighbor topology of surface atoms.
+- [X] Connectivity of adsorption site (hollow = 3, bridge = 2, top = 1)
+- [X] 2D adsorption coordinates relative to miller index.
+- [X] Adsorption vectors for accurate 3D projection.
+- [X] Connectivity between adsorption sites
 
-#+CAPTION: All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of N (blue) which shows 4-fold hollow sites.
-[[./images/CuPd3_321-sites.png]]
+*** ``Manual'' Adsorption site enumeration and visualization:
+Adsorption site enumeration in CatKit is solely dependent upon surface atom identification. This can be performed automatically using =catkit.surface.SlabGenerator=, however, this function relies upon bulk properties which are not always available.
 
-#+BEGIN_SRC python :results silent
+Here, we show how the surface sites can be assigned manually which is often convenient enough. Other means of surface site identification will be added in a future release.
+
+Surface atoms are used to define top sites (green), which are then used to define remaining sites (red) via Delaunay triangulation symmetries.
+[[./images/Pd3Cu-adsorption-sites.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.adsorption import AdsorptionSites
 from catkit.surface import SlabGenerator
 from ase.build import bulk
-from ase.io import write
-from ase import Atom
 
-# Make a test slab
 bulk = bulk('Pd', 'fcc', a=5, cubic=True)
 bulk[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     bulk,
-    miller_index=[3, 2, 1],
-    layers=14,
-    fixed=6,
-    vacuum=10,
-)
+    miller_index=(1, 1, 1),
+    layers=3,
+    vacuum=4)
 
-atoms = gen.get_slab(
-    # Reduce the slab to a primitive form.
-    primitive=True,
-)
+atoms = gen.get_slab(primitive=True)
+atoms.set_surface_atoms([8, 9, 10, 11])
 
-sites = gen.adsorption_sites(
-    atoms,
-    symmetry_reduced=False,
-)
+sites = AdsorptionSites(atoms)
+sites.plot('./images/Pd3Cu-adsorption-sites.png')
+#+END_SRC
 
-atm = {'top': 'X', 'hollow': 'C', '4fold': 'N', 'bridge': 'H'}
-for k, v in sites.items():
-    positions = v[0]
+*** Extended site enumeration:
+For more complex adsorption enumeration, we often require more detailed information 
 
-    for s in positions:
-        atoms += Atom(atm[k], s + [0, 0, 1.5])
+The =AdsorptionSite= class also produces an expanded unit cell which is useful for operations which require observation of periodic boundary conditions. This extended unit cell can be accessed by toggling the ``screen'' argument.
+
+All possible adsorption sites of of CuPd_{3} (3, 2, 1). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
+[[./images/CuPd3_321-sites.png]]
+
+#+BEGIN_SRC python :results output org drawer :exports code
+from catkit.adsorption import AdsorptionSites
+from catkit.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(3, 2, 1),
+    layers=13,
+    vacuum=5)
+
+atoms = gen.get_slab(primitive=True)
+
+top, _ = gen.get_voronoi_surface_atoms(atoms)
+atoms.set_surface_atoms(top)
+sites = AdsorptionSites(atoms)
+
+# Positon of each site
+coordinates = sites.get_coordinates()
+
+# Number of adjacent surface atoms
+connectivity = sites.get_connectivity()
+
+# The indices of adjacent surface atoms
+topology = sites.get_topology()
+
+# Only print every 5th entry.
+print('Coordinates:\n', coordinates[::5], '\n')
+print('Connectivity:\n', connectivity[::5], '\n')
+print('Topology:\n', topology[::5], '\n')
+
+periodic = sites.get_periodic_sites(screen=False)
+print('Sites by periodicity:\n', periodic[::5], '\n')
+
+symmetric = sites.get_symmetric_sites(unique=True, screen=False)
+print('Sites by symmetry:\n', symmetric[::5])
+
+atm = {1: 'X', 2: 'He', 3: 'F', 4: 'N'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
 
 write(
     './images/CuPd3_321-sites.pov',
     atoms,
-    show_unit_cell=2
-)
+    show_unit_cell=2,
+    run_povray=True)
 #+END_SRC
 
-**** Automated adsorption vectors
-The most commonly studied surfaces, such as (1, 1, 1), are perpendicular to the miller index at all adsorption sites. This means the most favorable angle of adsorption will always be perpendicular to the surface. For higher miller indices, this is no longer the case.
+#+RESULTS:
+:RESULTS:
+Coordinates:
+ [[ 8.66025404  1.15727512 10.34522484]
+ [ 8.66025404 10.41547612 11.68153105]
+ [ 2.88675135  3.27894619 12.0156076 ]
+ [ 7.21687836  3.27894619 12.0156076 ]
+ [ 2.88675135  6.75077156 11.3474545 ]
+ [ 5.77350269  7.7151675  11.68153105]
+ [ 8.66025404  8.67956344 12.0156076 ]
+ [10.10362971  5.97925481 12.0156076 ]
+ [ 1.9245009   3.34323925 12.34968415]
+ [ 6.73575314  7.45799525 11.90424875]
+ [ 6.73575314  1.28586125 11.01337794]
+ [ 4.33012702 10.41547612 11.68153105]] 
+
+Connectivity:
+ [1 1 2 2 2 2 2 2 3 3 3 4] 
+
+Topology:
+ [array([15]) array([21]) array([19, 22]) array([20, 25]) array([18, 19])
+ array([17, 23]) array([21, 24]) array([24, 19]) array([19, 25, 22])
+ array([24, 23, 17]) array([21, 15, 20]) array([23, 15, 18, 22])] 
+
+Sites by periodicity:
+ [  0   5   0   5   0   5   0   5   0   5   0   5   0   5   0   5   0   5
+  90  95 100 105  96 115  97 125  95  93 122 116  90  94 153 116  97 109
+ 151 125 124 106 153 105 115 127 220 100  97 116 124 177 124 178 100 106
+  97  98 178  93 108 115 106 116 126  97 105 100 330 331 340 338 339 331
+ 340 336 359 359 357 340 341 357 358 334 361 331 331 342 349 336 338 445
+  90  90] 
+
+Sites by symmetry:
+ [  0   5   0   5   0   5   0   5   0   5   0   5   0   5   0   5   0   5
+  90  95 100 105  96 115  97 125  95  93 122 116  90  94 153 116  97 109
+ 151 125 124 106 153 105 115 127 220 100  97 116 124 177 124 178 100 106
+  97  98 178  93 108 115 106 116 126  97 105 100 330 331 340 338 339 331
+ 340 336 359 359 357 340 341 357 358 334 361 331 331 342 349 336 338 445
+  90  90]
+:END:
+
+When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
+
+In this case there are no symmetrically reducible sites, so =get_symmetric_sites()= returns the same result.
+
+NOTE: The indices of the periodic and symmetry site functions are in reference to the extended unit cell.
+
+*** Adsorption vectors
+The most commonly studied miller indices, such as fcc(1, 1, 1), produce a flat surface. This means the most favorable angle of adsorption will always be perpendicular to the surface. This is not always the case for higher miller indices. 
+
+CatKit defines the most favorable vector for adsorption as the one which is furthest from all neighboring surface atoms. This vector is important for the generation of sensible 3D structures from graph enumerations. This is particularly true for adsorbates with multiple atoms.
 
 #+CAPTION: Illustration of adsorption vectors (red dots) on a CuPd_{3} (2, 1, 1) surface.
 [[./images/adsorption-vectors.png]]
 
-This is the first step to further reducing symmetrically equivalent sites in 3D space for more complex structures. It can also provide the used with better initial guesses for adsorption locations.
-
-#+BEGIN_SRC python :results output org drawer :exports code
+#+BEGIN_SRC python :results silent :exports code
+from catkit.adsorption import AdsorptionSites
 from catkit.surface import SlabGenerator
 from ase.build import bulk
-from ase import Atom
 from ase.io import write
+from ase import Atom
 import numpy as np
 
-# Make a test slab
 bulk = bulk('Pd', 'fcc', a=5, cubic=True)
 bulk[3].symbol = 'Cu'
 
@@ -205,31 +349,29 @@ gen = SlabGenerator(
     bulk,
     miller_index=(2, 1, 1),
     layers=10,
-    fixed=2,
-    vacuum=10,
-)
+    vacuum=5)
 
-slab = gen.get_slab(primitive=True)
-sites = gen.adsorption_sites(
-    slab,
-    vectors=True
-)
+atoms = gen.get_slab(primitive=True)
 
-for k, v in sites.items():
-    coords, points, avec = v
+top, _ = gen.get_voronoi_surface_atoms(atoms, attach_graph=False)
+atoms.set_surface_atoms(top)
+sites = AdsorptionSites(atoms)
 
-    # Generae a visual of the vectors.
-    for i, origin in enumerate(coords):
-        for d in np.arange(0, 2, 0.25):
-            slab += Atom('X', origin + avec[i] * d)
+coordinates = sites.get_coordinates()
+vectors = sites.get_adsorption_vectors()
 
-slab.wrap()
+heights = np.arange(0, 2, 0.25)
+for i, c in enumerate(coordinates):
+    for h in heights:
+        atoms += Atom('X', c + vectors[i] * h)
+
+atoms.wrap()
 write(
     './images/adsorption-vectors.pov',
-    slab * (2, 2, 1),
+    atoms * (2, 1, 1),
     show_unit_cell=2,
-    rotation='-60x',
-)
+    rotation='-90x, 20z',
+    run_povray=True)
 #+END_SRC
 
 ** Gas-phase:
@@ -275,8 +417,7 @@ with ReactionNetwork(db_name=db_name) as rn:
     # Run a molecule search
     rn.molecule_search(
         element_pool={'C': 2, 'H': 6},
-        multiple_bond_search=True
-    )
+        multiple_bond_search=False)
 
     # Load the molecules
     molecules = rn.load_molecules()
@@ -288,8 +429,7 @@ with ReactionNetwork(db_name=db_name) as rn:
         for i, molecule in molecules.items():
             plot_molecule(
                 molecule,
-                file_name='./images/molecule-{}.png'.format(i)
-            )
+                file_name='./images/molecule-{}.png'.format(i))
 
             molecule = get_uff_coordinates(molecule, steps=50)
             rn.save_3d_structure(molecule)
@@ -303,7 +443,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 22.6s
+Process completed in 28.6s
 :END:
 
 ** Reaction pathways:
@@ -312,7 +452,7 @@ Process completed in 22.6s
 - [X] Reconfiguration reactions (R1 <--> R1*)
 - [X] Substitution reactions (R1 + R2 <--> P1 + P2)
 
-*** Example network:
+*** Reaction networks:
 Enumeration of possible elementary reaction steps for gas-phase C_{2}H_{6} species.
 
 #+CAPTION: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
@@ -330,12 +470,10 @@ start = time.time()
 db_name = 'C2H6-example.db'
 
 with ReactionNetwork(db_name=db_name) as rn:
-
     # Substitution pathway search is expensive!
     rn.path_search(
-        reconfiguration=True,
-        substitution=True
-    )
+        reconfiguration=False,
+        substitution=False)
 
     rn.plot_reaction_network(file_name='./images/reaction-network.png')
 
@@ -344,10 +482,9 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 
 #+RESULTS:
 :RESULTS:
-Process completed in 2.4s
+Process completed in 0.6s
 :END:
 
-*** Example network access
 Once the reaction network has been produce, we can illustrate the potential pathways using the following code.
 
 #+BEGIN_SRC python :results output org drawer :exports both
@@ -357,46 +494,45 @@ import networkx as nx
 from ase.utils import formula_hill
 
 with ReactionNetwork(db_name='C2H6-example.db') as rn:
- 
     molecules = rn.load_molecules()
     pathways = rn.load_pathways()
 
-    names = np.empty(len(molecules) + 1, dtype='a5')
-    names[0] = ''
-    for k, v in molecules.items():
-        atn = nx.get_node_attributes(v, 'number')
+names = np.empty(len(molecules) + 1, dtype='a5')
+names[0] = ''
+for k, v in molecules.items():
+    atn = nx.get_node_attributes(v.graph, 'number')
 
-        # These are not always unique identifiers
-        hill = formula_hill(list(atn.values()))
-        names[k] = hill
+    # These are not always unique identifiers
+    hill = formula_hill(list(atn.values()))
+    names[k] = hill
 
-    for path in pathways:
-        print('|{} + {} --> {} + {}|'.format(*names[path]))
+for path in pathways:
+    print('|{} + {} --> {} + {}|'.format(*names[path]))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-| b'C' + b'C' --> b'' + b'C2'       |
-| b'C' + b'H' --> b'' + b'CH'       |
-| b'C' + b'CH' --> b'' + b'C2H'     |
-| b'C' + b'CH2' --> b'' + b'C2H2'   |
-| b'C' + b'CH3' --> b'' + b'C2H3'   |
 | b'H' + b'H' --> b'' + b'H2'       |
-| b'H' + b'C2' --> b'' + b'C2H'     |
+| b'H' + b'C' --> b'' + b'CH'       |
 | b'H' + b'CH' --> b'' + b'CH2'     |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
+| b'H' + b'C2' --> b'' + b'C2H'     |
 | b'H' + b'CH2' --> b'' + b'CH3'    |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'C2H' --> b'' + b'C2H2'   |
+| b'H' + b'C2H' --> b'' + b'C2H2'   |
 | b'H' + b'CH3' --> b'' + b'CH4'    |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
+| b'H' + b'C2H2' --> b'' + b'C2H3'  |
 | b'H' + b'C2H3' --> b'' + b'C2H4'  |
 | b'H' + b'C2H3' --> b'' + b'C2H4'  |
 | b'H' + b'C2H3' --> b'' + b'C2H4'  |
 | b'H' + b'C2H4' --> b'' + b'C2H5'  |
 | b'H' + b'C2H4' --> b'' + b'C2H5'  |
 | b'H' + b'C2H5' --> b'' + b'C2H6'  |
+| b'C' + b'C' --> b'' + b'C2'       |
+| b'C' + b'CH' --> b'' + b'C2H'     |
+| b'C' + b'CH2' --> b'' + b'C2H2'   |
+| b'C' + b'CH3' --> b'' + b'C2H3'   |
 | b'CH' + b'CH' --> b'' + b'C2H2'   |
 | b'CH' + b'CH2' --> b'' + b'C2H3'  |
 | b'CH' + b'CH3' --> b'' + b'C2H4'  |
