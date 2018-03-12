@@ -17,9 +17,7 @@ class Classifier(object):
     environments and the active sites they rest on.
     """
 
-    def __init__(
-            self,
-            atoms):
+    def __init__(self, atoms):
         """Return unique coordinate values of a given atoms object
         for a specified axis.
 
@@ -31,9 +29,7 @@ class Classifier(object):
         self.neighbor_list = None
         self.molecules = None
 
-    def _build_neighborlist(
-            self,
-            cutoff=None):
+    def _build_neighborlist(self, cutoff=None):
         """Construct a nearest-neighbor list using ASE:
         https://wiki.fysik.dtu.dk/ase/ase/neighborlist.html
 
@@ -56,20 +52,14 @@ class Classifier(object):
             cutoff = r[self.atoms.get_atomic_numbers()]
 
         # Build a nearest neighbor list
-        nl = NL(
-            cutoff,
-            skin=0.16,
-            self_interaction=False,
-            bothways=False)
+        nl = NL(cutoff, skin=0.16, self_interaction=False, bothways=False)
         nl.build(self.atoms)
 
         self.neighbor_list = nl
 
         return nl
 
-    def id_molecules(
-            self,
-            cutoff=None):
+    def id_molecules(self, cutoff=None):
         """Identify adsorbed molecules in a given ase atoms object.
 
         Assumptions:
@@ -108,10 +98,7 @@ class Classifier(object):
             a = atom.index
             neighbor_atoms = self.neighbor_list.get_neighbors(a)
 
-            G.add_node(
-                a,
-                number=atom.number,
-                symbol=atom.symbol)
+            G.add_node(a, number=atom.number)
 
             for n in neighbor_atoms[0]:
 
@@ -167,10 +154,7 @@ class Classifier(object):
         return sites
 
 
-def id_reconstruction(
-        images,
-        rmean=4,
-        save=False):
+def id_reconstruction(images, rmean=4, save=False):
     """Identify a reconstruction even analyzing changes in the forces.
 
     Parameters:
@@ -189,7 +173,7 @@ def id_reconstruction(
     """
     forces = []
     for i, atoms in enumerate(images):
-        forces += [np.sqrt((atoms.get_forces() ** 2).sum())]
+        forces += [np.sqrt((atoms.get_forces()**2).sum())]
     forces = np.array(forces)
 
     frm = pd.rolling_mean(forces, 4)
@@ -201,7 +185,8 @@ def id_reconstruction(
         fig, ax = plt.subplots(figsize=(6, 4))
         l, = plt.plot(range(1, len(images) + 1), frm)
         ax.fill_between(
-            range(1, len(images) + 1),
+            range(1,
+                  len(images) + 1),
             np.zeros(len(images)),
             frm,
             facecolor=l.get_color(),
@@ -253,12 +238,7 @@ def reactant_indices(R1, R2, P, broken_bond):
     Pgraph.graph.remove_edge(u, v)
     Rgraph = R1 + R2
 
-    gm = GM(
-        Pgraph.graph,
-        Rgraph.graph,
-        edge_match=em,
-        node_match=nm
-    )
+    gm = GM(Pgraph.graph, Rgraph.graph, edge_match=em, node_match=nm)
 
     gm.is_isomorphic()
 

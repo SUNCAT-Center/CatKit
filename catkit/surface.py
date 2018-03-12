@@ -1,9 +1,12 @@
+from __future__ import division
+from . import Gratoms
 from . import utils
 from . import adsorption
 import numpy as np
 from numpy.linalg import norm, solve
 from ase.build import rotate
 from ase.constraints import FixAtoms
+import networkx as nx
 import warnings
 try:
     from math import gcd
@@ -12,19 +15,22 @@ except ImportError:
 
 
 class SlabGenerator(object):
-    """Class for generation of slab unit cells from bulk unit cells."""
+    """Class for generation of slab unit cells from bulk unit cells.
 
-    def __init__(
-            self,
-            bulk,
-            miller_index=[1, 1, 1],
-            layers=4,
-            min_width=None,
-            fixed=2,
-            vacuum=0,
-            tol=1e-8
-    ):
-        """Generate a slab from an ASE bulk atoms-object.
+    Many surface operations rely upon / are made easier through the
+    bulk basis cell they are created from. The SlabGenerator class
+    is designed to house these operations.
+    """
+
+    def __init__(self,
+                 bulk,
+                 miller_index=[1, 1, 1],
+                 layers=4,
+                 min_width=None,
+                 fixed=0,
+                 vacuum=0,
+                 tol=1e-8):
+        """Generate a slab from a bulk atoms object.
 
         Parameters:
         -----------
@@ -43,7 +49,6 @@ class SlabGenerator(object):
         tol : float
             Tolerance for floating point rounding errors.
         """
-        self.bulk = bulk
         self.miller_index = np.array(miller_index)
         self.layers = layers
         self.fixed = fixed
@@ -52,18 +57,17 @@ class SlabGenerator(object):
         self.tol = tol
 
         self.unique_terminations = None
-        self.surface_atoms = None
         self.slab = None
 
-        self._basis = self.build_basis()
+        self._basis = self._build_basis(bulk)
 
-    def build_basis(self):
+    def _build_basis(self, bulk):
         """Get the basis unit cell from bulk unit cell. This
         basis is effectively the same as the bulk, but rotated such
         that the z-axis is aligned with the surface termination.
 
-        The basis is stored separately from the slab generated. This
-        is temporary until a slab class is created.
+        The basis is stored separately from the slab generated and is
+        only intended for internal use.
 
         Returns:
         --------
@@ -81,7 +85,7 @@ class SlabGenerator(object):
                 c1, c2, c3 = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
         else:
             p, q = ext_gcd(k, l)
-            a1, a2, a3 = self.bulk.cell
+            a1, a2, a3 = bulk.cell
 
             # constants describing the dot product of basis c1 and c2:
             # dot(c1,c2) = k1+i*k2, i in Z
@@ -92,7 +96,7 @@ class SlabGenerator(object):
 
             if abs(k2) > self.tol:
                 # i corresponding to the optimal basis
-                i = -int(round(k1 / k2))
+                i = -int(np.round(k1 / k2))
                 p, q = p + i * l, q - i * k
 
             a, b = ext_gcd(p * k + q * l, h)
@@ -101,19 +105,23 @@ class SlabGenerator(object):
             c2 = np.array((0, l, -k)) // abs(gcd(l, k))
             c3 = (b, a * p, a * q)
 
-        slab = self.bulk.copy()
+        basis_atoms = Gratoms(
+            positions=bulk.positions,
+            numbers=bulk.get_atomic_numbers(),
+            cell=bulk.cell,
+            pbc=True)
         basis = np.array([c1, c2, c3])
 
-        scaled = solve(basis.T, slab.get_scaled_positions().T).T
+        scaled = solve(basis.T, basis_atoms.get_scaled_positions().T).T
         scaled -= np.floor(scaled + self.tol)
-        slab.set_scaled_positions(scaled)
-        slab.set_cell(np.dot(basis, slab.cell), scale_atoms=True)
+        basis_atoms.set_scaled_positions(scaled)
+        basis_atoms.set_cell(np.dot(basis, basis_atoms.cell), scale_atoms=True)
 
-        a1, a2, a3 = slab.cell
+        a1, a2, a3 = basis_atoms.cell
         a3 = np.cross(a1, a2) / norm(np.cross(a1, a2))
-        rotate(slab, a3, (0, 0, 1), a1, (1, 0, 0))
+        rotate(basis_atoms, a3, (0, 0, 1), a1, (1, 0, 0))
 
-        return slab
+        return basis_atoms
 
     def get_unique_terminations(self):
         """Return smallest unit cell corresponding to given surface and
@@ -135,16 +143,13 @@ class SlabGenerator(object):
         z_symmetry = []
         for i, rotation in enumerate(rotations):
             if (abs(rotation[2][0]) < self.tol and
-                abs(rotation[2][1]) < self.tol and
-                abs(rotation[0][2]) < self.tol and
-                abs(rotation[1][2]) < self.tol and
-                abs(rotation[2][2] - 1.0) < self.tol
-            ):
+                    abs(rotation[2][1]) < self.tol and
+                    abs(rotation[0][2]) < self.tol and
+                    abs(rotation[1][2]) < self.tol and
+                    abs(rotation[2][2] - 1.0) < self.tol):
 
                 if not np.isclose(
-                        translations[i][2],
-                        z_symmetry,
-                        rtol=self.tol).any():
+                        translations[i][2], z_symmetry, rtol=self.tol).any():
                     z_symmetry += [translations[i][2]]
 
         # Find all unique z-shifts
@@ -163,9 +168,6 @@ class SlabGenerator(object):
 
             if not symmetry_found:
                 unique_shift += [z_planes[i]]
-
-        if len(unique_shift) == 1:
-            return unique_shift
 
         self.unique_terminations = unique_shift
 
@@ -201,11 +203,7 @@ class SlabGenerator(object):
             slab.wrap(pbc=True)
 
         # Get the minimum number of layers needed
-        zlayers = utils.get_unique_coordinates(
-            slab,
-            direct=False,
-            tol=self.tol
-        )
+        zlayers = utils.get_unique_coordinates(slab, direct=False, tol=self.tol)
 
         if self.min_width:
             width = slab.cell[2][2]
@@ -215,16 +213,8 @@ class SlabGenerator(object):
 
         slab *= (1, 1, int(z_repetitions))
 
-        # Orthogonalize the z-coordinate
-        # Warning: bulk symmetry is lost at this point
-        a1, a2, a3 = slab.cell
-        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) /
-              norm(np.cross(a1, a2)) ** 2)
-        slab.cell[2] = a3
-
         if primitive:
             if self.vacuum:
-
                 slab.center(vacuum=self.vacuum, axis=2)
             else:
                 raise ValueError('Primitive slab generation requires vacuum')
@@ -250,13 +240,16 @@ class SlabGenerator(object):
                 slab.wrap(pbc=True)
                 slab.center(vacuum=self.vacuum, axis=2)
 
+        # Orthogonalize the z-coordinate
+        # Warning: bulk symmetry is lost at this point
+        a1, a2, a3 = slab.cell
+        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
+            np.cross(a1, a2))**2)
+        slab.cell[2] = a3
+
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(
-            slab,
-            direct=False,
-            tag=True,
-            tol=self.tol
-        )
+            slab, direct=False, tag=True, tol=self.tol)
 
         reverse_sort = np.sort(zlayers)[::-1]
 
@@ -291,7 +284,36 @@ class SlabGenerator(object):
 
         return slab
 
-    def get_surface_atoms(self, slab=None):
+    def get_graph_from_bulk(self, slab, attach=False):
+        """Return the surface connectivity of a slab based on information
+        from the bulk basis is was constructed from.
+
+        Assumes the xy-plane is perpendicular to the miller index.
+
+        Parameters:
+        -----------
+        slab : atoms object
+            Atoms to find graph connectivity for.
+
+        Returns:
+        --------
+        surf_con : ndarray (n, n)
+            Connectivity matrix of the surface atoms with periodic boundary
+            conditions.
+        """
+        bulk_con = utils.get_voronoi_neighbors(self._basis)
+        d = self._basis.get_all_distances(mic=True)
+        maxd = d[bulk_con > 0].max()
+
+        surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
+
+        if attach:
+            G = nx.MultiGraph(surf_con)
+            slab.graph.add_edges_from(G.edges(data=True))
+
+        return surf_con
+
+    def get_voronoi_surface_atoms(self, slab, attach_graph=True):
         """Find the under-coordinated atoms at the upper and lower
         fraction of a given unit cell based on the bulk structure it
         originated from.
@@ -302,6 +324,8 @@ class SlabGenerator(object):
         -----------
         slab : atoms object
             The slab to find top layer atoms from.
+        attach_graph : bool
+            Store the slabs graph information in the passed  slab object.
 
         Returns:
         --------
@@ -311,12 +335,22 @@ class SlabGenerator(object):
             Array of atom indices corresponding to the bottom layer of
             the slab.
         """
-        ind, N, mcut = utils.get_voronoi_neighbors(self.bulk)
-        ind0, N0 = utils.get_cutoff_neighbors(slab, cutoff=mcut)
+        bulk_con = utils.get_voronoi_neighbors(self._basis)
+        d = self._basis.get_all_distances(mic=True)
+        maxd = d[bulk_con > 0].max()
+        btopo = bulk_con.sum(axis=0)
 
-        ind = np.repeat(ind, np.ceil(len(ind0) / len(ind)))
+        surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
+        stopo = surf_con.sum(axis=0)
 
-        surf_atoms = np.nonzero(ind0 - ind[:len(ind0)])[0]
+        if attach_graph:
+            edges = utils.connectivity_to_edges(surf_con)
+            slab.graph.add_weighted_edges_from(edges, weight='bonds')
+
+        # Expand bulk topology to match number of atoms in slab
+        btopo = np.repeat(btopo, np.ceil(len(stopo) / len(btopo)))
+
+        surf_atoms = np.nonzero(stopo - btopo[:len(stopo)])[0]
 
         bulk_atoms = set(np.arange(len(slab))) - set(surf_atoms)
 
@@ -324,21 +358,16 @@ class SlabGenerator(object):
             warnings.warn(
                 ("Your slab has no bulk atoms and is likely too thin "
                  "to identify surface atoms correctly. This may cause "
-                 "surface adsorption site identification to fail.")
-            )
+                 "surface adsorption site identification to fail."))
 
         hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
         top = surf_atoms[hwp.T[2] > 0]
-
         bottom = surf_atoms[hwp.T[2] < 0]
-
-        self.surface_atoms = top
 
         return top, bottom
 
     def adsorption_sites(self, slab, **kwargs):
-        """Helper function to return the adsorption sites
-        of the provided slab.
+        """Helper function to return the adsorption sites of the provided slab.
 
         Parameters:
         -----------
@@ -348,33 +377,20 @@ class SlabGenerator(object):
 
         Returns:
         --------
-        sites : dict of 3 lists
-            Dictionary of top, bridge, hollow, and 4-fold sites containing
-            positions, points, and neighbor lists. If adsorption vectors
-            are requested, the third list is replaced.
+        coordinates : ndarray (n,)
+            Coordinates of the adsorption sites
+        connectivity : ndarray (n,)
+            Connectivity of the adsorption sites
         """
-        if slab != self.slab or self.surface_atoms is None:
-            surface_sites = self.get_surface_atoms(slab)[0]
+        if slab != self.slab or slab.get_surface_atoms() is None:
+            surface_sites = self.get_voronoi_surface_atoms(slab)[0]
+            slab.set_surface_atoms(surface_sites)
             self.slab = slab
-        else:
-            surface_sites = self.surface_atoms
 
-        if kwargs.get('return_proxy'):
-            sites, vslab = adsorption.get_adsorption_sites(
-                slab=slab,
-                surface_sites=surface_sites,
-                **kwargs
-            )
+        coordinates, connectivity = adsorption.get_adsorption_sites(
+            slab=slab, **kwargs)
 
-            return sites, vslab
-
-        sites = adsorption.get_adsorption_sites(
-            slab=slab,
-            surface_sites=surface_sites,
-            **kwargs
-        )
-
-        return sites
+        return coordinates, connectivity
 
 
 def ext_gcd(a, b):
