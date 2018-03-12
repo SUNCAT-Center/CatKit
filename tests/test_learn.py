@@ -17,10 +17,7 @@ def test_learning():
 
     kernel = DotProduct() + WhiteKernel()
     gp = GaussianProcessRegressor(
-        kernel=kernel,
-        optimizer=optimizer,
-        n_restarts_optimizer=0,
-        alpha=0)
+        kernel=kernel, optimizer=optimizer, n_restarts_optimizer=0, alpha=0)
     gp.fit(X0, y0)
 
     # This is an ugly way to define default properties
@@ -29,14 +26,11 @@ def test_learning():
     optimizer.__defaults__ = (True, 'L-BFGS-B', 3)
 
     gp = GaussianProcessRegressor(
-        kernel=kernel,
-        optimizer=optimizer,
-        n_restarts_optimizer=0,
-        alpha=0)
+        kernel=kernel, optimizer=optimizer, n_restarts_optimizer=0, alpha=0)
     gp.fit(X0, y0)
 
-    samples = online_learning(X, y, [0, 1, 2], factors=[1, 1],
-                              nsteps=3, plot=True)
+    samples = online_learning(
+        X, y, [0, 1, 2], factors=[1, 1], nsteps=3, plot=True)
     test_array = np.array([0, 1, 2, 808, 4877, 3747])
 
     np.testing.assert_allclose(samples, test_array)

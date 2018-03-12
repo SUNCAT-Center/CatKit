@@ -523,9 +523,10 @@ class ReactionNetwork():
                                bond_tag not in molecules[comp_tag]:
                                 continue
 
-                            subst_pathway = np.array(
-                                [sorted([0, iRa[::-1][i]]),
-                                 sorted([iP1, iP2])])
+                            subst_pathway = np.array([
+                                sorted([0, iRa[::-1][i]]),
+                                sorted([iP1, iP2])
+                            ])
 
                             for G in molecules[comp_tag][bond_tag]:
                                 if R_P1.is_isomorph(G):
@@ -536,9 +537,9 @@ class ReactionNetwork():
                                         sorted([iP1, iP2])
                                     ])
 
-                                    sum_index = (','.join(
-                                        subst_pathway[0].astype(str)), ','.join(
-                                            subst_pathway[1].astype(str)))
+                                    sum_index = (
+                                        ','.join(subst_pathway[0].astype(str)),
+                                        ','.join(subst_pathway[1].astype(str)))
 
                                     if sum_index not in substitution_set:
                                         # These are identical

@@ -142,11 +142,11 @@ class SlabGenerator(object):
         # Find all symmetries which are rotations about the z-axis
         z_symmetry = []
         for i, rotation in enumerate(rotations):
-            if (abs(rotation[2][0]) < self.tol and
-                    abs(rotation[2][1]) < self.tol and
-                    abs(rotation[0][2]) < self.tol and
-                    abs(rotation[1][2]) < self.tol and
-                    abs(rotation[2][2] - 1.0) < self.tol):
+            if (abs(rotation[2][0]) < self.tol
+                    and abs(rotation[2][1]) < self.tol
+                    and abs(rotation[0][2]) < self.tol
+                    and abs(rotation[1][2]) < self.tol
+                    and abs(rotation[2][2] - 1.0) < self.tol):
 
                 if not np.isclose(
                         translations[i][2], z_symmetry, rtol=self.tol).any():
@@ -203,7 +203,8 @@ class SlabGenerator(object):
             slab.wrap(pbc=True)
 
         # Get the minimum number of layers needed
-        zlayers = utils.get_unique_coordinates(slab, direct=False, tol=self.tol)
+        zlayers = utils.get_unique_coordinates(
+            slab, direct=False, tol=self.tol)
 
         if self.min_width:
             width = slab.cell[2][2]

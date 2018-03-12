@@ -17,12 +17,12 @@ def test_database():
                                 'Atomic charge: depth {}'.format(i))
             fpd.parameter_entry('r{}'.format(i),
                                 'Cordero covalent radius: depth {}'.format(i))
-            fpd.parameter_entry('x{}'.format(i),
-                                'Pauling electronegetivity: depth {}'.format(i))
+            fpd.parameter_entry(
+                'x{}'.format(i),
+                'Pauling electronegetivity: depth {}'.format(i))
             fpd.parameter_entry('T{}'.format(i),
                                 'Coordination number: depth {}'.format(i))
-            fpd.parameter_entry('1{}'.format(i),
-                                'Unity: depth {}'.format(i))
+            fpd.parameter_entry('1{}'.format(i), 'Unity: depth {}'.format(i))
         fpd.parameter_entry('Ef', 'Formation energy')
         fpd.parameter_entry('Et', 'Total energy')
 

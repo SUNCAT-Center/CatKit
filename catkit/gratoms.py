@@ -145,7 +145,7 @@ class Gratoms(Atoms):
         n2 = len(other)
 
         for name, a1 in self.arrays.items():
-            a = np.zeros((n1 + n2,) + a1.shape[1:], a1.dtype)
+            a = np.zeros((n1 + n2, ) + a1.shape[1:], a1.dtype)
             a[:n1] = a1
             if name == 'masses':
                 a2 = other.get_masses()
@@ -158,7 +158,7 @@ class Gratoms(Atoms):
         for name, a2 in other.arrays.items():
             if name in self.arrays:
                 continue
-            a = np.empty((n1 + n2,) + a2.shape[1:], a2.dtype)
+            a = np.empty((n1 + n2, ) + a2.shape[1:], a2.dtype)
             a[n1:] = a2
             if name == 'masses':
                 a[:n1] = self.get_masses()[:n1]
@@ -220,7 +220,8 @@ class Gratoms(Atoms):
 
         for x, vec in zip(m, self._cell):
             if x != 1 and not vec.any():
-                raise ValueError('Cannot repeat along undefined lattice vector')
+                raise ValueError(
+                    'Cannot repeat along undefined lattice vector')
 
         if self.pbc.any() and len(self.edges()) > 0:
             raise ValueError("Edge conservation not currently supported with "
@@ -230,7 +231,7 @@ class Gratoms(Atoms):
         n = len(self)
 
         for name, a in self.arrays.items():
-            self.arrays[name] = np.tile(a, (M,) + (1,) * (len(a.shape) - 1))
+            self.arrays[name] = np.tile(a, (M, ) + (1, ) * (len(a.shape) - 1))
             cgraph = self._graph.copy()
 
         positions = self.arrays['positions']

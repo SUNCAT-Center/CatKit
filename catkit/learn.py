@@ -45,7 +45,7 @@ def optimizer(obj_func,
     """
     margs = {
         'method': minimizer,
-        'args': (gradient,),
+        'args': (gradient, ),
         'jac': gradient,
         'bounds': bounds,
     }
