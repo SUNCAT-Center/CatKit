@@ -30,14 +30,14 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        db_name : str
+        db_name: str
             Name of the database file to access. Will connect to
             'reaction-network.db' by default.
-        base_valence : array (n,)
+        base_valence: array (n,)
             The maximum number of bonds each chemical species may form. Each
             entry of the array is the bond limit of the corresponding atomic
             number. The 0th entry of the array is ignored.
-        nbond_limits : array (n, n):
+        nbond_limits: array (n, n):
             The maximum number of bonds that can be formed when species of
             index 0 is bonding to a species of index 1. Each entry of the array
             is the bond limit of the corresponding atomic number. The 0th entry
@@ -77,6 +77,7 @@ class ReactionNetwork():
 
     def create_table(self):
         """Create the SQLite database table framework."""
+
         self.c.execute("""CREATE TABLE IF NOT EXISTS molecules(
         molecule_pid INTEGER PRIMARY KEY AUTOINCREMENT,
         comp_tag CHAR NOT NULL,
@@ -138,23 +139,22 @@ class ReactionNetwork():
         FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid)
         )""")
 
-    def molecule_search(self,
-                        element_pool={
-                            'C': 2,
-                            'H': 6
-                        },
-                        load_molecules=True,
-                        multiple_bond_search=False):
+    def molecule_search(
+            self,
+            element_pool={'C': 2, 'H': 6},
+            load_molecules=True,
+            multiple_bond_search=False
+    ):
         """Return the enumeration of molecules which can be produced from
         the specified atoms.
 
         Parameters:
         -----------
-        element_pool : dict
+        element_pool: dict
             Atomic symbols keys paired with the maximum number of that atom.
-        load_molecules : bool
+        load_molecules: bool
             Load any existing molecules from the database.
-        multiple_bond_search : bool
+        multiple_bond_search: bool
             Allow atoms to form bonds with other atoms in the molecule.
         """
         numbers = np.zeros(len(self.base_valence))
@@ -175,7 +175,7 @@ class ReactionNetwork():
                 continue
 
             molecule = Gratoms(symbols=[el])
-            molecule.graph.node[0]['valence'] = self.base_valence[el]
+            molecule.nodes[0]['valence'] = self.base_valence[el]
 
             search_molecules += [molecule]
 
@@ -187,7 +187,9 @@ class ReactionNetwork():
 
             # Recusive use of molecules
             new_molecules, molecules = self._branch_molecule(
-                molecule, molecules)
+                molecule,
+                molecules
+            )
 
             search_molecules += new_molecules
 
@@ -213,15 +215,17 @@ class ReactionNetwork():
             new_molecules.
         """
         new_molecules = []
-        nodes = molecule.graph.node
+        nodes = molecule.nodes
         counter = np.bincount(
-            molecule.get_atomic_numbers(), minlength=len(self.base_valence))
+            molecule.get_atomic_numbers(),
+            minlength=len(self.base_valence)
+        )
 
         for base_node in nodes:
 
             # Check if an additional bond can be formed
             valence = nodes[base_node]['valence']
-            base_el = nodes[base_node]['number']
+            base_el = molecule.nodes[base_node]['number']
 
             # Creating new nodes
             for el, cnt in enumerate(self.element_pool):
@@ -240,9 +244,9 @@ class ReactionNetwork():
                 G = molecule.copy()
                 node_index = len(G)
 
-                G.graph.node[base_node]['valence'] -= 1
+                G.nodes[base_node]['valence'] -= 1
                 G += Atom(el)
-                G.graph.node[node_index]['valence'] = self.base_valence[el] - 1
+                G.nodes[node_index]['valence'] = self.base_valence[el] - 1
                 G.graph.add_edge(base_node, node_index, bonds=1)
 
                 comp_tag, bond_tag = G.get_chemical_tags()
@@ -276,19 +280,22 @@ class ReactionNetwork():
                         continue
 
                     valence_new = nodes[existing_node]['valence']
-                    el = nodes[existing_node]['number']
+                    el = molecule.nodes[existing_node]['number']
 
                     if valence_new <= 0:
                         continue
 
-                    if self._maximum_bond_limit(molecule, base_node,
-                                                existing_node):
+                    if self._maximum_bond_limit(
+                            molecule,
+                            base_node,
+                            existing_node
+                    ):
                         continue
 
                     G = molecule.copy()
 
-                    G.graph.node[base_node]['valence'] -= 1
-                    G.graph.node[existing_node]['valence'] -= 1
+                    G.nodes[base_node]['valence'] -= 1
+                    G.nodes[existing_node]['valence'] -= 1
                     if G.graph.has_edge(base_node, existing_node):
                         G.graph[base_node][existing_node]['bonds'] += 1
                     else:
@@ -315,7 +322,11 @@ class ReactionNetwork():
 
         return new_molecules, molecules
 
-    def path_search(self, reconfiguration=True, substitution=True):
+    def path_search(
+            self,
+            reconfiguration=True,
+            substitution=True
+    ):
         """Search for reaction mechanisms from a pre-populated database
         of molecules. By default, only single bond addition pathways are
         enumerated (Also called elementary steps).
@@ -338,7 +349,8 @@ class ReactionNetwork():
                 for molecule in molecule_list:
 
                     add_pathways, broken_bonds = self._get_addition_paths(
-                        molecule, molecules)
+                        molecule,
+                        molecules)
 
                     pathways += add_pathways
                     bbonds += broken_bonds
@@ -353,7 +365,11 @@ class ReactionNetwork():
             sub_pathways = self._get_substitution_paths(molecules, pathways)
             self.save_pathways(sub_pathways)
 
-    def _get_addition_paths(self, molecule, molecules):
+    def _get_addition_paths(
+            self,
+            molecule,
+            molecules
+    ):
         """TODO: I can haz documentation?"""
         disjoints, pathways, broken_bonds = [], [], []
         for u, v, data in molecule.edges(data=True):
@@ -377,7 +393,9 @@ class ReactionNetwork():
                 product_index = cut_molecule.graph.name
                 pieces = list(nx.connected_components(cut_molecule.graph))
 
-                addition_pathway = np.array([[0, 0], [product_index, 0]])
+                addition_pathway = np.array([
+                    [0, 0],
+                    [product_index, 0]])
                 for i, piece in enumerate(pieces):
 
                     if len(pieces) == 2:
@@ -399,7 +417,11 @@ class ReactionNetwork():
 
         return pathways, broken_bonds
 
-    def _get_reconfiguration_paths(self, molecules, pathways):
+    def _get_reconfiguration_paths(
+            self,
+            molecules,
+            pathways
+    ):
         """TODO: I can haz documentation?"""
         ind_mol = self.load_molecules()
 
@@ -425,6 +447,7 @@ class ReactionNetwork():
 
             for b1 in p1_bonds:
                 for b2 in p2_bonds:
+
                     Pt = mol_R1 + mol_R2
                     Pt.graph.add_edge(b1, b2, bonds=1)
 
@@ -438,7 +461,9 @@ class ReactionNetwork():
                         reconfigurations += [Pt]
 
             del reconfigurations[0]
-            reconfig_pathway = np.array([[P2, 0], [0, 0]])
+            reconfig_pathway = np.array([
+                [P2, 0],
+                [0, 0]])
             for Pt in reconfigurations:
                 comp_tag, bond_tag = Pt.get_chemical_tags()
 
@@ -460,7 +485,10 @@ class ReactionNetwork():
             [path.sort() for path in new_pathways]
         return new_pathways
 
-    def _get_substitution_paths(self, molecules, pathways):
+    def _get_substitution_paths(
+            self,
+            molecules,
+            pathways):
         """TODO: I can haz documentation?
 
         Follows the form:
@@ -491,15 +519,15 @@ class ReactionNetwork():
                 continue
 
             for iRa, iPa in pathways:
-                iR1, iR2 = iRa.astype(int)
-                _, iP2 = iPa.astype(int)
+                iR1, iR2 = iRa
+                _, iP2 = iPa
 
                 # Ignore bonding pathways
                 if not iR1:
                     continue
 
                 for i, iR in enumerate(iRa):
-                    R = ind_mol[int(iR)]
+                    R = ind_mol[iR]
                     nR = len(R)
 
                     # Don't create larger molecules
@@ -522,9 +550,8 @@ class ReactionNetwork():
                                 continue
 
                             subst_pathway = np.array([
-                                sorted([0, iRa.astype(int)[::-1][i]]),
-                                sorted([iP1, iP2])
-                            ])
+                                sorted([0, iRa[::-1][i]]),
+                                sorted([iP1, iP2])])
 
                             for G in molecules[comp_tag][bond_tag]:
                                 if R_P1.is_isomorph(G):
@@ -532,12 +559,11 @@ class ReactionNetwork():
 
                                     subst_pathway = np.array([
                                         sorted([iR_P1, iRa[::-1][i]]),
-                                        sorted([iP1, iP2])
-                                    ])
+                                        sorted([iP1, iP2])])
 
-                                    sum_index = (','.join(
-                                        subst_pathway[0].astype(str)), ','.join(
-                                            subst_pathway[1].astype(str)))
+                                    sum_index = (
+                                        ','.join(subst_pathway[0].astype(str)),
+                                        ','.join(subst_pathway[1].astype(str)))
 
                                     if sum_index not in substitution_set:
                                         # These are identical
@@ -554,14 +580,15 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        molecules : dict
+        molecules: dict
             Molecules to be saved to the database.
         """
         for comp_tag, data in molecules.items():
             for bond_tag, molecule_list in data.items():
                 for molecule in molecule_list:
 
-                    self.c.execute("""INSERT INTO molecules
+                    self.c.execute(
+                        """INSERT INTO molecules
                         (comp_tag, bond_tag)
                         VALUES(?, ?)""", (comp_tag, bond_tag))
 
@@ -574,7 +601,8 @@ class ReactionNetwork():
                             """INSERT INTO bonds
                             (molecule_id, node_id1, node_id2, nbonds)
                             VALUES(?, ?, ?, ?)""",
-                            (molecule_pid, int(u), int(v), int(bonds)))
+                            (molecule_pid, int(u), int(v), int(bonds))
+                        )
 
                     for node, data in molecule.nodes(data=True):
                         number = int(data.get('number'))
@@ -587,7 +615,8 @@ class ReactionNetwork():
                             """INSERT INTO atoms
                             (molecule_id, node_id, atom_num, valence)
                             VALUES(?, ?, ?, ?)""",
-                            (molecule_pid, int(node), number, int(valence)))
+                            (molecule_pid, int(node), number, int(valence))
+                        )
 
     def save_pathways(self, pathways, broken_bonds=None):
         """Save enumerated pathways the ReactionNetwork database.
@@ -595,9 +624,9 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        pathways : list
+        pathways: list
             Sorted pathways in the form [R1, R2, P1, P2].
-        broken_bonds : list
+        broken_bonds: list
             Comma separated strings of index associated with the
             two atoms whos bond is broken. List order must match
             pathways.
@@ -613,11 +642,12 @@ class ReactionNetwork():
                 bbond = None
 
             try:
-                self.c.execute("""INSERT INTO reactions
+                self.c.execute(
+                    """INSERT INTO reactions
                     (product1, product2, reactant1, reactant2, broken_bond)
                     VALUES(?, ?, ?, ?, ?)""",
-                               (int(P1), int(P2), int(R1), int(R2), bbond))
-            except (sqlite3.IntegrityError):
+                    (int(P1), int(P2), int(R1), int(R2), bbond))
+            except(sqlite3.IntegrityError):
                 pass
 
     def load_molecules(self, ids=None, binned=False):
@@ -625,13 +655,13 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        binned : bool
+        binned: bool
             Return the molecules in sub-dictionaries of their
             corresponding composition and bonding tags.
 
         Returns:
         --------
-        molecules : dict
+        molecules: dict
             All molecules present in the database.
         """
         if isinstance(ids, list):
@@ -672,7 +702,9 @@ class ReactionNetwork():
 
             # Unpacks node, number, and valence
             node_data = np.array(
-                [_.split(',') for _ in node_data.split(';')], dtype=int)
+                [_.split(',') for _ in node_data.split(';')],
+                dtype=int
+            )
 
             data, symbols = {}, []
             for node, n, valence in node_data:
@@ -680,12 +712,14 @@ class ReactionNetwork():
                 symbols += [n]
 
             molecule = Gratoms(symbols)
-            molecule.graph.name = str(index)
-            nx.set_node_attributes(molecule.graph, values=data, name='valence')
+            molecule.graph.name = index
+            nx.set_node_attributes(molecule.graph, data, 'valence')
 
             if edge_data:
                 edges = np.array(
-                    [_.split(',') for _ in edge_data.split(';')], dtype=int)
+                    [_.split(',') for _ in edge_data.split(';')],
+                    dtype=int
+                )
                 molecule.graph.add_weighted_edges_from(edges, weight='bonds')
 
             if binned:
@@ -707,13 +741,13 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        broken_bonds : bool
+        broken_bonds: bool
             Return the index information of which bond was broken.
             Only supported for elementary steps.
 
         Returns:
         --------
-        pathways : list
+        pathways: list
             All pathways present in the database.
         """
         if broken_bonds:
@@ -741,7 +775,7 @@ class ReactionNetwork():
             for _ in path:
                 try:
                     _add += [int(_)]
-                except (ValueError, TypeError):
+                except(ValueError, TypeError):
                     _add += [_]
 
             pathways += [_add]
@@ -755,9 +789,9 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        gratoms : Gratoms or Atoms object
+        gratoms: Gratoms or Atoms object
             Object with Cartesian coordinates to be saved.
-        overwrite : bool
+        overwrite: bool
             Allow the database to overwrite a matching index.
         """
         name = gratoms.graph.name
@@ -775,17 +809,19 @@ class ReactionNetwork():
             if match:
                 match = match[0].split(',')
 
-                assert (len(match) == len(gratoms))
+                assert(len(match) == len(gratoms))
 
                 for i, atom in enumerate(gratoms):
                     x, y, z = atom.position
 
-                    self.c.execute("""UPDATE positions
+                    self.c.execute(
+                        """UPDATE positions
                         SET x_coord = ?,
                             y_coord = ?,
                             z_coord = ?
                         WHERE position_pid = ?
-                        """, (x, y, z, match[i]))
+                        """, (x, y, z, match[i])
+                    )
 
                 return
 
@@ -793,22 +829,25 @@ class ReactionNetwork():
             x, y, z = atom.position
             symbol = atom.get('symbol')
 
-            self.c.execute("""INSERT INTO positions
+            self.c.execute(
+                """INSERT INTO positions
                 (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)
-                VALUES(?, ?, ?, ?, ?, ?)""", (name, i, x, y, z, symbol))
+                VALUES(?, ?, ?, ?, ?, ?)""",
+                (name, i, x, y, z, symbol)
+            )
 
     def load_3d_structures(self, ids=None):
         """Return Gratoms objects from the ReactionNetwork database.
 
         Parameters:
         -----------
-        ids : int or list of int
+        ids: int or list of int
             Identifier of the molecule in the database. If None, return all
             structure.
 
         Returns:
         --------
-        images : list
+        images: list
             All Gratoms objects in the database.
         """
         if isinstance(ids, list):
@@ -830,7 +869,8 @@ class ReactionNetwork():
 
                 symbols = out[1].split(';')
                 positions = np.array(
-                    [_.split(',') for _ in out[0].split(';')], dtype=float)
+                    [_.split(',')
+                     for _ in out[0].split(';')], dtype=float)
 
                 gratoms = Gratoms(symbols, positions)
                 gratoms.graph.name = i
@@ -856,7 +896,8 @@ class ReactionNetwork():
 
             symbols = out[1].split(';')
             positions = np.array(
-                [_.split(',') for _ in out[0].split(';')], dtype=float)
+                [_.split(',')
+                 for _ in out[0].split(';')], dtype=float)
 
             gratoms = Gratoms(symbols, positions)
             gratoms.graph.name = int(ids)
@@ -876,20 +917,19 @@ class ReactionNetwork():
 
         network = nx.Graph(pathways)
 
-        fig = plt.figure(figsize=(4, 4), frameon=False)
-        fig.add_axes([0, 0, 1, 1])
+        plt.figure(figsize=(6, 6))
         nx.draw_networkx(network)
         plt.draw()
         plt.axis('off')
 
         if file_name:
-            plt.savefig(file_name, transparent=True)
+            plt.savefig(file_name)
         plt.close()
 
     def _maximum_bond_limit(self, molecule, n1, n2):
         """Return whether a maximum bonding limit has been met."""
-        el1 = molecule.graph.node[n1]['number']
-        el2 = molecule.graph.node[n2]['number']
+        el1 = molecule.nodes[n1]['number']
+        el2 = molecule.nodes[n2]['number']
 
         bonds = 0
         if molecule.graph.has_edge(n1, n2):
