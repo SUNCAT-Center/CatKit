@@ -53,7 +53,7 @@ def trilaterate(centers, r):
 
         x = (r[0]**2 - r[1]**2 + d**2) / (2 * d)
         y = (r[0]**2 - r[2]**2 - 2 * i * x + i**2 + j**2) / (2 * j)
-        z = np.sqrt(r[0]**2 - x**2 - y**2)
+        z = -np.sqrt(r[0]**2 - x**2 - y**2)
         intersection = centers[0] + x * uvec1 + y * uvec2 + z * uvec3
 
     return intersection

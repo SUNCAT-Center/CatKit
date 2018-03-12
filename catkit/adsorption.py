@@ -92,7 +92,8 @@ class AdsorptionSites():
         else:
             return topology
 
-    def _get_higher_coordination_sites(self, top_coordinates,
+    def _get_higher_coordination_sites(self,
+                                       top_coordinates,
                                        allow_obtuse=True):
         """Find all bridge and hollow sites (3-fold and 4-fold) given an
         input slab based Delaunay triangulation of surface atoms of a
