@@ -81,7 +81,7 @@ def test_adsorption_examples():
     atoms.set_surface_atoms([8, 9, 10, 11])
 
     sites = AdsorptionSites(atoms)
-    sites.plot('./Pd3Cu-adsorption-sites.png')
+    sites.plot('./images/Pd3Cu-adsorption-sites.png')
 
     atoms = bulk('Pd', 'fcc', a=5, cubic=True)
     atoms[3].symbol = 'Cu'

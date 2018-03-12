@@ -110,6 +110,8 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
 
         if plot:
             mae = np.round(mean_absolute_error(yp, y), 3)
+            n = len(samples)
+
             fig, ax = plt.subplots(figsize=(6, 4))
             ax.plot(ids, y, 'o', zorder=0)
             ax.errorbar(ids, yp, yerr=ys, fmt='o', zorder=1)
@@ -118,7 +120,7 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
             ylim = ax.get_ylim()
             ax.text(xlim[0] / 9.0, ylim[0] / 9.0, mae)
             plt.tight_layout()
-            plt.savefig('./images/online-learning-RBF-{}.png'.format(step))
+            plt.savefig('./images/online-learning-RBF-{}.png'.format(n))
             plt.close()
 
         step += 1
