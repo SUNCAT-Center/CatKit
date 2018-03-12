@@ -1,3 +1,5 @@
+import matplotlib
+matplotlib.use('Agg')
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 from sklearn.model_selection import train_test_split

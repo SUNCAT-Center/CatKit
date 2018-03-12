@@ -7,7 +7,8 @@ import os
 
 
 def test_molecule_generation():
-    os.makedirs('temp')
+    if not os.path.exists('temp'):
+        os.makedirs('temp')
     db_name = 'temp/temp.db'
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(

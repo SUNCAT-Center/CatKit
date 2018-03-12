@@ -91,14 +91,14 @@ class Gratoms(Atoms):
 
         return isomorphic
 
-    def get_chemical_tags(self, rank=1):
+    def get_chemical_tags(self, rank=2):
         """Generate a hash descriptive of the chemical formula (rank 0)
         or include bonding (rank 1).
         """
         cnt = np.bincount(self.arrays['numbers'])
         composition = ','.join(cnt.astype(str))
 
-        if rank != 1:
+        if rank == 1:
             return composition[2:]
 
         for adj in self.adj.items():
