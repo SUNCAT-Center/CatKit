@@ -1,3 +1,4 @@
+from __future__ import division
 from . import Gratoms
 from . import utils
 from . import adsorption
@@ -26,7 +27,7 @@ class SlabGenerator(object):
                  miller_index=[1, 1, 1],
                  layers=4,
                  min_width=None,
-                 fixed=2,
+                 fixed=0,
                  vacuum=0,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
@@ -95,7 +96,7 @@ class SlabGenerator(object):
 
             if abs(k2) > self.tol:
                 # i corresponding to the optimal basis
-                i = -int(round(k1 / k2))
+                i = -int(np.round(k1 / k2))
                 p, q = p + i * l, q - i * k
 
             a, b = ext_gcd(p * k + q * l, h)
@@ -212,16 +213,8 @@ class SlabGenerator(object):
 
         slab *= (1, 1, int(z_repetitions))
 
-        # Orthogonalize the z-coordinate
-        # Warning: bulk symmetry is lost at this point
-        a1, a2, a3 = slab.cell
-        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
-            np.cross(a1, a2))**2)
-        slab.cell[2] = a3
-
         if primitive:
             if self.vacuum:
-
                 slab.center(vacuum=self.vacuum, axis=2)
             else:
                 raise ValueError('Primitive slab generation requires vacuum')
@@ -246,6 +239,13 @@ class SlabGenerator(object):
                 slab.positions -= [0, 0, translate + self.tol]
                 slab.wrap(pbc=True)
                 slab.center(vacuum=self.vacuum, axis=2)
+
+        # Orthogonalize the z-coordinate
+        # Warning: bulk symmetry is lost at this point
+        a1, a2, a3 = slab.cell
+        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
+            np.cross(a1, a2))**2)
+        slab.cell[2] = a3
 
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(

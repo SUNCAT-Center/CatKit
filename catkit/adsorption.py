@@ -43,16 +43,14 @@ class AdsorptionSites():
         self.r2_topology = sites['top'][2]
 
         # Put data into array format
-        for i, items in enumerate(sites.items()):
-            k, v = items
-            if k is 'top':
-                continue
-            coords, r1top, r2top = v
+        selection = ['bridge', 'hollow', '4fold']
+        for i, k in enumerate(selection):
+            coords, r1top, r2top = sites[k]
 
             if k in ['hollow', '4fold']:
                 r2top = [[] for _ in coords]
 
-            self.connectivity += (np.ones(len(coords)) * (i + 1)).tolist()
+            self.connectivity += (np.ones(len(coords)) * (i + 2)).tolist()
             self.coordinates += coords
             self.r1_topology += r1top
             self.r2_topology += r2top
@@ -197,8 +195,11 @@ class AdsorptionSites():
                 edge = sorted(edge)
                 i = sites['bridge'][1].index(edge)
                 n, m = sites['bridge'][1][i], sites['bridge'][2][i]
-                nn = (set(s) - set(n + m))
-                sites['bridge'][2][i] += [list(nn)[0]]
+                nn = list(set(s) - set(n + m))
+
+                if len(nn) == 0:
+                    continue
+                sites['bridge'][2][i] += [nn[0]]
 
         return sites
 
