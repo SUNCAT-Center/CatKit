@@ -1,7 +1,6 @@
 from scipy.optimize import minimize
 from scipy.optimize import basinhopping
 import matplotlib.pyplot as plt
-from sklearn.gaussian_process.kernels import ConstantKernel, RBF
 from sklearn.gaussian_process.kernels import WhiteKernel, DotProduct
 from sklearn.metrics import mean_absolute_error
 from sklearn.gaussian_process import GaussianProcessRegressor
@@ -73,15 +72,14 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
     components required are a regression method and a scoring
     technique.
 
-    Currently, the scoring methodology is baked in. This needs
-    to be made modular.
+    Currently, the scoring methodology and regressor are baked in.
+    These need to be made modular.
 
     Minimum 3 samples are required for 3 fold cross validation.
     """
     ids = np.arange(len(y))
 
-    kernel = ConstantKernel(1, (1e-7, 1e7)) * RBF() + WhiteKernel()
-    # kernel = DotProduct() + WhiteKernel()
+    kernel = DotProduct() + WhiteKernel()
     regressor = GaussianProcessRegressor(
         kernel=kernel, n_restarts_optimizer=5, alpha=0)
 

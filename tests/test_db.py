@@ -3,21 +3,26 @@ from ase.db import connect
 import networkx as nx
 import numpy as np
 import json
-import os
 
 db = connect('data/molecules.db')
 with open('data/chemical-properties.json', 'r') as f:
     properties = json.load(f)
 
+
 def test_database():
     dstar = 8
     with FingerprintDB('fingerprints.db') as fpd:
         for i in range(dstar + 1):
-            fpd.parameter_entry('Z{}'.format(i), 'Atomic charge: depth {}'.format(i))
-            fpd.parameter_entry('r{}'.format(i), 'Cordero covalent radius: depth {}'.format(i))
-            fpd.parameter_entry('x{}'.format(i), 'Pauling electronegetivity: depth {}'.format(i))
-            fpd.parameter_entry('T{}'.format(i), 'Coordination number: depth {}'.format(i))
-            fpd.parameter_entry('1{}'.format(i), 'Unity: depth {}'.format(i))
+            fpd.parameter_entry('Z{}'.format(i),
+                                'Atomic charge: depth {}'.format(i))
+            fpd.parameter_entry('r{}'.format(i),
+                                'Cordero covalent radius: depth {}'.format(i))
+            fpd.parameter_entry('x{}'.format(i),
+                                'Pauling electronegetivity: depth {}'.format(i))
+            fpd.parameter_entry('T{}'.format(i),
+                                'Coordination number: depth {}'.format(i))
+            fpd.parameter_entry('1{}'.format(i),
+                                'Unity: depth {}'.format(i))
         fpd.parameter_entry('Ef', 'Formation energy')
         fpd.parameter_entry('Et', 'Total energy')
 
@@ -39,14 +44,14 @@ def test_database():
             W[0] = atoms.numbers
 
             for i, n in enumerate(W[0]):
-                W[1][i] = properties[str(int(n))]['covalent_radius_cordero'] / 100
-                W[2][i] = properties[str(int(n))]['en_pauling']
+                ind = str(int(n))
+                W[1][i] = properties[ind]['covalent_radius_cordero'] / 100
+                W[2][i] = properties[ind]['en_pauling']
                 W[3][i] = len(G[i])
 
             for dd in range(dstar + 1):
                 B = Bm.copy()
                 B[distance_matrix == dd] = 1
-
                 AC = np.dot(np.dot(W, B), W.T).diagonal()
 
                 for j, v in enumerate(AC):
