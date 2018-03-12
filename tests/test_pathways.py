@@ -11,8 +11,10 @@ def test_molecule_generation():
     db_name = 'temp/temp.db'
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=False)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=False)
 
         molecules = rn.load_molecules()
         assert (len(molecules) == 17)
@@ -22,8 +24,7 @@ def test_molecule_generation():
         assert (len(pathways) == 27)
 
         for i, molecule in molecules.items():
-            plot_molecule(
-                molecule, file_name='temp/molecule-{}.png'.format(i))
+            plot_molecule(molecule, file_name='temp/molecule-{}.png'.format(i))
 
             molecule = get_uff_coordinates(molecule, steps=50)
             rn.save_3d_structure(molecule)
@@ -34,8 +35,10 @@ def test_molecule_generation():
     os.unlink(db_name)
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=False)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=False)
 
         molecules = rn.load_molecules()
         assert (len(molecules) == 17)
@@ -47,8 +50,10 @@ def test_molecule_generation():
     os.unlink(db_name)
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=False)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=False)
 
         molecules = rn.load_molecules()
         assert (len(molecules) == 17)
@@ -60,8 +65,10 @@ def test_molecule_generation():
     os.unlink(db_name)
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=True)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=True)
 
         molecules = rn.load_molecules()
         print(len(molecules))
@@ -74,8 +81,10 @@ def test_molecule_generation():
     os.unlink(db_name)
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=True)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=True)
 
         molecules = rn.load_molecules()
         assert (len(molecules) == 26)
@@ -87,8 +96,10 @@ def test_molecule_generation():
     os.unlink(db_name)
     with ReactionNetwork(db_name=db_name) as rn:
         rn.molecule_search(
-            element_pool={'C': 2, 'H': 6},
-            multiple_bond_search=True)
+            element_pool={
+                'C': 2,
+                'H': 6
+            }, multiple_bond_search=True)
 
         molecules = rn.load_molecules()
         assert (len(molecules) == 26)
@@ -96,6 +107,7 @@ def test_molecule_generation():
         rn.path_search(reconfiguration=True, substitution=True)
         pathways = rn.load_pathways()
         assert (len(pathways) == 437)
+
 
 if __name__ == "__main__":
     test_molecule_generation()
