@@ -69,28 +69,34 @@ class AdsorptionSites():
 
         self.screen = screen
 
-    def get_connectivity(self, screen=True):
+    def get_connectivity(self, unique=True):
         """Return the number of connections associated with each site."""
-        if screen:
-            return self.connectivity[self.screen]
+        if unique:
+            sel = self.get_symmetric_sites()
         else:
-            return self.connectivity
+            sel = self.get_periodic_sites()
 
-    def get_coordinates(self, screen=True):
+        return self.connectivity[sel]
+
+    def get_coordinates(self, unique=True):
         """Return the 3D coordinates associated with each site."""
-        if screen:
-            return self.coordinates[self.screen]
+        if unique:
+            sel = self.get_symmetric_sites()
         else:
-            return self.coordinates
+            sel = self.get_periodic_sites()
 
-    def get_topology(self, screen=True):
+        return self.coordinates[sel]
+
+    def get_topology(self, unique=True):
         """Return the indices of adjacent surface atoms."""
         topology = [self.index[top] for top in self.r1_topology]
         topology = np.array(topology)
-        if screen:
-            return topology[self.screen]
+        if unique:
+            sel = self.get_symmetric_sites()
         else:
-            return topology
+            sel = self.get_periodic_sites()
+
+        return topology[sel]
 
     def _get_higher_coordination_sites(self,
                                        top_coordinates,
@@ -285,7 +291,7 @@ class AdsorptionSites():
         else:
             return symmetry_match
 
-    def get_adsorption_vectors(self, screen=True):
+    def get_adsorption_vectors(self, unique=True, screen=True):
         """Returns the vectors representing the furthest distance from
         the neighboring atoms.
 
@@ -295,14 +301,13 @@ class AdsorptionSites():
             Adsorption vectors for surface sites.
         """
         top_coords = self.coordinates[self.connectivity == 1]
-        if screen:
-            coords = self.coordinates[self.screen]
-            r1top = self.r1_topology[self.screen]
-            r2top = self.r2_topology[self.screen]
+        if unique:
+            sel = self.get_symmetric_sites(screen=screen)
         else:
-            coords = self.coordinates
-            r1top = self.r1_topology
-            r2top = self.r2_topology
+            sel = self.get_periodic_sites(screen=screen)
+        coords = self.coordinates[sel]
+        r1top = self.r1_topology[sel]
+        r2top = self.r2_topology[sel]
 
         vectors = np.empty((coords.shape[0], 3))
         for i, s in enumerate(coords):
@@ -311,7 +316,7 @@ class AdsorptionSites():
 
         return vectors
 
-    def get_adsorption_graph(self, unique=True):
+    def get_adsorption_graph(self, unique=True, wrap=False):
         """Return the edges of adsorption sties defined as all regions
         with adjacent vertices.
 
@@ -326,39 +331,49 @@ class AdsorptionSites():
             All edges crossing ridge or vertices indexed by the expanded
             unit slab.
         """
-        vt = Voronoi(self.coordinates[:, :2])
-        regions = -np.ones((len(vt.regions) - 1, 12), dtype=int)
+        vt = Voronoi(self.coordinates[:, :2], qhull_options='Qbb Qc Qz C1e-8')
+        regions = -np.ones((len(vt.regions), 6), dtype=int)
         for i, p in enumerate(vt.point_region):
-            n = len(vt.regions[p])
-            regions[i, :n] = vt.regions[p]
+            select = vt.regions[p]
+            regions[i, :len(select)] = select
 
         site_id = self.get_symmetric_sites(unique=False, screen=False)
         site_id = site_id + self.connectivity / 10
+        per = self.get_periodic_sites(screen=False)
 
-        edges, uniques, sym_edge = [], [], []
-        for i in np.where(self.screen)[0]:
-            vert = np.unique(regions[i])[1:]
+        uper = self.get_periodic_sites()
+        edges, symmetry, uniques = [], [], []
+        for i, p in enumerate(uper):
+            poi = vt.point_region[p]
+            voi = vt.regions[poi]
 
-            for v in vert:
-                neighbor_regions = np.where(regions == v)[0][:, None]
-                new_edges = np.insert(neighbor_regions, 0, i, axis=1)
+            for v in voi:
+                nr = np.where(regions == v)[0]
 
-                for edge in new_edges:
-                    edge = sorted(edge)
-                    if edge in edges or edge[0] == edge[1]:
+                for n in nr:
+                    edge = sorted((p, n))
+
+                    if n in uper[:i + 1] or edge in edges:
+                        continue
+
+                    if np.in1d(per[edge], per[uper[:i]]).any():
                         continue
 
                     sym = sorted(site_id[edge])
-                    if sym in sym_edge:
+                    if sym in symmetry:
                         uniques += [False]
                     else:
                         uniques += [True]
-                        sym_edge += [sym]
+                        symmetry += [sym]
                     edges += [edge]
 
         edges = np.array(edges)
+
+        # Used for correct bidendate positioning
+        if wrap:
+            edges = per[edges]
         if unique:
-            return edges[uniques]
+            edges = edges[uniques]
 
         return edges
 
@@ -447,9 +462,9 @@ def get_adsorption_sites(slab,
 
     coordinates = sites.coordinates[s]
     connectivity = sites.connectivity[s]
+
     if adsorption_vectors:
         vectors = sites.get_adsorption_vectors()[s]
-
         return coordinates, connectivity, vectors
 
     return coordinates, connectivity
