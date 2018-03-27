@@ -10,15 +10,18 @@ class catmap_api():
     """This class contains information and functions for exporting
     input to catmap."""
 
-    def __init__(self, pathways=None, molecules=None, db_name=None,
+    def __init__(self,
+                 pathways=None,
+                 molecules=None,
+                 db_name=None,
                  formula='hill'):
         if pathways is not None and molecules is not None:
             self.pathways = pathways
             self.molecules = molecules
         elif db_name is not None:
             with ReactionNetwork(db_name=db_name) as rn:
-                self.pathways = rn.path_search(reconfiguration=True,
-                                               substitution=True)
+                self.pathways = rn.path_search(
+                    reconfiguration=True, substitution=True)
                 self.molecules = rn.load_molecules()
         else:
             raise ValueError("Pass a list of reaction edges in 'pathways'" +

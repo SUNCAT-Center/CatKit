@@ -18,39 +18,41 @@ class Gratoms(Atoms):
     Networkx Graph.
     """
 
-    def __init__(
-            self,
-            symbols=None,
-            positions=None,
-            numbers=None,
-            tags=None,
-            momenta=None,
-            masses=None,
-            magmoms=None,
-            charges=None,
-            scaled_positions=None,
-            cell=None,
-            pbc=None,
-            celldisp=None,
-            constraint=None,
-            calculator=None,
-            info=None,
-            edges=None
-    ):
-        super().__init__(
-            symbols, positions, numbers, tags, momenta, masses,
-            magmoms, charges, scaled_positions, cell, pbc, celldisp,
-            constraint, calculator, info)
+    def __init__(self,
+                 symbols=None,
+                 positions=None,
+                 numbers=None,
+                 tags=None,
+                 momenta=None,
+                 masses=None,
+                 magmoms=None,
+                 charges=None,
+                 scaled_positions=None,
+                 cell=None,
+                 pbc=None,
+                 celldisp=None,
+                 constraint=None,
+                 calculator=None,
+                 info=None,
+                 edges=None):
+        super().__init__(symbols, positions, numbers, tags, momenta, masses,
+                         magmoms, charges, scaled_positions, cell, pbc,
+                         celldisp, constraint, calculator, info)
 
         if self.pbc.any():
             self._graph = MultiGraph()
         else:
             self._graph = Graph()
+
+        nodes = [[i, {
+            'number': n
+        }] for i, n in enumerate(self.arrays['numbers'])]
+        self._graph.add_nodes_from(nodes)
+
         if edges:
             self._graph.add_edges_from(edges, bonds=1)
-        nodes = [[i, {'number': n}]
-                 for i, n in enumerate(self.arrays['numbers'])]
-        self._graph.add_nodes_from(nodes)
+
+        self._surface_atoms = None
 
     @property
     def graph(self):
@@ -68,6 +70,14 @@ class Gratoms(Atoms):
     def adj(self):
         return self._graph.adj
 
+    def get_surface_atoms(self):
+        """Return surface atoms."""
+        return self._surface_atoms
+
+    def set_surface_atoms(self, surface_atoms):
+        """Assign surface atoms."""
+        self._surface_atoms = surface_atoms
+
     def get_neighbor_symbols(self, u):
         """Get chemical symbols for neighboring atoms of u."""
         neighbors = list(self._graph[u])
@@ -77,21 +87,18 @@ class Gratoms(Atoms):
     def is_isomorph(self, other):
         """Check if isomorphic by bond count and atomic number."""
         isomorphic = nx.is_isomorphic(
-            self._graph,
-            other._graph,
-            edge_match=em,
-            node_match=nm)
+            self._graph, other._graph, edge_match=em, node_match=nm)
 
         return isomorphic
 
-    def get_chemical_tags(self, rank=1):
+    def get_chemical_tags(self, rank=2):
         """Generate a hash descriptive of the chemical formula (rank 0)
         or include bonding (rank 1).
         """
         cnt = np.bincount(self.arrays['numbers'])
         composition = ','.join(cnt.astype(str))
 
-        if rank != 1:
+        if rank == 1:
             return composition[2:]
 
         for adj in self.adj.items():
@@ -138,7 +145,7 @@ class Gratoms(Atoms):
         n2 = len(other)
 
         for name, a1 in self.arrays.items():
-            a = np.zeros((n1 + n2,) + a1.shape[1:], a1.dtype)
+            a = np.zeros((n1 + n2, ) + a1.shape[1:], a1.dtype)
             a[:n1] = a1
             if name == 'masses':
                 a2 = other.get_masses()
@@ -151,7 +158,7 @@ class Gratoms(Atoms):
         for name, a2 in other.arrays.items():
             if name in self.arrays:
                 continue
-            a = np.empty((n1 + n2,) + a2.shape[1:], a2.dtype)
+            a = np.empty((n1 + n2, ) + a2.shape[1:], a2.dtype)
             a[n1:] = a2
             if name == 'masses':
                 a[:n1] = self.get_masses()[:n1]
@@ -160,7 +167,12 @@ class Gratoms(Atoms):
 
             self.set_array(name, a)
 
-        self._graph = nx.disjoint_union(self._graph, other._graph)
+        if isinstance(other, Gratoms):
+            if isinstance(self._graph, nx.MultiGraph) & \
+               isinstance(other._graph, nx.Graph):
+                other._graph = nx.MultiGraph(other._graph)
+
+            self._graph = nx.disjoint_union(self._graph, other._graph)
 
         return self
 
@@ -211,17 +223,15 @@ class Gratoms(Atoms):
                 raise ValueError(
                     'Cannot repeat along undefined lattice vector')
 
-        if self.pbc.any() and len(self.edges) > 0:
-            raise ValueError(
-                "Edge conservation not currently supported with "
-                "pbc. Remove pbc or edges first."
-            )
+        if self.pbc.any() and len(self.edges()) > 0:
+            raise ValueError("Edge conservation not currently supported with "
+                             "pbc. Remove pbc or edges first.")
 
         M = np.product(m)
         n = len(self)
 
         for name, a in self.arrays.items():
-            self.arrays[name] = np.tile(a, (M,) + (1,) * (len(a.shape) - 1))
+            self.arrays[name] = np.tile(a, (M, ) + (1, ) * (len(a.shape) - 1))
             cgraph = self._graph.copy()
 
         positions = self.arrays['positions']
