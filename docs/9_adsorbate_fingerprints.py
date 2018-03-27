@@ -11,7 +11,7 @@ from ase.build import add_adsorbate
 from ase.data import covalent_radii
 from atoml.fingerprint.database_adsorbate_api import (get_radius,
                                                       attach_adsorbate_info)
-from atoml.fingerprint import FeatureGenerator
+from atoml.fingerprint.setup import FeatureGenerator
 from atoml.preprocess.clean_data import clean_infinite
 
 
