@@ -433,7 +433,7 @@ class Builder():
 
         return string
 
-    def add_adsorbate(self, adsorbate, bonds=None, index=0, swap=False):
+    def add_adsorbate(self, adsorbate, bonds=None, index=0):
         """Add and adsorbate to a slab.
 
         Parameters:
@@ -445,8 +445,6 @@ class Builder():
         index : int
             Index of the site or edge to use as the adsorption position. A
             value of -1 will return all possible structures.
-        swap : bool
-            Switch the order of adsorption for bidentate species.
 
         Returns:
         --------
@@ -470,9 +468,9 @@ class Builder():
         elif len(bonds) == 2:
             if index == -1:
                 for i, _ in enumerate(self.edges):
-                    slab += [self._double_adsorption(adsorbate, bonds, i, swap)]
+                    slab += [self._double_adsorption(adsorbate, bonds, i)]
             else:
-                slab = self._double_adsorption(adsorbate, bonds, index, swap)
+                slab = self._double_adsorption(adsorbate, bonds, index)
         else:
             raise ValueError('Only mono- and bidentate adsorption supported.')
 
@@ -514,8 +512,7 @@ class Builder():
 
         return slab
 
-    def _double_adsorption(self, adsorbate, bonds=None, edge_index=0,
-                           swap=False):
+    def _double_adsorption(self, adsorbate, bonds=None, edge_index=0):
         """Bond and adsorbate by two adjacent atoms."""
         slab = self.basis.copy()
         atoms = adsorbate.copy()
@@ -526,8 +523,6 @@ class Builder():
         coords = self.sites.coordinates[self.edges[edge_index]]
 
         U = self.sites.r1_topology[self.edges[edge_index]]
-        if swap:
-            U[[0, 1]] = U[[1, 0]]
         for i, u in enumerate(U):
             r = radii[slab[self.sites.index[u]].numbers]
             coords[i] = utils.trilaterate(self.top_sites[u], R[i] + r)

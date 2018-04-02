@@ -15,11 +15,12 @@ By conserving bond-formation order and pairing it with bulk symmetry enumeration
 
 Current enumerations include:
 
-- [X] Surfaces structure
+- [X] Surfaces structures
 - [X] Adsorption sites
-- [X] Simple gas-phase molecules
+- [X] Catalytic structures
+- [X] Gas phase molecules
 - [X] Reaction mechanisms
-
+- [X] Reaction routes
 
 Similar to ASE, modules in CatKit are designed to be completely independent of one another. The =Gratoms= object is the single exception to the rule. 
 
@@ -378,17 +379,13 @@ write(
 *** Adsorption structure builder
 Creating good initial guesses for 3D structures can be tedious to perform by hand, even small molecules. The =Builder= module in the adsorption package seeks to help automate this task.
 
-Below is a 
+The =Builder= module currently takes two Gratoms objects as input since graph information is required. 
 
-#+BEGIN_SRC python :results output org drawer
-from catkit.pathways import ReactionNetwork
+#+BEGIN_SRC python :results output org drawer :exports both
 from catkit.surface import SlabGenerator
 from catkit.adsorption import Builder
 from ase.build import bulk
 import numpy as np
-
-with ReactionNetwork(db_name='C2H6-example.db') as rn:
-    molecules = rn.load_molecules()
 
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
@@ -401,20 +398,137 @@ gen = SlabGenerator(
     vacuum=10)
 
 slab = gen.get_slab()
+
+# Use the slab generator to attach a graph in this step
 surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
 slab.set_surface_atoms(surface_sites)
-
-adsorbate = molecules[13]
-adsorbate.set_tags([0, -1, 0,-1, 0])
 
 builder = Builder(slab)
 print(builder)
 #+END_SRC
 
-**** Monodentate and bidentate adsorption
-When a single atom of the molecule is considered bonded to the surface
+#+RESULTS:
+:RESULTS:
+Adsorption builder for Cu4Pd12 slab
+9 unique adsorption sites
+21 unique adsorption edges
+:END:
 
+**** Monodentate adsorption
+When a single atom of the molecule is considered bonded to the surface, the builder attempts to arrange non-bonded atoms in an intelligent fashion.
 
+In this example, the use of =-1= as a tag on the adsorbate is used to indicate it is bonded to the slab.
+
+[[./images/CH3-ads.png]]
+
+[[./images/CH3-ads-top.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.pathways import ReactionNetwork
+from catkit.surface import SlabGenerator
+from catkit.adsorption import Builder
+from ase.build import bulk
+from ase.io import write
+import numpy as np
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=[1, 1, 1],
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
+slab.set_surface_atoms(surface_sites)
+
+with ReactionNetwork(db_name='C2H6-example.db') as rn:
+    rn.molecule_search({'C': 2, 'H': 6})
+    molecules = rn.load_molecules()
+
+adsorbate = molecules[8]
+adsorbate.set_tags([0, -1, 0, 0])
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, index=1)
+
+img_name = './images/CH3-ads.pov'
+write(
+    img_name,
+    ads_slab,
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+
+write(
+    img_name.replace('.pov', '-top.pov'),
+    ads_slab,
+    show_unit_cell=2,
+    run_povray=True)
+#+END_SRC
+
+**** Bidentate adsorption
+The =Builder= class can also produce structures for species bonded in two locations. In this example, indexing of the atoms which bond to the surface is done with the =bonds= key.
+
+Also, using setting the =index= key to =-1= will return a list of all the possible adsorbed structures.
+
+[[./images/CH2CH-ads.png]]
+
+[[./images/CH2CH-ads-top.png]]
+
+#+BEGIN_SRC python :results output org drawer :exports code
+from catkit.pathways import ReactionNetwork
+from catkit.surface import SlabGenerator
+from catkit.adsorption import Builder
+from ase.build import bulk
+from ase.io import write
+import numpy as np
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=[1, 1, 1],
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
+slab.set_surface_atoms(surface_sites)
+
+with ReactionNetwork(db_name='C2H6-example.db') as rn:
+    rn.molecule_search({'C': 2, 'H': 6})
+    molecules = rn.load_molecules()
+
+adsorbate = molecules[13]
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[1, 3], index=-1)
+
+print('{} adsorption structures generated'.format(len(ads_slab)))
+
+img_name = './images/CH2CH-ads.pov'
+write(
+    img_name,
+    ads_slab[17],
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+
+write(
+    img_name.replace('.pov', '-top.pov'),
+    ads_slab[17],
+    show_unit_cell=2,
+    run_povray=True)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+21 adsorption structures generated
+:END:
 
 ** Gas-phase:
 - [X] Various chemical species (C, H, and O currently tested)
