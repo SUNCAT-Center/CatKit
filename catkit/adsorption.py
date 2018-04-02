@@ -4,8 +4,10 @@ from scipy.linalg import circulant
 from itertools import product
 from numpy.linalg import pinv, norm
 import numpy as np
+from ase.data import covalent_radii as radii
 from scipy.spatial import Voronoi
 import matplotlib.pyplot as plt
+import networkx as nx
 
 
 class AdsorptionSites():
@@ -396,6 +398,261 @@ class AdsorptionSites():
             plt.savefig(savefile, transparent=True)
         else:
             plt.show()
+
+
+class Builder():
+    """Initial module for creation of 3D slab structures with
+    attached adsorbates.
+    """
+
+    def __init__(self, slab):
+        """Initialize the site information for building adsorbed
+        structures.
+
+        Parameters:
+        -----------
+        slab : gratoms object
+            Slab to add the adsorbates to.
+        """
+        self.basis = slab
+
+        sites = AdsorptionSites(slab)
+        self.sites = sites
+        self.symmetry_sites = sites.get_symmetric_sites()
+        self.vectors = sites.get_adsorption_vectors(screen=False)
+        self.edges = sites.get_adsorption_graph()
+
+        self.top_sites = sites.coordinates[sites.connectivity == 1]
+
+    def __repr__(self):
+        formula = self.basis.get_chemical_formula()
+        string = 'Adsorption builder for {} slab\n'.format(formula)
+        sym = len(self.symmetry_sites)
+        string += '{} unique adsorption sites\n'.format(sym)
+        string += '{} unique adsorption edges'.format(len(self.edges))
+
+        return string
+
+    def add_adsorbate(self, adsorbate, bonds=None, index=0, swap=False):
+        """Add and adsorbate to a slab.
+
+        Parameters:
+        -----------
+        adsorbate : gratoms object
+            Molecule to connect to the surface.
+        bonds : int or list of 2 int
+            Index of adsorbate atoms to be bonded.
+        index : int
+            Index of the site or edge to use as the adsorption position. A
+            value of -1 will return all possible structures.
+        swap : bool
+            Switch the order of adsorption for bidentate species.
+
+        Returns:
+        --------
+        slabs : gratoms object
+            Slab(s) with adsorbate attached.
+        """
+        slab = []
+
+        if bonds is None:
+            # Molecules with tag -1 are designated to bond
+            bonds = np.where(adsorbate.get_tags() == -1)[0]
+
+        if len(bonds) == 0:
+            raise ValueError('Specify the index of atom to bond.')
+        elif len(bonds) == 1:
+            if index == -1:
+                for i, _ in enumerate(self.symmetry_sites):
+                    slab += [self._single_adsorption(adsorbate, bonds[0], i)]
+            else:
+                slab = self._single_adsorption(adsorbate, bonds[0], index)
+        elif len(bonds) == 2:
+            if index == -1:
+                for i, _ in enumerate(self.edges):
+                    slab += [self._double_adsorption(adsorbate, bonds, i, swap)]
+            else:
+                slab = self._double_adsorption(adsorbate, bonds, index, swap)
+        else:
+            raise ValueError('Only mono- and bidentate adsorption supported.')
+
+        return slab
+
+    def _single_adsorption(self, adsorbate, bond=None, site_index=0):
+        """Bond and adsorbate by a single atom."""
+        slab = self.basis.copy()
+        atoms = adsorbate.copy()
+        atoms.set_cell(slab.cell)
+
+        numbers = atoms.numbers[bond]
+        R = radii[numbers]
+
+        u = self.sites.r1_topology[self.symmetry_sites[site_index]]
+        r = radii[slab[self.sites.index[u]].numbers]
+
+        # Improved position estimate for site.
+        base_position = utils.trilaterate(self.top_sites[u], R + r)
+
+        # Position the base atom
+        atoms[bond].position = base_position
+
+        branches = list(nx.bfs_successors(atoms.graph, bond))
+
+        if len(branches) != 0:
+            uvec0 = self.vectors[self.symmetry_sites[site_index]]
+            uvec1 = slab.cell[1] / norm(slab.cell[1])
+            uvec2 = np.cross(uvec0, uvec1)
+            uvec = [uvec0, uvec1, uvec2]
+
+            for branch in branches:
+                self._branch_monodentate(atoms, uvec, branch)
+
+        slab += atoms
+        # Add graph connections
+        for metal_index in self.sites.index[u]:
+            slab.graph.add_edge(metal_index, bond + len(self.basis))
+
+        return slab
+
+    def _double_adsorption(self, adsorbate, bonds=None, edge_index=0,
+                           swap=False):
+        """Bond and adsorbate by two adjacent atoms."""
+        slab = self.basis.copy()
+        atoms = adsorbate.copy()
+        atoms.set_cell(slab.cell)
+
+        numbers = atoms.numbers[bonds]
+        R = radii[numbers]
+        coords = self.sites.coordinates[self.edges[edge_index]]
+
+        U = self.sites.r1_topology[self.edges[edge_index]]
+        if swap:
+            U[[0, 1]] = U[[1, 0]]
+        for i, u in enumerate(U):
+            r = radii[slab[self.sites.index[u]].numbers]
+            coords[i] = utils.trilaterate(self.top_sites[u], R[i] + r)
+
+        vec = coords[1] - coords[0]
+        n = norm(vec)
+        uvec0 = vec / n
+        d = np.sum(radii[numbers]) * 0.9
+        dn = (d - n) / 2
+
+        base_position0 = coords[0] - uvec0 * dn
+        base_position1 = coords[1] + uvec0 * dn
+
+        # Position the base atoms
+        atoms[bonds[0]].position = base_position0
+        atoms[bonds[1]].position = base_position1
+
+        # Temporarily break adsorbate
+        atoms.graph.remove_edge(*bonds)
+
+        uvec1 = self.vectors[self.edges[edge_index]]
+        uvec2 = np.cross(uvec1, uvec0)
+        uvec2 /= -norm(uvec2, axis=1)[:, None]
+        uvec1 = np.cross(uvec2, uvec0)
+
+        branches0 = list(nx.bfs_successors(atoms.graph, bonds[0]))
+        if len(branches0) != 0:
+            uvec = [-uvec0, uvec1[0], uvec2[0]]
+            for branch in branches0:
+                self._branch_bidentate(atoms, uvec, branch)
+
+        branches1 = list(nx.bfs_successors(atoms.graph, bonds[1]))
+        if len(branches1) != 0:
+            uvec = [uvec0, uvec1[0], uvec2[0]]
+            for branch in branches1:
+                self._branch_bidentate(atoms, uvec, branch)
+
+        slab += atoms
+        # Add graph connections
+        atoms.graph.add_edge(*bonds)
+        for i, u in enumerate(U):
+            for metal_index in self.sites.index[u]:
+                slab.graph.add_edge(metal_index, bonds[i] + len(self.basis))
+
+        return slab
+
+    def _branch_bidentate(self, atoms, uvec, branch):
+        """Return extended positions for additional adsorbates
+        based on provided unit vectors.
+        """
+        r, nodes = branch
+        num = atoms.numbers[[r] + nodes]
+        d = radii[num[1:]] + radii[num[0]]
+        c = atoms[r].position
+
+        # Single additional atom
+        if len(nodes) == 1:
+            coord0 = c + \
+                     d[0] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     d[0] * uvec[1] * np.sin(1/3. * np.pi)
+            atoms[nodes[0]].position = coord0
+
+        # Two branch system
+        elif len(nodes) == 2:
+            coord0 = c + \
+                   d[0] * uvec[1] * np.cos(1/3. * np.pi) + \
+                   0.866 * d[0] * uvec[0] * np.cos(1/3. * np.pi) + \
+                   0.866 * d[0] * uvec[2] * np.sin(1/3. * np.pi)
+            atoms[nodes[0]].position = coord0
+
+            coord1 = c + \
+                     d[1] * uvec[1] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[1] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[1] * -uvec[2] * np.sin(1/3. * np.pi)
+            atoms[nodes[1]].position = coord1
+
+        else:
+            raise ValueError('Too many bonded atoms to position correctly.')
+
+    def _branch_monodentate(self, atoms, uvec, branch):
+        """Return extended positions for additional adsorbates
+        based on provided unit vectors.
+        """
+        r, nodes = branch
+        num = atoms.numbers[[r] + nodes]
+        d = radii[num[1:]] + radii[num[0]]
+        c = atoms[r].position
+
+        # Single additional atom
+        if len(nodes) == 1:
+            coord0 = c + uvec[0] * d[0]
+            atoms[nodes[0]].position = coord0
+
+        # Two branch system
+        elif len(nodes) == 2:
+            coord0 = c + \
+                     d[0] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     d[0] * uvec[1] * np.sin(1/3. * np.pi)
+            atoms[nodes[0]].position = coord0
+
+            coord1 = c + \
+                     d[1] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     d[1] * -uvec[1] * np.sin(1/3. * np.pi)
+            atoms[nodes[1]].position = coord1
+
+        # Three branch system
+        elif len(nodes) == 3:
+            coord0 = c + \
+                     d[0] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[0] * uvec[1] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[0] * uvec[2] * np.sin(1/3. * np.pi)
+            atoms[nodes[0]].position = coord0
+
+            coord1 = c + \
+                     d[1] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[1] * uvec[1] * np.cos(1/3. * np.pi) + \
+                     0.866 * d[1] * -uvec[2] * np.sin(1/3. * np.pi)
+            atoms[nodes[1]].position = coord1
+
+            coord2 = c + \
+                     d[2] * uvec[0] * np.cos(1/3. * np.pi) + \
+                     d[2] * -uvec[1] * np.sin(1/3. * np.pi)
+            atoms[nodes[2]].position = coord2
+        else:
+            raise ValueError('Too many bonded atoms to position correctly.')
 
 
 def matching_sites(position, comparators, tol=1e-8):
