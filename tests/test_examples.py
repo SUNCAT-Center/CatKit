@@ -123,7 +123,7 @@ def test_adsorption_examples():
     sites = AdsorptionSites(atoms)
 
     coordinates = sites.get_coordinates()
-    vectors = sites.get_adsorption_vectors()
+    vectors = sites.get_adsorption_vectors(unique=False)
     assert (len(vectors) == 32)
 
 

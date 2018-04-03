@@ -53,7 +53,7 @@ class Classifier(object):
 
         # Build a nearest neighbor list
         nl = NL(cutoff, skin=0.16, self_interaction=False, bothways=False)
-        nl.build(self.atoms)
+        nl.update(self.atoms)
 
         self.neighbor_list = nl
 
