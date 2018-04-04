@@ -9,8 +9,7 @@ from ase.build import bulk
 from catkit.surface import SlabGenerator
 from ase.build import add_adsorbate
 from ase.data import covalent_radii
-from atoml.fingerprint.database_adsorbate_api import (get_radius,
-                                                      attach_adsorbate_info)
+from atoml.fingerprint.adsorbate_prep import get_radius, autogen_info
 from atoml.fingerprint.setup import FeatureGenerator
 from atoml.preprocess.clean_data import clean_infinite
 
@@ -28,12 +27,13 @@ Gen = SlabGenerator(
     miller_index=[1, 1, 1],
     layers=3,
     fixed=1,
-    vacuum=8,
-)
+    vacuum=8)
+
 terminations = Gen.get_unique_terminations()
 # Loop over unique surface terminations.
 images = []
 for i, t in enumerate(terminations):
+    # Get the slab.
     slab = Gen.get_slab(iterm=i)
     slab.center(axis=2, vacuum=5)
     # Add an adsorbate to each slab.
@@ -43,15 +43,22 @@ for i, t in enumerate(terminations):
     # Some help is needed for AtoML to positively identify the adsorbate.
     # A string in Hill notation is enough, if the adsorbate consists
     #   of different elements from the slab.
-    slab.info['species'] = ads
+    slab.info['key_value_pairs'] = {}
+    slab.info['key_value_pairs']['species'] = ads
+    # If the adsorbate consist of the same elements that the slab does,
+    # it is preferable to specify the list of indices.
+    slab.info['ads_atoms'] = [12]
     # The number of layers also makes some of the fingerprinting easier.
     slab.info['layers'] = Gen.layers
     # Append them to a list.
     images.append(slab)
 
+# If you import from an ase.db, it is recommended to make use of
+    # atoml.api.ase_atoms_api.database_to_list
+
 # Some information is expected to be attached to atoms objects.
 #   There are various ways of doing this, but the easiest is to call
-AtoML_atoms = attach_adsorbate_info(images)
+AtoML_atoms = autogen_info(images)
 # This is where checks should be made
 
 # Instantiate the fingerprint generator for adsorbate structures.
@@ -59,16 +66,20 @@ fingerprinter = FeatureGenerator()
 
 # All user methods under the fingerprinter accepts an atoms object and
 #   returns a vector.
-functions = [
-    fingerprinter.ads_nbonds,
-    fingerprinter.primary_addatom,
-    fingerprinter.primary_adds_nn,
-    fingerprinter.Z_add,
-    fingerprinter.ads_av,
-    fingerprinter.primary_surf_nn,
-    fingerprinter.primary_surfatom,
-    fingerprinter.primary_surfatom_sum,
-    ]
+functions = [fingerprinter.mean_chemisorbed_atoms,
+             fingerprinter.count_chemisorbed_fragment,
+             fingerprinter.count_ads_atoms,
+             fingerprinter.count_ads_bonds,
+             fingerprinter.ads_av,
+             fingerprinter.ads_sum,
+             fingerprinter.bulk,
+             fingerprinter.term,
+             fingerprinter.strain,
+             fingerprinter.mean_surf_ligands,
+             fingerprinter.mean_site,
+             fingerprinter.sum_site,
+             fingerprinter.dbid,
+             fingerprinter.delta_energy]
 
 # This list is passed on to the following setup functions,
 #    along with a list of atoms.
