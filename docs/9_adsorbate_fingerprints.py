@@ -40,16 +40,13 @@ for i, t in enumerate(terminations):
     radii = np.average([get_radius(a.number) for a in slab])
     height = radii + covalent_radii[6]
     add_adsorbate(slab, ads, height, position=slab.get_positions()[-1, :2])
-    # Some help is needed for AtoML to positively identify the adsorbate.
-    # A string in Hill notation is enough, if the adsorbate consists
-    #   of different elements from the slab.
+    # Usually, the chemical formula (Hill) is available for the adsorbate.
+    # It will be used by AtoML if attached like so:
     slab.info['key_value_pairs'] = {}
     slab.info['key_value_pairs']['species'] = ads
     # If the adsorbate consist of the same elements that the slab does,
-    # it is preferable to specify the list of indices.
+    # it is preferable to specify the atomic indices belonging to the adsorbate.
     slab.info['ads_atoms'] = [12]
-    # The number of layers also makes some of the fingerprinting easier.
-    slab.info['layers'] = Gen.layers
     # Append them to a list.
     images.append(slab)
 
@@ -94,6 +91,7 @@ unlabeled_data_matrix = fingerprinter.return_vec(AtoML_atoms, functions)
 print(np.shape(unlabeled_data_matrix), 'data matrix created.')
 
 # Cleanup in case some of the functions are returning NaNs or Infs
+print("Cleaning data.")
 clean_data_matrix = clean_infinite(unlabeled_data_matrix)['train']
 
 # Ready for Machine learning.
