@@ -29,7 +29,7 @@ def test_classifier():
     np.testing.assert_allclose(test_point, intersect)
 
     intersect = ut.trilaterate(points, [2, 2, 2])
-    test_point = np.array([0.5, 0.5, 1.87082869])
+    test_point = np.array([0.5, 0.5, -1.87082869])
     np.testing.assert_allclose(test_point, intersect)
 
 

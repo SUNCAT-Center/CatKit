@@ -388,10 +388,10 @@ class SlabGenerator(object):
             slab.set_surface_atoms(surface_sites)
             self.slab = slab
 
-        coordinates, connectivity = adsorption.get_adsorption_sites(
+        output = adsorption.get_adsorption_sites(
             slab=slab, **kwargs)
 
-        return coordinates, connectivity
+        return output
 
 
 def ext_gcd(a, b):

@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 from catkit.api.rd_kit import plot_molecule
 from catkit.api.rd_kit import get_uff_coordinates
 from catkit.pathways import ReactionNetwork

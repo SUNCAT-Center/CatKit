@@ -37,10 +37,14 @@ def trilaterate(centers, r):
     d = norm(vec1)
 
     if len(r) == 2:
-        x = (d**2 - r[0]**2 + r[1]**2) / (2 * d)
-        a = np.sqrt(4 * d**2 * r[0]**2 - (d**2 - r[0]**2 + r[1]**2)**2)
-        h = [0, 0, 0.5 * (1 / d) * a]
-        intersection = centers[1] - uvec1 * x + h
+        x0 = (d**2 - r[0]**2 + r[1]**2)
+        x = d - x0 / (2 * d)
+        a = np.sqrt(4 * d**2 * r[1]**2 - x0**2)
+        z = 0.5 * (1 / d) * a
+        if np.isnan(z):
+            z = 0.01
+        h = [0, 0, z]
+        intersection = centers[0] + uvec1 * x + h
 
     if len(r) == 3:
         vec2 = centers[2] - centers[0]
@@ -53,7 +57,9 @@ def trilaterate(centers, r):
 
         x = (r[0]**2 - r[1]**2 + d**2) / (2 * d)
         y = (r[0]**2 - r[2]**2 - 2 * i * x + i**2 + j**2) / (2 * j)
-        z = -np.sqrt(r[0]**2 - x**2 - y**2)
+        z = np.sqrt(r[0]**2 - x**2 - y**2)
+        if np.isnan(z):
+            z = 0.01
         intersection = centers[0] + x * uvec1 + y * uvec2 + z * uvec3
 
     return intersection

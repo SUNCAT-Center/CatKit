@@ -15,10 +15,12 @@ By conserving bond-formation order and pairing it with bulk symmetry enumeration
 
 Current enumerations include:
 
-- [X] Surfaces structure
+- [X] Surfaces structures
 - [X] Adsorption sites
-- [X] Simple gas-phase molecules
-- [X] Reaction pathways
+- [X] Catalytic structures
+- [X] Gas phase molecules
+- [X] Reaction mechanisms
+- [X] Reaction routes
 
 Similar to ASE, modules in CatKit are designed to be completely independent of one another. The =Gratoms= object is the single exception to the rule. 
 
@@ -374,6 +376,160 @@ write(
     run_povray=True)
 #+END_SRC
 
+*** Adsorption structure builder
+Creating good initial guesses for 3D structures can be tedious to perform by hand, even small molecules. The =Builder= module in the adsorption package seeks to help automate this task.
+
+The =Builder= module currently takes two Gratoms objects as input since graph information is required. 
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.surface import SlabGenerator
+from catkit.adsorption import Builder
+from ase.build import bulk
+import numpy as np
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=[1, 1, 1],
+    layers=4,
+    fixed=2,
+    vacuum=10)
+
+slab = gen.get_slab()
+
+# Use the slab generator to attach a graph in this step
+surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
+slab.set_surface_atoms(surface_sites)
+
+builder = Builder(slab)
+print(builder)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+Adsorption builder for Cu4Pd12 slab
+9 unique adsorption sites
+21 unique adsorption edges
+:END:
+
+**** Monodentate adsorption
+When a single atom of the molecule is considered bonded to the surface, the builder attempts to arrange non-bonded atoms in an intelligent fashion.
+
+In this example, the use of =-1= as a tag on the adsorbate is used to indicate it is bonded to the slab.
+
+[[./images/CH3-ads.png]]
+
+[[./images/CH3-ads-top.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.pathways import ReactionNetwork
+from catkit.surface import SlabGenerator
+from catkit.adsorption import Builder
+from ase.build import bulk
+from ase.io import write
+import numpy as np
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=[1, 1, 1],
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
+slab.set_surface_atoms(surface_sites)
+
+with ReactionNetwork(db_name='C2H6-example.db') as rn:
+    rn.molecule_search({'C': 2, 'H': 6})
+    molecules = rn.load_molecules()
+
+adsorbate = molecules[8]
+adsorbate.set_tags([0, -1, 0, 0])
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, index=1)
+
+img_name = './images/CH3-ads.pov'
+write(
+    img_name,
+    ads_slab,
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+
+write(
+    img_name.replace('.pov', '-top.pov'),
+    ads_slab,
+    show_unit_cell=2,
+    run_povray=True)
+#+END_SRC
+
+**** Bidentate adsorption
+The =Builder= class can also produce structures for species bonded in two locations. In this example, indexing of the atoms which bond to the surface is done with the =bonds= key.
+
+Also, using setting the =index= key to =-1= will return a list of all the possible adsorbed structures.
+
+[[./images/CH2CH-ads.png]]
+
+[[./images/CH2CH-ads-top.png]]
+
+#+BEGIN_SRC python :results output org drawer :exports code
+from catkit.pathways import ReactionNetwork
+from catkit.surface import SlabGenerator
+from catkit.adsorption import Builder
+from ase.build import bulk
+from ase.io import write
+import numpy as np
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=[1, 1, 1],
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
+slab.set_surface_atoms(surface_sites)
+
+with ReactionNetwork(db_name='C2H6-example.db') as rn:
+    rn.molecule_search({'C': 2, 'H': 6})
+    molecules = rn.load_molecules()
+
+adsorbate = molecules[13]
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[1, 3], index=-1)
+
+print('{} adsorption structures generated'.format(len(ads_slab)))
+
+img_name = './images/CH2CH-ads.pov'
+write(
+    img_name,
+    ads_slab[17],
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True)
+
+write(
+    img_name.replace('.pov', '-top.pov'),
+    ads_slab[17],
+    show_unit_cell=2,
+    run_povray=True)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+21 adsorption structures generated
+:END:
+
 ** Gas-phase:
 - [X] Various chemical species (C, H, and O currently tested)
 - [X] Molecules with single bonds
@@ -446,7 +602,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 Process completed in 28.6s
 :END:
 
-** Reaction pathways:
+** Reaction mechanisms:
 - [X] Addition and Reduction reactions (R1 + R2 <--> P1)
 - [X] Bond formation / breaking pathways (R1 <--> P1)
 - [X] Reconfiguration reactions (R1 <--> R1*)
@@ -541,6 +697,251 @@ for path in pathways:
 | b'CH3' + b'CH3' --> b'' + b'C2H6' |
 :END:
 
+** Reaction routes
+- [X] Overall/Response reaction routes
+- [X] Linearly independent set of reaction routes
+- [X] Complete set of full reaction routes
+- [X] Complete set of empty reaction routes
+- [ ] Graph based enumeration
+
+*** Overall/Response reaction routes
+For a given set of elementary mechanisms, there is frequently many types of chemistry which could be considered simultaneously. As an example, we reproduce an example from the original literature which the algorithm is adopted from cite:fishtik-2004-new-approac.
+
+In this example, we choose the number of independent species.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit.route import get_response_reactions
+import numpy as np
+
+epsilon = np.array([
+    # To keep indexing consistent
+    [ 0, 0, 0, 0],  # I1
+    [ 0, 0, 0, 0],  # I2
+    [ 0, 0, 0, 0],  # I3
+    [ 0, 0, 0, 0],  # I4
+    [ 0, 0, 0, 0],  # I5
+    # C  N  H  O
+    [ 1, 0, 4, 0],  # CH4
+    [ 0, 1, 0, 1],  # NO
+    [ 0, 0, 0, 2],  # O2
+    [ 0, 2, 0, 0],  # N2
+    [ 1, 0, 0, 1],  # CO
+    [ 1, 0, 0, 2],  # CO2
+    [ 0, 0, 2, 1],  # H2O
+])
+
+terminal = [5, 6, 7, 8, 9, 10, 11]
+OR, species = get_response_reactions(epsilon, terminal, species=True)
+
+print('Overall reaction routes:')
+print(OR, '\n')
+
+print('Terminal species:')
+print(species)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+Overall reaction routes:
+[[ 0  0  0  0  0  0  2 -1 -1  0  0  0]
+ [ 0  0  0  0  0  0  0  1  0  2 -2  0]
+ [ 0  0  0  0  0  2  0  3  0 -2  0 -4]
+ [ 0  0  0  0  0  1  0  2  0  0 -1 -2]
+ [ 0  0  0  0  0  0  2  0 -1  2 -2  0]
+ [ 0  0  0  0  0  2  6  0 -3 -2  0 -4]
+ [ 0  0  0  0  0  1  4  0 -2  0 -1 -2]
+ [ 0  0  0  0  0  1  0  0  0 -4  3 -2]] 
+
+Terminal species:
+[[ 5  6  7  8  9]
+ [ 5  6  7  9 10]
+ [ 5  6  7  9 11]
+ [ 5  6  7 10 11]
+ [ 5  6  8  9 10]
+ [ 5  6  8  9 11]
+ [ 5  6  8 10 11]
+ [ 5  6  9 10 11]]
+:END:
+
+The terminal species matrix will always contain =s + 1= entries, where =s= is the number of elements in the chemistry. This does not necessarily mean that the overall reaction produced will include all =s + 1= species.
+
+*** Linearly independent set
+Currently, only Happel-Sellers reaction routes can be enumerated cite:fishtik-2004-new-approac. These routes require that the user choose a number of terminal species equal to =s + 1=. The terminal species selected will only produce overall reactions associated with the chemistry which is enumerated in the previous example.
+
+Below we take another example from to produce a linearly independent set of reaction routes cite:fishtik-2004-react-route-graph-2.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit.route import get_response_reactions
+from catkit.route import get_heppel_sellers
+import numpy as np
+
+nu = np.array([
+    # H2Os, COs, CO2s, H2s, Hs, OHs, Os, HCOOs, H2O, CO, CO2, H2
+    [   0,   1,   0,   0,   0,   0,   0,   0,   0,  -1,   0,   0],  # s1
+    [   1,   0,   0,   0,   0,   0,   0,   0,  -1,   0,   0,   0],  # s2
+    [   0,   0,  -1,   0,   0,   0,   0,   0,   0,   0,   1,   0],  # s3
+    [   0,   0,   0,   1,  -2,   0,   0,   0,   0,   0,   0,   0],  # s4
+    [   0,   0,   0,  -1,   0,   0,   0,   0,   0,   0,   0,   1],  # s5
+    [  -1,   0,   0,   0,   1,   1,   0,   0,   0,   0,   0,   0],  # s6
+    [   0,  -1 ,  1,   0,   0,   0,  -1,   0,   0,   0,   0,   0],  # s7
+    [   0,  -1,   0,   0,   0,  -1,   0,   1,   0,   0,   0,   0],  # s8
+    [   0,   0,   0,   0,   1,  -1,   1,   0,   0,   0,   0,   0],  # s9
+    [   0,  -1,   1,   0,   1,  -1,   0,   0,   0,   0,   0,   0],  # s10
+    [   0,   0,   1,   0,   1,   0,   0,  -1,   0,   0,   0,   0],  # s11
+    [   0,   0,   1,   0,   0,   1,  -1,  -1,   0,   0,   0,   0],  # s12
+    [  -1,   0,   0,   1,  -1,   1,   0,   0,   0,   0,   0,   0],  # s14
+    [   0,   0,   0,   1,  -1,  -1,   1,   0,   0,   0,   0,   0],  # s15
+    [   0,   0,   1,   1,  -1,   0,   0,  -1,   0,   0,   0,   0],  # s17
+])
+
+epsilon = np.array([
+    # Just a place holder
+    [ 0, 0, 0],  # H2OS
+    [ 0, 0, 0],  # COS
+    [ 0, 0, 0],  # CO2S
+    [ 0, 0, 0],  # H2S
+    [ 0, 0, 0],  # HS
+    [ 0, 0, 0],  # OHS
+    [ 0, 0, 0],  # OS
+    [ 0, 0, 0],  # HCOOS
+    # C, H, O
+    [ 0, 2, 1],  # H2O
+    [ 1, 0, 1],  # CO
+    [ 1, 0, 2],  # CO2
+    [ 0, 2, 0],  # H2
+])
+
+# Indices of the terminal species
+terminal = [8, 9, 10, 11]
+
+RER, species = get_response_reactions(epsilon, terminal, species=True)
+sigma = get_heppel_sellers(nu, species[0])
+
+print('Linearly independent set of reaction routes:')
+print(sigma, '\n')
+
+print('Overall reaction routes:')
+print(np.dot(sigma, nu))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+Linearly independent set of reaction routes:
+[[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0]
+ [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0]
+ [ 1  1  1  1  1  1  0  1  0  0  1  0  0  0  0]
+ [ 0  0  0  0  0  0  1 -1  0  0  0 -1  0  0  0]
+ [ 0  0  0  1  0  1  0  0  0  0  0  0 -1  0  0]
+ [ 1  1  1  0  1  1  1  0  0  0  0  0  0  1  0]
+ [ 1  1  1  0  1  1  0  1  0  0  0  0  0  0  1]] 
+
+Overall reaction routes:
+[[ 0  0  0  0  0  0  0  0 -1 -1  1  1]
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
+ [ 0  0  0  0  0  0  0  0  0  0  0  0]
+ [ 0  0  0  0  0  0  0  0  0  0  0  0]
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1]]
+:END:
+
+Note that all of the linearly independent reaction routes return the same overall reaction except for one. This is because some routes will return a trivial solution. Routes which return the correct overall chemistry are known as full routes (FR) and those which return trivial solutions are called empty routes (ER).
+
+*** Complete full and empty enumeration
+Computationally, collecting an arbitrary set of linearly independent reaction routes is computationally inexpensive and can potentially be useful on its own. Complete enumeration techniques currently implemented in CatKit become computationally infeasible with large numbers of species and elementary steps.
+
+However, it is still often desirable for some applications to have a full listing of both full and empty reaction routes. This can be achieved more efficiently when beginning with a linearly independent set of reaction routes cite:fishtik-2002-ubi-qep.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit.route import get_response_reactions
+from catkit.route import get_reaction_routes
+from catkit.route import get_heppel_sellers
+import numpy as np
+np.set_printoptions(threshold=np.inf)
+
+nu = np.array([
+    [  1,  0,  0,  0,  0,  0,  0,  0, -1,  0,  0,  0],  # s1
+    [  0,  1,  0,  0,  0,  0,  0,  0,  0, -1,  0,  0],  # s2
+    [  0,  0, -1,  0,  0,  0,  0,  0,  0,  0,  1,  0],  # s3
+    [  0,  0,  0,  1, -2,  0,  0,  0,  0,  0,  0,  0],  # s4
+    [  0,  0,  0, -1,  0,  0,  0,  0,  0,  0,  0,  1],  # s5
+    [ -1,  0,  0,  0,  1,  1,  0,  0,  0,  0,  0,  0],  # s6
+    [  0, -1,  1,  0,  0,  0, -1,  0,  0,  0,  0,  0],  # s7
+    [  0, -1,  0,  0,  0, -1,  0,  1,  0,  0,  0,  0],  # s8
+    [  0,  0,  0,  0,  1, -1,  1,  0,  0,  0,  0,  0],  # s9
+    [  0, -1,  1,  0,  1, -1,  0,  0,  0,  0,  0,  0],  # s10
+    [  0,  0,  1,  0,  1,  0,  0, -1,  0,  0,  0,  0],  # s11
+    [  0,  0,  1,  0,  0,  1, -1, -1,  0,  0,  0,  0],  # s12
+    [ -1,  0,  0,  0,  0,  2, -1,  0,  0,  0,  0,  0],  # s13
+])
+
+epsilon = np.array([
+    # C, H, O
+    [ 0, 2, 1],  # SH2O
+    [ 1, 0, 1],  # SCO
+    [ 1, 0, 2],  # SCO2
+    [ 0, 2, 0],  # SH2
+    [ 0, 1, 0],  # SH
+    [ 0, 1, 1],  # SOH
+    [ 0, 0, 1],  # SO
+    [ 1, 1, 2],  # SOOCH
+    [ 0, 2, 1],  # H2O
+    [ 1, 0, 1],  # CO
+    [ 1, 0, 2],  # CO2
+    [ 0, 2, 0],  # H2
+])
+
+
+# Indices of the species considered terminal
+terminal = [8, 9, 10, 11]
+
+RER, species = get_response_reactions(epsilon, terminal, species=True)
+sigma = get_heppel_sellers(nu, species[0])
+FR, ER = get_reaction_routes(nu, sigma)
+
+print('{} Full reaction routes:'.format(len(FR)))
+print(FR, '\n')
+
+print('{} Empty reaction routes:'.format(len(ER)))
+print(ER)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+17 Full reaction routes:
+[[ 1  1  1  1  1  1  1  0  1  0  0  0  0]
+ [ 1  1  1  1  1  1  0  0  0  1  0  0  0]
+ [ 1  1  1  1  1  1  0  1  0  0  1  0  0]
+ [ 1  1  1  1  1  2  1  0  0  0  0  0 -1]
+ [ 1  1  1  1  1  0  0  0  0  1  1 -1  1]
+ [ 1  1  1  1  1  0  0  0  1  1  0  0  1]
+ [ 1  1  1  1  1  0  0  1  0  0  2 -1  1]
+ [ 1  1  1  1  1  0  0 -1  0  2  0 -1  1]
+ [ 1  1  1  1  1  0  0  1  2  0  0  1  1]
+ [ 1  1  1  1  1  0  0  1  1  0  1  0  1]
+ [ 1  1  1  1  1  0  1  0  0  0  2 -2  1]
+ [ 1  1  1  1  1  0 -1  0  0  2  0  0  1]
+ [ 1  1  1  1  1  0  1  0  2  0  0  0  1]
+ [ 1  1  1  1  1  0 -1  2  0  0  2  0  1]
+ [ 1  1  1  1  1  2  0  1  0  0  0  1 -1]
+ [ 1  1  1  1  1  1  0  1  1  0  0  1  0]
+ [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]] 
+
+12 Empty reaction routes:
+[[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0]
+ [ 0  0  0  0  0  0  0  0  1  0 -1  1  0]
+ [ 0  0  0  0  0  0  0  1  0 -1  1  0  0]
+ [ 0  0  0  0  0  0  0  1  1 -1  0  1  0]
+ [ 0  0  0  0  0  0  1  0  0 -1  1 -1  0]
+ [ 0  0  0  0  0  0  1  0  1 -1  0  0  0]
+ [ 0  0  0  0  0  0  1 -1  1  0 -1  0  0]
+ [ 0  0  0  0  0  1  0  0  0  0 -1  1 -1]
+ [ 0  0  0  0  0  1  0  0 -1  0  0  0 -1]
+ [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1]
+ [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1]
+ [ 0  0  0  0  0  1  1 -1  0  0 -1  0 -1]]
+:END:
+
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
 
@@ -549,9 +950,6 @@ Atomic Simulation Environment (ASE) is a convenient platform with many good conv
 
 - [[https://atztogo.github.io/spglib/index.html][Spglib]]
 A Bulk symmetry library with functionality for identifying rotational and translation symmetries in bulk lattice structures.
-
-- [[http://www.rdkit.org/][RDKit]]
-RDKit is a well developed gas-phase molecule enumeration software for SMILES representation of gas-phase molecules and simple UFF integration.
 
 - [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]]
 Code for Graph theory implementation used to identify redundant structures.
