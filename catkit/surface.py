@@ -285,7 +285,7 @@ class SlabGenerator(object):
 
         return slab
 
-    def get_graph_from_bulk(self, slab, attach=False):
+    def get_graph_from_bulk(self, iterm=0, attach=False):
         """Return the surface connectivity of a slab based on information
         from the bulk basis is was constructed from.
 
@@ -293,15 +293,27 @@ class SlabGenerator(object):
 
         Parameters:
         -----------
-        slab : atoms object
-            Atoms to find graph connectivity for.
-
+        iterm : index of the termination to find graph connectivity for.
+                default is 0
+        attach : bool
+                 If set True, it will return the multigraph information that 
+                 can be used to add edge information to the slab object.
         Returns:
         --------
         surf_con : ndarray (n, n)
             Connectivity matrix of the surface atoms with periodic boundary
             conditions.
+        G : An unidirected graph class, optional
+            A class containing all the node and edge information based on the 
+            surface connectivity is returned. Only provided if attach is True.
+            
         """
+        if iterm != 0:
+            if not iterm <= self.get_unique_terminations():
+                raise ValueError('iterm is not consistent.')
+
+
+        slab = self.get_slab(iterm=iterm)
         bulk_con = utils.get_voronoi_neighbors(self._basis)
         d = self._basis.get_all_distances(mic=True)
         maxd = d[bulk_con > 0].max()
@@ -310,11 +322,12 @@ class SlabGenerator(object):
 
         if attach:
             G = nx.MultiGraph(surf_con)
-            slab.graph.add_edges_from(G.edges(data=True))
+            #slab.graph.add_edges_from(G.edges(data=True))
+            return surf_con, G
+        else:
+            return surf_con
 
-        return surf_con
-
-    def get_voronoi_surface_atoms(self, slab, attach_graph=True):
+    def get_voronoi_surface_atoms(self, iterm=0, attach_graph=True):
         """Find the under-coordinated atoms at the upper and lower
         fraction of a given unit cell based on the bulk structure it
         originated from.
@@ -323,10 +336,9 @@ class SlabGenerator(object):
 
         Parameters:
         -----------
-        slab : atoms object
-            The slab to find top layer atoms from.
+        iterm : index of the termination to find top layer atoms from.
         attach_graph : bool
-            Store the slabs graph information in the passed  slab object.
+            If set True, it will return the slab edge information.
 
         Returns:
         --------
@@ -335,7 +347,16 @@ class SlabGenerator(object):
         bottom : ndarray (m,)
             Array of atom indices corresponding to the bottom layer of
             the slab.
+        edges : list of edges that is compatible with Networkx, optional 
+            A lsit containing all the edge information based on the 
+            Voronoi surface atoms is returned. Only provided if 
+            attach_graph is True.
         """
+        if iterm != 0:
+            if not iterm <= self.get_unique_terminations():
+                raise ValueError('iterm is not consistent.')
+        
+        slab = self.get_slab(iterm=iterm)
         bulk_con = utils.get_voronoi_neighbors(self._basis)
         d = self._basis.get_all_distances(mic=True)
         maxd = d[bulk_con > 0].max()
@@ -343,10 +364,6 @@ class SlabGenerator(object):
 
         surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
         stopo = surf_con.sum(axis=0)
-
-        if attach_graph:
-            edges = utils.connectivity_to_edges(surf_con)
-            slab.graph.add_weighted_edges_from(edges, weight='bonds')
 
         # Expand bulk topology to match number of atoms in slab
         btopo = np.repeat(btopo, np.ceil(len(stopo) / len(btopo)))
@@ -365,16 +382,20 @@ class SlabGenerator(object):
         top = surf_atoms[hwp.T[2] > 0]
         bottom = surf_atoms[hwp.T[2] < 0]
 
-        return top, bottom
+        if attach_graph:
+            edges = utils.connectivity_to_edges(surf_con)
+            #slab.graph.add_weighted_edges_from(edges, weight='bonds')
+            return top, bottom, edges
+        else:
+            return top, bottom
 
-    def adsorption_sites(self, slab, **kwargs):
+    def adsorption_sites(self, iterm=0, **kwargs):
         """Helper function to return the adsorption sites of the provided slab.
 
         Parameters:
         -----------
-        slab : atoms object
-            The slab to find adsorption sites for. Assumes you are using
-            the same basis.
+        iterm : index of the termination to find adsorption sites for. 
+        Assumes you are using the same basis.
 
         Returns:
         --------
@@ -383,8 +404,13 @@ class SlabGenerator(object):
         connectivity : ndarray (n,)
             Connectivity of the adsorption sites
         """
+        if iterm != 0:
+            if not iterm <= self.get_unique_terminations():
+                raise ValueError('iterm is not consistent.')
+        
+        slab = self.get_slab(iterm=iterm)
         if slab != self.slab or slab.get_surface_atoms() is None:
-            surface_sites = self.get_voronoi_surface_atoms(slab)[0]
+            surface_sites = self.get_voronoi_surface_atoms(iterm=iterm)[0]
             slab.set_surface_atoms(surface_sites)
             self.slab = slab
 
