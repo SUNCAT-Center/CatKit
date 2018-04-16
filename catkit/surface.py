@@ -348,7 +348,7 @@ class SlabGenerator(object):
             Array of atom indices corresponding to the bottom layer of
             the slab.
         edges : list of edges that is compatible with Networkx, optional 
-            A lsit containing all the edge information based on the 
+            A list containing all the edge information based on the 
             Voronoi surface atoms is returned. Only provided if 
             attach_graph is True.
         """
