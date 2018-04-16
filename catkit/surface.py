@@ -309,7 +309,7 @@ class SlabGenerator(object):
             
         """
         if iterm != 0:
-            if not iterm <= self.get_unique_terminations():
+            if not iterm <= len(self.get_unique_terminations()):
                 raise ValueError('iterm is not consistent.')
 
 
@@ -353,7 +353,7 @@ class SlabGenerator(object):
             attach_graph is True.
         """
         if iterm != 0:
-            if not iterm <= self.get_unique_terminations():
+            if not iterm <= len(self.get_unique_terminations()):
                 raise ValueError('iterm is not consistent.')
         
         slab = self.get_slab(iterm=iterm)
@@ -405,7 +405,7 @@ class SlabGenerator(object):
             Connectivity of the adsorption sites
         """
         if iterm != 0:
-            if not iterm <= self.get_unique_terminations():
+            if not iterm <= len(self.get_unique_terminations()):
                 raise ValueError('iterm is not consistent.')
         
         slab = self.get_slab(iterm=iterm)
