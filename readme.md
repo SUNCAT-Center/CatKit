@@ -1,3 +1,5 @@
+# CatKit: Catalysis Kit
+
 <div class="HTML">
 <a href='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'><img src='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'/></a>
 <a href='https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master'><img src='https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master' alt='Coverage Status' /></a>

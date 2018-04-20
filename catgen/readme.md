@@ -1,3 +1,5 @@
+# CatGen: Catalysis Generator
+
 Currently, the primary function of CatGen is for automated enumeration of various systems of atoms and other catalytically relevant properties. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined through bonds formation rules.
 
 By conserving bond-formation order and pairing it with bulk symmetry enumerations, a comprehensive mapping tools of all possible relevant chemical pathways can be produced. This information can then be aggregated and used to gain insights into catalytic systems.
@@ -60,14 +62,12 @@ Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface cons
             img_name,
             slab,
             show_unit_cell=2,
-            rotation='-90x',
-            run_povray=True)
+            rotation='-90x')
     
         write(
             img_name.replace('.pov', '-top.pov'),
             slab,
-            show_unit_cell=2,
-            run_povray=True)
+            show_unit_cell=2)
 
 
 ### Slab graph and surface atoms:
@@ -105,8 +105,7 @@ One of the less visual features is the identification of the surface atoms and i
         '../images/Pd-surface-atoms.pov',
         atoms,
         show_unit_cell=2,
-        rotation='-90x',
-        run_povray=True)
+        rotation='-90x')
 
 [[0. 2. 2. 2. 1. 0. 0. 0. 0. 0. 0. 0.] <br />
  [2. 0. 2. 2. 0. 1. 0. 0. 0. 0. 0. 0.] <br />
@@ -156,8 +155,7 @@ With a generated slab, we can also produce the unique adsorption sites which wou
     write(
         '../images/CuPd3_111-sites.pov',
         atoms,
-        show_unit_cell=2,
-        run_povray=True)
+        show_unit_cell=2)
 
 
 ## Adsorption module
@@ -262,8 +260,7 @@ All possible adsorption sites of of CuPd<sub>3</sub> (3, 2, 1). Site identificat
     write(
         '../images/CuPd3_321-sites.pov',
         atoms,
-        show_unit_cell=2,
-        run_povray=True)
+        show_unit_cell=2)
 
 When we call `get_periodic_sites()`, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set `screen` to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
 
@@ -315,8 +312,7 @@ CatGen defines the most favorable vector for adsorption as the one which is furt
         '../images/adsorption-vectors.pov',
         atoms * (1, 2, 1),
         show_unit_cell=2,
-        rotation='-90x, 90y, 20z',
-        run_povray=True)
+        rotation='-90x, 90y, 20z')
 
 
 ### Adsorption structure builder
@@ -360,9 +356,7 @@ unique adsorption edges: 21
     
     In this example, the use of `-1` as a tag on the adsorbate is used to indicate it is bonded to the slab.
     
-    ![img](../images/CH3-ads.png "Builder for a CH<sub>3</sub> on a unique top site of a CuPd<sub>3</sub> (1, 1, 1) surface.")
-    
-    ![img](../images/CH3-ads-top.png)
+    ![img](../images/CH3-ads.png "Builder for a CH<sub>3</sub> on a unique top site of a CuPd<sub>3</sub> (1, 1, 1) surface.") ![img](../images/CH3-ads-top.png "Builder for a CH<sub>3</sub> on a unique top site of a CuPd<sub>3</sub> (1, 1, 1) surface.")
     
         from catgen.pathways import ReactionNetwork
         from catgen.surface import SlabGenerator
@@ -399,69 +393,12 @@ unique adsorption edges: 21
             img_name,
             ads_slab,
             show_unit_cell=2,
-            rotation='-90x',
-            run_povray=True)
+            rotation='-90x')
         
         write(
             img_name.replace('.pov', '-top.pov'),
             ads_slab,
-            show_unit_cell=2,
-            run_povray=True)
-
-2.  Bidentate adsorption
-
-    The `Builder` class can also produce structures for species bonded in two locations. In this example, indexing of the atoms which bond to the surface is done with the `bonds` key.
-    
-    Also, using setting the `index` key to `-1` will return a list of all the possible adsorbed structures.
-    
-    ![img](../images/CH2CH-ads.png "Builder for a C<sub>2</sub>H<sub>3</sub> on a unique edge of a CuPd<sub>3</sub> (1, 1, 1) surface.")
-    
-    ![img](../images/CH2CH-ads-top.png)
-    
-        from catgen.pathways import ReactionNetwork
-        from catgen.surface import SlabGenerator
-        from catgen.adsorption import Builder
-        from ase.build import bulk
-        from ase.io import write
-        import numpy as np
-        
-        atoms = bulk('Pd', 'fcc', a=4, cubic=True)
-        atoms[3].symbol = 'Cu'
-        
-        gen = SlabGenerator(
-            atoms,
-            miller_index=[1, 1, 1],
-            layers=4,
-            vacuum=4)
-        
-        slab = gen.get_slab()
-        surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
-        slab.set_surface_atoms(surface_sites)
-        
-        with ReactionNetwork(db_name='C2H6-example.db') as rn:
-            rn.molecule_search({'C': 2, 'H': 6})
-            molecules = rn.load_molecules()
-        
-        adsorbate = molecules[13]
-        
-        builder = Builder(slab)
-        ads_slab = builder.add_adsorbate(adsorbate, bonds=[1, 3], index=-1)
-        
-        print('{} adsorption structures generated'.format(len(ads_slab)))
-        
-        img_name = '../images/CH2CH-ads.pov'
-        write(
-            img_name,
-            ads_slab[14],
-            show_unit_cell=2,
-            rotation='-90x',
-            run_povray=True)
-        
-        write(
-            img_name.replace('.pov', '-top.pov'),
-            ads_slab[14],
-            show_unit_cell=2,
-            run_povray=True)
+            show_unit_cell=2)
 
 
 ## Gas-phase:
@@ -480,23 +417,11 @@ unique adsorption edges: 21
 
 Below is an example script which generates some simple figures using [NetworkX](https://networkx.github.io/documentation/networkx-1.10/index.html) code for all molecules up to C<sub>2</sub>H<sub>6</sub>.
 
-1 ![img](../images/molecule-1.png)
-2 ![img](../images/molecule-2.png)
-3 ![img](../images/molecule-3.png)
-4 ![img](../images/molecule-4.png) <br />
-5 ![img](../images/molecule-5.png)
-6 ![img](../images/molecule-6.png)
-7 ![img](../images/molecule-7.png)
-8 ![img](../images/molecule-8.png) <br />
-9 ![img](../images/molecule-9.png)
-10 ![img](../images/molecule-10.png)
-11 ![img](../images/molecule-11.png)
-12 ![img](../images/molecule-12.png) <br />
-13 ![img](../images/molecule-13.png)
-14 ![img](../images/molecule-14.png)
-15 ![img](../images/molecule-15.png)
-16 ![img](../images/molecule-16.png) <br />
-17 ![img](../images/molecule-17.png)
+![img](../images/molecule-1.png) ![img](../images/molecule-2.png) ![img](../images/molecule-3.png) ![img](../images/molecule-4.png) 
+![img](../images/molecule-5.png) ![img](../images/molecule-6.png) ![img](../images/molecule-7.png) ![img](../images/molecule-8.png)
+![img](../images/molecule-9.png) ![img](../images/molecule-10.png) ![img](../images/molecule-11.png) ![img](../images/molecule-12.png)
+![img](../images/molecule-13.png) ![img](../images/molecule-14.png) ![img](../images/molecule-15.png) ![img](../images/molecule-16.png)
+![img](../images/molecule-17.png)
 
     from catgen.pathways import ReactionNetwork
     import time
@@ -774,7 +699,7 @@ In this example, we choose the number of independent species.
     ])
     
     terminal = [5, 6, 7, 8, 9, 10, 11]
-    OR, species = get_response_reactions(epsilon, terminal, species=True)
+    OR, selfpecies = get_response_reactions(epsilon, terminal, species=True)
     
     print('Overall reaction routes:')
     print(OR, '\n')
@@ -959,7 +884,7 @@ However, it is still often desirable for some applications to have a full listin
  [ 1  1  1  1  1  0 -1  2  0  0  2  0  1] <br />
  [ 1  1  1  1  1  2  0  1  0  0  0  1 -1] <br />
  [ 1  1  1  1  1  1  0  1  1  0  0  1  0] <br />
- [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]]
+ [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]] 
 
 12 Empty reaction routes: <br />
 [[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0] <br />

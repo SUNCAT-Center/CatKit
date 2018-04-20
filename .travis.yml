@@ -38,8 +38,8 @@ install:
 
 
 script:
-  - nosetests tests/* --with-coverage --cover-inclusive --cover-package=. --cover-erase
-  - coverage report --omit 'images/*,tests/*' --show-missing
+  - nosetests ./*/tests/* --with-coverage --cover-inclusive --cover-package=. --cover-erase
+  - coverage report --omit 'images/*,./*/tests/*' --show-missing
 
 after_success:
   - coveralls
