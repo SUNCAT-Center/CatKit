@@ -129,7 +129,6 @@ Connectivity matrix:
 Are isomorphs: True
 :END:
 
-
 * CatGen: Catalysis Generator
 CatGen is an enumeration module designed to construct various catalytic structures.
 
@@ -149,4 +148,4 @@ For additional details regarding how the generator operates, including example u
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
 
-A full list of required packaged can be found in [[./requirements.txt]].
+A full list of required packaged can be found in [[./requirements.txt][the requirements]].

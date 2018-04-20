@@ -29,10 +29,10 @@ The surface module is designed to leverage information about the bulk structure 
 *** Slab enumeration:
 Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
-First termination of 9 layer slab of CuPd_{3}.
+#+CAPTION: First termination of 9 layer slab of CuPd_{3}.
 [[../images/CuPd3-term-0.png]] [[../images/CuPd3-term-0-top.png]]
 
-Second termination of 9 layer slab of CuPd_{3}.
+#+CAPTION: Second termination of 9 layer slab of CuPd_{3}.
 [[../images/CuPd3-term-1.png]] [[../images/CuPd3-term-1-top.png]]
 
 #+BEGIN_SRC python :results silent :exports code
@@ -61,20 +61,18 @@ for i, t in enumerate(terminations):
         img_name,
         slab,
         show_unit_cell=2,
-        rotation='-90x',
-        run_povray=True)
+        rotation='-90x')
 
     write(
         img_name.replace('.pov', '-top.pov'),
         slab,
-        show_unit_cell=2,
-        run_povray=True)
+        show_unit_cell=2)
 #+END_SRC
 
 *** Slab graph and surface atoms:
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au. 
+#+CAPTION: Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au. 
 [[../images/Pd-surface-atoms.png]]
 
 #+BEGIN_SRC python  :results output org drawer :exports both
@@ -107,8 +105,7 @@ write(
     '../images/Pd-surface-atoms.pov',
     atoms,
     show_unit_cell=2,
-    rotation='-90x',
-    run_povray=True)
+    rotation='-90x')
 #+END_SRC
 
 #+RESULTS:
@@ -162,8 +159,7 @@ for i, c in enumerate(coordinates):
 write(
     '../images/CuPd3_111-sites.pov',
     atoms,
-    show_unit_cell=2,
-    run_povray=True)
+    show_unit_cell=2)
 #+END_SRC
 
 ** Adsorption module
@@ -182,6 +178,8 @@ Adsorption site enumeration in CatGen is solely dependent upon surface atom iden
 Here, we show how the surface sites can be assigned manually which is often convenient enough. Other means of surface site identification will be added in a future release.
 
 Surface atoms are used to define top sites (green), which are then used to define remaining sites (red) via Delaunay triangulation symmetries.
+
+#+CAPTION: Delaunay triangulation of surface atoms for fcc(111) structure.
 [[../images/Pd3Cu-adsorption-sites.png]]
 
 #+BEGIN_SRC python :results silent :exports code
@@ -211,6 +209,8 @@ For more complex adsorption enumeration, we often require more detailed informat
 The =AdsorptionSite= class also produces an expanded unit cell which is useful for operations which require observation of periodic boundary conditions. This extended unit cell can be accessed by toggling the ``screen'' argument.
 
 All possible adsorption sites of of CuPd_{3} (3, 2, 1). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
+
+#+CAPTION: Delaunay triangulation of surface atoms for fcc(111) structure.
 [[../images/CuPd3_321-sites.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports code
@@ -264,8 +264,7 @@ for i, c in enumerate(coordinates):
 write(
     '../images/CuPd3_321-sites.pov',
     atoms,
-    show_unit_cell=2,
-    run_povray=True)
+    show_unit_cell=2)
 #+END_SRC
 
 #+RESULTS:
@@ -349,8 +348,7 @@ write(
     '../images/adsorption-vectors.pov',
     atoms * (1, 2, 1),
     show_unit_cell=2,
-    rotation='-90x, 90y, 20z',
-    run_povray=True)
+    rotation='-90x, 90y, 20z')
 #+END_SRC
 
 *** Adsorption structure builder
@@ -397,12 +395,11 @@ When a single atom of the molecule is considered bonded to the surface, the buil
 
 In this example, the use of =-1= as a tag on the adsorbate is used to indicate it is bonded to the slab.
 
-[[../images/CH3-ads.png]]
-
-[[../images/CH3-ads-top.png]]
+#+CAPTION: Builder for a CH_{3} on a unique top site of a CuPd_{3} (1, 1, 1) surface.
+[[../images/CH3-ads.png]] [[../images/CH3-ads-top.png]]
 
 #+BEGIN_SRC python :results silent :exports code
-from catgen.pathways import ReactionNetwork
+from catgen.molecules import get_topologies
 from catgen.surface import SlabGenerator
 from catgen.adsorption import Builder
 from ase.build import bulk
@@ -422,12 +419,8 @@ slab = gen.get_slab()
 surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
 slab.set_surface_atoms(surface_sites)
 
-with ReactionNetwork(db_name='C2H6-example.db') as rn:
-    rn.molecule_search({'C': 2, 'H': 6})
-    molecules = rn.load_molecules()
-
-adsorbate = molecules[8]
-adsorbate.set_tags([0, -1, 0, 0])
+adsorbate = get_topologies('CH3')[0]
+adsorbate.set_tags([-1, 0, 0, 0])
 
 builder = Builder(slab)
 ads_slab = builder.add_adsorbate(adsorbate, index=1)
@@ -452,11 +445,10 @@ The =Builder= class can also produce structures for species bonded in two locati
 
 Also, using setting the =index= key to =-1= will return a list of all the possible adsorbed structures.
 
-[[../images/CH2CH-ads.png]]
+#+CAPTION: Builder for a C_{2}H_{3} on a unique adsorption edge of a CuPd_{3} (1, 1, 1) surface.
+[[../images/CH2CH-ads.png]] [[../images/CH2CH-ads-top.png]]
 
-[[../images/CH2CH-ads-top.png]]
-
-#+BEGIN_SRC python :results output org drawer :exports code
+#+BEGIN_SRC python :results output org drawer :exports both
 from catgen.pathways import ReactionNetwork
 from catgen.surface import SlabGenerator
 from catgen.adsorption import Builder
@@ -521,23 +513,11 @@ write(
 *** Example usage:
 Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C_{2}H_{6}.
 
-1 [[../images/molecule-1.png]]
-2 [[../images/molecule-2.png]]
-3 [[../images/molecule-3.png]]
-4 [[../images/molecule-4.png]]
-5 [[../images/molecule-5.png]]
-6 [[../images/molecule-6.png]]
-7 [[../images/molecule-7.png]]
-8 [[../images/molecule-8.png]]
-9 [[../images/molecule-9.png]]
-10 [[../images/molecule-10.png]]
-11 [[../images/molecule-11.png]]
-12 [[../images/molecule-12.png]]
-13 [[../images/molecule-13.png]]
-14 [[../images/molecule-14.png]]
-15 [[../images/molecule-15.png]]
-16 [[../images/molecule-16.png]]
-17 [[../images/molecule-17.png]]
+ [[../images/molecule-1.png]] [[../images/molecule-2.png]] [[../images/molecule-3.png]] [[../images/molecule-4.png]] 
+[[../images/molecule-5.png]] [[../images/molecule-6.png]] [[../images/molecule-7.png]] [[../images/molecule-8.png]]
+[[../images/molecule-9.png]] [[../images/molecule-10.png]] [[../images/molecule-11.png]] [[../images/molecule-12.png]]
+[[../images/molecule-13.png]] [[../images/molecule-14.png]] [[../images/molecule-15.png]] [[../images/molecule-16.png]]
+[[../images/molecule-17.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports both
 from catgen.pathways import ReactionNetwork
@@ -709,7 +689,7 @@ epsilon = np.array([
 ])
 
 terminal = [5, 6, 7, 8, 9, 10, 11]
-OR, species = get_response_reactions(epsilon, terminal, species=True)
+OR, selfpecies = get_response_reactions(epsilon, terminal, species=True)
 
 print('Overall reaction routes:')
 print(OR, '\n')
