@@ -108,28 +108,17 @@ One of the less visual features is the identification of the surface atoms and i
         rotation='-90x',
         run_povray=True)
 
-[[0. 2. 2. 2. 1. 0. 0. 0. 0. 0. 0. 0.]
-
- [2. 0. 2. 2. 0. 1. 0. 0. 0. 0. 0. 0.]
- 
- [2. 2. 0. 2. 2. 2. 1. 0. 0. 0. 0. 0.]
- 
- [2. 2. 2. 0. 2. 2. 0. 1. 0. 0. 0. 0.]
- 
- [1. 0. 2. 2. 0. 2. 2. 2. 1. 0. 0. 0.]
- 
- [0. 1. 2. 2. 2. 0. 2. 2. 0. 1. 0. 0.]
- 
- [0. 0. 1. 0. 2. 2. 0. 2. 2. 2. 1. 0.]
- 
- [0. 0. 0. 1. 2. 2. 2. 0. 2. 2. 0. 1.]
- 
- [0. 0. 0. 0. 1. 0. 2. 2. 0. 2. 2. 2.]
- 
- [0. 0. 0. 0. 0. 1. 2. 2. 2. 0. 2. 2.]
- 
- [0. 0. 0. 0. 0. 0. 1. 0. 2. 2. 0. 2.]
- 
+[[0. 2. 2. 2. 1. 0. 0. 0. 0. 0. 0. 0.] <br />
+ [2. 0. 2. 2. 0. 1. 0. 0. 0. 0. 0. 0.] <br />
+ [2. 2. 0. 2. 2. 2. 1. 0. 0. 0. 0. 0.] <br />
+ [2. 2. 2. 0. 2. 2. 0. 1. 0. 0. 0. 0.] <br />
+ [1. 0. 2. 2. 0. 2. 2. 2. 1. 0. 0. 0.] <br />
+ [0. 1. 2. 2. 2. 0. 2. 2. 0. 1. 0. 0.] <br />
+ [0. 0. 1. 0. 2. 2. 0. 2. 2. 2. 1. 0.] <br />
+ [0. 0. 0. 1. 2. 2. 2. 0. 2. 2. 0. 1.] <br />
+ [0. 0. 0. 0. 1. 0. 2. 2. 0. 2. 2. 2.] <br />
+ [0. 0. 0. 0. 0. 1. 2. 2. 2. 0. 2. 2.] <br />
+ [0. 0. 0. 0. 0. 0. 1. 0. 2. 2. 0. 2.] <br />
  [0. 0. 0. 0. 0. 0. 0. 1. 2. 2. 2. 0.]]
 
 By using the \`\`attach'' flag this connectivity matrix has already been converted into a NetworkX graph and attached to the Gratoms object for future use.
@@ -183,7 +172,7 @@ Using the `AdsorptionSites` class form the adsorption module provides more power
 -   [X] Connectivity between adsorption sites
 
 
-### ''Manual'' Adsorption site enumeration and visualization:
+### \`\`Manual'' Adsorption site enumeration and visualization:
 
 Adsorption site enumeration in CatGen is solely dependent upon surface atom identification. This can be performed automatically using `catgen.surface.SlabGenerator`, however, this function relies upon bulk properties which are not always available.
 
@@ -361,11 +350,8 @@ The `Builder` module currently takes two Gratoms objects as input since graph in
     print(builder)
 
 Adsorption builder for Cu4Pd12 slab.
-
 unique adsorption sites: 9
-
 site connectivity: [1 1 2 2 2 3 3 3 3]
-
 unique adsorption edges: 21
 
 1.  Monodentate adsorption
@@ -494,14 +480,22 @@ unique adsorption edges: 21
 
 Below is an example script which generates some simple figures using [NetworkX](https://networkx.github.io/documentation/networkx-1.10/index.html) code for all molecules up to C<sub>2</sub>H<sub>6</sub>.
 
-1 ![img](../images/molecule-1.png) 2 ![img](../images/molecule-2.png) 3 ![img](../images/molecule-3.png) 4 ![img](../images/molecule-4.png)
-
-5 ![img](../images/molecule-5.png) 6 ![img](../images/molecule-6.png) 7 ![img](../images/molecule-7.png) 8 ![img](../images/molecule-8.png)
-
-9 ![img](../images/molecule-9.png) 10 ![img](../images/molecule-10.png) 11 ![img](../images/molecule-11.png) 12 ![img](../images/molecule-12.png)
-
-13 ![img](../images/molecule-13.png) 14 ![img](../images/molecule-14.png) 15 ![img](../images/molecule-15.png) 16 ![img](../images/molecule-16.png)
-
+1 ![img](../images/molecule-1.png)
+2 ![img](../images/molecule-2.png)
+3 ![img](../images/molecule-3.png)
+4 ![img](../images/molecule-4.png)
+5 ![img](../images/molecule-5.png)
+6 ![img](../images/molecule-6.png)
+7 ![img](../images/molecule-7.png)
+8 ![img](../images/molecule-8.png)
+9 ![img](../images/molecule-9.png)
+10 ![img](../images/molecule-10.png)
+11 ![img](../images/molecule-11.png)
+12 ![img](../images/molecule-12.png)
+13 ![img](../images/molecule-13.png)
+14 ![img](../images/molecule-14.png)
+15 ![img](../images/molecule-15.png)
+16 ![img](../images/molecule-16.png)
 17 ![img](../images/molecule-17.png)
 
     from catgen.pathways import ReactionNetwork
@@ -870,35 +864,21 @@ Below we take another example from to produce a linearly independent set of reac
     print(np.dot(sigma, nu))
 
 Linearly independent set of reaction routes:
-
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0]
-
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0]
- 
  [ 1  1  1  1  1  1  0  1  0  0  1  0  0  0  0]
- 
  [ 0  0  0  0  0  0  1 -1  0  0  0 -1  0  0  0]
- 
  [ 0  0  0  1  0  1  0  0  0  0  0  0 -1  0  0]
- 
  [ 1  1  1  0  1  1  1  0  0  0  0  0  0  1  0]
- 
  [ 1  1  1  0  1  1  0  1  0  0  0  0  0  0  1]] 
 
 Overall reaction routes:
-
 [[ 0  0  0  0  0  0  0  0 -1 -1  1  1]
-
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- 
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- 
  [ 0  0  0  0  0  0  0  0  0  0  0  0]
- 
  [ 0  0  0  0  0  0  0  0  0  0  0  0]
- 
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- 
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]]
 
 Note that all of the linearly independent reaction routes return the same overall reaction except for one. This is because some routes will return a trivial solution. Routes which return the correct overall chemistry are known as full routes (FR) and those which return trivial solutions are called empty routes (ER).
@@ -963,64 +943,38 @@ However, it is still often desirable for some applications to have a full listin
     print(ER)
 
 17 Full reaction routes:
-
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0]
-
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0]
- 
  [ 1  1  1  1  1  1  0  1  0  0  1  0  0]
- 
  [ 1  1  1  1  1  2  1  0  0  0  0  0 -1]
- 
  [ 1  1  1  1  1  0  0  0  0  1  1 -1  1]
- 
  [ 1  1  1  1  1  0  0  0  1  1  0  0  1]
- 
  [ 1  1  1  1  1  0  0  1  0  0  2 -1  1]
- 
  [ 1  1  1  1  1  0  0 -1  0  2  0 -1  1]
- 
  [ 1  1  1  1  1  0  0  1  2  0  0  1  1]
- 
  [ 1  1  1  1  1  0  0  1  1  0  1  0  1]
- 
  [ 1  1  1  1  1  0  1  0  0  0  2 -2  1]
- 
  [ 1  1  1  1  1  0 -1  0  0  2  0  0  1]
- 
  [ 1  1  1  1  1  0  1  0  2  0  0  0  1]
- 
  [ 1  1  1  1  1  0 -1  2  0  0  2  0  1]
- 
  [ 1  1  1  1  1  2  0  1  0  0  0  1 -1]
- 
  [ 1  1  1  1  1  1  0  1  1  0  0  1  0]
- 
  [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]] 
 
 12 Empty reaction routes:
-
 [[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0]
-
  [ 0  0  0  0  0  0  0  0  1  0 -1  1  0]
- 
  [ 0  0  0  0  0  0  0  1  0 -1  1  0  0]
- 
  [ 0  0  0  0  0  0  0  1  1 -1  0  1  0]
- 
  [ 0  0  0  0  0  0  1  0  0 -1  1 -1  0]
- 
  [ 0  0  0  0  0  0  1  0  1 -1  0  0  0]
- 
  [ 0  0  0  0  0  0  1 -1  1  0 -1  0  0]
- 
  [ 0  0  0  0  0  1  0  0  0  0 -1  1 -1]
- 
  [ 0  0  0  0  0  1  0  0 -1  0  0  0 -1]
- 
  [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1]
- 
  [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1]
- 
  [ 0  0  0  0  0  1  1 -1  0  0 -1  0 -1]]
+
+
+# Supporting information
 
