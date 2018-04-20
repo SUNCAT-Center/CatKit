@@ -1,4 +1,4 @@
-import catgen import utils
+from catgen import utils
 import numpy as np
 import os
 
@@ -29,6 +29,7 @@ def test_classifier():
     np.testing.assert_allclose(test_point, intersect)
 
     intersect = utils.trilaterate(points, [2, 2, 2])
+
     test_point = np.array([0.5, 0.5, -1.87082869])
     np.testing.assert_allclose(test_point, intersect)
 
