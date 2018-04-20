@@ -349,9 +349,9 @@ The `Builder` module currently takes two Gratoms objects as input since graph in
     builder = Builder(slab)
     print(builder)
 
-Adsorption builder for Cu4Pd12 slab.
-unique adsorption sites: 9
-site connectivity: [1 1 2 2 2 3 3 3 3]
+Adsorption builder for Cu4Pd12 slab. <br />
+unique adsorption sites: 9 <br />
+site connectivity: [1 1 2 2 2 3 3 3 3] <br />
 unique adsorption edges: 21
 
 1.  Monodentate adsorption
@@ -483,19 +483,19 @@ Below is an example script which generates some simple figures using [NetworkX](
 1 ![img](../images/molecule-1.png)
 2 ![img](../images/molecule-2.png)
 3 ![img](../images/molecule-3.png)
-4 ![img](../images/molecule-4.png)
+4 ![img](../images/molecule-4.png) <br />
 5 ![img](../images/molecule-5.png)
 6 ![img](../images/molecule-6.png)
 7 ![img](../images/molecule-7.png)
-8 ![img](../images/molecule-8.png)
+8 ![img](../images/molecule-8.png) <br />
 9 ![img](../images/molecule-9.png)
 10 ![img](../images/molecule-10.png)
 11 ![img](../images/molecule-11.png)
-12 ![img](../images/molecule-12.png)
+12 ![img](../images/molecule-12.png) <br />
 13 ![img](../images/molecule-13.png)
 14 ![img](../images/molecule-14.png)
 15 ![img](../images/molecule-15.png)
-16 ![img](../images/molecule-16.png)
+16 ![img](../images/molecule-16.png) <br />
 17 ![img](../images/molecule-17.png)
 
     from catgen.pathways import ReactionNetwork
@@ -782,24 +782,24 @@ In this example, we choose the number of independent species.
     print('Terminal species:')
     print(species)
 
-Overall reaction routes:
-[[ 0  0  0  0  0  0  2 -1 -1  0  0  0]
- [ 0  0  0  0  0  0  0  1  0  2 -2  0]
- [ 0  0  0  0  0  2  0  3  0 -2  0 -4]
- [ 0  0  0  0  0  1  0  2  0  0 -1 -2]
- [ 0  0  0  0  0  0  2  0 -1  2 -2  0]
- [ 0  0  0  0  0  2  6  0 -3 -2  0 -4]
- [ 0  0  0  0  0  1  4  0 -2  0 -1 -2]
+Overall reaction routes: <br />
+[[ 0  0  0  0  0  0  2 -1 -1  0  0  0] <br />
+ [ 0  0  0  0  0  0  0  1  0  2 -2  0] <br />
+ [ 0  0  0  0  0  2  0  3  0 -2  0 -4] <br />
+ [ 0  0  0  0  0  1  0  2  0  0 -1 -2] <br />
+ [ 0  0  0  0  0  0  2  0 -1  2 -2  0] <br />
+ [ 0  0  0  0  0  2  6  0 -3 -2  0 -4] <br />
+ [ 0  0  0  0  0  1  4  0 -2  0 -1 -2] <br />
  [ 0  0  0  0  0  1  0  0  0 -4  3 -2]] 
 
-Terminal species:
-[[ 5  6  7  8  9]
- [ 5  6  7  9 10]
- [ 5  6  7  9 11]
- [ 5  6  7 10 11]
- [ 5  6  8  9 10]
- [ 5  6  8  9 11]
- [ 5  6  8 10 11]
+Terminal species: <br />
+[[ 5  6  7  8  9] <br />
+ [ 5  6  7  9 10] <br />
+ [ 5  6  7  9 11] <br />
+ [ 5  6  7 10 11] <br />
+ [ 5  6  8  9 10] <br />
+ [ 5  6  8  9 11] <br />
+ [ 5  6  8 10 11] <br />
  [ 5  6  9 10 11]]
 
 The terminal species matrix will always contain `s + 1` entries, where `s` is the number of elements in the chemistry. This does not necessarily mean that the overall reaction produced will include all `s + 1` species.
@@ -863,22 +863,22 @@ Below we take another example from to produce a linearly independent set of reac
     print('Overall reaction routes:')
     print(np.dot(sigma, nu))
 
-Linearly independent set of reaction routes:
-[[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0]
- [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0]
- [ 1  1  1  1  1  1  0  1  0  0  1  0  0  0  0]
- [ 0  0  0  0  0  0  1 -1  0  0  0 -1  0  0  0]
- [ 0  0  0  1  0  1  0  0  0  0  0  0 -1  0  0]
- [ 1  1  1  0  1  1  1  0  0  0  0  0  0  1  0]
+Linearly independent set of reaction routes: <br />
+[[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0] <br />
+ [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0] <br />
+ [ 1  1  1  1  1  1  0  1  0  0  1  0  0  0  0] <br />
+ [ 0  0  0  0  0  0  1 -1  0  0  0 -1  0  0  0] <br />
+ [ 0  0  0  1  0  1  0  0  0  0  0  0 -1  0  0] <br />
+ [ 1  1  1  0  1  1  1  0  0  0  0  0  0  1  0] <br />
  [ 1  1  1  0  1  1  0  1  0  0  0  0  0  0  1]] 
 
-Overall reaction routes:
-[[ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
- [ 0  0  0  0  0  0  0  0  0  0  0  0]
- [ 0  0  0  0  0  0  0  0  0  0  0  0]
- [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
+Overall reaction routes: <br />
+[[ 0  0  0  0  0  0  0  0 -1 -1  1  1] <br />
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1] <br />
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1] <br />
+ [ 0  0  0  0  0  0  0  0  0  0  0  0] <br />
+ [ 0  0  0  0  0  0  0  0  0  0  0  0] <br />
+ [ 0  0  0  0  0  0  0  0 -1 -1  1  1] <br />
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]]
 
 Note that all of the linearly independent reaction routes return the same overall reaction except for one. This is because some routes will return a trivial solution. Routes which return the correct overall chemistry are known as full routes (FR) and those which return trivial solutions are called empty routes (ER).
@@ -942,39 +942,36 @@ However, it is still often desirable for some applications to have a full listin
     print('{} Empty reaction routes:'.format(len(ER)))
     print(ER)
 
-17 Full reaction routes:
-[[ 1  1  1  1  1  1  1  0  1  0  0  0  0]
- [ 1  1  1  1  1  1  0  0  0  1  0  0  0]
- [ 1  1  1  1  1  1  0  1  0  0  1  0  0]
- [ 1  1  1  1  1  2  1  0  0  0  0  0 -1]
- [ 1  1  1  1  1  0  0  0  0  1  1 -1  1]
- [ 1  1  1  1  1  0  0  0  1  1  0  0  1]
- [ 1  1  1  1  1  0  0  1  0  0  2 -1  1]
- [ 1  1  1  1  1  0  0 -1  0  2  0 -1  1]
- [ 1  1  1  1  1  0  0  1  2  0  0  1  1]
- [ 1  1  1  1  1  0  0  1  1  0  1  0  1]
- [ 1  1  1  1  1  0  1  0  0  0  2 -2  1]
- [ 1  1  1  1  1  0 -1  0  0  2  0  0  1]
- [ 1  1  1  1  1  0  1  0  2  0  0  0  1]
- [ 1  1  1  1  1  0 -1  2  0  0  2  0  1]
- [ 1  1  1  1  1  2  0  1  0  0  0  1 -1]
- [ 1  1  1  1  1  1  0  1  1  0  0  1  0]
- [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]] 
+17 Full reaction routes: <br />
+[[ 1  1  1  1  1  1  1  0  1  0  0  0  0] <br />
+ [ 1  1  1  1  1  1  0  0  0  1  0  0  0] <br />
+ [ 1  1  1  1  1  1  0  1  0  0  1  0  0] <br />
+ [ 1  1  1  1  1  2  1  0  0  0  0  0 -1] <br />
+ [ 1  1  1  1  1  0  0  0  0  1  1 -1  1] <br />
+ [ 1  1  1  1  1  0  0  0  1  1  0  0  1] <br />
+ [ 1  1  1  1  1  0  0  1  0  0  2 -1  1] <br />
+ [ 1  1  1  1  1  0  0 -1  0  2  0 -1  1] <br />
+ [ 1  1  1  1  1  0  0  1  2  0  0  1  1] <br />
+ [ 1  1  1  1  1  0  0  1  1  0  1  0  1] <br />
+ [ 1  1  1  1  1  0  1  0  0  0  2 -2  1] <br />
+ [ 1  1  1  1  1  0 -1  0  0  2  0  0  1] <br />
+ [ 1  1  1  1  1  0  1  0  2  0  0  0  1] <br />
+ [ 1  1  1  1  1  0 -1  2  0  0  2  0  1] <br />
+ [ 1  1  1  1  1  2  0  1  0  0  0  1 -1] <br />
+ [ 1  1  1  1  1  1  0  1  1  0  0  1  0] <br />
+ [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]]
 
-12 Empty reaction routes:
-[[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0]
- [ 0  0  0  0  0  0  0  0  1  0 -1  1  0]
- [ 0  0  0  0  0  0  0  1  0 -1  1  0  0]
- [ 0  0  0  0  0  0  0  1  1 -1  0  1  0]
- [ 0  0  0  0  0  0  1  0  0 -1  1 -1  0]
- [ 0  0  0  0  0  0  1  0  1 -1  0  0  0]
- [ 0  0  0  0  0  0  1 -1  1  0 -1  0  0]
- [ 0  0  0  0  0  1  0  0  0  0 -1  1 -1]
- [ 0  0  0  0  0  1  0  0 -1  0  0  0 -1]
- [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1]
- [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1]
+12 Empty reaction routes: <br />
+[[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0] <br />
+ [ 0  0  0  0  0  0  0  0  1  0 -1  1  0] <br />
+ [ 0  0  0  0  0  0  0  1  0 -1  1  0  0] <br />
+ [ 0  0  0  0  0  0  0  1  1 -1  0  1  0] <br />
+ [ 0  0  0  0  0  0  1  0  0 -1  1 -1  0] <br />
+ [ 0  0  0  0  0  0  1  0  1 -1  0  0  0] <br />
+ [ 0  0  0  0  0  0  1 -1  1  0 -1  0  0] <br />
+ [ 0  0  0  0  0  1  0  0  0  0 -1  1 -1] <br />
+ [ 0  0  0  0  0  1  0  0 -1  0  0  0 -1] <br />
+ [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1] <br />
+ [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1] <br />
  [ 0  0  0  0  0  1  1 -1  0  0 -1  0 -1]]
-
-
-# Supporting information
 
