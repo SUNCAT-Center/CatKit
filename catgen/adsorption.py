@@ -415,6 +415,8 @@ class Builder(AdsorptionSites):
         string = 'Adsorption builder for {} slab.\n'.format(formula)
         sym = len(self.get_symmetric_sites())
         string += 'unique adsorption sites: {}\n'.format(sym)
+        con = self.get_connectivity()
+        string += 'site connectivity: {}\n'.format(con)
         edges = self.get_adsorption_edges()
         string += 'unique adsorption edges: {}'.format(len(edges))
 

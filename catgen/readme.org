@@ -15,7 +15,7 @@ Current enumerations include:
 - [X] Reaction mechanisms
 - [X] Reaction routes
 
-* Enumeration
+* Enumerations
 ** Surface module:
 The surface module is designed to leverage information about the bulk structure which a slab is derived from.
 
@@ -249,16 +249,17 @@ print('Coordinates:\n', coordinates[::5], '\n')
 print('Connectivity:\n', connectivity[::5], '\n')
 print('Topology:\n', topology[::5], '\n')
 
-periodic = sites.get_periodic_sites(screen=False)
+periodic = sites.get_periodic_sites()
 print('Sites by periodicity:\n', periodic[::5], '\n')
 
-symmetric = sites.get_symmetric_sites(unique=True, screen=False)
+symmetric = sites.get_symmetric_sites()
 print('Sites by symmetry:\n', symmetric[::5])
 
 atm = {1: 'X', 2: 'He', 3: 'F', 4: 'N'}
 for i, c in enumerate(coordinates):
     typ = connectivity[i]
     atoms += Atom(atm[typ], c + [0, 0, 2])
+
 
 write(
     '../images/CuPd3_321-sites.pov',
@@ -292,20 +293,10 @@ Topology:
  array([18, 19, 17]) array([25, 20, 15]) array([23, 15, 22, 18])] 
 
 Sites by periodicity:
- [ 40  45  40  45  40  45  40  45  40  45  40  45  40  45  40  45  40  45
- 278 224 279 187 172 192 155 277 192 185 276 187 224 155 189 224 186 278
- 222 185 190 222 191 205 222 173 185 185 222 185 192 172 224 191 260 185
- 270 275 189 284 191 276 276 284 224 189 275 173 404 400 357 395 350 355
- 377 377 350 359 400 374 400 395 400 404 374 399 356 395 395 357 451 451
- 447] 
+ [ 40  45 155 186 191 222 273 279 355 377 399 451] 
 
 Sites by symmetry:
- [ 40  45  40  45  40  45  40  45  40  45  40  45  40  45  40  45  40  45
- 278 224 279 187 172 192 155 277 192 185 276 187 224 155 189 224 186 278
- 222 185 190 222 191 102 222 173 185 185 222 185 192 172 224 191 102 185
- 270 275 189 284 191 276 276 284 224 189 275 173 404 400 357 395 350 355
- 377 377 350 359 400 374 400 395 400 404 374 399 356 395 395 357 451 451
- 447]
+ [ 40  45 155 186 191 222 273 279 355 377 399 451]
 :END:
 
 When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
@@ -397,6 +388,7 @@ print(builder)
 :RESULTS:
 Adsorption builder for Cu4Pd12 slab.
 unique adsorption sites: 9
+site connectivity: [1 1 2 2 2 3 3 3 3]
 unique adsorption edges: 21
 :END:
 
