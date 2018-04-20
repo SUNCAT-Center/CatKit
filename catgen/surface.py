@@ -24,7 +24,7 @@ class SlabGenerator(object):
 
     def __init__(self,
                  bulk,
-                 miller_index=[1, 1, 1],
+                 miller_index=(1, 1, 1),
                  layers=4,
                  min_width=None,
                  fixed=0,

@@ -204,9 +204,10 @@ class Gratoms(Atoms):
             # interpreted at 0 and 1 indices.
             i = np.atleast_1d(i)
 
+        n = len(self)
+        i = np.arange(n)[i]
+
         if len(self._constraints) > 0:
-            n = len(self)
-            i = np.arange(n)[i]
             if isinstance(i, int):
                 i = [i]
             constraints = []
@@ -222,10 +223,8 @@ class Gratoms(Atoms):
         for name, a in self.arrays.items():
             self.arrays[name] = a[mask]
 
-        if isinstance(i, slice):
-            i = np.arange(n)[i]
-
         self._graph.remove_nodes_from(i)
+
         mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
         nx.relabel_nodes(self._graph, mapping, copy=False)
 
