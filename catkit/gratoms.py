@@ -39,18 +39,24 @@ class Gratoms(Atoms):
                          magmoms, charges, scaled_positions, cell, pbc,
                          celldisp, constraint, calculator, info)
 
-        if self.pbc.any():
-            self._graph = MultiGraph()
+        if isinstance(edges, np.ndarray):
+            if self.pbc.any():
+                self._graph = MultiGraph(edges)
+            else:
+                self._graph = Graph(edges)
         else:
-            self._graph = Graph()
+            if self.pbc.any():
+                self._graph = MultiGraph()
+            else:
+                self._graph = Graph()
 
         nodes = [[i, {
             'number': n
         }] for i, n in enumerate(self.arrays['numbers'])]
         self._graph.add_nodes_from(nodes)
 
-        if edges:
-            self._graph.add_edges_from(edges, bonds=1)
+        if isinstance(edges, list):
+            self._graph.add_edges_from(edges)
 
         self._surface_atoms = None
 
@@ -69,6 +75,16 @@ class Gratoms(Atoms):
     @property
     def adj(self):
         return self._graph.adj
+
+    @property
+    def degree(self):
+        degree = self._graph.degree
+        return np.array([_[1] for _ in degree])
+
+    @property
+    def connectivity(self):
+        connectivity = nx.to_numpy_matrix(self._graph).astype(int)
+        return connectivity
 
     def get_surface_atoms(self):
         """Return surface atoms."""

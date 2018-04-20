@@ -50,7 +50,7 @@ Second termination of 9 layer slab of CuPd_{3}.
 [[./images/CuPd3-term-1.png]] [[./images/CuPd3-term-1-top.png]]
 
 #+BEGIN_SRC python :results silent :exports code
-from catkit.surface import SlabGenerator
+from catgen.surface import SlabGenerator
 from ase.io import write
 from ase.build import bulk
 
@@ -409,9 +409,9 @@ print(builder)
 
 #+RESULTS:
 :RESULTS:
-Adsorption builder for Cu4Pd12 slab
-9 unique adsorption sites
-21 unique adsorption edges
+Adsorption builder for Cu4Pd12 slab.
+unique adsorption sites: 9
+unique adsorption edges: 21
 :END:
 
 **** Monodentate adsorption
@@ -513,14 +513,14 @@ print('{} adsorption structures generated'.format(len(ads_slab)))
 img_name = './images/CH2CH-ads.pov'
 write(
     img_name,
-    ads_slab[17],
+    ads_slab[14],
     show_unit_cell=2,
     rotation='-90x',
     run_povray=True)
 
 write(
     img_name.replace('.pov', '-top.pov'),
-    ads_slab[17],
+    ads_slab[14],
     show_unit_cell=2,
     run_povray=True)
 #+END_SRC
