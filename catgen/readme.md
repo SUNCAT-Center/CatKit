@@ -31,11 +31,9 @@ The surface module is designed to leverage information about the bulk structure 
 
 Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1<sub>0</sub> CuPd<sub>3</sub> cubic alloy.
 
-First termination of 9 layer slab of CuPd<sub>3</sub>.
-![img](../images/CuPd3-term-0.png) ![img](../images/CuPd3-term-0-top.png)
+![img](../images/CuPd3-term-0.png "First termination of 9 layer slab of CuPd<sub>3</sub>.") ![img](../images/CuPd3-term-0-top.png "First termination of 9 layer slab of CuPd<sub>3</sub>.")
 
-Second termination of 9 layer slab of CuPd<sub>3</sub>.
-![img](../images/CuPd3-term-1.png) ![img](../images/CuPd3-term-1-top.png)
+![img](../images/CuPd3-term-1.png "Second termination of 9 layer slab of CuPd<sub>3</sub>.") ![img](../images/CuPd3-term-1-top.png "Second termination of 9 layer slab of CuPd<sub>3</sub>.")
 
     from catgen.surface import SlabGenerator
     from ase.io import write
@@ -76,8 +74,7 @@ Second termination of 9 layer slab of CuPd<sub>3</sub>.
 
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au. 
-![img](../images/Pd-surface-atoms.png)
+![img](../images/Pd-surface-atoms.png "Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au.")
 
     from catgen.surface import SlabGenerator
     from ase.build import bulk
@@ -175,14 +172,15 @@ Using the `AdsorptionSites` class form the adsorption module provides more power
 -   [X] Connectivity between adsorption sites
 
 
-### \`\`Manual'' Adsorption site enumeration and visualization:
+### ''Manual'' Adsorption site enumeration and visualization:
 
 Adsorption site enumeration in CatGen is solely dependent upon surface atom identification. This can be performed automatically using `catgen.surface.SlabGenerator`, however, this function relies upon bulk properties which are not always available.
 
 Here, we show how the surface sites can be assigned manually which is often convenient enough. Other means of surface site identification will be added in a future release.
 
 Surface atoms are used to define top sites (green), which are then used to define remaining sites (red) via Delaunay triangulation symmetries.
-![img](../images/Pd3Cu-adsorption-sites.png)
+
+![img](../images/Pd3Cu-adsorption-sites.png "Delaunay triangulation of surface atoms for fcc(111) structure.")
 
     from catgen.adsorption import AdsorptionSites
     from catgen.surface import SlabGenerator
@@ -211,7 +209,8 @@ For more complex adsorption enumeration, we often require more detailed informat
 The `AdsorptionSite` class also produces an expanded unit cell which is useful for operations which require observation of periodic boundary conditions. This extended unit cell can be accessed by toggling the \`\`screen'' argument.
 
 All possible adsorption sites of of CuPd<sub>3</sub> (3, 2, 1). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
-![img](../images/CuPd3_321-sites.png)
+
+![img](../images/CuPd3_321-sites.png "Delaunay triangulation of surface atoms for fcc(111) structure.")
 
     from catgen.adsorption import AdsorptionSites
     from catgen.surface import SlabGenerator
@@ -361,7 +360,7 @@ unique adsorption edges: 21
     
     In this example, the use of `-1` as a tag on the adsorbate is used to indicate it is bonded to the slab.
     
-    ![img](../images/CH3-ads.png)
+    ![img](../images/CH3-ads.png "Builder for a CH<sub>3</sub> on a unique top site of a CuPd<sub>3</sub> (1, 1, 1) surface.")
     
     ![img](../images/CH3-ads-top.png)
     
@@ -415,7 +414,7 @@ unique adsorption edges: 21
     
     Also, using setting the `index` key to `-1` will return a list of all the possible adsorbed structures.
     
-    ![img](../images/CH2CH-ads.png)
+    ![img](../images/CH2CH-ads.png "Builder for a C<sub>2</sub>H<sub>3</sub> on a unique edge of a CuPd<sub>3</sub> (1, 1, 1) surface.")
     
     ![img](../images/CH2CH-ads-top.png)
     
