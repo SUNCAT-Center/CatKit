@@ -19,7 +19,6 @@ class Connect():
 
     with Connect() as db:
         (Perform operation here)
-
     """
 
     def __init__(self, engine='sqlite:///example.db'):

@@ -1,10 +1,10 @@
 import matplotlib
 matplotlib.use('Agg')
-from catkit.surface import SlabGenerator
-from catkit.adsorption import AdsorptionSites
-from catkit.pathways import ReactionNetwork
-from catkit.api.rd_kit import plot_molecule
-from catkit.api.rd_kit import get_uff_coordinates
+from catgen.surface import SlabGenerator
+from catgen.adsorption import AdsorptionSites
+from catgen.pathways import ReactionNetwork
+from catgen.api.rd_kit import plot_molecule
+from catgen.api.rd_kit import get_uff_coordinates
 from ase.utils import formula_hill
 from ase.build import bulk
 import networkx as nx
@@ -107,8 +107,9 @@ def test_adsorption_examples():
     topology = sites.get_topology()
     assert (len(topology) == 56)
 
-    periodic = sites.get_periodic_sites(screen=False)
-    symmetric = sites.get_symmetric_sites(unique=True, screen=False)
+    periodic = sites.get_periodic_sites()
+    symmetric = sites.get_symmetric_sites()
+    print(periodic)
     np.testing.assert_allclose(symmetric, periodic)
 
     atoms = bulk('Pd', 'fcc', a=5, cubic=True)

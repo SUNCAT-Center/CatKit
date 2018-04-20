@@ -1,5 +1,5 @@
 from catkit import Gratoms
-from catkit.utils import to_gratoms
+from catgen.utils import to_gratoms
 from ase.constraints import FixAtoms
 from ase.build import molecule
 import networkx as nx
