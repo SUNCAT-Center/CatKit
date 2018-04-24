@@ -432,6 +432,9 @@ class Builder(AdsorptionSites):
         edges = self.get_adsorption_edges(symmetric=False, periodic=False)
         coords = self.coordinates[:, :2]
 
+        if isinstance(index, int):
+            index = [index]
+
         if not cutoff:
             for i in per[index]:
                 sd = np.where(edges == i)[0]

@@ -12,14 +12,20 @@ def get_graph(molecule, sanitize=True):
 
     for j, data in molecule.nodes(data=True):
         rdAtom = Chem.rdchem.Atom(chemical_symbols[data['number']])
-        rdAtom.SetNumRadicalElectrons(int(data['valence']))
+        if data.get('valence'):
+            rdAtom.SetNumRadicalElectrons(int(data.get('valence')))
+        else:
+            rdAtom.SetNumRadicalElectrons(int(0))
         rdkG.AddAtom(rdAtom)
 
     rdBonds = Chem.rdchem.BondType
     orders = {'1': rdBonds.SINGLE, '2': rdBonds.DOUBLE, '3': rdBonds.TRIPLE}
 
     for u, v, data in molecule.edges(data=True):
-        order = orders[str(data['bonds'])]
+        if data.get('bonds'):
+            order = orders[str(data['bonds'])]
+        else:
+            order = rdBonds.SINGLE
         rdkG.AddBond(int(u), int(v), order)
 
     rdkG = rdkG.GetMol()
