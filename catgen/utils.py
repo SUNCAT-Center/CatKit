@@ -1,7 +1,7 @@
+from . import defaults
 from catkit import Gratoms
 from scipy.spatial import Voronoi
 from scipy.linalg import lstsq
-from ase.data import covalent_radii as radii
 from ase.data import chemical_symbols as sym
 import numpy as np
 from numpy.linalg import norm, solve
@@ -181,7 +181,7 @@ def get_voronoi_neighbors(atoms, r=8):
     voronoi = Voronoi(coords)
     points = voronoi.ridge_points
 
-    connectivity = np.zeros((len(atoms), len(atoms)), dtype=int)
+    connectivity = np.zeros((len(atoms), len(atoms)))
     for i, n in enumerate(oind):
         p = points[np.where(points == n)[0]]
         edges = np.sort(index[p])
@@ -193,13 +193,15 @@ def get_voronoi_neighbors(atoms, r=8):
 
         for j, edge in enumerate(unique_edge):
             u, v = edge
-            connectivity[u][v] += edge_counts[j] / 2
-            connectivity[v][u] += edge_counts[j] / 2
+            connectivity[u][v] += edge_counts[j]
+            connectivity[v][u] += edge_counts[j]
 
-    return connectivity
+    connectivity /= 2
+
+    return connectivity.astype(int)
 
 
-def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
+def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     """Return the connectivity matrix from a simple radial cutoff.
     Multi-bonding occurs through periodic boundary conditions.
 
@@ -218,127 +220,31 @@ def get_cutoff_neighbors(atoms, cutoff, atol=1e-8):
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    cutoff += atol
+    cov_radii = defaults.get('covalent_radii')
+    numbers = atoms.numbers
+    index, coords = expand_cell(atoms, 4)[:2]
 
-    index, coords = expand_cell(atoms, cutoff * 2.0)[:2]
+    if cutoff is None:
+        radii = cov_radii[numbers]
+        radii = np.repeat(radii[:, None], len(index) / len(radii), axis=1)
+        radii = radii.T.flatten()
+    else:
+        radii = np.ones_like(index) * cutoff
 
-    connectivity = np.zeros((len(atoms), len(atoms)))
-    for u, center in enumerate(atoms.positions):
+    connectivity = np.zeros((len(atoms), len(atoms)), dtype=int)
+    for i, center in enumerate(atoms.positions):
         norm = np.linalg.norm(coords - center, axis=1)
-        neighbors = index[np.where(norm < cutoff)]
+        boundry_distance = norm - radii
+        if cutoff is None:
+            boundry_distance -= cov_radii[numbers[i]]
+        neighbors = index[np.where(boundry_distance < atol)]
 
         unique, counts = np.unique(neighbors, return_counts=True)
-        connectivity[u, unique] = counts
+        connectivity[i, unique] = counts
         # Remove self-interaction
-        connectivity[u, u] -= 1
+        connectivity[i, i] -= 1
 
     return connectivity
-
-
-def get_neighbors(atoms, points=None, cutoff_matrix=None):
-    """Returns the neighboring atoms within a specified cutoff matrix
-    criteria for requested points.
-
-    Use of the cutoff matrix provides more fine-tuned control
-    over the interaction parameters.
-
-    Parameters:
-    -----------
-    atoms : atoms object
-        Atoms object to return.
-    points : list (N,) or None
-        Points to locate neighboring points of. If not provided, all
-        atom points in the atoms-object will be used.
-    cutoff_matrix : ndarray (96, 96) or None
-        A matrix of interaction distances for the first 96 elements
-        of the periodic table. These interactions are separated into
-        individual i, j interactions. If None, defaults from ASE
-        will be used.
-
-    Returns:
-    --------
-    neighbors : dict
-        Keys of each point and an array of each neighboring atoms index.
-    """
-    if cutoff_matrix is None:
-
-        r = radii.copy()
-        # TODO: Develop an SVM to parameterize this for me
-        # Will need reliable training data for an supervised approach
-        metals = [
-            [47, 1.1],  # Ag
-            [79, 1.2],  # Au
-            [29, 1.1],  # Cu
-            [77, 1.1],  # Ir
-            [46, 1.1],  # Pd
-            [78, 1.2],  # Pt
-            [45, 1.1],  # Rh
-        ]
-
-        adsorbates = [[1, 1.0], [6, 1.0], [7, 1.0], [8, 1.0], [16, 1.0]]
-
-        for i, f in metals:
-            r[i] *= f
-        for i, f in adsorbates:
-            r[i] *= f
-        cutoff_matrix = np.zeros((96, 96))
-        for i in range(96):
-            for j in range(96):
-                cutoff_matrix[i][j] = r[i] + r[j]
-                cutoff_matrix[j][i] = r[i] + r[j]
-
-    rcmax = cutoff_matrix.max()
-
-    an = atoms.get_atomic_numbers()
-    positions = atoms.get_positions()
-    pbc = atoms.get_pbc()
-    cell = atoms.get_cell()
-
-    icell = np.linalg.pinv(cell)
-    scaled = np.dot(positions, icell)
-    scaled0 = scaled.copy()
-
-    N = []
-    for i in range(3):
-        if pbc[i]:
-            scaled0[:, i] %= 1.0
-            v = icell[:, i]
-            h = 1 / np.sqrt(np.dot(v, v))
-            n = int(2 * rcmax / h) + 1
-        else:
-            n = 0
-        N.append(n)
-
-    offsets = (scaled0 - scaled).round().astype(int)
-    positions0 = atoms.positions + np.dot(offsets, cell)
-    natoms = len(atoms)
-    indices = np.arange(natoms)
-
-    if points is None:
-        points = indices
-
-    cutoffs = np.zeros(natoms)
-    neighbors = {a: np.empty(0, int) for a in points}
-    for n1 in range(-N[0], N[0] + 1):
-        for n2 in range(-N[1], N[1] + 1):
-            for n3 in range(-N[2], N[2] + 1):
-
-                displacement = np.dot((n1, n2, n3), cell)
-
-                for a in points:
-
-                    for b in range(natoms):
-                        cutoffs[b] = cutoff_matrix[an[a]][an[b]]
-
-                    d = positions0 + displacement - positions0[a]
-                    i = indices[(d**2).sum(1) < (cutoffs)**2]
-
-                    if a in i:
-                        i = np.delete(i, np.where(i == a)[0])
-
-                    neighbors[a] = np.concatenate((neighbors[a], i))
-
-    return neighbors
 
 
 def get_primitive_cell(atoms, tol=1e-8):
