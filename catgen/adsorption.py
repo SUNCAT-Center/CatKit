@@ -13,7 +13,7 @@ import networkx as nx
 class AdsorptionSites():
     """Adsorption site object."""
 
-    def __init__(self, slab, r=8, tol=1e-5):
+    def __init__(self, slab, surface_atoms=None, r=8, tol=1e-5):
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
@@ -29,7 +29,8 @@ class AdsorptionSites():
             Absolute tolerance for floating point errors.
         """
         index, coords, offsets = utils.expand_cell(slab, r)
-        surface_atoms = slab.get_surface_atoms()
+        if surface_atoms is None:
+            surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
             raise ValueError('Slab must contain surface atoms')
 
