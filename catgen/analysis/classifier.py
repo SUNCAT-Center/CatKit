@@ -1,4 +1,7 @@
 from .. import utils
+from catkit import Gratoms
+from ase import Atoms
+import networkx as nx
 import numpy as np
 
 
@@ -21,6 +24,7 @@ class Classifier():
         self.atoms = atoms
         self.ads_atoms = None
         self.slab_atoms = None
+        self.surface_atoms = None
 
     def id_slab_atoms(
             self,
@@ -68,6 +72,8 @@ class Classifier():
             tags[slab_atoms] = new_tags[::-1]
             self.atoms.set_tags(tags)
 
+        self.slab_atoms = slab_atoms
+
         return slab_atoms
 
     def id_adsorbate_atoms(self, classifier='trivial', tag=False):
@@ -102,3 +108,115 @@ class Classifier():
         self.ads_atoms = ads_atoms
 
         return ads_atoms
+
+    def id_surface_atoms(self, classifier='voronoi_sweep'):
+        """Identify surface atoms of an atoms object. This will
+        require that adsorbate atoms have already been identified.
+
+        Parameters:
+        -----------
+        classifier : str
+            Classification technique to identify surface atoms.
+
+            'voronoi_sweep':
+            Create a sweep of proxy atoms above surface. Surface atoms
+            are those which are most frequent neighbors of the sweep.
+
+        Returns:
+        --------
+        surface_atoms : ndarray (n,)
+            Index of the surface atoms in the object.
+        """
+        atoms = self.atoms.copy()
+
+        # Remove adsorbates before analysis
+        ads_atoms = self.ads_atoms
+        if ads_atoms is None:
+            ads_atoms = self.id_adsorbate_atoms()
+        del atoms[ads_atoms]
+
+        if classifier == 'voronoi_sweep':
+            spos = atoms.get_scaled_positions()
+            zmax = np.max(spos[:, -1])
+
+            # Create a distribution of points to screen with
+            # 2.5 angstrom defines the absolute separation
+            dvec = (np.linalg.norm(atoms.cell[:-1], axis=1) / 2.5) ** -1
+            xy = np.mgrid[0:1:dvec[0], 0:1:dvec[1]].reshape(2, -1)
+            z = np.ones_like(xy[0]) * zmax
+            xyz = np.vstack((xy, z)).T
+
+            screen = np.dot(xyz, atoms.cell)
+
+            n = len(atoms)
+            m = len(screen)
+            ind = np.arange(n, n + m)
+
+            slab_atoms = np.arange(n)
+
+            satoms = []
+            # 2 - 3 Angstroms seems to work for a large range of indices.
+            for k in np.linspace(2, 3, 10):
+                wall = screen.copy() + [0, 0, k]
+
+                atm = Atoms(['X'] * m, positions=wall)
+                test_atoms = atoms + atm
+
+                con = utils.get_voronoi_neighbors(test_atoms)
+                surf_atoms = np.where(con[ind].sum(axis=0)[slab_atoms])[0]
+                satoms += [surf_atoms]
+
+            len_surf_atoms = [len(_) for _ in satoms]
+            uni, ind, cnt = np.unique(
+                len_surf_atoms, return_counts=True, return_index=True)
+
+            max_cnt = np.argmax(cnt)
+            surf_atoms = satoms[ind[max_cnt]]
+
+        self.surface_atoms = surf_atoms
+
+        return surf_atoms
+
+    def id_adsorbates(self, classifier='radial'):
+        """Return a list of Gratoms objects for each adsorbate
+        classified on a surface. Requires classification of slab
+        atoms.
+
+        Parameters:
+        -----------
+        classifier : str
+            Classification technique to identify individual adsorbates.
+
+            'radial':
+            Use standard cutoff distances to identify neighboring atoms.
+
+        Returns:
+        --------
+        adsorabtes : list (n,)
+            Gratoms objects of molecular adsorbates in unit cell.
+        """
+        atoms = self.atoms.copy()
+
+        # Remove the slab atoms
+        slab_atoms = self.slab_atoms
+        if slab_atoms is None:
+            slab_atoms = self.id_slab_atoms()
+        del atoms[slab_atoms]
+
+        if classifier == 'radial':
+            con = utils.get_cutoff_neighbors(atoms)
+            G = nx.Graph(con)
+            SG = list(nx.connected_component_subgraphs(G))
+
+            adsorabtes = []
+            for sg in SG:
+                nodes = list(sg.nodes)
+                edges = list(sg.edges)
+                ads = Gratoms(
+                    numbers=atoms.numbers[nodes],
+                    positions=atoms.positions[nodes],
+                    edges=edges)
+                ads.center(vacuum=5)
+                adsorabtes += [ads]
+
+        return adsorabtes
