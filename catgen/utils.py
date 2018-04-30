@@ -486,3 +486,36 @@ def get_reference_energies(species, energies):
     elements = elements[srt]
 
     return elements, references
+
+
+def get_unique_xy(xyz_coords, cutoff=0.1):
+    """Return the unique coordinates of an atoms object
+    for the requrested atoms indices. Z-coordinates are projected
+    to maximum z-coordinate by default.
+
+    Parameters:
+    -----------
+    xyz_coords : ndarray (n, 3)
+        Cartesian coordinates to identify unique xy positions from.
+    cutoff : float
+        Distance in Angstrons to consider xy-coordinate unique within.
+
+    Returns:
+    --------
+    xy_pos : ndarray (m, 3)
+        Unique xy coordinates projected onto a maximal z coordinate.
+    """
+    xyz_coords[:, -1] = np.max(xyz_coords[:, -1])
+
+    xy_copies = []
+    for i, p in enumerate(xyz_coords[:, :-1]):
+        if i in xy_copies:
+            continue
+
+        dis = xyz_coords[:, :-1][:, None] - p
+        match = np.where(abs(dis).sum(axis=2).T < cutoff)[1]
+        xy_copies += match[1:].tolist()
+
+    xyz_coords = np.delete(xyz_coords, xy_copies, axis=0)
+
+    return xyz_coords
