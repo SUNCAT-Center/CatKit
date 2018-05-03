@@ -29,6 +29,7 @@ class SlabGenerator(object):
                  min_width=None,
                  fixed=0,
                  vacuum=0,
+                 fix_stoichiometry=False,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
@@ -46,6 +47,9 @@ class SlabGenerator(object):
             Number of layers to fix in the slab.
         vacuum : float
             Angstroms of vacuum to add to the slab.
+        fix_stoichiometry : bool
+            Constraints any slab generated to have the same
+            stoichiometry as the bulk provided bulk.
         tol : float
             Tolerance for floating point rounding errors.
         """
@@ -56,6 +60,7 @@ class SlabGenerator(object):
         self.vacuum = vacuum
         self.tol = tol
 
+        self.fix_stoichiometry = fix_stoichiometry
         self.unique_terminations = None
         self.slab = None
 
@@ -254,18 +259,19 @@ class SlabGenerator(object):
 
         reverse_sort = np.sort(zlayers)[::-1]
 
-        if self.min_width:
-            n = np.where(zlayers < self.min_width, 1, 0).sum()
-            ncut = reverse_sort[n]
-        else:
-            ncut = reverse_sort[:self.layers][-1]
+        if not self.fix_stoichiometry:
+            if self.min_width:
+                n = np.where(zlayers < self.min_width, 1, 0).sum()
+                ncut = reverse_sort[n]
+            else:
+                ncut = reverse_sort[:self.layers][-1]
 
-        zpos = slab.positions[:, 2]
-        index = np.arange(len(slab))
-        del slab[index[zpos - ncut < -self.tol]]
+            zpos = slab.positions[:, 2]
+            index = np.arange(len(slab))
+            del slab[index[zpos - ncut < -self.tol]]
 
-        slab.cell[2][2] -= ncut
-        slab.translate([0, 0, -ncut])
+            slab.cell[2][2] -= ncut
+            slab.translate([0, 0, -ncut])
 
         del slab.constraints
 

@@ -325,7 +325,8 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
         Array of unique values.
     """
     if direct:
-        positions = atoms.get_scaled_positions()
+        positions = (atoms.get_scaled_positions() + tol) % 1
+        positions -= tol
     else:
         positions = atoms.positions
 
