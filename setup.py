@@ -25,18 +25,17 @@ setuptools.setup(
         'catgen.api',
         'catflow'
     ],
+    package_dir={'catkit': 'catkit'},
+    package_data={'catkit': ['data/*.db', 'data/*.json']},
 
     install_requires=required,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
 
     classifiers=[
         'Development Status :: 4 - Beta',
-
         'Intended Audience :: Developers',
-        'Topic :: High Throughput Catalysis',
-
-        'License :: GPL-3.0',
-
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Programming Language :: Python',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',

@@ -258,7 +258,9 @@ class AdsorptionSites():
         sites : dict of lists
             Dictionary of sites containing index of site
         """
-        if self._symmetric_sites is None:
+        symmetry_match = self._symmetric_sites
+
+        if symmetry_match is None:
             symmetry = utils.get_symmetry(self.slab, tol=self.tol)
             rotations = np.swapaxes(symmetry['rotations'], 1, 2)
             translations = symmetry['translations']
@@ -282,13 +284,11 @@ class AdsorptionSites():
 
             self._symmetric_sites = symmetry_match
 
-        symmetry_match = self._symmetric_sites
-
         if screen:
             periodic = self.get_periodic_sites()
             symmetry_match = symmetry_match[periodic]
-            if unique:
-                return np.unique(symmetry_match)
+        if unique:
+            return np.unique(symmetry_match)
 
         else:
             return symmetry_match
@@ -401,7 +401,7 @@ class AdsorptionSites():
         ax.axis('off')
 
         if savefile:
-            plt.savefig(savefile, transparent=True)
+            plt.savefig(savefile)
         else:
             plt.show()
 
@@ -422,47 +422,6 @@ class Builder(AdsorptionSites):
         string += 'unique adsorption edges: {}'.format(len(edges))
 
         return string
-
-    def ex_sites(self, index, select='inner', cutoff=0):
-        """Get site indices inside or outside of a cutoff radii from a
-        provided periodic site index. If two sites are provided, an
-        option to return the mutually inclusive points is also available.
-        """
-        per = self.get_periodic_sites(False)
-        sym = self.get_symmetric_sites()
-        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
-        coords = self.coordinates[:, :2]
-
-        if isinstance(index, int):
-            index = [index]
-
-        if not cutoff:
-            for i in per[index]:
-                sd = np.where(edges == i)[0]
-                select_coords = coords[edges[sd]]
-                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
-                cutoff = max(d.max(), cutoff)
-        cutoff += self.tol
-
-        diff = coords[:, None] - coords[sym]
-        norm = np.linalg.norm(diff, axis=2)
-        neighbors = np.array(np.where(norm < cutoff))
-
-        neighbors = []
-        for i in index:
-            diff = coords[:, None] - coords[per[i]]
-            norm = np.linalg.norm(diff, axis=2)
-            if select == 'mutual' and len(index) == 2:
-                neighbors += [np.where(norm < cutoff)[0].tolist()]
-            else:
-                neighbors += np.where(norm < cutoff)[0].tolist()
-
-        if select == 'inner':
-            return per[neighbors]
-        elif select == 'outer':
-            return np.setdiff1d(per, per[neighbors])
-        elif select == 'mutual':
-            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
 
     def add_adsorbates(self, adsorbates, indices):
         """ """
@@ -728,6 +687,47 @@ class Builder(AdsorptionSites):
             atoms[nodes[2]].position = coord2
         else:
             raise ValueError('Too many bonded atoms to position correctly.')
+
+    def ex_sites(self, index, select='inner', cutoff=0):
+        """Get site indices inside or outside of a cutoff radii from a
+        provided periodic site index. If two sites are provided, an
+        option to return the mutually inclusive points is also available.
+        """
+        per = self.get_periodic_sites(False)
+        sym = self.get_symmetric_sites()
+        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
+        coords = self.coordinates[:, :2]
+
+        if isinstance(index, int):
+            index = [index]
+
+        if not cutoff:
+            for i in per[index]:
+                sd = np.where(edges == i)[0]
+                select_coords = coords[edges[sd]]
+                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
+                cutoff = max(d.max(), cutoff)
+        cutoff += self.tol
+
+        diff = coords[:, None] - coords[sym]
+        norm = np.linalg.norm(diff, axis=2)
+        neighbors = np.array(np.where(norm < cutoff))
+
+        neighbors = []
+        for i in index:
+            diff = coords[:, None] - coords[per[i]]
+            norm = np.linalg.norm(diff, axis=2)
+            if select == 'mutual' and len(index) == 2:
+                neighbors += [np.where(norm < cutoff)[0].tolist()]
+            else:
+                neighbors += np.where(norm < cutoff)[0].tolist()
+
+        if select == 'inner':
+            return per[neighbors]
+        elif select == 'outer':
+            return np.setdiff1d(per, per[neighbors])
+        elif select == 'mutual':
+            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
 
 
 def matching_sites(position, comparators, tol=1e-8):

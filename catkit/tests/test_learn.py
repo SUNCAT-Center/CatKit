@@ -7,11 +7,15 @@ from catkit.learn import online_learning
 from catkit.db import FingerprintDB
 from catkit.learn import optimizer
 import numpy as np
+import pkg_resources
 np.random.seed(42)
 
 
 def test_learning():
-    with FingerprintDB('data/fingerprints.db') as fp:
+    data_path = pkg_resources.resource_filename(
+        'catkit', 'data/fingerprints.db')
+
+    with FingerprintDB(data_path) as fp:
         X = fp.get_fingerprints(params=np.arange(20) + 1)
         y = fp.get_fingerprints(params=['Ef']).T[0]
 

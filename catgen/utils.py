@@ -368,15 +368,18 @@ def plane_normal(xyz):
     return vec
 
 
-def connectivity_to_edges(connectivity):
+def connectivity_to_edges(connectivity, indices=None):
     """Convert a Numpy connectivity matrix into a list of
     NetworkX compatible edges
     """
+    if indices is None:
+        indices = np.arange(connectivity.shape[0], dtype=int)
+
     edges = []
     for i, c in enumerate(connectivity):
         lower_diagonal = c[:i]
         for j, v in enumerate(lower_diagonal):
-            edges += [(int(i), int(j), 1)] * int(v)
+            edges += [(indices[i], indices[j], 1)] * int(v)
 
     return edges
 
