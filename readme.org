@@ -1,6 +1,7 @@
 #+Title: CatKit: Catalysis Kit
 #+Author: SUNCAT Method Development Team
 #+OPTIONS: toc:nil
+#+LATEX_HEADER: \setlength{\parindent}{0em}
 
 #+BEGIN_HTML
 <a href='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'><img src='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'/></a>

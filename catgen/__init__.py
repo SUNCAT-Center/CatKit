@@ -2,7 +2,7 @@
 # (see accompanying license files for details).
 """Catalysis Generator."""
 
-__version__ = '0.2.0'
+__version__ = '0.4.0'
 
 from collections import MutableMapping
 from ase.data import covalent_radii
@@ -24,3 +24,6 @@ class Defaults(MutableMapping, dict):
 
 
 defaults = Defaults()
+
+# Add a small skin to the default setting.
+defaults['covalent_radii'] += 0.15
