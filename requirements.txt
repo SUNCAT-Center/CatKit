@@ -8,4 +8,4 @@ sqlalchemy==1.2.1
 spglib==1.10.3
 future==0.16.0
 sklearn
-
+python-coveralls
