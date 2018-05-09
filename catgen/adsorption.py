@@ -1,4 +1,5 @@
 from . import utils
+from . import geometry
 from scipy.spatial import Delaunay
 from scipy.linalg import circulant
 from itertools import product
@@ -237,7 +238,7 @@ class AdsorptionSites():
         periodic = periodic_match.copy()[self.screen]
 
         for p in periodic:
-            matched = matching_sites(self.frac_coords[p], coords)
+            matched = geometry.matching_sites(self.frac_coords[p], coords)
             periodic_match[matched] = p
 
         return periodic_match
@@ -728,35 +729,6 @@ class Builder(AdsorptionSites):
             return np.setdiff1d(per, per[neighbors])
         elif select == 'mutual':
             return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
-
-
-def matching_sites(position, comparators, tol=1e-8):
-    """Get the indices of all points in a comparator list that are
-    equal to a given position (with a tolerance), taking into
-    account periodic boundary conditions (adaptation from Pymatgen).
-
-    Parameters:
-    -----------
-    position : list (3,)
-        Fractional coordinate to compare to list.
-    comparators : list (3, n)
-        Fractional coordinates to compare against.
-    tol : float
-        Absolute tolerance.
-
-    Returns:
-    --------
-    match : list (n,)
-        Indices of matches.
-    """
-    if len(comparators) == 0:
-        return []
-
-    fdist = comparators - position
-    fdist -= np.round(fdist)
-    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
-
-    return match
 
 
 def get_adsorption_sites(slab,

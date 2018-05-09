@@ -269,8 +269,11 @@ def get_primitive_cell(atoms, tol=1e-8):
 
     cell = (lattice, positions, numbers)
 
-    _lattice, _positions, _numbers = spglib.find_primitive(cell, symprec=tol)
+    cell = spglib.find_primitive(cell, symprec=tol)
+    if cell is None:
+        return None
 
+    _lattice, _positions, _numbers = cell
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
     atoms.set_scaled_positions(_positions)
 

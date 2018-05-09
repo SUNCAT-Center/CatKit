@@ -2,6 +2,7 @@ from __future__ import division
 from catkit import Gratoms
 from . import utils
 from . import adsorption
+from . import geometry
 import numpy as np
 from numpy.linalg import norm, solve
 from ase.build import rotate
@@ -80,6 +81,8 @@ class SlabGenerator(object):
         basis : atoms object
             The basis slab corresponding to the provided bulk.
         """
+        del bulk.constraints
+
         if len(np.nonzero(self.miller_index)[0]) == 1:
             mi = max(self.miller_index)
             basis = circulant(self.miller_index[::-1] / mi).astype(int)
@@ -176,11 +179,17 @@ class SlabGenerator(object):
 
         return unique_shift
 
-    def get_slab(self, iterm=None, primitive=False):
+    def get_slab(self, size=(1, 1), root=None, iterm=None, primitive=False):
         """Generate a slab object with a certain number of layers.
 
         Parameters:
         -----------
+        size : tuple (2,)
+            Repeat the x and y lattice vectors by the indicated
+            dimensions
+        root : int
+            Produce a slab with a primitive a1 basis vector multiplied
+            by the square root of a provided value. Uses primitive unit cell.
         iterm : int
             A termination index in reference to the list of possible
             terminations.
@@ -217,32 +226,34 @@ class SlabGenerator(object):
 
         slab *= (1, 1, int(z_repetitions))
 
-        if primitive:
+        if primitive or root:
             if self.vacuum:
                 slab.center(vacuum=self.vacuum, axis=2)
             else:
                 raise ValueError('Primitive slab generation requires vacuum')
 
-            slab = utils.get_primitive_cell(slab)
+            nslab = utils.get_primitive_cell(slab)
 
-            # For hcp(1, 1, 0), primitive alters z-axis
-            d = norm(slab.cell, axis=0)
-            maxd = np.argwhere(d == d.max())[0][0]
-            if maxd != 2:
-                slab.rotate(slab.cell[maxd], 'z', rotate_cell=True)
-                slab.cell[[maxd, 2]] = slab.cell[[2, maxd]]
-                slab.cell[maxd] = -slab.cell[maxd]
-                slab.wrap(pbc=True)
+            if nslab is not None:
+                slab = nslab
+                # For hcp(1, 1, 0), primitive alters z-axis
+                d = norm(slab.cell, axis=0)
+                maxd = np.argwhere(d == d.max())[0][0]
+                if maxd != 2:
+                    slab.rotate(slab.cell[maxd], 'z', rotate_cell=True)
+                    slab.cell[[maxd, 2]] = slab.cell[[2, maxd]]
+                    slab.cell[maxd] = -slab.cell[maxd]
+                    slab.wrap(pbc=True)
 
-            slab.rotate(slab.cell[0], 'x', rotate_cell=True)
+                slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
-            # spglib occasionally returns a bimodal slab
-            zpos = slab.get_scaled_positions().T[2]
-            if zpos.max() > 0.9 or zpos.min() < 0.1:
-                translate = slab.positions.T[2][zpos > 0.5].min()
-                slab.positions -= [0, 0, translate + self.tol]
-                slab.wrap(pbc=True)
-                slab.center(vacuum=self.vacuum, axis=2)
+                # spglib occasionally returns a bimodal slab
+                zpos = slab.get_scaled_positions().T[2]
+                if zpos.max() > 0.9 or zpos.min() < 0.1:
+                    translate = slab.positions.T[2][zpos > 0.5].min()
+                    slab.positions -= [0, 0, translate + self.tol]
+                    slab.wrap(pbc=True)
+                    slab.center(vacuum=self.vacuum, axis=2)
 
         # Orthogonalize the z-coordinate
         # Warning: bulk symmetry is lost at this point
@@ -251,13 +262,25 @@ class SlabGenerator(object):
             np.cross(a1, a2))**2)
         slab.cell[2] = a3
 
+        if root:
+            roots, vectors = root_surface_analysis(
+                slab, root=15, return_vectors=True)
+
+            if root not in roots:
+                raise ValueError(
+                    'Requested root structure unavailable for this system.'
+                    'Try: {}'.format(roots))
+
+            vect = vectors[np.where(root == roots)][0]
+            slab = self.root_surface(slab, root, vect)
+
         # Get the direct z-coordinate of the requested layer
         zlayers = utils.get_unique_coordinates(
             slab, direct=False, tag=True, tol=self.tol)
 
-        reverse_sort = np.sort(zlayers)[::-1]
-
         if not self.fix_stoichiometry:
+            reverse_sort = np.sort(zlayers)[::-1]
+
             if self.min_width:
                 n = np.where(zlayers < self.min_width, 1, 0).sum()
                 ncut = reverse_sort[n]
@@ -271,8 +294,6 @@ class SlabGenerator(object):
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
 
-        del slab.constraints
-
         tags = slab.get_tags()
         fix = tags.max() - self.fixed
 
@@ -284,6 +305,7 @@ class SlabGenerator(object):
 
         slab.wrap()
         slab.pbc = [1, 1, 0]
+        slab *= (size[0], size[1], 1)
 
         self.slab = slab
 
@@ -401,6 +423,98 @@ class SlabGenerator(object):
             slab=slab, **kwargs)
 
         return output
+
+    def root_surface(self, slab, root, vector=None):
+        """Creates a cell from a primitive cell that repeats along the x and y
+        axis in a way consistent with the primitive cell, that has been cut
+        to have a side length of *root*.
+
+        *primitive cell* should be a primitive 2d cell of your slab, repeated
+        as needed in the z direction.
+
+        *root* should be determined using an analysis tool such as the
+        root_surface_analysis function, or prior knowledge. It should always
+        be a whole number as it represents the number of repetitions.
+        """
+        atoms = slab.copy()
+
+        xynorm = norm(atoms.cell[0:2, 0:2], axis=1)
+        vectors = atoms.cell[0:2, 0:2] / xynorm[0]
+        mvectors = norm(vectors, axis=1)
+
+        vnorm = norm(vector)
+        angle = -np.arctan2(vector[1], vector[0])
+        scale = vnorm / mvectors[0]
+
+        maxn = int(np.ceil(scale)) * 2
+        atoms *= (maxn, maxn, 1)
+        atoms.cell[0:2, 0:2] = slab.cell[0:2, 0:2] * scale
+        atoms.rotate((angle * 180) / np.pi, 'z')
+
+        coords = atoms.get_scaled_positions()
+        original_index = np.arange(coords.shape[0])
+        periodic_match = original_index.copy()
+        for i, j in enumerate(periodic_match):
+            if i != j:
+                continue
+
+            matched = geometry.matching_sites(coords[i], coords)
+            periodic_match[matched] = i
+
+        repeated = np.where(periodic_match != original_index)
+        del atoms[repeated]
+
+        atoms.wrap()
+        ind = np.lexsort(
+            (atoms.positions[:, 0],
+             atoms.positions[:, 1],
+             atoms.positions[:, 2]))
+        atoms = Gratoms(
+            positions=atoms.positions[ind],
+            numbers=atoms.numbers[ind],
+            cell=atoms.cell,
+            pbc=atoms.pbc)
+
+        assert(len(atoms) == len(slab) * root)
+
+        return atoms
+
+
+def root_surface_analysis(slab, root=20, return_vectors=True):
+    """A tool to analyze a slab and look for valid roots that exist, up to
+    the given root. This is useful for generating all possible cells
+    without prior knowledge.
+
+    *primitive slab* is the primitive cell to analyze.
+
+    *root* is the desired root to find, and all below.
+
+    *allow_above* allows you to also include cells above
+    the given *root* if found in the process.  Otherwise these
+    are trimmed off.
+    """
+    xnorm = norm(slab.cell[0][0:2])
+    vectors = slab.cell[0:2, 0:2] / xnorm
+
+    mvectors = norm(vectors, axis=1)
+    space = np.ceil(root * 1.2 / mvectors)
+
+    grid = np.mgrid[0:space[0], 0:space[1]]
+    vect = np.dot(grid.T, vectors).reshape(-1, 2)[1:]
+
+    dist = np.around(np.sum(vect ** 2, axis=1),
+                     -int(np.log10(1e-8)))
+
+    integers = np.equal(dist % 1, 0)
+    select = np.where((dist <= root) & integers)
+    valid_roots, unique = np.unique(dist[select], return_index=True)
+    valid_roots = valid_roots.astype(int)
+
+    if return_vectors:
+        bvectors = vect[select][unique]
+        return valid_roots, bvectors
+
+    return valid_roots
 
 
 def ext_gcd(a, b):
