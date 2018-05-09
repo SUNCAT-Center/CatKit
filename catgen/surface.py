@@ -8,6 +8,7 @@ from ase.build import rotate
 from ase.constraints import FixAtoms
 import networkx as nx
 import warnings
+from scipy.linalg import circulant
 try:
     from math import gcd
 except ImportError:
@@ -79,16 +80,11 @@ class SlabGenerator(object):
         basis : atoms object
             The basis slab corresponding to the provided bulk.
         """
-        h, k, l = self.miller_index
-        h0, k0, l0 = (self.miller_index == 0)
-        if h0 and k0 or h0 and l0 or k0 and l0:
-            if not h0:
-                c1, c2, c3 = [(0, 1, 0), (0, 0, 1), (1, 0, 0)]
-            if not k0:
-                c1, c2, c3 = [(0, 0, 1), (1, 0, 0), (0, 1, 0)]
-            if not l0:
-                c1, c2, c3 = [(1, 0, 0), (0, 1, 0), (0, 0, 1)]
+        if len(np.nonzero(self.miller_index)[0]) == 1:
+            mi = max(self.miller_index)
+            basis = circulant(self.miller_index[::-1] / mi).astype(int)
         else:
+            h, k, l = self.miller_index
             p, q = ext_gcd(k, l)
             a1, a2, a3 = bulk.cell
 
@@ -110,12 +106,13 @@ class SlabGenerator(object):
             c2 = np.array((0, l, -k)) // abs(gcd(l, k))
             c3 = (b, a * p, a * q)
 
+            basis = np.array([c1, c2, c3])
+
         basis_atoms = Gratoms(
             positions=bulk.positions,
             numbers=bulk.get_atomic_numbers(),
             cell=bulk.cell,
             pbc=True)
-        basis = np.array([c1, c2, c3])
 
         scaled = solve(basis.T, basis_atoms.get_scaled_positions().T).T
         scaled -= np.floor(scaled + self.tol)
@@ -123,7 +120,8 @@ class SlabGenerator(object):
         basis_atoms.set_cell(np.dot(basis, basis_atoms.cell), scale_atoms=True)
 
         a1, a2, a3 = basis_atoms.cell
-        a3 = np.cross(a1, a2) / norm(np.cross(a1, a2))
+        n1 = np.cross(a1, a2)
+        a3 = n1 / norm(n1)
         rotate(basis_atoms, a3, (0, 0, 1), a1, (1, 0, 0))
 
         return basis_atoms

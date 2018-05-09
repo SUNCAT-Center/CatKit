@@ -1,11 +1,8 @@
 import setuptools
 
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
-
 setuptools.setup(
     name="CatKit",
-    version="0.4.1",
+    version="0.4.2",
     url="https://github.com/SUNCAT-Center/CatKit",
 
     author="Jacob Boes",
@@ -23,10 +20,21 @@ setuptools.setup(
     ],
     package_dir={'catkit': 'catkit'},
     package_data={
-        '': ['requirements.txt'],
         'catkit': ['data/*.db', 'data/*.json']},
 
-    install_requires=required,
+    install_requires=[
+        'ase>=3.16.0',
+        'matplotlib>=2.2.2',
+        'nose>=1.3.7',
+        'numpy>=1.14.2',
+        'scipy>=1.0.1',
+        'networkx>=2.1',
+        'sqlalchemy>=1.2.1',
+        'spglib>=1.10.3',
+        'future>=0.16.0',
+        'sklearn',
+        'python-coveralls',
+    ],
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
 
     classifiers=[
