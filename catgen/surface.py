@@ -51,7 +51,7 @@ class SlabGenerator(object):
             Angstroms of vacuum to add to the slab.
         fix_stoichiometry : bool
             Constraints any slab generated to have the same
-            stoichiometry as the bulk provided bulk.
+            stoichiometry as the provided bulk.
         tol : float
             Tolerance for floating point rounding errors.
         """
@@ -91,15 +91,12 @@ class SlabGenerator(object):
             p, q = ext_gcd(k, l)
             a1, a2, a3 = bulk.cell
 
-            # constants describing the dot product of basis c1 and c2:
-            # dot(c1,c2) = k1+i*k2, i in Z
             k1 = np.dot(p * (k * a1 - h * a2) + q * (l * a1 - h * a3),
                         l * a2 - k * a3)
             k2 = np.dot(l * (k * a1 - h * a2) - k * (l * a1 - h * a3),
                         l * a2 - k * a3)
 
             if abs(k2) > self.tol:
-                # i corresponding to the optimal basis
                 i = -int(np.round(k1 / k2))
                 p, q = p + i * l, q - i * k
 
@@ -140,7 +137,6 @@ class SlabGenerator(object):
         """
         z_planes = utils.get_unique_coordinates(self._basis, tol=self.tol)
 
-        # now get the symmetries of lattice
         symmetry = utils.get_symmetry(self._basis, tol=self.tol)
         rotations = symmetry['rotations']
         translations = symmetry['translations']
@@ -264,7 +260,7 @@ class SlabGenerator(object):
 
         if root:
             roots, vectors = root_surface_analysis(
-                slab, root=15, return_vectors=True)
+                slab, return_vectors=True)
 
             if root not in roots:
                 raise ValueError(
@@ -480,24 +476,33 @@ class SlabGenerator(object):
         return atoms
 
 
-def root_surface_analysis(slab, root=20, return_vectors=True):
+def root_surface_analysis(slab, max_cell=20, return_vectors=True):
     """A tool to analyze a slab and look for valid roots that exist, up to
-    the given root. This is useful for generating all possible cells
-    without prior knowledge.
+    the given cell size. This is adapted from ASE.
 
-    *primitive slab* is the primitive cell to analyze.
+    Parameters:
+    -----------
+    slab : atoms object
+        The slab to find adsorption sites for. Assumes you are using
+        the same basis.
+    max_cell : bool
+        The maximum cell size to search for root structures within.
+    return_vectors : bool
+        Return the vectors associated with the valid root instances.
 
-    *root* is the desired root to find, and all below.
-
-    *allow_above* allows you to also include cells above
-    the given *root* if found in the process.  Otherwise these
-    are trimmed off.
+    Returns:
+    --------
+    valid_roots : ndarray (n,)
+        Return the integers which represent valid root distances.
+        to create a unit cell from.
+    bvectors :  ndarray (n, 2)
+        The xy vectors associated with each of the valid integers.
     """
     xnorm = norm(slab.cell[0][0:2])
     vectors = slab.cell[0:2, 0:2] / xnorm
 
     mvectors = norm(vectors, axis=1)
-    space = np.ceil(root * 1.2 / mvectors)
+    space = np.ceil(max_cell * 1.2 / mvectors)
 
     grid = np.mgrid[0:space[0], 0:space[1]]
     vect = np.dot(grid.T, vectors).reshape(-1, 2)[1:]
@@ -506,7 +511,7 @@ def root_surface_analysis(slab, root=20, return_vectors=True):
                      -int(np.log10(1e-8)))
 
     integers = np.equal(dist % 1, 0)
-    select = np.where((dist <= root) & integers)
+    select = np.where((dist <= max_cell) & integers)
     valid_roots, unique = np.unique(dist[select], return_index=True)
     valid_roots = valid_roots.astype(int)
 
