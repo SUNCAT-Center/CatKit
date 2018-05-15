@@ -268,8 +268,8 @@ def get_primitive_cell(atoms, tol=1e-8):
     numbers = atoms.get_atomic_numbers()
 
     cell = (lattice, positions, numbers)
-
     cell = spglib.find_primitive(cell, symprec=tol)
+
     if cell is None:
         return None
 

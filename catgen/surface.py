@@ -39,8 +39,9 @@ class SlabGenerator(object):
         -----------
         bulk : atoms object
             Bulk structure to produce the slab from.
-        miller_index : list (3,)
-            Miller index to construct surface from.
+        miller_index : list (3,) or (4,)
+            Miller index to construct surface from. If length is 4, then
+            Miller-Bravis indices are assumed.
         layers : int
             Number of layers to include in the slab.
         min_width : float
@@ -55,7 +56,13 @@ class SlabGenerator(object):
         tol : float
             Tolerance for floating point rounding errors.
         """
-        self.miller_index = np.array(miller_index)
+        miller_index = np.array(miller_index)
+
+        if len(miller_index) == 4:
+            miller_index[[0, 1]] -= miller_index[2]
+            miller_index = np.delete(miller_index, 2)
+
+        self.miller_index = miller_index
         self.layers = layers
         self.fixed = fixed
         self.min_width = min_width
@@ -84,7 +91,7 @@ class SlabGenerator(object):
         del bulk.constraints
 
         if len(np.nonzero(self.miller_index)[0]) == 1:
-            mi = max(self.miller_index)
+            mi = max(np.abs(self.miller_index))
             basis = circulant(self.miller_index[::-1] / mi).astype(int)
         else:
             h, k, l = self.miller_index
@@ -232,6 +239,15 @@ class SlabGenerator(object):
 
             if nslab is not None:
                 slab = nslab
+
+                # spglib occasionally returns a split slab
+                zpos = slab.get_scaled_positions()
+                if zpos[:, 2].max() > 0.9 or zpos[:, 2].min() < 0.1:
+                    zpos[:, 2] -= 0.5
+                    zpos[:, 2] %= 1
+                    slab.set_scaled_positions(zpos)
+                    slab.center(vacuum=self.vacuum, axis=2)
+
                 # For hcp(1, 1, 0), primitive alters z-axis
                 d = norm(slab.cell, axis=0)
                 maxd = np.argwhere(d == d.max())[0][0]
@@ -243,20 +259,15 @@ class SlabGenerator(object):
 
                 slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
-                # spglib occasionally returns a bimodal slab
-                zpos = slab.get_scaled_positions().T[2]
-                if zpos.max() > 0.9 or zpos.min() < 0.1:
-                    translate = slab.positions.T[2][zpos > 0.5].min()
-                    slab.positions -= [0, 0, translate + self.tol]
-                    slab.wrap(pbc=True)
-                    slab.center(vacuum=self.vacuum, axis=2)
-
         # Orthogonalize the z-coordinate
         # Warning: bulk symmetry is lost at this point
         a1, a2, a3 = slab.cell
         a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
             np.cross(a1, a2))**2)
         slab.cell[2] = a3
+
+        if slab.cell[1][0] < 0:
+            slab.cell *= [[1, 0, 0], [-1, 1, 0], [0, 0, 1]]
 
         if root:
             roots, vectors = root_surface_analysis(
@@ -290,18 +301,34 @@ class SlabGenerator(object):
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
 
+        slab *= (size[0], size[1], 1)
         tags = slab.get_tags()
-        fix = tags.max() - self.fixed
 
+        m = np.where(tags == 1)[0][0]
+        translation = slab[m].position.copy()
+        translation[2] = 0
+        slab.translate(-translation)
+        slab.wrap()
+
+        ind = np.lexsort(
+            (slab.positions[:, 0],
+             slab.positions[:, 1],
+             slab.positions[:, 2]))
+
+        slab = Gratoms(
+            positions=slab.positions[ind],
+            numbers=slab.numbers[ind],
+            cell=slab.cell,
+            pbc=[1, 1, 0],
+            tags=tags[ind]
+        )
+
+        fix = tags.max() - self.fixed
         constraints = FixAtoms(indices=[a.index for a in slab if a.tag > fix])
         slab.set_constraint(constraints)
 
         if self.vacuum:
             slab.center(vacuum=self.vacuum, axis=2)
-
-        slab.wrap()
-        slab.pbc = [1, 1, 0]
-        slab *= (size[0], size[1], 1)
 
         self.slab = slab
 
@@ -469,7 +496,9 @@ class SlabGenerator(object):
             positions=atoms.positions[ind],
             numbers=atoms.numbers[ind],
             cell=atoms.cell,
-            pbc=atoms.pbc)
+            pbc=atoms.pbc,
+            tags=atoms.get_tags()
+        )
 
         assert(len(atoms) == len(slab) * root)
 

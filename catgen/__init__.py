@@ -13,7 +13,7 @@ class Defaults(MutableMapping, dict):
 
     def __init__(self):
         self.update({
-            'covalent_radii': covalent_radii
+            'covalent_radii': covalent_radii.copy()
         })
 
     def __setitem__(self, key, val):
@@ -24,6 +24,3 @@ class Defaults(MutableMapping, dict):
 
 
 defaults = Defaults()
-
-# Add a small skin to the default setting.
-defaults['covalent_radii'] += 0.15

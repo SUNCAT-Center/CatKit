@@ -732,8 +732,8 @@ class Builder(AdsorptionSites):
 
 
 def get_adsorption_sites(slab,
+                         surface_atoms=None,
                          symmetry_reduced=True,
-                         adsorption_vectors=False,
                          tol=1e-5):
     """Get the adsorption sites of a slab as defined by surface
     symmetries of the surface atoms.
@@ -743,6 +743,8 @@ def get_adsorption_sites(slab,
     slab : atoms object
         The slab to find adsorption sites for. Must have surface
         atoms defined.
+    surface_atoms : list (n,)
+        List of the surface atom indices.
     symmetry_reduced : bool
         Return the symmetrically unique sites only.
     adsorption_vectors : bool
@@ -754,9 +756,12 @@ def get_adsorption_sites(slab,
         Cartesian coordinates of activate sites.
     connectivity : ndarray (n,)
         Number of bonds formed for a given adsorbate.
-    vectors : ndarray (n, 3)
-        Vector associated with minimum surface interaction.
+    symmetry_index : ndarray(n,)
+        Arbitrary indices of symmetric sites.
     """
+    if surface_atoms is not None:
+        slab.set_surface_atoms(surface_atoms)
+
     sites = AdsorptionSites(slab)
 
     if symmetry_reduced:
@@ -767,8 +772,11 @@ def get_adsorption_sites(slab,
     coordinates = sites.coordinates[s]
     connectivity = sites.connectivity[s]
 
-    if adsorption_vectors:
-        vectors = sites.get_adsorption_vectors()[s]
-        return coordinates, connectivity, vectors
+    if symmetry_reduced:
+        return coordinates, connectivity
 
-    return coordinates, connectivity
+    symmetries = sites.get_symmetric_sites(unique=False)
+    unique, counts = np.unique(symmetries, return_counts=True)
+    symmetry_index = np.arange(len(unique)).repeat(counts)
+
+    return coordinates, connectivity, symmetry_index
