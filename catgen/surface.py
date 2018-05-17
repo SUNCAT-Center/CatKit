@@ -61,6 +61,7 @@ class SlabGenerator(object):
         if len(miller_index) == 4:
             miller_index[[0, 1]] -= miller_index[2]
             miller_index = np.delete(miller_index, 2)
+        miller_index = (miller_index / list_gcd(miller_index)).astype(int)
 
         self.miller_index = miller_index
         self.layers = layers
@@ -258,6 +259,12 @@ class SlabGenerator(object):
                     slab.wrap(pbc=True)
 
                 slab.rotate(slab.cell[0], 'x', rotate_cell=True)
+
+        vdist = norm(slab.cell[:2], axis=1)
+        if vdist[1] > vdist[0]:
+            slab.rotate(slab.cell[1], 'x', rotate_cell=True)
+            slab.cell[0] *= -1
+            slab.cell[[0, 1]] = slab.cell[[1, 0]]
 
         # Orthogonalize the z-coordinate
         # Warning: bulk symmetry is lost at this point
@@ -560,3 +567,11 @@ def ext_gcd(a, b):
     else:
         x, y = ext_gcd(b, a % b)
         return y, x - y * (a // b)
+
+
+def list_gcd(values):
+    """Return the greatest common divisor of a list of values."""
+    gcd_func = np.frompyfunc(gcd, 2, 1)
+    _gcd = np.ufunc.reduce(gcd_func, values)
+
+    return _gcd
