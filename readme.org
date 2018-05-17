@@ -145,6 +145,13 @@ It also has functionality for enumeration of other systems relevant to the field
 
 For additional details regarding how the generator operates, including example usage, see the [[./catgen/readme.org][CatGen readme]].
 
+* CatFlow: Catalysis Workflow
+CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
+
+Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io/fireworks/][Fireworks]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[http://suncat.stanford.edu/][SUNCAT]] group as Stanford.
+
+For additional detail see the [[./catflow/readme.org][CatFlow readme]].
+
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
 
