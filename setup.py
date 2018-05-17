@@ -23,7 +23,8 @@ setuptools.setup(
         'catkit',
         'catgen',
         'catgen.api',
-        'catflow'
+        'catflow',
+        'cathub'
     ],
 
     install_requires=required,

@@ -10,3 +10,7 @@ spglib
 sklearn
 future
 python-coveralls
+click
+psycopg2
+python-Levenshtein
+pathlib2
