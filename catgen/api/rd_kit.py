@@ -1,4 +1,4 @@
-from .. import Gratoms
+from catkit import Gratoms
 from ase.data import chemical_symbols
 import numpy as np
 import networkx as nx

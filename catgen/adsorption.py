@@ -70,6 +70,7 @@ class AdsorptionSites():
                  (self.frac_coords[:, 1] < 1 - self.tol)
 
         self.screen = screen
+        self._symmetric_sites = None
 
     def get_connectivity(self, unique=True):
         """Return the number of connections associated with each site."""
@@ -124,8 +125,7 @@ class AdsorptionSites():
             'top': [top_coordinates, [], [[] for _ in top_coordinates]],
             'bridge': [[], [], []],
             'hollow': [[], [], []],
-            '4fold': [[], [], []],
-        }
+            '4fold': [[], [], []]}
 
         dt = Delaunay(sites['top'][0][:, :2])
         neighbors = dt.neighbors
@@ -227,20 +227,17 @@ class AdsorptionSites():
             Indices of the coordinates which are identical by
             periodic boundary conditions.
         """
-        if screen:
-            original_index = np.arange(self.frac_coords.shape[0])[self.screen]
-            coords = self.frac_coords[self.screen]
-        else:
-            original_index = np.arange(self.frac_coords.shape[0])
-            coords = self.frac_coords
-        periodic_match = original_index.copy()
-        for i, j in enumerate(periodic_match):
-            ind = original_index[i]
-            if ind != j:
-                continue
+        periodic_match = np.arange(self.frac_coords.shape[0])
 
-            new_match = matching_sites(self.frac_coords[j], coords)
-            periodic_match[new_match] = ind
+        if screen:
+            return periodic_match[self.screen]
+
+        coords = self.frac_coords
+        periodic = periodic_match.copy()[self.screen]
+
+        for p in periodic:
+            matched = matching_sites(self.frac_coords[p], coords)
+            periodic_match[matched] = p
 
         return periodic_match
 
@@ -260,36 +257,38 @@ class AdsorptionSites():
         sites : dict of lists
             Dictionary of sites containing index of site
         """
-        if screen is False:
-            unique = False
+        if self._symmetric_sites is None:
+            symmetry = utils.get_symmetry(self.slab, tol=self.tol)
+            rotations = np.swapaxes(symmetry['rotations'], 1, 2)
+            translations = symmetry['translations']
+            affine = np.append(rotations, translations[:, None], axis=1)
 
-        symmetry = utils.get_symmetry(self.slab, tol=self.tol)
-        rotations = np.swapaxes(symmetry['rotations'], 1, 2)
-        translations = symmetry['translations']
-        affine = np.append(rotations, translations[:, None], axis=1)
+            points = self.frac_coords
+            true_index = self.get_periodic_sites(False)
+
+            affine_points = np.insert(points, 3, 1, axis=1)
+            operations = np.dot(affine_points, affine)
+            symmetry_match = np.arange(points.shape[0])
+
+            for i, j in enumerate(symmetry_match):
+                if i != j:
+                    continue
+
+                d = operations[i, :, None] - points
+                d -= np.round(d)
+                dind = np.where((np.abs(d) < self.tol).all(axis=2))[-1]
+                symmetry_match[np.unique(dind)] = true_index[i]
+
+            self._symmetric_sites = symmetry_match
+
+        symmetry_match = self._symmetric_sites
 
         if screen:
             periodic = self.get_periodic_sites()
-            points = self.frac_coords[periodic]
-            true_index = np.where(self.screen)[0]
-        else:
-            points = self.frac_coords
-            true_index = np.arange(self.frac_coords.shape[0])
+            symmetry_match = symmetry_match[periodic]
+            if unique:
+                return np.unique(symmetry_match)
 
-        affine_points = np.insert(points, 3, 1, axis=1)
-        operations = np.dot(affine_points, affine)
-        symmetry_match = np.arange(points.shape[0])
-        for i, j in enumerate(symmetry_match):
-            if i != j:
-                continue
-
-            d = operations[i, :, None] - points
-            d -= np.round(d)
-            dind = np.where((np.abs(d) < self.tol).all(axis=2))[-1]
-            symmetry_match[np.unique(dind)] = true_index[i]
-
-        if unique:
-            return np.unique(symmetry_match)
         else:
             return symmetry_match
 
@@ -318,14 +317,16 @@ class AdsorptionSites():
 
         return vectors
 
-    def get_adsorption_graph(self, unique=True, wrap=False):
+    def get_adsorption_edges(self, symmetric=True, periodic=True):
         """Return the edges of adsorption sties defined as all regions
         with adjacent vertices.
 
         Parameters:
         -----------
-        unique : bool
-            Return only the unique edges.
+        symmetric : bool
+            Return only the symmetrically reduced edges.
+        periodic : bool
+            Return edges which are unique via periodicity.
 
         Returns:
         --------
@@ -333,11 +334,18 @@ class AdsorptionSites():
             All edges crossing ridge or vertices indexed by the expanded
             unit slab.
         """
-        vt = Voronoi(self.coordinates[:, :2], qhull_options='Qbb Qc Qz C1e-8')
-        regions = -np.ones((len(vt.regions), 6), dtype=int)
+        vt = Voronoi(self.coordinates[:, :2],
+                     qhull_options='Qbb Qc Qz C{}'.format(1e-2))
+
+        select, lens = [], []
         for i, p in enumerate(vt.point_region):
-            select = vt.regions[p]
-            regions[i, :len(select)] = select
+            select += [vt.regions[p]]
+            lens += [len(vt.regions[p])]
+
+        dmax = max(lens)
+        regions = np.zeros((len(select), dmax), int)
+        mask = np.arange(dmax) < np.array(lens)[:, None]
+        regions[mask] = np.concatenate(select)
 
         site_id = self.get_symmetric_sites(unique=False, screen=False)
         site_id = site_id + self.connectivity / 10
@@ -358,7 +366,7 @@ class AdsorptionSites():
                     if n in uper[:i + 1] or edge in edges:
                         continue
 
-                    if np.in1d(per[edge], per[uper[:i]]).any():
+                    if (np.in1d(per[edge], per[uper[:i]]).any()) and periodic:
                         continue
 
                     sym = sorted(site_id[edge])
@@ -367,14 +375,11 @@ class AdsorptionSites():
                     else:
                         uniques += [True]
                         symmetry += [sym]
+
                     edges += [edge]
 
         edges = np.array(edges)
-
-        # Used for correct bidendate positioning
-        if wrap:
-            edges = per[edges]
-        if unique:
+        if symmetric:
             edges = edges[uniques]
 
         return edges
@@ -400,38 +405,75 @@ class AdsorptionSites():
             plt.show()
 
 
-class Builder():
+class Builder(AdsorptionSites):
     """Initial module for creation of 3D slab structures with
     attached adsorbates.
     """
 
-    def __init__(self, slab):
-        """Initialize the site information for building adsorbed
-        structures.
-
-        Parameters:
-        -----------
-        slab : gratoms object
-            Slab to add the adsorbates to.
-        """
-        self.basis = slab
-
-        sites = AdsorptionSites(slab)
-        self.sites = sites
-        self.symmetry_sites = sites.get_symmetric_sites()
-        self.vectors = sites.get_adsorption_vectors(screen=False)
-        self.edges = sites.get_adsorption_graph()
-
-        self.top_sites = sites.coordinates[sites.connectivity == 1]
-
     def __repr__(self):
-        formula = self.basis.get_chemical_formula()
-        string = 'Adsorption builder for {} slab\n'.format(formula)
-        sym = len(self.symmetry_sites)
-        string += '{} unique adsorption sites\n'.format(sym)
-        string += '{} unique adsorption edges'.format(len(self.edges))
+        formula = self.slab.get_chemical_formula()
+        string = 'Adsorption builder for {} slab.\n'.format(formula)
+        sym = len(self.get_symmetric_sites())
+        string += 'unique adsorption sites: {}\n'.format(sym)
+        con = self.get_connectivity()
+        string += 'site connectivity: {}\n'.format(con)
+        edges = self.get_adsorption_edges()
+        string += 'unique adsorption edges: {}'.format(len(edges))
 
         return string
+
+    def ex_sites(self, index, select='inner', cutoff=0):
+        """Get site indices inside or outside of a cutoff radii from a
+        provided periodic site index. If two sites are provided, an
+        option to return the mutually inclusive points is also available.
+        """
+        per = self.get_periodic_sites(False)
+        sym = self.get_symmetric_sites()
+        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
+        coords = self.coordinates[:, :2]
+
+        if not cutoff:
+            for i in per[index]:
+                sd = np.where(edges == i)[0]
+                select_coords = coords[edges[sd]]
+                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
+                cutoff = max(d.max(), cutoff)
+        cutoff += self.tol
+
+        diff = coords[:, None] - coords[sym]
+        norm = np.linalg.norm(diff, axis=2)
+        neighbors = np.array(np.where(norm < cutoff))
+
+        neighbors = []
+        for i in index:
+            diff = coords[:, None] - coords[per[i]]
+            norm = np.linalg.norm(diff, axis=2)
+            if select == 'mutual' and len(index) == 2:
+                neighbors += [np.where(norm < cutoff)[0].tolist()]
+            else:
+                neighbors += np.where(norm < cutoff)[0].tolist()
+
+        if select == 'inner':
+            return per[neighbors]
+        elif select == 'outer':
+            return np.setdiff1d(per, per[neighbors])
+        elif select == 'mutual':
+            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
+
+    def add_adsorbates(self, adsorbates, indices):
+        """ """
+        slab = self.slab.copy()
+        for i, ads in enumerate(adsorbates):
+            bond = np.where(ads.get_tags() == -1)[0][0]
+
+            slab = self._single_adsorption(
+                ads,
+                slab=slab,
+                bond=bond,
+                site_index=indices[i],
+                symmetric=False)
+
+        return slab
 
     def add_adsorbate(self, adsorbate, bonds=None, index=0):
         """Add and adsorbate to a slab.
@@ -451,53 +493,80 @@ class Builder():
         slabs : gratoms object
             Slab(s) with adsorbate attached.
         """
-        slab = []
-
         if bonds is None:
             # Molecules with tag -1 are designated to bond
             bonds = np.where(adsorbate.get_tags() == -1)[0]
 
         if len(bonds) == 0:
             raise ValueError('Specify the index of atom to bond.')
+
         elif len(bonds) == 1:
-            if index == -1:
-                for i, _ in enumerate(self.symmetry_sites):
-                    slab += [self._single_adsorption(adsorbate, bonds[0], i)]
+            if index is -1:
+                slab = []
+                for i, _ in enumerate(self.get_symmetric_sites()):
+                    slab += [self._single_adsorption(adsorbate,
+                                                     bond=bonds[0],
+                                                     site_index=i)]
+            elif isinstance(index, (list, np.ndarray)):
+                slab = []
+                for i in index:
+                    slab += [self._single_adsorption(adsorbate,
+                                                     bond=bonds[0],
+                                                     site_index=i)]
             else:
-                slab = self._single_adsorption(adsorbate, bonds[0], index)
+                slab = self._single_adsorption(adsorbate,
+                                               bond=bonds[0],
+                                               site_index=index)
+
         elif len(bonds) == 2:
             if index == -1:
-                for i, _ in enumerate(self.edges):
-                    slab += [self._double_adsorption(adsorbate, bonds, i)]
+                slab = []
+                edges = self.get_adsorption_edges()
+                for i, _ in enumerate(edges):
+                    slab += [self._double_adsorption(adsorbate,
+                                                     bonds=bonds,
+                                                     edge_index=i)]
             else:
-                slab = self._double_adsorption(adsorbate, bonds, index)
+                slab = self._double_adsorption(adsorbate,
+                                               bonds=bonds,
+                                               edge_index=index)
+
         else:
             raise ValueError('Only mono- and bidentate adsorption supported.')
 
         return slab
 
-    def _single_adsorption(self, adsorbate, bond=None, site_index=0):
+    def _single_adsorption(self, adsorbate, slab=None,
+                           bond=None, site_index=0, symmetric=True):
         """Bond and adsorbate by a single atom."""
-        slab = self.basis.copy()
+        if slab is None:
+            slab = self.slab.copy()
         atoms = adsorbate.copy()
         atoms.set_cell(slab.cell)
 
         numbers = atoms.numbers[bond]
-        R = radii[numbers]
+        R = radii[numbers] * 0.95
 
-        u = self.sites.r1_topology[self.symmetry_sites[site_index]]
-        r = radii[slab[self.sites.index[u]].numbers]
+        if symmetric:
+            ind = self.get_symmetric_sites()[site_index]
+        else:
+            ind = self.get_periodic_sites(screen=False)[site_index]
+
+        u = self.r1_topology[ind]
+        r = radii[slab[self.index[u]].numbers] * 0.95
 
         # Improved position estimate for site.
-        base_position = utils.trilaterate(self.top_sites[u], R + r)
+        top_sites = self.coordinates[self.connectivity == 1]
+        base_position = utils.trilaterate(top_sites[u], R + r)
 
         # Position the base atom
         atoms[bond].position = base_position
 
         branches = list(nx.bfs_successors(atoms.graph, bond))
 
-        if len(branches) != 0:
-            uvec0 = self.vectors[self.symmetry_sites[site_index]]
+        if len(branches[0][1]) != 0:
+            vectors = self.get_adsorption_vectors(screen=False)
+            uvec0 = vectors[ind]
             uvec1 = slab.cell[1] / norm(slab.cell[1])
             uvec2 = np.cross(uvec0, uvec1)
             uvec = [uvec0, uvec1, uvec2]
@@ -505,32 +574,37 @@ class Builder():
             for branch in branches:
                 self._branch_monodentate(atoms, uvec, branch)
 
+        n = len(slab)
         slab += atoms
         # Add graph connections
-        for metal_index in self.sites.index[u]:
-            slab.graph.add_edge(metal_index, bond + len(self.basis))
+        for metal_index in self.index[u]:
+            slab.graph.add_edge(metal_index, bond + n)
 
         return slab
 
-    def _double_adsorption(self, adsorbate, bonds=None, edge_index=0):
+    def _double_adsorption(self, adsorbate, slab=None,
+                           bonds=None, edge_index=0):
         """Bond and adsorbate by two adjacent atoms."""
-        slab = self.basis.copy()
+        if slab is None:
+            slab = self.slab.copy()
         atoms = adsorbate.copy()
         atoms.set_cell(slab.cell)
 
         numbers = atoms.numbers[bonds]
-        R = radii[numbers]
-        coords = self.sites.coordinates[self.edges[edge_index]]
+        R = radii[numbers] * 0.95
+        edges = self.get_adsorption_edges()
+        coords = self.coordinates[edges[edge_index]]
 
-        U = self.sites.r1_topology[self.edges[edge_index]]
+        U = self.r1_topology[edges[edge_index]]
         for i, u in enumerate(U):
-            r = radii[slab[self.sites.index[u]].numbers]
-            coords[i] = utils.trilaterate(self.top_sites[u], R[i] + r)
+            r = radii[slab[self.index[u]].numbers] * 0.95
+            top_sites = self.coordinates[self.connectivity == 1]
+            coords[i] = utils.trilaterate(top_sites[u], R[i] + r)
 
         vec = coords[1] - coords[0]
         n = norm(vec)
         uvec0 = vec / n
-        d = np.sum(radii[numbers]) * 0.9
+        d = np.sum(radii[numbers]) * 0.95
         dn = (d - n) / 2
 
         base_position0 = coords[0] - uvec0 * dn
@@ -543,29 +617,31 @@ class Builder():
         # Temporarily break adsorbate
         atoms.graph.remove_edge(*bonds)
 
-        uvec1 = self.vectors[self.edges[edge_index]]
+        vectors = self.get_adsorption_vectors(screen=False)
+        uvec1 = vectors[edges[edge_index]]
         uvec2 = np.cross(uvec1, uvec0)
         uvec2 /= -norm(uvec2, axis=1)[:, None]
         uvec1 = np.cross(uvec2, uvec0)
 
         branches0 = list(nx.bfs_successors(atoms.graph, bonds[0]))
-        if len(branches0) != 0:
+        if len(branches0[0][1]) != 0:
             uvec = [-uvec0, uvec1[0], uvec2[0]]
             for branch in branches0:
                 self._branch_bidentate(atoms, uvec, branch)
 
         branches1 = list(nx.bfs_successors(atoms.graph, bonds[1]))
-        if len(branches1) != 0:
+        if len(branches1[0][1]) != 0:
             uvec = [uvec0, uvec1[0], uvec2[0]]
             for branch in branches1:
                 self._branch_bidentate(atoms, uvec, branch)
 
+        n = len(slab)
         slab += atoms
         # Add graph connections
-        atoms.graph.add_edge(*bonds)
+        slab.graph.add_edge(*np.array(bonds) + n)
         for i, u in enumerate(U):
-            for metal_index in self.sites.index[u]:
-                slab.graph.add_edge(metal_index, bonds[i] + len(self.basis))
+            for metal_index in self.index[u]:
+                slab.graph.add_edge(metal_index, bonds[i] + n)
 
         return slab
 

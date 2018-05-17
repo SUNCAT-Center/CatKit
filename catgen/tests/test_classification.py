@@ -1,7 +1,7 @@
 import matplotlib
 matplotlib.use('Agg')
 from ase.io import read
-from catkit.classification import Classifier
+from catgen.classification import Classifier
 
 
 def test_classifier():

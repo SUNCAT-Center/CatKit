@@ -1,5 +1,5 @@
 from __future__ import division
-from . import Gratoms
+from catkit import Gratoms
 from . import utils
 from . import adsorption
 import numpy as np
@@ -24,7 +24,7 @@ class SlabGenerator(object):
 
     def __init__(self,
                  bulk,
-                 miller_index=[1, 1, 1],
+                 miller_index=(1, 1, 1),
                  layers=4,
                  min_width=None,
                  fixed=0,
@@ -338,26 +338,31 @@ class SlabGenerator(object):
         """
         bulk_con = utils.get_voronoi_neighbors(self._basis)
         d = self._basis.get_all_distances(mic=True)
-        maxd = d[bulk_con > 0].max()
-        btopo = bulk_con.sum(axis=0)
 
+        # This is potentially problematic for very small unit cells
+        # as it does not take periodicity into account
+        maxd = d[bulk_con > 0].max()
+        bulk_con = utils.get_cutoff_neighbors(self._basis, cutoff=maxd)
+
+        bulk_degree = bulk_con.sum(axis=0)
         surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
-        stopo = surf_con.sum(axis=0)
+        surf_degree = surf_con.sum(axis=0)
 
         if attach_graph:
             edges = utils.connectivity_to_edges(surf_con)
             slab.graph.add_weighted_edges_from(edges, weight='bonds')
 
         # Expand bulk topology to match number of atoms in slab
-        btopo = np.repeat(btopo, np.ceil(len(stopo) / len(btopo)))
+        rep = np.ceil(len(surf_degree) / len(bulk_degree))
+        bulk_degree = np.repeat(bulk_degree, rep)
 
-        surf_atoms = np.nonzero(stopo - btopo[:len(stopo)])[0]
-
+        diff_degree = surf_degree - bulk_degree[:len(surf_degree)]
+        surf_atoms = np.nonzero(diff_degree)[0]
         bulk_atoms = set(np.arange(len(slab))) - set(surf_atoms)
 
         if len(bulk_atoms) == 0:
             warnings.warn(
-                ("Your slab has no bulk atoms and is likely too thin "
+                ("Your slab has no bulk atoms and may be too thin "
                  "to identify surface atoms correctly. This may cause "
                  "surface adsorption site identification to fail."))
 

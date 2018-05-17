@@ -1,4 +1,4 @@
-from .utils import get_neighbors
+from .utils import get_neighbors, rmean
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
 from ase.neighborlist import NeighborList as NL
@@ -6,7 +6,6 @@ from ase.data import atomic_numbers as an
 from ase.data import covalent_radii as r
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 
 class Classifier(object):
@@ -154,15 +153,13 @@ class Classifier(object):
         return sites
 
 
-def id_reconstruction(images, rmean=4, save=False):
+def id_reconstruction(images, save=False):
     """Identify a reconstruction even analyzing changes in the forces.
 
     Parameters:
     -----------
     images : list of ASE atoms objects
         Relaxation trajectory.
-    rmean : int
-        Number of values to use for rolling mean.
     show : bool
         Create a figure to display the events located.
 
@@ -176,7 +173,7 @@ def id_reconstruction(images, rmean=4, save=False):
         forces += [np.sqrt((atoms.get_forces()**2).sum())]
     forces = np.array(forces)
 
-    frm = pd.rolling_mean(forces, 4)
+    frm = rmean(forces)
     fdiff = np.diff(frm)
     fterm = np.array([fdiff > 0.25 * frm[:-1]]).astype(int)[0]
     predicted_events = np.where(fterm[:-1] < fterm[1:])[0]

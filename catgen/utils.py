@@ -1,14 +1,16 @@
-from . import Gratoms
+from catkit import Gratoms
 from scipy.spatial import Voronoi
 from scipy.linalg import lstsq
 from ase.data import covalent_radii as radii
+from ase.data import chemical_symbols as sym
 import numpy as np
-from numpy.linalg import norm
+from numpy.linalg import norm, solve
+import networkx.algorithms.isomorphism as iso
+import networkx as nx
+import contextlib
 import spglib
 import os
-import contextlib
-import networkx as nx
-import networkx.algorithms.isomorphism as iso
+import re
 
 
 def trilaterate(centers, r):
@@ -29,7 +31,9 @@ def trilaterate(centers, r):
     intersection : ndarray (3,)
         The point where all spheres/planes intersect.
     """
-    if len(r) == 1:
+    if len(r) > 3:
+        raise ValueError('Cannot trilaterate more than 3 points')
+    elif len(r) == 1:
         return centers[0] + [0, 0, r[0]]
 
     vec1 = centers[1] - centers[0]
@@ -46,7 +50,7 @@ def trilaterate(centers, r):
         h = [0, 0, z]
         intersection = centers[0] + uvec1 * x + h
 
-    if len(r) == 3:
+    elif len(r) == 3:
         vec2 = centers[2] - centers[0]
         i = np.dot(uvec1, vec2)
         vec2 = vec2 - i * uvec1
@@ -185,8 +189,7 @@ def get_voronoi_neighbors(atoms, r=8):
         unique_edge, edge_counts = np.unique(
             edges,
             return_counts=True,
-            axis=0,
-        )
+            axis=0)
 
         for j, edge in enumerate(unique_edge):
             u, v = edge
@@ -494,3 +497,86 @@ def to_gratoms(atoms):
         gratoms.set_constraint(atoms.constraints)
 
     return gratoms
+
+
+def get_atomic_numbers(formula, return_count=False):
+    """Return the atomic numbers associated with a chemical formula.
+
+    Parameters:
+    -----------
+    formula : string
+        A chemical formula to parse into atomic numbers.
+    return_count : bool
+        Return the count of each element in the formula.
+
+    Returns:
+    --------
+    numbers : ndarray (n,)
+        Element numbers in associated species.
+    counts : ndarray (n,)
+        Count of each element in a species.
+    """
+    parse = re.findall('[A-Z][a-z]?|[0-9]+', formula)
+
+    values = {}
+    for i, e in enumerate(parse):
+        if e.isdigit():
+            values[parse[i - 1]] += int(e) - 1
+        else:
+            if e not in values:
+                values[e] = 1
+            else:
+                values[e] += 1
+
+    numbers = np.array([sym.index(k) for k in values.keys()])
+    srt = np.argsort(numbers)
+    numbers = numbers[srt]
+
+    if return_count:
+        counts = np.array([v for v in values.values()])[srt]
+
+        return numbers, counts
+
+    return numbers
+
+
+def get_reference_energies(species, energies):
+    """Get reference energies for the elements in a set of molecules.
+
+    Parameters:
+    -----------
+    species : list (n,)
+        Chemical formulas for each molecular species.
+    energies : list (n,)
+        Total energies associated with each species.
+
+    Returns:
+    --------
+    elements : ndarray (n,)
+        Atomic elements associated with all species.
+    references : ndarray (n,)
+        Reference energies associated with each element.
+    """
+    if not isinstance(energies, np.ndarray):
+        energies = np.array(energies)
+
+    A = np.zeros((len(species), len(species)))
+    elements = np.zeros(len(species), dtype=int)
+    n = 0
+
+    # Construct the elements array as they appear
+    for i, s in enumerate(species):
+        num, cnt = get_atomic_numbers(s, True)
+
+        for j in num[~np.in1d(num, elements)]:
+            elements[n] = j
+            n += 1
+
+        A[i][np.in1d(elements, num)] = cnt
+
+    references = solve(A, energies)
+    srt = np.argsort(elements)
+    references = references[srt]
+    elements = elements[srt]
+
+    return elements, references

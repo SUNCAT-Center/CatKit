@@ -1,4 +1,4 @@
-from . import Gratoms
+from catkit import Gratoms
 import sqlite3
 import numpy as np
 import networkx as nx
@@ -140,10 +140,7 @@ class ReactionNetwork():
         )""")
 
     def molecule_search(self,
-                        element_pool={
-                            'C': 2,
-                            'H': 6
-                        },
+                        element_pool={'C': 2, 'H': 6},
                         load_molecules=True,
                         multiple_bond_search=False):
         """Return the enumeration of molecules which can be produced from

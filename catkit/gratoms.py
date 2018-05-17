@@ -39,18 +39,24 @@ class Gratoms(Atoms):
                          magmoms, charges, scaled_positions, cell, pbc,
                          celldisp, constraint, calculator, info)
 
-        if self.pbc.any():
-            self._graph = MultiGraph()
+        if isinstance(edges, np.ndarray):
+            if self.pbc.any():
+                self._graph = MultiGraph(edges)
+            else:
+                self._graph = Graph(edges)
         else:
-            self._graph = Graph()
+            if self.pbc.any():
+                self._graph = MultiGraph()
+            else:
+                self._graph = Graph()
 
         nodes = [[i, {
             'number': n
         }] for i, n in enumerate(self.arrays['numbers'])]
         self._graph.add_nodes_from(nodes)
 
-        if edges:
-            self._graph.add_edges_from(edges, bonds=1)
+        if isinstance(edges, list):
+            self._graph.add_edges_from(edges)
 
         self._surface_atoms = None
 
@@ -69,6 +75,16 @@ class Gratoms(Atoms):
     @property
     def adj(self):
         return self._graph.adj
+
+    @property
+    def degree(self):
+        degree = self._graph.degree
+        return np.array([_[1] for _ in degree])
+
+    @property
+    def connectivity(self):
+        connectivity = nx.to_numpy_matrix(self._graph).astype(int)
+        return connectivity
 
     def get_surface_atoms(self):
         """Return surface atoms."""
@@ -188,9 +204,10 @@ class Gratoms(Atoms):
             # interpreted at 0 and 1 indices.
             i = np.atleast_1d(i)
 
+        n = len(self)
+        i = np.arange(n)[i]
+
         if len(self._constraints) > 0:
-            n = len(self)
-            i = np.arange(n)[i]
             if isinstance(i, int):
                 i = [i]
             constraints = []
@@ -206,10 +223,8 @@ class Gratoms(Atoms):
         for name, a in self.arrays.items():
             self.arrays[name] = a[mask]
 
-        if isinstance(i, slice):
-            i = np.arange(n)[i]
-
         self._graph.remove_nodes_from(i)
+
         mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
         nx.relabel_nodes(self._graph, mapping, copy=False)
 

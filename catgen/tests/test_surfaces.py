@@ -1,4 +1,4 @@
-from catkit.surface import SlabGenerator
+from catgen.surface import SlabGenerator
 from ase.build import bulk
 
 
