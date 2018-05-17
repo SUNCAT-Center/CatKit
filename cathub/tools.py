@@ -87,19 +87,26 @@ def check_reaction(reactants, products):
     #assert r_stars == p_stars, 'Please match the number of surfaces on each side. Left side: {} *s, right side: {} *s'.format(r_stars, p_stars)
 
 
-def get_bases(folder_name):
+def get_catbase():
     import os
+
     if 'SHERLOCK' in os.environ:
         sherlock = os.environ['SHERLOCK']
         if sherlock == '1':
             catbase = '/home/winther/data_catapp/'
         elif sherlock == '2':
             catbase = '/home/users/winther/data_catapp/'
-
     elif 'SLAC_ENVIRON' in os.environ:
         catbase = '/nfs/slac/g/suncatfs/data_catapp/'
     else:
         catbase = './'
+    return catbase
+
+
+def get_bases(folder_name):
+    import os
+
+    catbase = get_catbase()
 
     if os.environ['USER'] == 'winther':
         data_base = catbase + 'winther/databases/'
@@ -109,7 +116,5 @@ def get_bases(folder_name):
         data_base = catbase + folder_name + '/'
 
     user_base = catbase + folder_name
-
-
     return catbase, data_base, user, user_base
 

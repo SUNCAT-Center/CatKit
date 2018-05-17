@@ -4,14 +4,16 @@ import os
 import sys
 import json
 
-try:  # sherlock 1 or 2
+if 'SHERLOCK' in os.environ:  # Sherlock 1 or 2
     sherlock = os.environ['SHERLOCK']
     if sherlock == '1':
         catbase = '/home/winther/data_catapp'
     elif sherlock == '2':
         catbase = '/home/users/winther/data_catapp'
-except:  # SUNCAT
-    catbase = '/nfs/slac/g/suncatfs/data_catapp'
+elif 'SLAC_ENVIRON' in os.environ:  #SUNCAT
+    catbase = '/nfs/slac/g/suncatfs/data_catapp/'
+else:
+    catbase = None
 
 sys.path.append(catbase)
 
