@@ -176,7 +176,7 @@ class FolderReader:
                 print('ERROR: No tags')
                 self.tags = None
 
-            for key, value in pub_data.iteritems():
+            for key, value in pub_data.items():
                 if isinstance(value, list):
                     value = json.dumps(value)
                 else:
@@ -283,7 +283,7 @@ class FolderReader:
 
             id, ase_id = check_in_ase(traj, self.cathub_db) #self.ase_db)
 
-            for key, mollist in self.reaction_atoms.iteritems():
+            for key, mollist in self.reaction_atoms.items():
                 for i, molecule in enumerate(mollist):
                     if molecule == chemical_composition \
                             and self.states[key][i] == 'gas':
@@ -415,7 +415,7 @@ class FolderReader:
         #    activation_energy = None
 
         prefactor_scale = copy.deepcopy(self.prefactors)
-        for key1, values in prefactor_scale.iteritems():
+        for key1, values in prefactor_scale.items():
             prefactor_scale[key1] = [1 for v in values]
 
         #prefactor_scale_ads = copy.deepcopy(prefactor_scale)
@@ -464,7 +464,7 @@ class FolderReader:
 
             elif i == empty_i:
                 found = True
-                for key, mollist in self.reaction_atoms.iteritems():
+                for key, mollist in self.reaction_atoms.items():
                     if '' in mollist:
                         n = mollist.index('')
                         self.traj_files[key][n] = traj
@@ -489,7 +489,7 @@ class FolderReader:
 
             supercell_factor = 1
             n_ads = 1
-            for key, mollist in self.reaction_atoms.iteritems():
+            for key, mollist in self.reaction_atoms.items():
                 if found:
                     continue
                 for n, molecule in enumerate(mollist):
@@ -536,14 +536,14 @@ class FolderReader:
 
 
             if n_ads > 1:
-                for key1, values in prefactor_scale.iteritems():
+                for key1, values in prefactor_scale.items():
                     for mol_i in range(len(values)):
                         #prefactor_scale_ads[key1][mol_i] = n_ads
                         if self.states[key1][mol_i] == 'gas':
                             prefactor_scale[key1][mol_i] = n_ads
 
             if supercell_factor > 1:
-                for key2, values in prefactor_scale.iteritems():
+                for key2, values in prefactor_scale.items():
                     for mol_i in range(len(values)):
                         if self.reaction[key2][mol_i] =='star':
                             prefactor_scale[key2][mol_i] *= supercell_factor + 1

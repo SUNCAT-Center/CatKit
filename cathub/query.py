@@ -90,7 +90,7 @@ def graphql_query(table='reactions',
 
 def get_reactions(n_results=20, write_local=False, **kwargs):
     queries = {}
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         key = map_column_names(key)
         if key == 'distinct':
             if value in ['True', 'true']:
@@ -152,7 +152,7 @@ def get_reactions(n_results=20, write_local=False, **kwargs):
     
 def get_publications(**kwargs):
     queries = {}
-    for key, value in kwargs.iteritems():
+    for key, value in kwargs.items():
         key = map_column_names(key)
         if key == 'distinct':
             if value in ['True', 'true']:
