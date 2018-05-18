@@ -20,6 +20,7 @@ def cli():
 @click.option('--goto-reaction', help="""name of reaction folder to skip to""")
 @click.option('--old', default=False)
 def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
+    """Read folders and collect data in local sqlite3 database"""
     import os
     import cathub.folder2db
 
@@ -44,6 +45,7 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
 @click.option('--db_user', default='catroot', type=str)
 def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, db_user):
+    """Transfer data from local database to Catalysis Hub server"""
     import os
     import cathub.db2server
     db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
@@ -98,6 +100,7 @@ publication_columns = [
     help="Make a selection on one of the columns: {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt \n -q reactants=CO for reactions with CO as a reactants".format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def reactions(columns, n_results, queries):
+    """Search for reactions"""
     import cathub.query
     if not isinstance(queries, dict):
         query_dict = {}
@@ -135,6 +138,7 @@ def reactions(columns, n_results, queries):
     help="Make a selection on one of the columns: {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich \n year=2017".format(publication_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def publications(columns, n_results, queries):
+    """Search for publications"""
     import cathub.query
     if not isinstance(queries, dict):
         query_dict = {}
@@ -388,7 +392,9 @@ def write_user_spec():
     default=False,
     show_default=True,
     help="Show more debugging messages.")
+
 def organize(**kwargs):
+    """Read reactions from non-organized folder"""
     import cathub.organize
     import collections
 
