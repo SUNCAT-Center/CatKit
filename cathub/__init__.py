@@ -114,7 +114,7 @@ def reactions(columns, n_results, queries):
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
     #columns = [columns]
-    query.main(
+    query.query(
         table='reactions',
         columns=columns,
         n_results=n_results,
