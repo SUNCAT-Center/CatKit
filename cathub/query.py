@@ -30,7 +30,6 @@ def query(table='reactions',
                                  columns=columns,
                                  n_results=n_results,
                                  queries=queries)
-   # print query_string
     
     return execute_graphQL(query_string)
 
@@ -115,21 +114,6 @@ def get_reactions(n_results=20, write_local=False, **kwargs):
         for row in data['data']['reactions']['edges']:
             row = row['node']
             key_values = {}
-            #key_values = {'chemical_composition': row['chemicalComposition'],
-            #              'surface_composition': row['surfaceComposition'],
-            #              'facet': row['facet'],
-            #              'sites': row['sites'],
-            #              'coverages': row['coverages'],
-            #3              'reactants': row['reactants'],
-            #              'products': row['products'],
-            #              'reaction_energy': row['reactionEnergy'],
-            #              'activation_energy': row['activationEnergy'],
-            #              'dft_code': row['dftCode'],
-            #              'dft_functional': row['dftFunctional'],
-            #              'username': row['username'],
-            #              'pub_id': row['pubId']
-            #}
-            print 'got data'
             for key in all_columns['reactions']:
                 v = row[key]
                 if isinstance(v, unicode):
@@ -139,7 +123,6 @@ def get_reactions(n_results=20, write_local=False, **kwargs):
                 except:
                     pass
                 key_values[convert(key)] = v
-            print 'encoded!'
             ase_ids = {}
             energy_corrections = {}
             
@@ -160,15 +143,12 @@ def get_reactions(n_results=20, write_local=False, **kwargs):
                 id = db.write(key_values)
             else:
                 db.update(id, key_values)
-            print 'wrote reaction!'
 
             pub_key_values = {}
             row_p = row['publication']
             for key in all_columns['publications']:
                 pub_key_values[convert(key)] = row_p[key]
             db.write_publication(pub_key_values)
-            print 'wrote publication!'
-
     
 def get_publications(**kwargs):
     queries = {}
