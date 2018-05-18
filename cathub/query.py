@@ -5,12 +5,13 @@ import pprint
 from cathub.cathubsqlite import CathubSQLite
 
 all_columns = {'reactions': ['chemicalComposition', 'surfaceComposition',
-                             'facet', 'sites', 'coverages', 'reactants', 'products', 'Equation',
-                             'reactionEnergy', 'activationEnergy', 'dftCode', 'dftFunctional',
+                             'facet', 'sites', 'coverages', 'reactants',
+                             'products', 'Equation',
+                             'reactionEnergy', 'activationEnergy',
+                             'dftCode', 'dftFunctional',
                              'username', 'pubId'],               
                'publication': ['pubId', 'title', 'authors', 'journal', 'number', 'volume',
-                               'pages',
-                               'year', 'publisher', 'doi', 'tags'],
+                               'pages', 'year', 'publisher', 'doi', 'tags'],
                'publications': ['pubId', 'title', 'authors', 'journal', 'volume', 'number',
                                 'pages', 'year', 'publisher', 'doi', 'tags'],
                'reactionSystems': ['name', 'energyCorrection', 'aseId'],
