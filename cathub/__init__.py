@@ -151,7 +151,7 @@ def publications(columns, n_results, queries):
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
 
-    query.main(
+    query.query(
         table='publications',
         columns=columns,
         n_results=n_results,

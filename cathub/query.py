@@ -2,7 +2,7 @@
 
 import requests
 import pprint
-from cathubsqlite import CathubSQLite
+from cathub.cathubsqlite import CathubSQLite
 
 all_columns = {'reactions': ['chemicalComposition', 'surfaceComposition',
                              'facet', 'sites', 'coverages', 'reactants', 'products', 'Equation',
@@ -59,7 +59,7 @@ def graphql_query(table='reactions',
 
     statement = '{'
     statement += '{}(first: {}'.format(table, n_results)
-    for key, value in queries.iteritems():
+    for key, value in queries.items():
         if isinstance(value, str):
             statement += ', {}: "{}"'.format(key, value)
         elif isinstance(value, bool):

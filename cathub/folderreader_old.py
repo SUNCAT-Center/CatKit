@@ -4,9 +4,9 @@ import copy
 import sqlite3
 from sys import argv
 import json
-from ase_tools import *
-from cathubsqlite import CathubSQLite
-from tools import get_bases
+from cathub.ase_tools import *
+from cathub.cathubsqlite import CathubSQLite
+from cathub.tools import get_bases
 import glob
 from ase.io.trajectory import convert
 import ase
