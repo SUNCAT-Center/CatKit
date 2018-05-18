@@ -260,20 +260,23 @@ class SlabGenerator(object):
 
                 slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
+        # Orthogonalize the z-coordinate
+        # Warning: bulk symmetry is lost at this point
+        a, b, c = slab.cell
+        nab = np.cross(a, b)
+        c = (nab * np.dot(c, nab) / norm(nab)**2)
+        slab.cell[2] = c
+
+        # Align the longest remaining basis vector with x
         vdist = norm(slab.cell[:2], axis=1)
         if vdist[1] > vdist[0]:
             slab.rotate(slab.cell[1], 'x', rotate_cell=True)
             slab.cell[0] *= -1
             slab.cell[[0, 1]] = slab.cell[[1, 0]]
 
-        # Orthogonalize the z-coordinate
-        # Warning: bulk symmetry is lost at this point
-        a1, a2, a3 = slab.cell
-        a3 = (np.cross(a1, a2) * np.dot(a3, np.cross(a1, a2)) / norm(
-            np.cross(a1, a2))**2)
-        slab.cell[2] = a3
-
+        # Enforce that the angle between basis vectors is acute.
         if slab.cell[1][0] < 0:
+            slab.rotate(slab.cell[2], '-z')
             slab.cell *= [[1, 0, 0], [-1, 1, 0], [0, 0, 1]]
 
         if root:
