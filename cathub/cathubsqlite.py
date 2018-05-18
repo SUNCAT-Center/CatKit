@@ -50,8 +50,7 @@ init_commands = [
     id integer,
     FOREIGN KEY (ase_id) REFERENCES systems(unique_id),
     FOREIGN KEY (id) REFERENCES reaction(id)
-    );"""
-]
+    );"""]
 
 #index_statements = [
 #    'CREATE INDEX idxpubid ON publication(pub_id)',
@@ -178,13 +177,13 @@ class CathubSQLite:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        if self.id is None:
-            try:
-                id = self.get_last_id(cur) + 1
-            except:
-                id = 1
-        else:
-            id = self.id
+        #if self.id is None:
+        #    try:
+        #id = self.last_id#self.get_last_id(cur) + 1
+        #    except:
+        #        id = 1
+        #else:
+        id = self.id
 
         pub_id = values['pub_id']
         ase_ids = values['ase_ids']
@@ -228,6 +227,7 @@ class CathubSQLite:
         if self.connection is None:
             con.commit()
             con.close()
+        self.id = id
 
         return id
 
@@ -236,7 +236,7 @@ class CathubSQLite:
         self._initialize(con)
         cur = con.cursor()
 
-        values['year'] = int(values['year'])
+        #values['year'] = int(values['year'])
         pub_id = values['pub_id']
         ase_ids = values['ase_ids']
         energy_corrections = values['energy_corrections']
