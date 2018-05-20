@@ -8,7 +8,7 @@ import numpy as np
 import json
 try:
     from espresso import espresso
-except(ModuleNotFoundError):
+except(ImportError):
     from ase.calculator import espresso
 
 
