@@ -78,7 +78,7 @@ def test_adsorption_examples():
     atoms.set_surface_atoms([8, 9, 10, 11])
 
     sites = AdsorptionSites(atoms)
-    sites.plot('./images/Pd3Cu-adsorption-sites.png')
+    sites.plot('./Pd3Cu-adsorption-sites.png')
 
     atoms = bulk('Pd', 'fcc', a=5, cubic=True)
     atoms[3].symbol = 'Cu'
@@ -140,7 +140,7 @@ def test_gas_phase_example():
 
         for i, molecule in molecules.items():
             plot_molecule(
-                molecule, file_name='./images/molecule-{}.png'.format(i))
+                molecule, file_name='./molecule-{}.png'.format(i))
 
             molecule = get_uff_coordinates(molecule, steps=50)
             rn.save_3d_structure(molecule)
@@ -150,7 +150,7 @@ def test_gas_phase_example():
         assert (len(images) == 17)
 
         rn.path_search(reconfiguration=False, substitution=False)
-        rn.plot_reaction_network(file_name='./images/reaction-network.png')
+        rn.plot_reaction_network(file_name='./reaction-network.png')
         pathways = rn.load_pathways()
 
         assert (len(pathways) == 27)
