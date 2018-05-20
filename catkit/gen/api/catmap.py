@@ -1,5 +1,5 @@
 from ..pathways import ReactionNetwork
-from ..pathways import get_smiles
+from .rd_kit import get_smiles
 import numpy as np
 import networkx as nx
 from ase.utils import formula_hill
