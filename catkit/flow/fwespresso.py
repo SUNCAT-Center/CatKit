@@ -2,11 +2,14 @@ from .fwio import array_to_list, atoms_to_encode
 from .qeio import log_to_atoms
 from .hpcio import get_nnodes
 from ase.dft.bee import BEEFEnsemble
-from espresso import espresso
 from ase.io import read, write
 import msgpack
 import numpy as np
 import json
+try:
+    from espresso import espresso
+except(ModuleNotFoundError):
+    from ase.calculator import espresso
 
 
 def get_relaxed_calculation(in_file='output.traj'):
