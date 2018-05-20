@@ -1,11 +1,10 @@
 from catkit import Gratoms
 from .utils import get_atomic_numbers
 from itertools import combinations
-from scipy.linalg import circulant
 import numpy as np
 
 radicals = np.ones(92)
-radicals[[6, 7, 8, 9, 16]] = [4, 3, 2, 1, 2]
+radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
 
 
 def bin_hydrogen(hydrogens=1, bins=1):
@@ -66,11 +65,13 @@ def get_topologies(chemistry, saturate=False):
         hcnt = hmax
 
     if n == 1:
-        atoms = Gratoms(elements, cell=circulant([1, 0, 0]))
+        atoms = Gratoms(elements, cell=[1, 1, 1])
         hatoms = hydrogenate(atoms, np.array([hcnt]))
         return [hatoms]
     elif n == 0:
         hatoms = Gratoms('H{}'.format(hcnt))
+        if hcnt == 2:
+            hatoms.graph.add_edge(0, 1, bonds=1)
         return [hatoms]
 
     ln = np.arange(n).sum()
@@ -100,8 +101,7 @@ def get_topologies(chemistry, saturate=False):
         atoms = Gratoms(
             numbers=elements,
             edges=connectivity,
-            cell=circulant([1, 0, 0])
-        )
+            cell=[1, 1, 1])
 
         isomorph = False
         for G0 in backbones:

@@ -1,5 +1,9 @@
 from catgen.surface import SlabGenerator
+from catgen.molecules import get_topologies
+from catgen.geometry import _branch_molecule
+from catgen import utils
 from ase.build import bulk
+import networkx as nx
 from ase import Atoms
 
 
@@ -34,6 +38,8 @@ def surface(
     root : int
         If not None, attempt to produce a root unit cell with
         a primitive lattice length multiple this root.
+    primitive : bool
+        Perform an spglib reduction of the slabs unit cell.
 
     Returns:
     --------
@@ -55,3 +61,46 @@ def surface(
     slab = gen.get_slab(size=size, root=root, primitive=primitive)
 
     return slab
+
+
+def molecule(
+        species,
+        topology=None,
+        vacuum=0):
+    """Return gas-phase molecule structures based on species and
+    topology.
+
+    Parameters:
+    -----------
+    species : str
+        The chemical symbols to construct a molecule from.
+    topology : int, str, or slice
+        The indices for the distinct topology produced by the generator.
+    vacuum : float
+        Angstroms of vacuum to pad the molecule with.
+
+    Returns:
+    --------
+    images : list of objects
+        3D structures of the requested chemical species and topologies.
+    """
+    molecule_graphs = get_topologies(species)
+
+    if len(molecule_graphs) > 1:
+        _slice = utils.parse_slice(topology)
+        molecule_graphs = get_topologies(species)[_slice]
+
+    images = []
+    for atoms in molecule_graphs:
+        branches = nx.bfs_successors(atoms.graph, 0)
+
+        root = None
+        for i, branch in enumerate(branches):
+            _branch_molecule(atoms, branch, base_root=root)
+            root = 0
+
+        if vacuum:
+            atoms.center(vacuum=vacuum)
+        images += [atoms]
+
+    return images

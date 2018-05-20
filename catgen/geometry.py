@@ -1,4 +1,6 @@
 import numpy as np
+from numpy.linalg import norm
+from . import defaults
 
 
 def matching_sites(position, comparators, tol=1e-8):
@@ -30,80 +32,94 @@ def matching_sites(position, comparators, tol=1e-8):
     return match
 
 
-# def build_xyz(self):
-#     """ Build xyz representation from z-matrix"""
+def _get_basis_vectors(coordinates):
+    if len(coordinates) == 3:
+        c0, c1, c2 = coordinates
+    else:
+        c0, c1 = coordinates
+        c2 = np.array([0, 1, 0])
 
-#     coords = self.atomcoords[-1]
-#     self.newcoords = np.zeros((len(coords), 3))
+    basis1 = c0 - c1
+    basis2 = np.cross(basis1, c0 - c2)
+    basis3 = np.cross(basis1, basis2)
 
-#     for i in range(len(coords)):
-#         self.newcoords[i] = self._calc_position(i)
+    basis1 /= norm(basis1)
+    basis2 /= norm(basis2)
+    basis3 /= norm(basis3)
 
-#     self.atomcoords[-1] = self.newcoords
+    basis_vectors = np.vstack([basis1, basis2, basis3])
+
+    return basis_vectors
 
 
-def _calc_position(self, i, connectivity, angleconnectivity, dihedralconnectivity):
-    """Calculate position of another atom based on internal coordinates"""
+def _get_position(coordinates, basis=None,
+                  distance=1, angle=109.47, dihedral=0):
+    if basis is None:
+        basis = _get_basis_vectors(coordinates)
 
-    if i > 1:
-        j = connectivity[i]
-        k = angleconnectivity[i]
-        l = dihedralconnectivity[i]
+    ang = np.deg2rad(angle)
+    tor = np.deg2rad(dihedral)
 
-        # # Prevent doubles
-        # if k == l and i > 0:
-        #     for idx in range(1, len(self.connectivity[:i])):
-        #         if self.connectivity[idx] in [i, j, k] and not idx in [i, j, k]:
-        #             l = idx
-        #             break
+    basis[1] *= -np.sin(tor)
+    basis[2] *= np.cos(tor)
 
-        avec = self.newcoords[j]
-        bvec = self.newcoords[k]
+    vector = basis[1] + basis[2]
+    vector /= norm(vector)
 
-        dst = self.distances[i]
-        ang = self.angles[i] * np.pi / 180.0
+    vector *= distance * np.sin(ang)
+    basis[0] *= distance * np.cos(ang)
 
-        if i == 2:
-            # Third atom will be in same plane as first two
-            tor = 90.0 * np.pi / 180.0
-            cvec = np.array([0, 1, 0])
-        else:
-            # Fourth + atoms require dihedral (torsional) angle
-            tor = self.dihedrals[i] * np.pi / 180.0
-            cvec = self.newcoords[l]
-
-        v1 = avec - bvec
-        v2 = avec - cvec
-
-        n = np.cross(v1, v2)
-        nn = np.cross(v1, n)
-
-        n /= np.norm(n)
-        nn /= np.norm(nn)
-
-        n *= -np.sin(tor)
-        nn *= np.cos(tor)
-
-        v3 = n + nn
-        v3 /= np.norm(v3)
-        v3 *= dst * np.sin(ang)
-
-        v1 /= np.norm(v1)
-        v1 *= dst * np.cos(ang)
-
-        position = avec + v3 - v1
-
-    elif i == 1:
-        # Second atom dst away from origin along Z-axis
-        j = self.connectivity[i]
-        dst = self.distances[i]
-        position = np.array(
-            [self.newcoords[j][0] + dst,
-             self.newcoords[j][1],
-             self.newcoords[j][2]])
-
-    elif i == 0:
-        # First atom at the origin
-        position = np.array([0, 0, 0])
+    position = coordinates[0] + vector - basis[0]
 
     return position
+
+
+def _branch_molecule(atoms, branch, base_root=None, adsorption=False):
+    root, nodes = branch
+
+    if len(nodes) == 0:
+        return
+
+    radii = defaults.get('covalent_radii')
+    num = atoms.numbers[[root] + nodes]
+    d = radii[num[0]] + radii[num[1:]]
+    c0 = atoms[root].position
+
+    angle = 120
+    angle_mod = 0
+    dihedral = np.array([0, 120, -120])
+
+    if base_root is None:
+        c1 = np.array([0, 0, -d[0]])
+
+        if not adsorption:
+            # Remove the first element for proper angle treatment
+            m = nodes.pop(0)
+            atoms[m].position = c1
+            d = d[1:]
+        else:
+            # Move adsorption structures away from surface
+            angle_mod = 25
+    else:
+        c1 = atoms[base_root].position
+
+    n = len(nodes)
+    if n == 1:
+        if base_root is None and not adsorption:
+            dihedral[0] = 120
+        else:
+            angle = 180
+    elif n == 2:
+        dihedral[1] = 180
+    else:
+        angle = 109.47
+
+    for k in range(n):
+        c = _get_position(
+            [c0, c1],
+            distance=d[k],
+            angle=angle + angle_mod,
+            dihedral=dihedral[k])
+        atoms[nodes[k]].position = c
+
+    return root
