@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('Agg')
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.pathways import ReactionNetwork
@@ -9,7 +7,6 @@ from ase.utils import formula_hill
 from ase.build import bulk
 import networkx as nx
 import numpy as np
-import shutil
 import os
 
 
