@@ -1,4 +1,4 @@
-from catgen import utils
+from catkit.gen import utils
 import numpy as np
 import os
 

@@ -14,9 +14,9 @@ setuptools.setup(
     packages=[
         'catkit',
         'catkit.pawprint',
-        'catgen',
-        'catgen.api',
-        'catflow'
+        'catkit.gen',
+        'catkit.gen.api',
+        'catkit.flow'
     ],
     package_dir={'catkit': 'catkit'},
     package_data={

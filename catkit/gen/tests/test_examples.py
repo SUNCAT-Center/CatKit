@@ -1,10 +1,10 @@
 import matplotlib
 matplotlib.use('Agg')
-from catgen.surface import SlabGenerator
-from catgen.adsorption import AdsorptionSites
-from catgen.pathways import ReactionNetwork
-from catgen.api.rd_kit import plot_molecule
-from catgen.api.rd_kit import get_uff_coordinates
+from catkit.gen.surface import SlabGenerator
+from catkit.gen.adsorption import AdsorptionSites
+from catkit.gen.pathways import ReactionNetwork
+from catkit.gen.api.rd_kit import plot_molecule
+from catkit.gen.api.rd_kit import get_uff_coordinates
 from ase.utils import formula_hill
 from ase.build import bulk
 import networkx as nx

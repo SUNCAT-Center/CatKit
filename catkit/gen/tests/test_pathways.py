@@ -1,6 +1,6 @@
-from catgen.api.rd_kit import plot_molecule
-from catgen.api.rd_kit import get_uff_coordinates
-from catgen.pathways import ReactionNetwork
+from catkit.gen.api.rd_kit import plot_molecule
+from catkit.gen.api.rd_kit import get_uff_coordinates
+from catkit.gen.pathways import ReactionNetwork
 import os
 
 

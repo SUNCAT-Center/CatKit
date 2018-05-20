@@ -38,7 +38,7 @@ install:
 
 
 script:
-  - nosetests ./*/tests/* --with-coverage --cover-inclusive --cover-package=. --cover-erase
+  - nosetests ./catkit --with-coverage --cover-inclusive --cover-package=. --cover-erase
   - coverage report --omit 'images/*,./*/tests/*' --show-missing
 
 after_success:

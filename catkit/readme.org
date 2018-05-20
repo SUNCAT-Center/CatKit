@@ -3,6 +3,125 @@
 #+OPTIONS: toc:nil
 #+LATEX_HEADER: \setlength{\parindent}{0em}
 
+* Graph-atoms (Gratoms) object
+The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
+
+** Graph information
+The =Gratoms= object primary function is to conveniently store and manage graph information.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit import Gratoms
+from catgen.molecules import get_topologies
+
+atoms0 = get_topologies('C4', saturate=True)[0]
+
+print(type(atoms0))
+print('\nAtomic numbers:\n{}\n'.format(atoms0.numbers))
+print('Connectivity matrix:\n{}'.format(atoms0.connectivity))
+
+atoms1 = atoms0.copy()
+del atoms1[0]
+
+print('\nAtomic numbers:\n{}\n'.format(atoms1.numbers))
+print('Connectivity matrix:\n{}'.format(atoms1.connectivity))
+print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
+
+atoms2 = atoms1 + Gratoms('C')
+
+print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
+print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
+
+atoms2.graph.add_edges_from([(0, 13), (1, 13), (2, 13), (3, 13)])
+
+print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
+print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
+
+print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms2)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+<class 'catkit.gratoms.Gratoms'>
+
+Atomic numbers:
+[6 6 6 6 1 1 1 1 1 1 1 1 1 1]
+
+Connectivity matrix:
+[[0 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 1 1 1 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 1 1 1 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 1 1 1]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]]
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]]
+
+Are isomorphs: False
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 1]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0 1]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1 1]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [1 1 1 1 0 0 0 0 0 0 0 0 0 0]]
+
+Are isomorphs: True
+:END:
 * PawPrint
 The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in [[./pawprint/operations.py]].
 
