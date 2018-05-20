@@ -10,126 +10,6 @@
 
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis research. The goal of the project is to provide a communal location for those interested in hosting such tools under a common banner. In doing so, we hope to provide the infrastructure to produce more advanced functionality based on modular components of individual contributors.
 
-* Graph-atoms (Gratoms) object
-The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
-
-** Graph information
-The =Gratoms= object primary function is to conveniently store and manage graph information.
-
-#+BEGIN_SRC python :results output org drawer
-from catkit import Gratoms
-from catgen.molecules import get_topologies
-
-atoms0 = get_topologies('C4', saturate=True)[0]
-
-print(type(atoms0))
-print('\nAtomic numbers:\n{}\n'.format(atoms0.numbers))
-print('Connectivity matrix:\n{}'.format(atoms0.connectivity))
-
-atoms1 = atoms0.copy()
-del atoms1[0]
-
-print('\nAtomic numbers:\n{}\n'.format(atoms1.numbers))
-print('Connectivity matrix:\n{}'.format(atoms1.connectivity))
-print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
-
-atoms2 = atoms1 + Gratoms('C')
-
-print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
-print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
-
-atoms2.graph.add_edges_from([(0, 13), (1, 13), (2, 13), (3, 13)])
-
-print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
-print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
-
-print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms2)))
-#+END_SRC
-
-#+RESULTS:
-:RESULTS:
-<class 'catkit.gratoms.Gratoms'>
-
-Atomic numbers:
-[6 6 6 6 1 1 1 1 1 1 1 1 1 1]
-
-Connectivity matrix:
-[[0 1 1 1 1 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 1 1 1 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 1 1 1 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 1 1 1]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]]
-
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1]
-
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 1 1 1 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 1 1 1]
- [0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]]
-
-Are isomorphs: False
-
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
-
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 1 1 1 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 1 1 1 0]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
-
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
-
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0 1]
- [0 0 0 0 0 0 0 1 1 1 0 0 0 1]
- [0 0 0 0 0 0 0 0 0 0 1 1 1 1]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 1]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [1 1 1 1 0 0 0 0 0 0 0 0 0 0]]
-
-Are isomorphs: True
-:END:
-
 * CatGen: Catalysis Generator
 CatGen is an enumeration module designed to construct various catalytic structures.
 
@@ -144,14 +24,17 @@ It also has functionality for enumeration of other systems relevant to the field
 - [X] Reaction mechanisms
 - [X] Reaction routes
 
-For additional details regarding how the generator operates, including example usage, see the [[./catgen/readme.org][CatGen readme]].
+For additional details regarding how the generator operates, including example usage, see the [[./catkit/gen/readme.org][CatGen readme]].
 
 * CatFlow: Catalysis Workflow
 CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
 
 Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io/fireworks/][Fireworks]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[http://suncat.stanford.edu/][SUNCAT]] group as Stanford.
 
-For additional detail see the [[./catflow/readme.org][CatFlow readme]].
+For additional detail see the [[./catkit/flow/readme.org][CatFlow readme]].
+
+* CatHUB: Catalysis Hub
+Coming soon.
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.

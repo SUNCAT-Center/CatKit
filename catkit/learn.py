@@ -115,7 +115,7 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
             ylim = ax.get_ylim()
             ax.text(xlim[0] / 9.0, ylim[0] / 9.0, mae)
             plt.tight_layout()
-            plt.savefig('./images/online-learning-RBF-{}.png'.format(n))
+            plt.savefig('./online-learning-RBF-{}.png'.format(n))
             plt.close()
 
         step += 1

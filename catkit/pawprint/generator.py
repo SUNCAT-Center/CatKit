@@ -3,7 +3,7 @@ import json
 import numpy as np
 import ase
 from . import operations
-from catgen import utils
+from ..gen import utils
 
 
 class Fingerprinter():
