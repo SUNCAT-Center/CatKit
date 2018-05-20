@@ -1,7 +1,5 @@
-import matplotlib
-matplotlib.use('Agg')
-from ase.io import read
 from catkit.gen.analysis import Classifier
+from ase.io import read
 import pkg_resources
 
 

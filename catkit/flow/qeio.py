@@ -1,3 +1,4 @@
+from .fwio import array_to_list
 import os
 import contextlib
 import json
@@ -10,7 +11,6 @@ from ase.calculators.singlepoint import SinglePointCalculator as SPC
 from ase.db import connect
 from ase.units import Ry, Bohr
 from ase.io import read, write
-from fw.fwio import array_to_list
 # 1.889726 is the atomic unit of length per Angstrom (aul/A)
 aul = 1.889726
 
