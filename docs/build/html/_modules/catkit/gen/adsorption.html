@@ -1,0 +1,995 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.adsorption &mdash; CatKit 0.4.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../gen.html">catkit.gen</a> &raquo;</li>
+        
+      <li>catkit.gen.adsorption</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.gen.adsorption</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">geometry</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">Delaunay</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="k">import</span> <span class="n">circulant</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="k">import</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">norm</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">ase.data</span> <span class="k">import</span> <span class="n">covalent_radii</span> <span class="k">as</span> <span class="n">radii</span>
+<span class="kn">from</span> <span class="nn">scipy.spatial</span> <span class="k">import</span> <span class="n">Voronoi</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+
+
+<div class="viewcode-block" id="AdsorptionSites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites">[docs]</a><span class="k">class</span> <span class="nc">AdsorptionSites</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Adsorption site object.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slab</span><span class="p">,</span> <span class="n">surface_atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create an extended unit cell of the surface sites for</span>
+<span class="sd">        use in identifying other sites.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        slab : atoms object</span>
+<span class="sd">            The atoms object to manage adsorption sites for. Must contain</span>
+<span class="sd">            surface atom identification.</span>
+<span class="sd">        r : float</span>
+<span class="sd">            Minimum basis vector length in Angstroms for creating extended</span>
+<span class="sd">            unit cell.</span>
+<span class="sd">        tol : float</span>
+<span class="sd">            Absolute tolerance for floating point errors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">offsets</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">expand_cell</span><span class="p">(</span><span class="n">slab</span><span class="p">,</span> <span class="n">r</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">surface_atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">surface_atoms</span> <span class="o">=</span> <span class="n">slab</span><span class="o">.</span><span class="n">get_surface_atoms</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">surface_atoms</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Slab must contain surface atoms&#39;</span><span class="p">)</span>
+
+        <span class="n">extended_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">surface_atoms</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tol</span> <span class="o">=</span> <span class="n">tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">extended_top</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">extended_top</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">extended_top</span><span class="p">))]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">extended_top</span><span class="p">]</span>
+
+        <span class="n">sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_higher_coordination_sites</span><span class="p">(</span><span class="n">coords</span><span class="p">[</span><span class="n">extended_top</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2_topology</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c1"># Put data into array format</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">,</span> <span class="s1">&#39;hollow&#39;</span><span class="p">,</span> <span class="s1">&#39;4fold&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">selection</span><span class="p">):</span>
+            <span class="n">coords</span><span class="p">,</span> <span class="n">r1top</span><span class="p">,</span> <span class="n">r2top</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;hollow&#39;</span><span class="p">,</span> <span class="s1">&#39;4fold&#39;</span><span class="p">]:</span>
+                <span class="n">r2top</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">coords</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">+=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">+=</span> <span class="n">coords</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span> <span class="o">+=</span> <span class="n">r1top</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">r2_topology</span> <span class="o">+=</span> <span class="n">r2top</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">r2_topology</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r2_topology</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">pinv</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">slab</span> <span class="o">=</span> <span class="n">slab</span>
+
+        <span class="n">screen</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span> <span class="o">&amp;</span> \
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span> <span class="o">&amp;</span> \
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span> <span class="o">&amp;</span> \
+                 <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">screen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_symmetric_sites</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="AdsorptionSites.get_connectivity"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_connectivity">[docs]</a>    <span class="k">def</span> <span class="nf">get_connectivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of connections associated with each site.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.get_coordinates"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the 3D coordinates associated with each site.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.get_topology"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_topology">[docs]</a>    <span class="k">def</span> <span class="nf">get_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the indices of adjacent surface atoms.&quot;&quot;&quot;</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">top</span><span class="p">]</span> <span class="k">for</span> <span class="n">top</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">]</span>
+        <span class="n">topology</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topology</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">topology</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_higher_coordination_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">top_coordinates</span><span class="p">,</span>
+                                       <span class="n">allow_obtuse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find all bridge and hollow sites (3-fold and 4-fold) given an</span>
+<span class="sd">        input slab based Delaunay triangulation of surface atoms of a</span>
+<span class="sd">        super-cell.</span>
+
+<span class="sd">        TODO: Determine if this can be made more efficient by</span>
+<span class="sd">        removing the &#39;sites&#39; dictionary.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        top_coordinates : ndarray (n, 3)</span>
+<span class="sd">            Cartesian coordinates for the top atoms of the unit cell.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        sites : dict of 3 lists</span>
+<span class="sd">            Dictionary sites containing positions, points, and neighbor lists.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sites</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;top&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">top_coordinates</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">top_coordinates</span><span class="p">]],</span>
+            <span class="s1">&#39;bridge&#39;</span><span class="p">:</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[]],</span>
+            <span class="s1">&#39;hollow&#39;</span><span class="p">:</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[]],</span>
+            <span class="s1">&#39;4fold&#39;</span><span class="p">:</span> <span class="p">[[],</span> <span class="p">[],</span> <span class="p">[]]}</span>
+
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">neighbors</span>
+        <span class="n">simplices</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">simplices</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">corners</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">simplices</span><span class="p">):</span>
+            <span class="n">cir</span> <span class="o">=</span> <span class="n">circulant</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">cir</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Inner angle of each triangle corner</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">edges</span><span class="o">.</span><span class="n">T</span><span class="p">]</span> <span class="o">-</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">corners</span><span class="p">]</span>
+            <span class="n">uvec</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">T</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">vec</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">angles</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">uvec</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="o">.</span><span class="n">T</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># Angle types</span>
+            <span class="n">right</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">obtuse</span> <span class="o">=</span> <span class="p">(</span><span class="n">angles</span> <span class="o">&lt;</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+
+            <span class="n">rh_corner</span> <span class="o">=</span> <span class="n">corners</span><span class="p">[</span><span class="n">right</span><span class="p">]</span>
+            <span class="n">edge_neighbors</span> <span class="o">=</span> <span class="n">neighbors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">obtuse</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">allow_obtuse</span><span class="p">:</span>
+                <span class="c1"># Assumption: All simplices with obtuse angles</span>
+                <span class="c1"># are irrelevant boundaries.</span>
+                <span class="k">continue</span>
+
+            <span class="n">bridge</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">edges</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span>
+
+            <span class="c1"># Looping through corners allows for elimination of</span>
+            <span class="c1"># redundant points, identification of 4-fold hollows,</span>
+            <span class="c1"># and collection of bridge neighbors.</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">corners</span><span class="p">):</span>
+                <span class="n">edge</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">edges</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Get the bridge neighbors (for adsorption vector)</span>
+                <span class="n">neighbor_simplex</span> <span class="o">=</span> <span class="n">simplices</span><span class="p">[</span><span class="n">edge_neighbors</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+                <span class="n">oc</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">neighbor_simplex</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">edge</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># Right angles potentially indicate 4-fold hollow</span>
+                <span class="n">potential_hollow</span> <span class="o">=</span> <span class="n">edge</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">c</span><span class="p">,</span> <span class="n">oc</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">rh_corner</span><span class="p">:</span>
+
+                    <span class="k">if</span> <span class="n">potential_hollow</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;4fold&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Assumption: If not 4-fold, this suggests</span>
+                    <span class="c1"># no hollow OR bridge site is present.</span>
+                    <span class="n">ovec</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">edge</span><span class="p">]</span> <span class="o">-</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">oc</span><span class="p">]</span>
+                    <span class="n">ouvec</span> <span class="o">=</span> <span class="n">ovec</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">ovec</span><span class="p">)</span>
+                    <span class="n">oangle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="o">*</span><span class="n">ouvec</span><span class="p">)</span>
+                    <span class="n">oright</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">oangle</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">oright</span><span class="p">:</span>
+                        <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;4fold&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bridge</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+                        <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;4fold&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">potential_hollow</span><span class="p">]</span>
+                        <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">c</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">oc</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">bridge</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+                    <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">edge</span><span class="p">]</span>
+                    <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[[</span><span class="n">c</span><span class="p">,</span> <span class="n">oc</span><span class="p">]]</span>
+
+                <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">edge</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">edge</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">right</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obtuse</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="n">hollow</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">sites</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="n">corners</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;hollow&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">hollow</span><span class="p">]</span>
+                <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;hollow&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">corners</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+
+        <span class="c1"># For collecting missed bridge neighbors</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;4fold&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]:</span>
+
+            <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">s</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
+                <span class="n">edge</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+                <span class="n">n</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">nn</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">m</span><span class="p">))</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nn</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">sites</span><span class="p">[</span><span class="s1">&#39;bridge&#39;</span><span class="p">][</span><span class="mi">2</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">nn</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">return</span> <span class="n">sites</span>
+
+<div class="viewcode-block" id="AdsorptionSites.get_periodic_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_periodic_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_periodic_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an index of the coordinates which are unique by</span>
+<span class="sd">        periodic boundary conditions.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        screen : bool</span>
+<span class="sd">            Return only sites inside the unit cell.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        periodic_match : ndarray (n,)</span>
+<span class="sd">            Indices of the coordinates which are identical by</span>
+<span class="sd">            periodic boundary conditions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">periodic_match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">screen</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">periodic_match</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">]</span>
+
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span>
+        <span class="n">periodic</span> <span class="o">=</span> <span class="n">periodic_match</span><span class="o">.</span><span class="n">copy</span><span class="p">()[</span><span class="bp">self</span><span class="o">.</span><span class="n">screen</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periodic</span><span class="p">:</span>
+            <span class="n">matched</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">matching_sites</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">coords</span><span class="p">)</span>
+            <span class="n">periodic_match</span><span class="p">[</span><span class="n">matched</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span>
+
+        <span class="k">return</span> <span class="n">periodic_match</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.get_symmetric_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_symmetric_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetric_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine the symmetrically unique adsorption sites</span>
+<span class="sd">        from a list of fractional coordinates.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        unique : bool</span>
+<span class="sd">            Return only the unique symmetrically reduced sites.</span>
+<span class="sd">        screen : bool</span>
+<span class="sd">            Return only sites inside the unit cell.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        sites : dict of lists</span>
+<span class="sd">            Dictionary of sites containing index of site</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">symmetry_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmetric_sites</span>
+
+        <span class="k">if</span> <span class="n">symmetry_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">symmetry</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+            <span class="n">rotations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">translations</span> <span class="o">=</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;translations&#39;</span><span class="p">]</span>
+            <span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span>
+            <span class="n">true_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">affine_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">points</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">operations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">affine_points</span><span class="p">,</span> <span class="n">affine</span><span class="p">)</span>
+            <span class="n">symmetry_match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">points</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">symmetry_match</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">d</span> <span class="o">=</span> <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">points</span>
+                <span class="n">d</span> <span class="o">-=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="n">dind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">))[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">symmetry_match</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">dind</span><span class="p">)]</span> <span class="o">=</span> <span class="n">true_index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_symmetric_sites</span> <span class="o">=</span> <span class="n">symmetry_match</span>
+
+        <span class="k">if</span> <span class="n">screen</span><span class="p">:</span>
+            <span class="n">periodic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+            <span class="n">symmetry_match</span> <span class="o">=</span> <span class="n">symmetry_match</span><span class="p">[</span><span class="n">periodic</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">symmetry_match</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">symmetry_match</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.get_adsorption_vectors"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the vectors representing the furthest distance from</span>
+<span class="sd">        the neighboring atoms.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        vectors : ndarray (n, 3)</span>
+<span class="sd">            Adsorption vectors for surface sites.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">top_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="n">screen</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="n">screen</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="n">r1top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+        <span class="n">r2top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r2_topology</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+
+        <span class="n">vectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">3</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+            <span class="n">plane_points</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">r1top</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">r2top</span><span class="p">[</span><span class="n">i</span><span class="p">]),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">vectors</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">plane_normal</span><span class="p">(</span><span class="n">top_coords</span><span class="p">[</span><span class="n">plane_points</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">vectors</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.get_adsorption_edges"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the edges of adsorption sties defined as all regions</span>
+<span class="sd">        with adjacent vertices.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        symmetric : bool</span>
+<span class="sd">            Return only the symmetrically reduced edges.</span>
+<span class="sd">        periodic : bool</span>
+<span class="sd">            Return edges which are unique via periodicity.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        edges : ndarray (n, 2)</span>
+<span class="sd">            All edges crossing ridge or vertices indexed by the expanded</span>
+<span class="sd">            unit slab.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vt</span> <span class="o">=</span> <span class="n">Voronoi</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+                     <span class="n">qhull_options</span><span class="o">=</span><span class="s1">&#39;Qbb Qc Qz C</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="mf">1e-2</span><span class="p">))</span>
+
+        <span class="n">select</span><span class="p">,</span> <span class="n">lens</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vt</span><span class="o">.</span><span class="n">point_region</span><span class="p">):</span>
+            <span class="n">select</span> <span class="o">+=</span> <span class="p">[</span><span class="n">vt</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">p</span><span class="p">]]</span>
+            <span class="n">lens</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">vt</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">p</span><span class="p">])]</span>
+
+        <span class="n">dmax</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">lens</span><span class="p">)</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">select</span><span class="p">),</span> <span class="n">dmax</span><span class="p">),</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">dmax</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">lens</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">regions</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">select</span><span class="p">)</span>
+
+        <span class="n">site_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">site_id</span> <span class="o">=</span> <span class="n">site_id</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">/</span> <span class="mi">10</span>
+        <span class="n">per</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">uper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+        <span class="n">edges</span><span class="p">,</span> <span class="n">symmetry</span><span class="p">,</span> <span class="n">uniques</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">uper</span><span class="p">):</span>
+            <span class="n">poi</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">point_region</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+            <span class="n">voi</span> <span class="o">=</span> <span class="n">vt</span><span class="o">.</span><span class="n">regions</span><span class="p">[</span><span class="n">poi</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">voi</span><span class="p">:</span>
+                <span class="n">nr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">regions</span> <span class="o">==</span> <span class="n">v</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">nr</span><span class="p">:</span>
+                    <span class="n">edge</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">p</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+                    <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">uper</span><span class="p">[:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">per</span><span class="p">[</span><span class="n">edge</span><span class="p">],</span> <span class="n">per</span><span class="p">[</span><span class="n">uper</span><span class="p">[:</span><span class="n">i</span><span class="p">]])</span><span class="o">.</span><span class="n">any</span><span class="p">())</span> <span class="ow">and</span> <span class="n">periodic</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">sym</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">site_id</span><span class="p">[</span><span class="n">edge</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">symmetry</span><span class="p">:</span>
+                        <span class="n">uniques</span> <span class="o">+=</span> <span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">uniques</span> <span class="o">+=</span> <span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+                        <span class="n">symmetry</span> <span class="o">+=</span> <span class="p">[</span><span class="n">sym</span><span class="p">]</span>
+
+                    <span class="n">edges</span> <span class="o">+=</span> <span class="p">[</span><span class="n">edge</span><span class="p">]</span>
+
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+            <span class="n">edges</span> <span class="o">=</span> <span class="n">edges</span><span class="p">[</span><span class="n">uniques</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">edges</span></div>
+
+<div class="viewcode-block" id="AdsorptionSites.plot"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">savefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a visualization of the sites.&quot;&quot;&quot;</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">!=</span> <span class="mi">1</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">][</span><span class="n">top</span><span class="p">])</span>
+
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">triplot</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dt</span><span class="o">.</span><span class="n">simplices</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">][</span><span class="n">other</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">][</span><span class="n">other</span><span class="p">],</span>
+                <span class="s1">&#39;o&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">savefile</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefile</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="Builder"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder">[docs]</a><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">AdsorptionSites</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initial module for creation of 3D slab structures with</span>
+<span class="sd">    attached adsorbates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">()</span>
+        <span class="n">string</span> <span class="o">=</span> <span class="s1">&#39;Adsorption builder for </span><span class="si">{}</span><span class="s1"> slab.</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
+        <span class="n">sym</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">())</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s1">&#39;unique adsorption sites: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">sym</span><span class="p">)</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_connectivity</span><span class="p">()</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s1">&#39;site connectivity: </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_edges</span><span class="p">()</span>
+        <span class="n">string</span> <span class="o">+=</span> <span class="s1">&#39;unique adsorption edges: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">edges</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">string</span>
+
+<div class="viewcode-block" id="Builder.add_adsorbates"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbates">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbates</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+        <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ads</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adsorbates</span><span class="p">):</span>
+            <span class="n">bond</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ads</span><span class="o">.</span><span class="n">get_tags</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_adsorption</span><span class="p">(</span>
+                <span class="n">ads</span><span class="p">,</span>
+                <span class="n">slab</span><span class="o">=</span><span class="n">slab</span><span class="p">,</span>
+                <span class="n">bond</span><span class="o">=</span><span class="n">bond</span><span class="p">,</span>
+                <span class="n">site_index</span><span class="o">=</span><span class="n">indices</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">slab</span></div>
+
+<div class="viewcode-block" id="Builder.add_adsorbate"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbate">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add and adsorbate to a slab.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        adsorbate : gratoms object</span>
+<span class="sd">            Molecule to connect to the surface.</span>
+<span class="sd">        bonds : int or list of 2 int</span>
+<span class="sd">            Index of adsorbate atoms to be bonded.</span>
+<span class="sd">        index : int</span>
+<span class="sd">            Index of the site or edge to use as the adsorption position. A</span>
+<span class="sd">            value of -1 will return all possible structures.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        slabs : gratoms object</span>
+<span class="sd">            Slab(s) with adsorbate attached.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">bonds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Molecules with tag -1 are designated to bond</span>
+            <span class="n">bonds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">adsorbate</span><span class="o">.</span><span class="n">get_tags</span><span class="p">()</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Specify the index of atom to bond.&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">slab</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()):</span>
+                    <span class="n">slab</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_single_adsorption</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">,</span>
+                                                     <span class="n">bond</span><span class="o">=</span><span class="n">bonds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">site_index</span><span class="o">=</span><span class="n">i</span><span class="p">)]</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+                <span class="n">slab</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="n">slab</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_single_adsorption</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">,</span>
+                                                     <span class="n">bond</span><span class="o">=</span><span class="n">bonds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                     <span class="n">site_index</span><span class="o">=</span><span class="n">i</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_single_adsorption</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">,</span>
+                                               <span class="n">bond</span><span class="o">=</span><span class="n">bonds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                               <span class="n">site_index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">slab</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_edges</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">edges</span><span class="p">):</span>
+                    <span class="n">slab</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_double_adsorption</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">,</span>
+                                                     <span class="n">bonds</span><span class="o">=</span><span class="n">bonds</span><span class="p">,</span>
+                                                     <span class="n">edge_index</span><span class="o">=</span><span class="n">i</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_double_adsorption</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">,</span>
+                                               <span class="n">bonds</span><span class="o">=</span><span class="n">bonds</span><span class="p">,</span>
+                                               <span class="n">edge_index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Only mono- and bidentate adsorption supported.&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">slab</span></div>
+
+    <span class="k">def</span> <span class="nf">_single_adsorption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">slab</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">bond</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">site_index</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Bond and adsorbate by a single atom.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">slab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">adsorbate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
+
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">numbers</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.95</span>
+
+        <span class="k">if</span> <span class="n">symmetric</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()[</span><span class="n">site_index</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)[</span><span class="n">site_index</span><span class="p">]</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">slab</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">u</span><span class="p">]]</span><span class="o">.</span><span class="n">numbers</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.95</span>
+
+        <span class="c1"># Improved position estimate for site.</span>
+        <span class="n">top_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">base_position</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trilaterate</span><span class="p">(</span><span class="n">top_sites</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">R</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+
+        <span class="c1"># Position the base atom</span>
+        <span class="n">atoms</span><span class="p">[</span><span class="n">bond</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">base_position</span>
+
+        <span class="n">branches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_successors</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">bond</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">branches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">uvec0</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+            <span class="n">uvec1</span> <span class="o">=</span> <span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">uvec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec0</span><span class="p">,</span> <span class="n">uvec1</span><span class="p">)</span>
+            <span class="n">uvec</span> <span class="o">=</span> <span class="p">[</span><span class="n">uvec0</span><span class="p">,</span> <span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec2</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_branch_monodentate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uvec</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slab</span><span class="p">)</span>
+        <span class="n">slab</span> <span class="o">+=</span> <span class="n">atoms</span>
+        <span class="c1"># Add graph connections</span>
+        <span class="k">for</span> <span class="n">metal_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">u</span><span class="p">]:</span>
+            <span class="n">slab</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">metal_index</span><span class="p">,</span> <span class="n">bond</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">slab</span>
+
+    <span class="k">def</span> <span class="nf">_double_adsorption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">slab</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                           <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">edge_index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Bond and adsorbate by two adjacent atoms.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">slab</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">atoms</span> <span class="o">=</span> <span class="n">adsorbate</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">atoms</span><span class="o">.</span><span class="n">set_cell</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
+
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">[</span><span class="n">bonds</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">numbers</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.95</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_edges</span><span class="p">()</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_index</span><span class="p">]]</span>
+
+        <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_index</span><span class="p">]]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">U</span><span class="p">):</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">slab</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">u</span><span class="p">]]</span><span class="o">.</span><span class="n">numbers</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.95</span>
+            <span class="n">top_sites</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">coords</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">trilaterate</span><span class="p">(</span><span class="n">top_sites</span><span class="p">[</span><span class="n">u</span><span class="p">],</span> <span class="n">R</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">r</span><span class="p">)</span>
+
+        <span class="n">vec</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">norm</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span>
+        <span class="n">uvec0</span> <span class="o">=</span> <span class="n">vec</span> <span class="o">/</span> <span class="n">n</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">radii</span><span class="p">[</span><span class="n">numbers</span><span class="p">])</span> <span class="o">*</span> <span class="mf">0.95</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="p">(</span><span class="n">d</span> <span class="o">-</span> <span class="n">n</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+        <span class="n">base_position0</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">uvec0</span> <span class="o">*</span> <span class="n">dn</span>
+        <span class="n">base_position1</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">uvec0</span> <span class="o">*</span> <span class="n">dn</span>
+
+        <span class="c1"># Position the base atoms</span>
+        <span class="n">atoms</span><span class="p">[</span><span class="n">bonds</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">base_position0</span>
+        <span class="n">atoms</span><span class="p">[</span><span class="n">bonds</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">base_position1</span>
+
+        <span class="c1"># Temporarily break adsorbate</span>
+        <span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="o">*</span><span class="n">bonds</span><span class="p">)</span>
+
+        <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">uvec1</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_index</span><span class="p">]]</span>
+        <span class="n">uvec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec0</span><span class="p">)</span>
+        <span class="n">uvec2</span> <span class="o">/=</span> <span class="o">-</span><span class="n">norm</span><span class="p">(</span><span class="n">uvec2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="n">uvec1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec2</span><span class="p">,</span> <span class="n">uvec0</span><span class="p">)</span>
+
+        <span class="n">branches0</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_successors</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">bonds</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">branches0</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">uvec</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="n">uvec0</span><span class="p">,</span> <span class="n">uvec1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvec2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_branch_bidentate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uvec</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+
+        <span class="n">branches1</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_successors</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">bonds</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">branches1</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">uvec</span> <span class="o">=</span> <span class="p">[</span><span class="n">uvec0</span><span class="p">,</span> <span class="n">uvec1</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">uvec2</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="k">for</span> <span class="n">branch</span> <span class="ow">in</span> <span class="n">branches1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_branch_bidentate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">uvec</span><span class="p">,</span> <span class="n">branch</span><span class="p">)</span>
+
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slab</span><span class="p">)</span>
+        <span class="n">slab</span> <span class="o">+=</span> <span class="n">atoms</span>
+        <span class="c1"># Add graph connections</span>
+        <span class="n">slab</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">bonds</span><span class="p">)</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">U</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">metal_index</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">u</span><span class="p">]:</span>
+                <span class="n">slab</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">metal_index</span><span class="p">,</span> <span class="n">bonds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">slab</span>
+
+    <span class="k">def</span> <span class="nf">_branch_bidentate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">uvec</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return extended positions for additional adsorbates</span>
+<span class="sd">        based on provided unit vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">[[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">nodes</span><span class="p">]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">num</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span> <span class="o">+</span> <span class="n">radii</span><span class="p">[</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
+
+        <span class="c1"># Single additional atom</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">coord0</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord0</span>
+
+        <span class="c1"># Two branch system</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">coord0</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                   <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                   <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                   <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord0</span>
+
+            <span class="n">coord1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="n">uvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord1</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Too many bonded atoms to position correctly.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_branch_monodentate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atoms</span><span class="p">,</span> <span class="n">uvec</span><span class="p">,</span> <span class="n">branch</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return extended positions for additional adsorbates</span>
+<span class="sd">        based on provided unit vectors.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">r</span><span class="p">,</span> <span class="n">nodes</span> <span class="o">=</span> <span class="n">branch</span>
+        <span class="n">num</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">[[</span><span class="n">r</span><span class="p">]</span> <span class="o">+</span> <span class="n">nodes</span><span class="p">]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">radii</span><span class="p">[</span><span class="n">num</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span> <span class="o">+</span> <span class="n">radii</span><span class="p">[</span><span class="n">num</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">atoms</span><span class="p">[</span><span class="n">r</span><span class="p">]</span><span class="o">.</span><span class="n">position</span>
+
+        <span class="c1"># Single additional atom</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">coord0</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord0</span>
+
+        <span class="c1"># Two branch system</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">coord0</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord0</span>
+
+            <span class="n">coord1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord1</span>
+
+        <span class="c1"># Three branch system</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">coord0</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord0</span>
+
+            <span class="n">coord1</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="mf">0.866</span> <span class="o">*</span> <span class="n">d</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="n">uvec</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord1</span>
+
+            <span class="n">coord2</span> <span class="o">=</span> <span class="n">c</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">uvec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span> <span class="o">+</span> \
+                     <span class="n">d</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="o">-</span><span class="n">uvec</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">atoms</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">coord2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Too many bonded atoms to position correctly.&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Builder.ex_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.ex_sites">[docs]</a>    <span class="k">def</span> <span class="nf">ex_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Get site indices inside or outside of a cutoff radii from a</span>
+<span class="sd">        provided periodic site index. If two sites are provided, an</span>
+<span class="sd">        option to return the mutually inclusive points is also available.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">per</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">sym</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_edges</span><span class="p">(</span><span class="n">symmetric</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cutoff</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">per</span><span class="p">[</span><span class="n">index</span><span class="p">]:</span>
+                <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">edges</span> <span class="o">==</span> <span class="n">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">select_coords</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">sd</span><span class="p">]]</span>
+                <span class="n">d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">select_coords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                <span class="n">cutoff</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span> <span class="n">cutoff</span><span class="p">)</span>
+        <span class="n">cutoff</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tol</span>
+
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">sym</span><span class="p">]</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">norm</span> <span class="o">&lt;</span> <span class="n">cutoff</span><span class="p">))</span>
+
+        <span class="n">neighbors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">index</span><span class="p">:</span>
+            <span class="n">diff</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="n">per</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">diff</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s1">&#39;mutual&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">neighbors</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">norm</span> <span class="o">&lt;</span> <span class="n">cutoff</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">neighbors</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">norm</span> <span class="o">&lt;</span> <span class="n">cutoff</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">select</span> <span class="o">==</span> <span class="s1">&#39;inner&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s1">&#39;outer&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">setdiff1d</span><span class="p">(</span><span class="n">per</span><span class="p">,</span> <span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">select</span> <span class="o">==</span> <span class="s1">&#39;mutual&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span></div></div>
+
+
+<div class="viewcode-block" id="get_adsorption_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.get_adsorption_sites">[docs]</a><span class="k">def</span> <span class="nf">get_adsorption_sites</span><span class="p">(</span><span class="n">slab</span><span class="p">,</span>
+                         <span class="n">surface_atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">symmetry_reduced</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the adsorption sites of a slab as defined by surface</span>
+<span class="sd">    symmetries of the surface atoms.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    slab : atoms object</span>
+<span class="sd">        The slab to find adsorption sites for. Must have surface</span>
+<span class="sd">        atoms defined.</span>
+<span class="sd">    surface_atoms : list (n,)</span>
+<span class="sd">        List of the surface atom indices.</span>
+<span class="sd">    symmetry_reduced : bool</span>
+<span class="sd">        Return the symmetrically unique sites only.</span>
+<span class="sd">    adsorption_vectors : bool</span>
+<span class="sd">        Return the adsorption vectors.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    coordinates : ndarray (n, 3)</span>
+<span class="sd">        Cartesian coordinates of activate sites.</span>
+<span class="sd">    connectivity : ndarray (n,)</span>
+<span class="sd">        Number of bonds formed for a given adsorbate.</span>
+<span class="sd">    symmetry_index : ndarray(n,)</span>
+<span class="sd">        Arbitrary indices of symmetric sites.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">surface_atoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">slab</span><span class="o">.</span><span class="n">set_surface_atoms</span><span class="p">(</span><span class="n">surface_atoms</span><span class="p">)</span>
+
+    <span class="n">sites</span> <span class="o">=</span> <span class="n">AdsorptionSites</span><span class="p">(</span><span class="n">slab</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">symmetry_reduced</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">get_periodic_sites</span><span class="p">()</span>
+
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+    <span class="n">connectivity</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">connectivity</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">symmetry_reduced</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">connectivity</span>
+
+    <span class="n">symmetries</span> <span class="o">=</span> <span class="n">sites</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">(</span><span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">unique</span><span class="p">,</span> <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">symmetries</span><span class="p">,</span> <span class="n">return_counts</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">symmetry_index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique</span><span class="p">))</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">connectivity</span><span class="p">,</span> <span class="n">symmetry_index</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Sun, 20 May 2018 11:00:57.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.3',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

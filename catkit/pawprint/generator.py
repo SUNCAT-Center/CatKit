@@ -157,7 +157,7 @@ def get_connectivity(atoms, method=None):
     for a given atoms-object from CatGen.
 
     Parameters:
-    ----------
+    -----------
     atoms : object
         Molecular structure with out without adsorbates.
     method : str (None or 'voronoi')

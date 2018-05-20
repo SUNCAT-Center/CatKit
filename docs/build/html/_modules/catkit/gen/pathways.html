@@ -1,0 +1,1112 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.pathways &mdash; CatKit 0.4.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../gen.html">catkit.gen</a> &raquo;</li>
+        
+      <li>catkit.gen.pathways</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.gen.pathways</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">ase</span> <span class="k">import</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">ase.data</span> <span class="k">import</span> <span class="n">chemical_symbols</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+
+<div class="viewcode-block" id="ReactionNetwork"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork">[docs]</a><span class="k">class</span> <span class="nc">ReactionNetwork</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot; A class for accessing a temporary SQLite database. This</span>
+<span class="sd">    function works as a context manager and should be used as follows:</span>
+
+<span class="sd">    with ReactionNetwork() as rn:</span>
+<span class="sd">        (Perform operation here)</span>
+
+<span class="sd">    This syntax will automatically construct the temporary database,</span>
+<span class="sd">    or access an existing one. Upon exiting the indentation, the</span>
+<span class="sd">    changes to the database will be automatically committed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">db_name</span><span class="o">=</span><span class="s1">&#39;reaction-network.db&#39;</span><span class="p">,</span>
+            <span class="n">base_valence</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">nbond_limits</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The __init__ function is automatically called when the</span>
+<span class="sd">        class is referenced.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        db_name: str</span>
+<span class="sd">            Name of the database file to access. Will connect to</span>
+<span class="sd">            &#39;reaction-network.db&#39; by default.</span>
+<span class="sd">        base_valence: array (n,)</span>
+<span class="sd">            The maximum number of bonds each chemical species may form. Each</span>
+<span class="sd">            entry of the array is the bond limit of the corresponding atomic</span>
+<span class="sd">            number. The 0th entry of the array is ignored.</span>
+<span class="sd">        nbond_limits: array (n, n):</span>
+<span class="sd">            The maximum number of bonds that can be formed when species of</span>
+<span class="sd">            index 0 is bonding to a species of index 1. Each entry of the array</span>
+<span class="sd">            is the bond limit of the corresponding atomic number. The 0th entry</span>
+<span class="sd">            of the array is ignored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">db_name</span> <span class="o">=</span> <span class="n">db_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">molecules</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="n">base_valence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">base_valence</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">17</span><span class="p">)</span>
+            <span class="c1"># Define valence for H, C, N, O, and S</span>
+            <span class="n">base_valence</span><span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span> <span class="o">=</span> <span class="n">base_valence</span>
+
+        <span class="k">if</span> <span class="n">nbond_limits</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">nbond_limits</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">17</span><span class="p">,</span> <span class="mi">17</span><span class="p">))</span>
+            <span class="n">nbond_limits</span><span class="p">[</span><span class="mi">2</span><span class="p">:,</span> <span class="mi">2</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="c1"># # Specific bonding limits for Carbon</span>
+            <span class="n">nbond_limits</span><span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nbond_limits</span> <span class="o">=</span> <span class="n">nbond_limits</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the database connection when entering</span>
+<span class="sd">        an indented loop.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">con</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">db_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_table</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Commit and close the database upon exiting indentation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ReactionNetwork.create_table"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.create_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create the SQLite database table framework.&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS molecules(</span>
+<span class="s2">        molecule_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        comp_tag CHAR NOT NULL,</span>
+<span class="s2">        bond_tag CHAR NOT NULL</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS reactions(</span>
+<span class="s2">        reaction_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        reactant1 INT NOT NULL,</span>
+<span class="s2">        reactant2 INT NOT NULL,</span>
+<span class="s2">        product1 INT NOT NULL,</span>
+<span class="s2">        product2 INT NOT NULL,</span>
+<span class="s2">        broken_bond CHAR,</span>
+<span class="s2">        FOREIGN KEY(reactant1) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(reactant2) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(product1) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(product2) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(broken_bond) REFERENCES bonds(bond_pid),</span>
+<span class="s2">        UNIQUE (reactant1, reactant2, product1, product2)</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS atoms(</span>
+<span class="s2">        atom_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        molecule_id INT NOT NULL,</span>
+<span class="s2">        node_id INT NOT NULL,</span>
+<span class="s2">        atom_num INT NOT NULL,</span>
+<span class="s2">        valence INT NOT NULL,</span>
+<span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid)</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS bonds(</span>
+<span class="s2">        bond_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        molecule_id INT NOT NULL,</span>
+<span class="s2">        node_id1 INT NOT NULL,</span>
+<span class="s2">        node_id2 INT NOT NULL,</span>
+<span class="s2">        nbonds INT NOT NULL,</span>
+<span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(node_id1) REFERENCES atoms(atom_pid),</span>
+<span class="s2">        FOREIGN KEY(node_id2) REFERENCES atoms(atom_pid)</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS positions(</span>
+<span class="s2">        position_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        molecule_id INT NOT NULL,</span>
+<span class="s2">        atom_id INT NOT NULL,</span>
+<span class="s2">        x_coord REAL NOT NULL,</span>
+<span class="s2">        y_coord REAL NOT NULL,</span>
+<span class="s2">        z_coord REAL NOT NULL,</span>
+<span class="s2">        symbol CHAR NOT NULL,</span>
+<span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid),</span>
+<span class="s2">        FOREIGN KEY(atom_id) REFERENCES atoms(atom_pid)</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS energies(</span>
+<span class="s2">        energy_pid INTEGER PRIMARY KEY AUTOINCREMENT,</span>
+<span class="s2">        molecule_id INT NOT NULL,</span>
+<span class="s2">        energy REAL NOT NULL,</span>
+<span class="s2">        calculator CHAR,</span>
+<span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid)</span>
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.molecule_search"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.molecule_search">[docs]</a>    <span class="k">def</span> <span class="nf">molecule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                        <span class="n">element_pool</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
+                        <span class="n">load_molecules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">multiple_bond_search</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the enumeration of molecules which can be produced from</span>
+<span class="sd">        the specified atoms.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        element_pool: dict</span>
+<span class="sd">            Atomic symbols keys paired with the maximum number of that atom.</span>
+<span class="sd">        load_molecules: bool</span>
+<span class="sd">            Load any existing molecules from the database.</span>
+<span class="sd">        multiple_bond_search: bool</span>
+<span class="sd">            Allow atoms to form bonds with other atoms in the molecule.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">element_pool</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">numbers</span><span class="p">[</span><span class="n">chemical_symbols</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">element_pool</span> <span class="o">=</span> <span class="n">numbers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">multiple_bond_search</span> <span class="o">=</span> <span class="n">multiple_bond_search</span>
+
+        <span class="n">molecules</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">load_molecules</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">molecules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_molecules</span><span class="p">(</span><span class="n">binned</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">search_molecules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">cnt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_pool</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="n">cnt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">molecule</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="p">[</span><span class="n">el</span><span class="p">])</span>
+            <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span><span class="p">[</span><span class="n">el</span><span class="p">]</span>
+
+            <span class="n">search_molecules</span> <span class="o">+=</span> <span class="p">[</span><span class="n">molecule</span><span class="p">]</span>
+
+            <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">comp_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">molecules</span><span class="p">:</span>
+                <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">bond_tag</span><span class="p">:</span> <span class="p">[</span><span class="n">molecule</span><span class="p">]}</span>
+
+        <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">search_molecules</span><span class="p">:</span>
+
+            <span class="c1"># Recusive use of molecules</span>
+            <span class="n">new_molecules</span><span class="p">,</span> <span class="n">molecules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_branch_molecule</span><span class="p">(</span>
+                <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">)</span>
+
+            <span class="n">search_molecules</span> <span class="o">+=</span> <span class="n">new_molecules</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_molecules</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_branch_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Construct all the molecules one atom larger from a given</span>
+<span class="sd">        molecule and add the unique ones to a dictionary.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        molecule : Gratoms object</span>
+<span class="sd">            Molecule to create branching structures from.</span>
+<span class="sd">        molecules : dict</span>
+<span class="sd">            Molecule structures to check for unique matches against.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        new_molecules : list</span>
+<span class="sd">            All unique molecules discovered while branching.</span>
+<span class="sd">        molecules : dict</span>
+<span class="sd">            Molecule structures to check for unique matches updated with</span>
+<span class="sd">            new_molecules.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_molecules</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">bincount</span><span class="p">(</span>
+            <span class="n">molecule</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">(),</span> <span class="n">minlength</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">base_node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+
+            <span class="c1"># Check if an additional bond can be formed</span>
+            <span class="n">valence</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">base_node</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span>
+            <span class="n">base_el</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">base_node</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
+
+            <span class="c1"># Creating new nodes</span>
+            <span class="k">for</span> <span class="n">el</span><span class="p">,</span> <span class="n">cnt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_pool</span><span class="p">):</span>
+
+                <span class="c1"># Skip elements exceeding specified limit</span>
+                <span class="k">if</span> <span class="n">counter</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">cnt</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">valence</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># Don&#39;t form new bonds if the users rules prohibit</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbond_limits</span><span class="p">[</span><span class="n">base_el</span><span class="p">,</span> <span class="n">el</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="n">G</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">node_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+
+                <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">base_node</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                <span class="n">G</span> <span class="o">+=</span> <span class="n">Atom</span><span class="p">(</span><span class="n">el</span><span class="p">)</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">node_index</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span><span class="p">[</span><span class="n">el</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+                <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">base_node</span><span class="p">,</span> <span class="n">node_index</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+
+                <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">comp_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+                    <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="k">if</span> <span class="n">bond_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]:</span>
+                    <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">G1</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">G1</span><span class="p">):</span>
+                            <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">isomorph_found</span><span class="p">:</span>
+                    <span class="n">new_molecules</span> <span class="o">+=</span> <span class="p">[</span><span class="n">G</span><span class="p">]</span>
+                    <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">G</span><span class="p">]</span>
+
+            <span class="c1"># Bonds to existing nodes</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiple_bond_search</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">existing_node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+
+                    <span class="k">if</span> <span class="n">valence</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Atoms don&#39;t bond to themselves</span>
+                    <span class="k">if</span> <span class="n">existing_node</span> <span class="o">==</span> <span class="n">base_node</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">valence_new</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">existing_node</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span>
+                    <span class="n">el</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">existing_node</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
+
+                    <span class="k">if</span> <span class="n">valence_new</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_maximum_bond_limit</span><span class="p">(</span><span class="n">molecule</span><span class="p">,</span> <span class="n">base_node</span><span class="p">,</span>
+                                                <span class="n">existing_node</span><span class="p">):</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">G</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                    <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">base_node</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="n">G</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">existing_node</span><span class="p">][</span><span class="s1">&#39;valence&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">base_node</span><span class="p">,</span> <span class="n">existing_node</span><span class="p">):</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="n">base_node</span><span class="p">][</span><span class="n">existing_node</span><span class="p">][</span><span class="s1">&#39;bonds&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">base_node</span><span class="p">,</span> <span class="n">existing_node</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+
+                    <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">comp_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+                        <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                    <span class="k">if</span> <span class="n">bond_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]:</span>
+                        <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">G1</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]:</span>
+                            <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">G1</span><span class="p">):</span>
+                                <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">break</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">isomorph_found</span><span class="p">:</span>
+                        <span class="n">new_molecules</span> <span class="o">+=</span> <span class="p">[</span><span class="n">G</span><span class="p">]</span>
+                        <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">G</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">new_molecules</span><span class="p">,</span> <span class="n">molecules</span>
+
+<div class="viewcode-block" id="ReactionNetwork.path_search"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.path_search">[docs]</a>    <span class="k">def</span> <span class="nf">path_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reconfiguration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">substitution</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Search for reaction mechanisms from a pre-populated database</span>
+<span class="sd">        of molecules. By default, only single bond addition pathways are</span>
+<span class="sd">        enumerated (Also called elementary steps).</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        reconfiguration : bool</span>
+<span class="sd">            Search for reconfiguration paths. Reconfiguration paths are</span>
+<span class="sd">            all those where only the bond order is changed. R1 --&gt; P1.</span>
+<span class="sd">        substitution : bool</span>
+<span class="sd">            Search for substitution paths. Substitution paths are all</span>
+<span class="sd">            those where one bond is broken and one bond is formed</span>
+<span class="sd">            simultaneously. R1 + R2 --&gt; P1 + P2.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">molecules</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_molecules</span><span class="p">(</span><span class="n">binned</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">pathways</span><span class="p">,</span> <span class="n">bbonds</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecules</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">molecule_list</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">molecule_list</span><span class="p">:</span>
+
+                    <span class="n">add_pathways</span><span class="p">,</span> <span class="n">broken_bonds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_addition_paths</span><span class="p">(</span>
+                        <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">)</span>
+
+                    <span class="n">pathways</span> <span class="o">+=</span> <span class="n">add_pathways</span>
+                    <span class="n">bbonds</span> <span class="o">+=</span> <span class="n">broken_bonds</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_pathways</span><span class="p">(</span><span class="n">pathways</span><span class="p">,</span> <span class="n">bbonds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">reconfiguration</span><span class="p">:</span>
+            <span class="n">re_pathways</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_reconfiguration_paths</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">pathways</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pathways</span><span class="p">(</span><span class="n">re_pathways</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">substitution</span><span class="p">:</span>
+            <span class="n">sub_pathways</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_substitution_paths</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">pathways</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pathways</span><span class="p">(</span><span class="n">sub_pathways</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_addition_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;TODO: I can haz documentation?&quot;&quot;&quot;</span>
+        <span class="n">disjoints</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecule</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+
+            <span class="n">cut_molecule</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="n">cut_molecule</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;bonds&#39;</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">cut_molecule</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="n">u</span><span class="p">][</span><span class="n">v</span><span class="p">][</span><span class="s1">&#39;bonds&#39;</span><span class="p">]:</span>
+                <span class="n">cut_molecule</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+
+            <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">disjoint</span> <span class="ow">in</span> <span class="n">disjoints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">cut_molecule</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">disjoint</span><span class="p">):</span>
+                    <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">isomorph_found</span><span class="p">:</span>
+                <span class="n">disjoints</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cut_molecule</span><span class="p">]</span>
+                <span class="n">broken_bonds</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">,</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)]</span>
+
+                <span class="n">product_index</span> <span class="o">=</span> <span class="n">cut_molecule</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">pieces</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">connected_components</span><span class="p">(</span><span class="n">cut_molecule</span><span class="o">.</span><span class="n">graph</span><span class="p">))</span>
+
+                <span class="n">addition_pathway</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="n">product_index</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">piece</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pieces</span><span class="p">):</span>
+
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pieces</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">G</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                        <span class="k">del</span> <span class="n">G</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">piece</span><span class="p">)]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">G</span> <span class="o">=</span> <span class="n">cut_molecule</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+                    <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+
+                    <span class="k">for</span> <span class="n">reactant</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="n">G</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">reactant</span><span class="p">):</span>
+                            <span class="n">pindex</span> <span class="o">=</span> <span class="n">reactant</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
+                            <span class="n">addition_pathway</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">pindex</span>
+                            <span class="k">break</span>
+
+                <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">addition_pathway</span><span class="p">]</span>
+                <span class="n">pathways</span> <span class="o">+=</span> <span class="p">[</span><span class="n">addition_pathway</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span>
+
+    <span class="k">def</span> <span class="nf">_get_reconfiguration_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">,</span> <span class="n">pathways</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;TODO: I can haz documentation?&quot;&quot;&quot;</span>
+        <span class="n">ind_mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_molecules</span><span class="p">()</span>
+
+        <span class="n">new_pathways</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">reconfig</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">R</span><span class="p">,</span> <span class="n">P</span> <span class="ow">in</span> <span class="n">pathways</span><span class="p">:</span>
+            <span class="n">R1</span><span class="p">,</span> <span class="n">R2</span> <span class="o">=</span> <span class="n">R</span>
+            <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">P</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">R1</span> <span class="ow">or</span> <span class="n">P1</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="n">mol_R1</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">R1</span><span class="p">]</span>
+            <span class="n">mol_R2</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">R2</span><span class="p">]</span>
+
+            <span class="n">reconfigurations</span> <span class="o">=</span> <span class="p">[</span><span class="n">ind_mol</span><span class="p">[</span><span class="n">P2</span><span class="p">]]</span>
+
+            <span class="c1"># Find potential bonding sites</span>
+            <span class="n">p1_bonds</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">R1</span><span class="p">]</span><span class="o">.</span><span class="n">get_unsaturated_nodes</span><span class="p">()</span>
+
+            <span class="n">p2_bonds</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">R2</span><span class="p">]</span><span class="o">.</span><span class="n">get_unsaturated_nodes</span><span class="p">()</span> <span class="o">+</span> \
+                <span class="nb">len</span><span class="p">(</span><span class="n">ind_mol</span><span class="p">[</span><span class="n">R1</span><span class="p">])</span>
+
+            <span class="k">for</span> <span class="n">b1</span> <span class="ow">in</span> <span class="n">p1_bonds</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">b2</span> <span class="ow">in</span> <span class="n">p2_bonds</span><span class="p">:</span>
+
+                    <span class="n">Pt</span> <span class="o">=</span> <span class="n">mol_R1</span> <span class="o">+</span> <span class="n">mol_R2</span>
+                    <span class="n">Pt</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                    <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">P</span> <span class="ow">in</span> <span class="n">reconfigurations</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">Pt</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">P</span><span class="p">):</span>
+                            <span class="n">isomorph_found</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">isomorph_found</span><span class="p">:</span>
+                        <span class="n">reconfigurations</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Pt</span><span class="p">]</span>
+
+            <span class="k">del</span> <span class="n">reconfigurations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">reconfig_pathway</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">P2</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+            <span class="k">for</span> <span class="n">Pt</span> <span class="ow">in</span> <span class="n">reconfigurations</span><span class="p">:</span>
+                <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">Pt</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+
+                <span class="c1"># Bond structure has not been enumerated</span>
+                <span class="k">if</span> <span class="n">bond_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">P</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">P</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">Pt</span><span class="p">):</span>
+                        <span class="n">reconfig_pathway</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
+                        <span class="n">pc</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="n">P</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">P2</span><span class="p">]))</span>
+                        <span class="k">break</span>
+
+                <span class="k">if</span> <span class="n">pc</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">reconfig</span><span class="p">:</span>
+                    <span class="n">reconfig</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pc</span><span class="p">)</span>
+                    <span class="n">new_pathways</span> <span class="o">+=</span> <span class="p">[</span><span class="n">reconfig_pathway</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">new_pathways</span><span class="p">:</span>
+            <span class="p">[</span><span class="n">path</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span> <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">new_pathways</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">new_pathways</span>
+
+    <span class="k">def</span> <span class="nf">_get_substitution_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">,</span> <span class="n">pathways</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;TODO: I can haz documentation?</span>
+
+<span class="sd">        Follows the form:</span>
+<span class="sd">        R1(-P1) + R2(-P1) --&gt; P1 + P2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">substitution_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">new_pathways</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">ind_mol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_molecules</span><span class="p">()</span>
+
+        <span class="c1"># Get the maximum number of nodes</span>
+        <span class="n">maxn</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ind_mol</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">maxn</span><span class="p">:</span>
+                <span class="n">maxn</span> <span class="o">=</span> <span class="n">n</span>
+
+        <span class="c1"># Need to eliminate isomorphs to</span>
+        <span class="c1"># not count double bonds</span>
+        <span class="k">for</span> <span class="n">iP1</span> <span class="ow">in</span> <span class="n">ind_mol</span><span class="p">:</span>
+
+            <span class="n">P1</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">iP1</span><span class="p">]</span>
+            <span class="n">P1_bonds</span> <span class="o">=</span> <span class="n">P1</span><span class="o">.</span><span class="n">get_unsaturated_nodes</span><span class="p">()</span>
+            <span class="n">nP1</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">P1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">P1_bonds</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">for</span> <span class="n">iRa</span><span class="p">,</span> <span class="n">iPa</span> <span class="ow">in</span> <span class="n">pathways</span><span class="p">:</span>
+                <span class="n">iR1</span><span class="p">,</span> <span class="n">iR2</span> <span class="o">=</span> <span class="n">iRa</span>
+                <span class="n">_</span><span class="p">,</span> <span class="n">iP2</span> <span class="o">=</span> <span class="n">iPa</span>
+
+                <span class="c1"># Ignore bonding pathways</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">iR1</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">iR</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">iRa</span><span class="p">):</span>
+                    <span class="n">R</span> <span class="o">=</span> <span class="n">ind_mol</span><span class="p">[</span><span class="n">iR</span><span class="p">]</span>
+                    <span class="n">nR</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+
+                    <span class="c1"># Don&#39;t create larger molecules</span>
+                    <span class="k">if</span> <span class="n">nR</span> <span class="o">+</span> <span class="n">nP1</span> <span class="o">&gt;</span> <span class="n">maxn</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">R_bonds</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">get_unsaturated_nodes</span><span class="p">()</span> <span class="o">+</span> <span class="n">nP1</span>
+
+                    <span class="k">for</span> <span class="n">b1</span> <span class="ow">in</span> <span class="n">P1_bonds</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">b2</span> <span class="ow">in</span> <span class="n">R_bonds</span><span class="p">:</span>
+
+                            <span class="n">R_P1</span> <span class="o">=</span> <span class="n">P1</span> <span class="o">+</span> <span class="n">R</span>
+                            <span class="n">R_P1</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+                            <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span> <span class="o">=</span> <span class="n">R_P1</span><span class="o">.</span><span class="n">get_chemical_tags</span><span class="p">()</span>
+
+                            <span class="c1"># Bond structure has not been enumerated</span>
+                            <span class="k">if</span> <span class="n">comp_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span> <span class="ow">or</span> \
+                               <span class="n">bond_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]:</span>
+                                <span class="k">continue</span>
+
+                            <span class="n">subst_pathway</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                                <span class="nb">sorted</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">iRa</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]]),</span>
+                                <span class="nb">sorted</span><span class="p">([</span><span class="n">iP1</span><span class="p">,</span> <span class="n">iP2</span><span class="p">])</span>
+                            <span class="p">])</span>
+
+                            <span class="k">for</span> <span class="n">G</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]:</span>
+                                <span class="k">if</span> <span class="n">R_P1</span><span class="o">.</span><span class="n">is_isomorph</span><span class="p">(</span><span class="n">G</span><span class="p">):</span>
+                                    <span class="n">iR_P1</span> <span class="o">=</span> <span class="n">G</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
+
+                                    <span class="n">subst_pathway</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span>
+                                        <span class="nb">sorted</span><span class="p">([</span><span class="n">iR_P1</span><span class="p">,</span> <span class="n">iRa</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="n">i</span><span class="p">]]),</span>
+                                        <span class="nb">sorted</span><span class="p">([</span><span class="n">iP1</span><span class="p">,</span> <span class="n">iP2</span><span class="p">])</span>
+                                    <span class="p">])</span>
+
+                                    <span class="n">sum_index</span> <span class="o">=</span> <span class="p">(</span>
+                                        <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subst_pathway</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)),</span>
+                                        <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">subst_pathway</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)))</span>
+
+                                    <span class="k">if</span> <span class="n">sum_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">substitution_set</span><span class="p">:</span>
+                                        <span class="c1"># These are identical</span>
+                                        <span class="n">substitution_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sum_index</span><span class="p">)</span>
+                                        <span class="n">substitution_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sum_index</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+                                        <span class="n">new_pathways</span> <span class="o">+=</span> <span class="p">[</span><span class="n">subst_pathway</span><span class="p">]</span>
+                                    <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">new_pathways</span>
+
+<div class="viewcode-block" id="ReactionNetwork.save_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">save_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save enumerated molecules to the ReactionNetwork database.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        molecules: dict</span>
+<span class="sd">            Molecules to be saved to the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">comp_tag</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">bond_tag</span><span class="p">,</span> <span class="n">molecule_list</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="n">molecule_list</span><span class="p">:</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;INSERT INTO molecules</span>
+<span class="s2">                        (comp_tag, bond_tag)</span>
+<span class="s2">                        VALUES(?, ?)&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span><span class="p">))</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT last_insert_rowid()&quot;&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">molecule_pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecule</span><span class="o">.</span><span class="n">edges</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                        <span class="n">bonds</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;bonds&#39;</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                            <span class="sd">&quot;&quot;&quot;INSERT INTO bonds</span>
+<span class="sd">                            (molecule_id, node_id1, node_id2, nbonds)</span>
+<span class="sd">                            VALUES(?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">molecule_pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">u</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">bonds</span><span class="p">)))</span>
+
+                    <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+                        <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">))</span>
+                        <span class="n">valence</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;valence&#39;</span><span class="p">)</span>
+
+                        <span class="k">if</span> <span class="n">valence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">valence</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                            <span class="sd">&quot;&quot;&quot;INSERT INTO atoms</span>
+<span class="sd">                            (molecule_id, node_id, atom_num, valence)</span>
+<span class="sd">                            VALUES(?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
+                            <span class="p">(</span><span class="n">molecule_pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">number</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">valence</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.save_pathways"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">save_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
+<span class="sd">        More than two reactants or two products is not supported.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        pathways: list</span>
+<span class="sd">            Sorted pathways in the form [R1, R2, P1, P2].</span>
+<span class="sd">        broken_bonds: list</span>
+<span class="sd">            Comma separated strings of index associated with the</span>
+<span class="sd">            two atoms whos bond is broken. List order must match</span>
+<span class="sd">            pathways.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">pathways</span><span class="p">):</span>
+            <span class="n">R</span><span class="p">,</span> <span class="n">P</span> <span class="o">=</span> <span class="n">path</span>
+            <span class="n">P1</span><span class="p">,</span> <span class="n">P2</span> <span class="o">=</span> <span class="n">P</span>
+            <span class="n">R1</span><span class="p">,</span> <span class="n">R2</span> <span class="o">=</span> <span class="n">R</span>
+
+            <span class="k">if</span> <span class="n">broken_bonds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">bbond</span> <span class="o">=</span> <span class="n">broken_bonds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">bbond</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;INSERT INTO reactions</span>
+<span class="s2">                    (product1, product2, reactant1, reactant2, broken_bond)</span>
+<span class="s2">                    VALUES(?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
+                               <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">P1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">P2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">R1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">R2</span><span class="p">),</span> <span class="n">bbond</span><span class="p">))</span>
+            <span class="k">except</span> <span class="p">(</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">):</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.load_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">load_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Load 2D molecule graphs from the database.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        binned: bool</span>
+<span class="sd">            Return the molecules in sub-dictionaries of their</span>
+<span class="sd">            corresponding composition and bonding tags.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        molecules: dict</span>
+<span class="sd">            All molecules present in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT m.molecule_pid,</span>
+<span class="s2">                        m.comp_tag,</span>
+<span class="s2">                        m.bond_tag,</span>
+<span class="s2">                        nodes,</span>
+<span class="s2">                        bonds</span>
+<span class="s2">        FROM molecules m LEFT JOIN</span>
+<span class="s2">        (</span>
+<span class="s2">         SELECT molecule_id,</span>
+<span class="s2">         GROUP_CONCAT(node_id || &#39;,&#39; || atom_num || &#39;,&#39; || valence, &#39;;&#39;)</span>
+<span class="s2">         as nodes</span>
+<span class="s2">         FROM atoms</span>
+<span class="s2">         GROUP BY molecule_id</span>
+<span class="s2">        ) a</span>
+<span class="s2">          ON a.molecule_id = m.molecule_pid LEFT JOIN</span>
+<span class="s2">        (</span>
+<span class="s2">         SELECT molecule_id,</span>
+<span class="s2">         GROUP_CONCAT(node_id1 || &#39;,&#39; || node_id2 || &#39;,&#39; || nbonds, &#39;;&#39;)</span>
+<span class="s2">         as bonds</span>
+<span class="s2">         FROM bonds</span>
+<span class="s2">         GROUP BY molecule_id</span>
+<span class="s2">        ) b</span>
+<span class="s2">          ON b.molecule_id = m.molecule_pid</span>
+<span class="s2">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ids</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;WHERE m.molecule_pid IN (</span><span class="si">{}</span><span class="s2">)&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="n">fetch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="n">molecules</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">comp_tag</span><span class="p">,</span> <span class="n">bond_tag</span><span class="p">,</span> <span class="n">node_data</span><span class="p">,</span> <span class="n">edge_data</span> <span class="ow">in</span> <span class="n">fetch</span><span class="p">:</span>
+
+            <span class="c1"># Unpacks node, number, and valence</span>
+            <span class="n">node_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">node_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">data</span><span class="p">,</span> <span class="n">symbols</span> <span class="o">=</span> <span class="p">{},</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">valence</span> <span class="ow">in</span> <span class="n">node_data</span><span class="p">:</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">node</span><span class="p">:</span> <span class="n">valence</span><span class="p">})</span>
+                <span class="n">symbols</span> <span class="o">+=</span> <span class="p">[</span><span class="n">n</span><span class="p">]</span>
+
+            <span class="n">molecule</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">molecule</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">index</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">set_node_attributes</span><span class="p">(</span><span class="n">molecule</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">&#39;valence&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">edge_data</span><span class="p">:</span>
+                <span class="n">edges</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">edge_data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+                <span class="n">molecule</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_weighted_edges_from</span><span class="p">(</span><span class="n">edges</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="s1">&#39;bonds&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">binned</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">comp_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">:</span>
+                    <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+                <span class="k">if</span> <span class="n">bond_tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">]:</span>
+                    <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="n">molecules</span><span class="p">[</span><span class="n">comp_tag</span><span class="p">][</span><span class="n">bond_tag</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">molecule</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">molecules</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">molecule</span>
+
+        <span class="k">return</span> <span class="n">molecules</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.load_pathways"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">load_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
+<span class="sd">        More than two reactants or two products is not supported.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        broken_bonds: bool</span>
+<span class="sd">            Return the index information of which bond was broken.</span>
+<span class="sd">            Only supported for elementary steps.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        pathways: list</span>
+<span class="sd">            All pathways present in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">broken_bonds</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT</span>
+<span class="s2">            reactant1,</span>
+<span class="s2">            reactant2,</span>
+<span class="s2">            product1,</span>
+<span class="s2">            product2,</span>
+<span class="s2">            broken_bond</span>
+<span class="s2">            FROM reactions&quot;&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT</span>
+<span class="s2">            reactant1,</span>
+<span class="s2">            reactant2,</span>
+<span class="s2">            product1,</span>
+<span class="s2">            product2</span>
+<span class="s2">            FROM reactions&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="n">fetch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="n">pathways</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">fetch</span><span class="p">:</span>
+            <span class="n">_add</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">_add</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">_</span><span class="p">)]</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+                    <span class="n">_add</span> <span class="o">+=</span> <span class="p">[</span><span class="n">_</span><span class="p">]</span>
+
+            <span class="n">pathways</span> <span class="o">+=</span> <span class="p">[</span><span class="n">_add</span><span class="p">]</span>
+
+        <span class="n">pathways</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pathways</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pathways</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.save_3d_structure"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_3d_structure">[docs]</a>    <span class="k">def</span> <span class="nf">save_3d_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gratoms</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save Cartesian coordinates into the ReactionNetwork database.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        gratoms: Gratoms or Atoms object</span>
+<span class="sd">            Object with Cartesian coordinates to be saved.</span>
+<span class="sd">        overwrite: bool</span>
+<span class="sd">            Allow the database to overwrite a matching index.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">gratoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="k">if</span> <span class="n">overwrite</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT GROUP_CONCAT(position_pid)</span>
+<span class="s2">            FROM positions</span>
+<span class="s2">            WHERE molecule_id = (</span><span class="si">{}</span><span class="s2">)</span>
+<span class="s2">            GROUP BY molecule_id</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">match</span> <span class="o">=</span> <span class="n">match</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+                <span class="k">assert</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">match</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">gratoms</span><span class="p">))</span>
+
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gratoms</span><span class="p">):</span>
+                    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;UPDATE positions</span>
+<span class="s2">                        SET x_coord = ?,</span>
+<span class="s2">                            y_coord = ?,</span>
+<span class="s2">                            z_coord = ?</span>
+<span class="s2">                        WHERE position_pid = ?</span>
+<span class="s2">                        &quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">match</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+                <span class="k">return</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">gratoms</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">position</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;INSERT INTO positions</span>
+<span class="s2">                (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)</span>
+<span class="s2">                VALUES(?, ?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">symbol</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.load_3d_structures"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_3d_structures">[docs]</a>    <span class="k">def</span> <span class="nf">load_3d_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return Gratoms objects from the ReactionNetwork database.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        ids: int or list of int</span>
+<span class="sd">            Identifier of the molecule in the database. If None, return all</span>
+<span class="sd">            structure.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">        --------</span>
+<span class="sd">        images: list</span>
+<span class="sd">            All Gratoms objects in the database.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">ids</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT</span>
+<span class="s2">             GROUP_CONCAT(x_coord || &#39;,&#39; || y_coord || &#39;,&#39; || z_coord, &#39;;&#39;),</span>
+<span class="s2">             GROUP_CONCAT(symbol, &#39;;&#39;)</span>
+<span class="s2">             FROM positions</span>
+<span class="s2">             GROUP BY molecule_id</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="n">fetch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+            <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">out</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fetch</span><span class="p">):</span>
+
+                <span class="n">symbols</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+                <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+                <span class="n">gratoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+                <span class="n">gratoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">i</span>
+
+                <span class="n">images</span> <span class="o">+=</span> <span class="p">[</span><span class="n">gratoms</span><span class="p">]</span>
+
+            <span class="k">return</span> <span class="n">images</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT</span>
+<span class="s2">             GROUP_CONCAT(x_coord || &#39;,&#39; || y_coord || &#39;,&#39; || z_coord, &#39;;&#39;),</span>
+<span class="s2">             GROUP_CONCAT(symbol, &#39;;&#39;)</span>
+<span class="s2">             FROM positions</span>
+<span class="s2">             WHERE molecule_id IN (</span><span class="si">{}</span><span class="s2">)</span>
+<span class="s2">             GROUP BY molecule_id</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No matching index found&#39;</span><span class="p">)</span>
+
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">_</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">)],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+            <span class="n">gratoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+            <span class="n">gratoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">gratoms</span></div>
+
+<div class="viewcode-block" id="ReactionNetwork.plot_reaction_network"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.plot_reaction_network">[docs]</a>    <span class="k">def</span> <span class="nf">plot_reaction_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot the reaction network present in the database.&quot;&quot;&quot;</span>
+
+        <span class="n">pathways</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">load_paths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_pathways</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">load_paths</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">R</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[:</span><span class="mi">2</span><span class="p">]:</span>
+                <span class="k">for</span> <span class="n">P</span> <span class="ow">in</span> <span class="n">path</span><span class="p">[</span><span class="mi">2</span><span class="p">:]:</span>
+                    <span class="k">if</span> <span class="n">R</span> <span class="ow">and</span> <span class="n">P</span><span class="p">:</span>
+                        <span class="n">pathways</span> <span class="o">+=</span> <span class="p">[[</span><span class="n">R</span><span class="p">,</span> <span class="n">P</span><span class="p">]]</span>
+
+        <span class="n">network</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">Graph</span><span class="p">(</span><span class="n">pathways</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">draw_networkx</span><span class="p">(</span><span class="n">network</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">_maximum_bond_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return whether a maximum bonding limit has been met.&quot;&quot;&quot;</span>
+        <span class="n">el1</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
+        <span class="n">el2</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n2</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
+
+        <span class="n">bonds</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">molecule</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">has_edge</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
+            <span class="n">bonds</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">graph</span><span class="p">[</span><span class="n">n1</span><span class="p">][</span><span class="n">n2</span><span class="p">][</span><span class="s1">&#39;bonds&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbond_limits</span><span class="p">[</span><span class="n">el1</span><span class="p">][</span><span class="n">el2</span><span class="p">]</span> <span class="o">==</span> <span class="n">bonds</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Sun, 20 May 2018 11:00:57.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.3',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
