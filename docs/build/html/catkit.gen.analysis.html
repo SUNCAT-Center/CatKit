@@ -1,0 +1,502 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.analysis package &mdash; CatKit 0.4.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="catkit.gen.api package" href="catkit.gen.api.html" />
+    <link rel="prev" title="catkit.gen package" href="catkit.gen.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">catkit</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">catkit</a> &raquo;</li>
+        
+          <li><a href="catkit.html">catkit package</a> &raquo;</li>
+        
+          <li><a href="catkit.gen.html">catkit.gen package</a> &raquo;</li>
+        
+      <li>catkit.gen.analysis package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/catkit.gen.analysis.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-gen-analysis-package">
+<h1>catkit.gen.analysis package<a class="headerlink" href="#catkit-gen-analysis-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.gen.analysis.classifier">
+<span id="catkit-gen-analysis-classifier-module"></span><h2>catkit.gen.analysis.classifier module<a class="headerlink" href="#module-catkit.gen.analysis.classifier" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.gen.analysis.classifier.Classifier">
+<em class="property">class </em><code class="descclassname">catkit.gen.analysis.classifier.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for classification of various aspects of an an atomic
+unit cell.</p>
+<p>Currently, a tool for classification of adsorbates on surface
+environments and the active sites they rest on.</p>
+<p>Return unique coordinate values of a given atoms object
+for a specified axis.</p>
+<blockquote>
+<div>atoms : atoms object</div></blockquote>
+<dl class="method">
+<dt id="catkit.gen.analysis.classifier.Classifier.id_adsorbate_atoms">
+<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbate_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify adsorbed atoms in a given atoms object.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify adsorbate atoms.</p>
+<p class="last">‘trivial’:
+Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
+</dd>
+<dt>tag <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return adsorbate atoms with tags of -2.</dd>
+</dl>
+<dl class="docutils">
+<dt>ads_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of adsorbate atoms found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.classifier.Classifier.id_adsorbates">
+<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of Gratoms objects for each adsorbate
+classified on a surface. Requires classification of adsorbate
+atoms.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify individual adsorbates.</p>
+<p class="last">‘radial’:
+Use standard cutoff distances to identify neighboring atoms.</p>
+</dd>
+<dt>return_atoms <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return Gratoms objects instead of adsorbate indices.</dd>
+</dl>
+<dl class="docutils">
+<dt>adsorabtes <span class="classifier-delimiter">:</span> <span class="classifier">list (n,)</span></dt>
+<dd>Adsorbate indices of adsorbates in unit cell.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.classifier.Classifier.id_slab_atoms">
+<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_slab_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the indices of the slab atoms using select characterization
+techniques.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify slab atoms.</p>
+<p class="last">‘trivial’:
+Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
+</dd>
+<dt>tag <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return adsorbate atoms with tags of 2.</dd>
+<dt>rtol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Relative cutoff distance for tagging layers.</dd>
+</dl>
+<dl class="docutils">
+<dt>slab_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of slab atoms found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.classifier.Classifier.id_surface_atoms">
+<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify surface atoms of an atoms object. This will
+require that adsorbate atoms have already been identified.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify surface atoms.</p>
+<p class="last">‘voronoi_sweep’:
+Create a sweep of proxy atoms above surface. Surface atoms
+are those which are most frequent neighbors of the sweep.</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>surface_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of the surface atoms in the object.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.analysis.matching">
+<span id="catkit-gen-analysis-matching-module"></span><h2>catkit.gen.analysis.matching module<a class="headerlink" href="#module-catkit.gen.analysis.matching" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.analysis.matching.reactant_indices">
+<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">reactant_indices</code><span class="sig-paren">(</span><em>R1</em>, <em>R2</em>, <em>P</em>, <em>broken_bond</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/matching.html#reactant_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.matching.reactant_indices" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Match the indices of a pair of reactants from a</dt>
+<dd>product and broken bond.</dd>
+</dl>
+<dl class="docutils">
+<dt>R1 <span class="classifier-delimiter">:</span> <span class="classifier">networkx MultiGraph</span></dt>
+<dd>Graph representing reactant 1</dd>
+<dt>R2 <span class="classifier-delimiter">:</span> <span class="classifier">networkx MultiGraph</span></dt>
+<dd>Graph representing reactant 2</dd>
+<dt>P <span class="classifier-delimiter">:</span> <span class="classifier">networkx MultiGraph</span></dt>
+<dd>Graph representing the product</dd>
+<dt>broken_bond <span class="classifier-delimiter">:</span> <span class="classifier">list (2,)</span></dt>
+<dd>Indices representing the edge of the product
+to be removed.</dd>
+</dl>
+<dl class="docutils">
+<dt>pindex: ndarrays (n,)</dt>
+<dd>Indices of the product graph sorted by the order of
+the reactants indices.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.analysis.matching.slab_indices">
+<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">slab_indices</code><span class="sig-paren">(</span><em>slab0</em>, <em>slab1</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/matching.html#slab_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.matching.slab_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Match the indices of similar atoms between two slabs.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.analysis.reconfiguration">
+<span id="catkit-gen-analysis-reconfiguration-module"></span><h2>catkit.gen.analysis.reconfiguration module<a class="headerlink" href="#module-catkit.gen.analysis.reconfiguration" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.analysis.reconfiguration.id_reconstruction">
+<code class="descclassname">catkit.gen.analysis.reconfiguration.</code><code class="descname">id_reconstruction</code><span class="sig-paren">(</span><em>images</em>, <em>save=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/reconfiguration.html#id_reconstruction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.reconfiguration.id_reconstruction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify a reconstruction event by analyzing changes in
+the forces.</p>
+<dl class="docutils">
+<dt>images <span class="classifier-delimiter">:</span> <span class="classifier">list of ASE atoms objects</span></dt>
+<dd>Relaxation trajectory.</dd>
+<dt>show <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Create a figure to display the events located.</dd>
+</dl>
+<dl class="docutils">
+<dt>predicted_events: list of int</dt>
+<dd>index of images predicted before the event occurs.</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.analysis">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.gen.analysis" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.gen.analysis.Classifier">
+<em class="property">class </em><code class="descclassname">catkit.gen.analysis.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for classification of various aspects of an an atomic
+unit cell.</p>
+<p>Currently, a tool for classification of adsorbates on surface
+environments and the active sites they rest on.</p>
+<p>Return unique coordinate values of a given atoms object
+for a specified axis.</p>
+<blockquote>
+<div>atoms : atoms object</div></blockquote>
+<dl class="method">
+<dt id="catkit.gen.analysis.Classifier.id_adsorbate_atoms">
+<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbate_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify adsorbed atoms in a given atoms object.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify adsorbate atoms.</p>
+<p class="last">‘trivial’:
+Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
+</dd>
+<dt>tag <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return adsorbate atoms with tags of -2.</dd>
+</dl>
+<dl class="docutils">
+<dt>ads_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of adsorbate atoms found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.Classifier.id_adsorbates">
+<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of Gratoms objects for each adsorbate
+classified on a surface. Requires classification of adsorbate
+atoms.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify individual adsorbates.</p>
+<p class="last">‘radial’:
+Use standard cutoff distances to identify neighboring atoms.</p>
+</dd>
+<dt>return_atoms <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return Gratoms objects instead of adsorbate indices.</dd>
+</dl>
+<dl class="docutils">
+<dt>adsorabtes <span class="classifier-delimiter">:</span> <span class="classifier">list (n,)</span></dt>
+<dd>Adsorbate indices of adsorbates in unit cell.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.Classifier.id_slab_atoms">
+<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_slab_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the indices of the slab atoms using select characterization
+techniques.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify slab atoms.</p>
+<p class="last">‘trivial’:
+Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
+</dd>
+<dt>tag <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>Return adsorbate atoms with tags of 2.</dd>
+<dt>rtol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
+<dd>Relative cutoff distance for tagging layers.</dd>
+</dl>
+<dl class="docutils">
+<dt>slab_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of slab atoms found.</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.analysis.Classifier.id_surface_atoms">
+<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Identify surface atoms of an atoms object. This will
+require that adsorbate atoms have already been identified.</p>
+<dl class="docutils">
+<dt>classifier <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><p class="first">Classification technique to identify surface atoms.</p>
+<p class="last">‘voronoi_sweep’:
+Create a sweep of proxy atoms above surface. Surface atoms
+are those which are most frequent neighbors of the sweep.</p>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>surface_atoms <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n,)</span></dt>
+<dd>Index of the surface atoms in the object.</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catkit.gen.api.html" class="btn btn-neutral float-right" title="catkit.gen.api package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catkit.gen.html" class="btn btn-neutral" title="catkit.gen package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Sun, 20 May 2018 10:53:55.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.4.3',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

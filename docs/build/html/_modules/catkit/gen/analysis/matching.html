@@ -1,0 +1,278 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.analysis.matching &mdash; CatKit 0.4.3 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../gen.html">catkit.gen</a> &raquo;</li>
+        
+      <li>catkit.gen.analysis.matching</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.gen.analysis.matching</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">import</span> <span class="nn">networkx.algorithms.isomorphism</span> <span class="k">as</span> <span class="nn">iso</span>
+<span class="kn">from</span> <span class="nn">ase.geometry</span> <span class="k">import</span> <span class="n">get_distances</span>
+<span class="kn">from</span> <span class="nn">ase.build</span> <span class="k">import</span> <span class="n">sort</span>
+
+
+<div class="viewcode-block" id="reactant_indices"><a class="viewcode-back" href="../../../../catkit.gen.analysis.html#catkit.gen.analysis.matching.reactant_indices">[docs]</a><span class="k">def</span> <span class="nf">reactant_indices</span><span class="p">(</span><span class="n">R1</span><span class="p">,</span> <span class="n">R2</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">broken_bond</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Match the indices of a pair of reactants from a</span>
+<span class="sd">     product and broken bond.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">    -----------</span>
+<span class="sd">    R1 : networkx MultiGraph</span>
+<span class="sd">        Graph representing reactant 1</span>
+<span class="sd">    R2 : networkx MultiGraph</span>
+<span class="sd">        Graph representing reactant 2</span>
+<span class="sd">    P : networkx MultiGraph</span>
+<span class="sd">        Graph representing the product</span>
+<span class="sd">    broken_bond : list (2,)</span>
+<span class="sd">        Indices representing the edge of the product</span>
+<span class="sd">        to be removed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">    --------</span>
+<span class="sd">    pindex: ndarrays (n,)</span>
+<span class="sd">        Indices of the product graph sorted by the order of</span>
+<span class="sd">        the reactants indices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">GM</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">algorithms</span><span class="o">.</span><span class="n">isomorphism</span><span class="o">.</span><span class="n">GraphMatcher</span>
+    <span class="n">em</span> <span class="o">=</span> <span class="n">iso</span><span class="o">.</span><span class="n">numerical_edge_match</span><span class="p">(</span><span class="s1">&#39;bonds&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">nm</span> <span class="o">=</span> <span class="n">iso</span><span class="o">.</span><span class="n">numerical_node_match</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">Pgraph</span> <span class="o">=</span> <span class="n">P</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">u</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">broken_bond</span>
+    <span class="n">Pgraph</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+    <span class="n">Rgraph</span> <span class="o">=</span> <span class="n">R1</span> <span class="o">+</span> <span class="n">R2</span>
+
+    <span class="n">gm</span> <span class="o">=</span> <span class="n">GM</span><span class="p">(</span><span class="n">Pgraph</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">Rgraph</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">edge_match</span><span class="o">=</span><span class="n">em</span><span class="p">,</span> <span class="n">node_match</span><span class="o">=</span><span class="n">nm</span><span class="p">)</span>
+
+    <span class="n">gm</span><span class="o">.</span><span class="n">is_isomorphic</span><span class="p">()</span>
+
+    <span class="n">pindex</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">Pgraph</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">gm</span><span class="o">.</span><span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">pindex</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+    <span class="k">return</span> <span class="n">pindex</span></div>
+
+
+<div class="viewcode-block" id="slab_indices"><a class="viewcode-back" href="../../../../catkit.gen.analysis.html#catkit.gen.analysis.matching.slab_indices">[docs]</a><span class="k">def</span> <span class="nf">slab_indices</span><span class="p">(</span><span class="n">slab0</span><span class="p">,</span> <span class="n">slab1</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Match the indices of similar atoms between two slabs.&quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">slab0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">matching</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">ipos</span> <span class="o">=</span> <span class="n">slab0</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+    <span class="n">fpos</span> <span class="o">=</span> <span class="n">slab1</span><span class="o">.</span><span class="n">positions</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="n">get_distances</span><span class="p">(</span><span class="n">ipos</span><span class="p">,</span> <span class="n">fpos</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">slab0</span><span class="o">.</span><span class="n">cell</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">slab0</span><span class="o">.</span><span class="n">pbc</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="n">matching</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="n">sort</span><span class="p">(</span><span class="n">slab0</span><span class="p">,</span> <span class="n">matching</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">atoms</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Sun, 20 May 2018 11:00:57.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.4.3',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

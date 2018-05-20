@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>&lt;no title&gt; &mdash; CatKit 0.4.3 documentation</title>
+  <title>CatKit: Catalysis Kit &mdash; CatKit 0.4.3 documentation</title>
   
 
   
@@ -28,7 +28,8 @@
     <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="catkit" href="modules.html" /> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -81,10 +82,10 @@
               
             
             
-              <!-- Local TOC -->
-              <div class="local-toc"><ul class="simple">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">catkit</a></li>
 </ul>
-</div>
+
             
           
         </div>
@@ -128,13 +129,13 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>&lt;no title&gt;</li>
+      <li>CatKit: Catalysis Kit</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/index.org.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -147,40 +148,81 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <p>#+Title: CatKit: Catalysis Kit
-#+Author: SUNCAT Method Development Team
-#+EMAIL: <a class="reference external" href="mailto:jrboes&#37;&#52;&#48;stanford&#46;edu">jrboes<span>&#64;</span>stanford<span>&#46;</span>edu</a>
-#+OPTIONS: toc:nil
-#+LATEX_HEADER: setlength{parindent}{0em}</p>
-<p>#+SETUPFILE: /home/jboes/scripts/org-html-themes/setup/theme-bigblow.setup</p>
-<p>#+BEGIN_HTML
-&lt;a href=’<a class="reference external" href="https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'">https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master’</a>&gt;&lt;img src=’<a class="reference external" href="https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'/">https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master’/</a>&gt;&lt;/a&gt;
-&lt;a href=’<a class="reference external" href="https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master'">https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master’</a>&gt;&lt;img src=’<a class="reference external" href="https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master">https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master</a>’ alt=’Coverage Status’ /&gt;&lt;/a&gt;
-#+END_HTML</p>
+  <div class="section" id="catkit-catalysis-kit">
+<h1>CatKit: Catalysis Kit<a class="headerlink" href="#catkit-catalysis-kit" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master"><img alt="https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master" src="https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master" /></a>
+<a class="reference external image-reference" href="https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master"><img alt="https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master" src="https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master" /></a>
 <p>Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis research. The goal of the project is to provide a communal location for those interested in hosting such tools under a common banner. In doing so, we hope to provide the infrastructure to produce more advanced functionality based on modular components of individual contributors.</p>
-<ul class="simple">
-<li>Catalysis Kit</li>
+<img alt="_images/CuPd3_321-sites.png" class="align-center" src="_images/CuPd3_321-sites.png" />
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">catkit</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html">catkit package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#module-catkit.flow.fwespresso">catkit.flow.fwespresso module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#module-catkit.flow.fwio">catkit.flow.fwio module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#module-catkit.flow.hpcio">catkit.flow.hpcio module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#module-catkit.flow.qeio">catkit.flow.qeio module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.flow.html#module-catkit.flow">Module contents</a></li>
 </ul>
-<p>Catalysis Kit (CatKit) modules for setting up, manipulating, running, visualizing and analyzing atomistic simulations.  The code is freely available under the [[../LICENSE][GPLv3]].</p>
-<p>** CatGen: Catalysis Generator
-CatGen is an enumeration module designed to construct various catalytic structures.</p>
-<ul class="simple">
-<li>[X] Gas phase molecules</li>
-<li>[ ] Bulk structures</li>
-<li>[X] Surfaces structures</li>
-<li>[X] Adsorption sites</li>
-<li>[X] Catalytic structures</li>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="catkit.gen.analysis.html">catkit.gen.analysis package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.analysis.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.classifier">catkit.gen.analysis.classifier module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.matching">catkit.gen.analysis.matching module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.reconfiguration">catkit.gen.analysis.reconfiguration module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis">Module contents</a></li>
 </ul>
-<p>It also has functionality for enumeration of other systems relevant to the field of catalysis.</p>
-<ul class="simple">
-<li>[X] Reaction mechanisms</li>
-<li>[X] Reaction routes</li>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="catkit.gen.api.html">catkit.gen.api package</a><ul>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.api.html#submodules">Submodules</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.catmap">catkit.gen.api.catmap module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.rd_kit">catkit.gen.api.rd_kit module</a></li>
+<li class="toctree-l7"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api">Module contents</a></li>
 </ul>
-<p>** CatFlow: Catalysis Workflow
-CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.</p>
-<p>Currently, CatFlow’s functionality utilizes [[<a class="reference external" href="https://materialsproject.github.io/fireworks/][Fireworks">https://materialsproject.github.io/fireworks/][Fireworks</a>]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[<a class="reference external" href="http://suncat.stanford.edu/][SUNCAT">http://suncat.stanford.edu/][SUNCAT</a>]] group as Stanford.</p>
-<p>** CatHUB: Catalysis Hub
-Coming soon.</p>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.adsorption">catkit.gen.adsorption module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.geometry">catkit.gen.geometry module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.molecules">catkit.gen.molecules module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.pathways">catkit.gen.pathways module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.route">catkit.gen.route module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.surface">catkit.gen.surface module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen.utils">catkit.gen.utils module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.gen.html#module-catkit.gen">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="catkit.pawprint.html#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.pawprint.html#module-catkit.pawprint.generator">catkit.pawprint.generator module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.pawprint.html#module-catkit.pawprint.operations">catkit.pawprint.operations module</a></li>
+<li class="toctree-l5"><a class="reference internal" href="catkit.pawprint.html#module-catkit.pawprint">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
 
 
            </div>
@@ -188,13 +230,20 @@ Coming soon.</p>
           </div>
           <footer>
   
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="modules.html" class="btn btn-neutral float-right" title="catkit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 10:27:26.
+      Last updated on Sun, 20 May 2018 11:00:57.
 
     </p>
   </div>
