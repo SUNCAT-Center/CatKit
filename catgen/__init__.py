@@ -2,7 +2,7 @@
 # (see accompanying license files for details).
 """Catalysis Generator."""
 
-__version__ = '0.2.0'
+__version__ = '0.4.0'
 
 from collections import MutableMapping
 from ase.data import covalent_radii
@@ -13,7 +13,7 @@ class Defaults(MutableMapping, dict):
 
     def __init__(self):
         self.update({
-            'covalent_radii': covalent_radii
+            'covalent_radii': covalent_radii.copy()
         })
 
     def __setitem__(self, key, val):

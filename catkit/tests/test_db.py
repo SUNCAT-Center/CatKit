@@ -2,16 +2,22 @@ from catkit.db import FingerprintDB
 from ase.db import connect
 import networkx as nx
 import numpy as np
+import pkg_resources
 import json
 
-db = connect('data/molecules.db')
-with open('data/chemical-properties.json', 'r') as f:
+db_path = pkg_resources.resource_filename(
+    'catkit', 'data/molecules.db')
+db = connect(db_path)
+
+data_path = pkg_resources.resource_filename(
+    'catkit', 'data/chemical-properties.json')
+with open(data_path, 'r') as f:
     properties = json.load(f)
 
 
 def test_database():
     dstar = 8
-    with FingerprintDB('fingerprints.db') as fpd:
+    with FingerprintDB('tmp-fingerprints.db') as fpd:
         for i in range(dstar + 1):
             fpd.parameter_entry('Z{}'.format(i),
                                 'Atomic charge: depth {}'.format(i))

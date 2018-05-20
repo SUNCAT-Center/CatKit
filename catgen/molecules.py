@@ -4,7 +4,7 @@ from itertools import combinations
 import numpy as np
 
 radicals = np.ones(92)
-radicals[[6, 8]] = [4, 2]
+radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
 
 
 def bin_hydrogen(hydrogens=1, bins=1):
@@ -65,11 +65,13 @@ def get_topologies(chemistry, saturate=False):
         hcnt = hmax
 
     if n == 1:
-        atoms = Gratoms(elements)
+        atoms = Gratoms(elements, cell=[1, 1, 1])
         hatoms = hydrogenate(atoms, np.array([hcnt]))
         return [hatoms]
     elif n == 0:
         hatoms = Gratoms('H{}'.format(hcnt))
+        if hcnt == 2:
+            hatoms.graph.add_edge(0, 1, bonds=1)
         return [hatoms]
 
     ln = np.arange(n).sum()
@@ -96,7 +98,10 @@ def get_topologies(chemistry, saturate=False):
         if np.any(remaining_bonds < 0):
             continue
 
-        atoms = Gratoms(numbers=elements, edges=connectivity)
+        atoms = Gratoms(
+            numbers=elements,
+            edges=connectivity,
+            cell=[1, 1, 1])
 
         isomorph = False
         for G0 in backbones:

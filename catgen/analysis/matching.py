@@ -1,6 +1,8 @@
 import numpy as np
 import networkx as nx
 import networkx.algorithms.isomorphism as iso
+from ase.geometry import get_distances
+from ase.build import sort
 
 
 def reactant_indices(R1, R2, P, broken_bond):
@@ -43,3 +45,21 @@ def reactant_indices(R1, R2, P, broken_bond):
         pindex[k] = v
 
     return pindex
+
+
+def slab_indices(slab0, slab1, mask=None):
+    """Match the indices of similar atoms between two slabs."""
+    n = len(slab0)
+    if mask is None:
+        mask = np.arange(n)
+    matching = np.arange(n)
+
+    ipos = slab0.positions[mask]
+    fpos = slab1.positions[mask]
+
+    d = get_distances(ipos, fpos, cell=slab0.cell, pbc=slab0.pbc)[1]
+
+    matching[mask] = np.argmin(d, axis=1)
+    atoms = sort(slab0, matching)
+
+    return atoms

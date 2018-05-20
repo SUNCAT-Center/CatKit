@@ -1,0 +1,12 @@
+#+TITLE: Catalysis Kit
+#+LANGUAGE: en
+#+OPTIONS:   H:4 num:nil toc:2
+#+AUTHOR: Jacob Boes
+#+EMAIL: mailto:jacobboes@gmail.com
+
+#+SETUPFILE: /home/jboes/scripts/org-html-themes/setup/theme-bigblow.setup
+
+
+* Catalysis Kit
+
+Catalysis Kit (CatKit) modules for setting up, manipulating, running, visualizing and analyzing atomistic simulations.  The code is freely available under the [[../LICENSE][GPLv3]].

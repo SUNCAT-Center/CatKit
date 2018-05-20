@@ -177,9 +177,9 @@ class Classifier():
 
         return surf_atoms
 
-    def id_adsorbates(self, classifier='radial'):
+    def id_adsorbates(self, classifier='radial', return_atoms=False):
         """Return a list of Gratoms objects for each adsorbate
-        classified on a surface. Requires classification of slab
+        classified on a surface. Requires classification of adsorbate
         atoms.
 
         Parameters:
@@ -190,33 +190,42 @@ class Classifier():
             'radial':
             Use standard cutoff distances to identify neighboring atoms.
 
+        return_atoms : bool
+            Return Gratoms objects instead of adsorbate indices.
+
         Returns:
         --------
         adsorabtes : list (n,)
-            Gratoms objects of molecular adsorbates in unit cell.
+            Adsorbate indices of adsorbates in unit cell.
         """
         atoms = self.atoms.copy()
 
         # Remove the slab atoms
-        slab_atoms = self.slab_atoms
-        if slab_atoms is None:
-            slab_atoms = self.id_slab_atoms()
-        del atoms[slab_atoms]
+        ads_atoms = self.ads_atoms
+        if ads_atoms is None:
+            ads_atoms = self.id_adsorbate_atoms()
 
         if classifier == 'radial':
             con = utils.get_cutoff_neighbors(atoms)
-            G = nx.Graph(con)
-            SG = list(nx.connected_component_subgraphs(G))
+            ads_con = con[ads_atoms][:, ads_atoms]
+            G = nx.Graph()
+            G.add_nodes_from(ads_atoms)
+            edges = utils.connectivity_to_edges(ads_con, indices=ads_atoms)
+            G.add_weighted_edges_from(edges, weight='bonds')
+            SG = nx.connected_component_subgraphs(G)
 
             adsorabtes = []
             for sg in SG:
                 nodes = list(sg.nodes)
-                edges = list(sg.edges)
-                ads = Gratoms(
-                    numbers=atoms.numbers[nodes],
-                    positions=atoms.positions[nodes],
-                    edges=edges)
-                ads.center(vacuum=5)
+                if return_atoms:
+                    edges = list(sg.edges)
+                    ads = Gratoms(
+                        numbers=atoms.numbers[nodes],
+                        positions=atoms.positions[nodes],
+                        edges=edges)
+                    ads.center(vacuum=5)
+                else:
+                    ads = nodes
                 adsorabtes += [ads]
 
         return adsorabtes

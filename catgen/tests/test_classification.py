@@ -2,10 +2,13 @@ import matplotlib
 matplotlib.use('Agg')
 from ase.io import read
 from catgen.analysis import Classifier
+import pkg_resources
 
 
 def test_classifier():
-    atoms = read('data/molecules.db')
+    data_path = pkg_resources.resource_filename(
+        'catkit', 'data/molecules.db')
+    atoms = read(data_path)
 
     # This needs to be made rigorous, but also to be converted to
     # Gratoms automatically.

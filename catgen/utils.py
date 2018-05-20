@@ -268,9 +268,12 @@ def get_primitive_cell(atoms, tol=1e-8):
     numbers = atoms.get_atomic_numbers()
 
     cell = (lattice, positions, numbers)
+    cell = spglib.find_primitive(cell, symprec=tol)
 
-    _lattice, _positions, _numbers = spglib.find_primitive(cell, symprec=tol)
+    if cell is None:
+        return None
 
+    _lattice, _positions, _numbers = cell
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
     atoms.set_scaled_positions(_positions)
 
@@ -368,15 +371,18 @@ def plane_normal(xyz):
     return vec
 
 
-def connectivity_to_edges(connectivity):
+def connectivity_to_edges(connectivity, indices=None):
     """Convert a Numpy connectivity matrix into a list of
     NetworkX compatible edges
     """
+    if indices is None:
+        indices = np.arange(connectivity.shape[0], dtype=int)
+
     edges = []
     for i, c in enumerate(connectivity):
         lower_diagonal = c[:i]
         for j, v in enumerate(lower_diagonal):
-            edges += [(int(i), int(j), 1)] * int(v)
+            edges += [(indices[i], indices[j], 1)] * int(v)
 
     return edges
 
@@ -520,3 +526,31 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
     xyz_coords = np.delete(xyz_coords, xy_copies, axis=0)
 
     return xyz_coords
+
+
+def parse_slice(slice_name):
+    """Return a correctly parsed slice from input of
+    varying types.
+    """
+    if isinstance(slice_name, (slice)):
+        _slice = slice_name
+
+    elif isinstance(slice_name, type(None)):
+        _slice = slice(None)
+
+    elif isinstance(slice_name, int):
+        i = int(slice_name)
+        _slice = slice(i, i + 1)
+
+    elif isinstance(slice_name, str):
+        if slice_name.isdigit():
+            i = int(slice_name)
+            _slice = slice(i, i + 1)
+
+        else:
+            split = slice_name.split(':')
+            split = [int(_) if _.lstrip('-').isdigit()
+                     else None for _ in split]
+            _slice = slice(*split)
+
+    return _slice

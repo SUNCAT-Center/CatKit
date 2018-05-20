@@ -1,4 +1,5 @@
 from . import utils
+from . import geometry
 from scipy.spatial import Delaunay
 from scipy.linalg import circulant
 from itertools import product
@@ -237,7 +238,7 @@ class AdsorptionSites():
         periodic = periodic_match.copy()[self.screen]
 
         for p in periodic:
-            matched = matching_sites(self.frac_coords[p], coords)
+            matched = geometry.matching_sites(self.frac_coords[p], coords)
             periodic_match[matched] = p
 
         return periodic_match
@@ -258,7 +259,9 @@ class AdsorptionSites():
         sites : dict of lists
             Dictionary of sites containing index of site
         """
-        if self._symmetric_sites is None:
+        symmetry_match = self._symmetric_sites
+
+        if symmetry_match is None:
             symmetry = utils.get_symmetry(self.slab, tol=self.tol)
             rotations = np.swapaxes(symmetry['rotations'], 1, 2)
             translations = symmetry['translations']
@@ -282,13 +285,11 @@ class AdsorptionSites():
 
             self._symmetric_sites = symmetry_match
 
-        symmetry_match = self._symmetric_sites
-
         if screen:
             periodic = self.get_periodic_sites()
             symmetry_match = symmetry_match[periodic]
-            if unique:
-                return np.unique(symmetry_match)
+        if unique:
+            return np.unique(symmetry_match)
 
         else:
             return symmetry_match
@@ -401,7 +402,7 @@ class AdsorptionSites():
         ax.axis('off')
 
         if savefile:
-            plt.savefig(savefile, transparent=True)
+            plt.savefig(savefile)
         else:
             plt.show()
 
@@ -422,47 +423,6 @@ class Builder(AdsorptionSites):
         string += 'unique adsorption edges: {}'.format(len(edges))
 
         return string
-
-    def ex_sites(self, index, select='inner', cutoff=0):
-        """Get site indices inside or outside of a cutoff radii from a
-        provided periodic site index. If two sites are provided, an
-        option to return the mutually inclusive points is also available.
-        """
-        per = self.get_periodic_sites(False)
-        sym = self.get_symmetric_sites()
-        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
-        coords = self.coordinates[:, :2]
-
-        if isinstance(index, int):
-            index = [index]
-
-        if not cutoff:
-            for i in per[index]:
-                sd = np.where(edges == i)[0]
-                select_coords = coords[edges[sd]]
-                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
-                cutoff = max(d.max(), cutoff)
-        cutoff += self.tol
-
-        diff = coords[:, None] - coords[sym]
-        norm = np.linalg.norm(diff, axis=2)
-        neighbors = np.array(np.where(norm < cutoff))
-
-        neighbors = []
-        for i in index:
-            diff = coords[:, None] - coords[per[i]]
-            norm = np.linalg.norm(diff, axis=2)
-            if select == 'mutual' and len(index) == 2:
-                neighbors += [np.where(norm < cutoff)[0].tolist()]
-            else:
-                neighbors += np.where(norm < cutoff)[0].tolist()
-
-        if select == 'inner':
-            return per[neighbors]
-        elif select == 'outer':
-            return np.setdiff1d(per, per[neighbors])
-        elif select == 'mutual':
-            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
 
     def add_adsorbates(self, adsorbates, indices):
         """ """
@@ -729,39 +689,51 @@ class Builder(AdsorptionSites):
         else:
             raise ValueError('Too many bonded atoms to position correctly.')
 
+    def ex_sites(self, index, select='inner', cutoff=0):
+        """Get site indices inside or outside of a cutoff radii from a
+        provided periodic site index. If two sites are provided, an
+        option to return the mutually inclusive points is also available.
+        """
+        per = self.get_periodic_sites(False)
+        sym = self.get_symmetric_sites()
+        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
+        coords = self.coordinates[:, :2]
 
-def matching_sites(position, comparators, tol=1e-8):
-    """Get the indices of all points in a comparator list that are
-    equal to a given position (with a tolerance), taking into
-    account periodic boundary conditions (adaptation from Pymatgen).
+        if isinstance(index, int):
+            index = [index]
 
-    Parameters:
-    -----------
-    position : list (3,)
-        Fractional coordinate to compare to list.
-    comparators : list (3, n)
-        Fractional coordinates to compare against.
-    tol : float
-        Absolute tolerance.
+        if not cutoff:
+            for i in per[index]:
+                sd = np.where(edges == i)[0]
+                select_coords = coords[edges[sd]]
+                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
+                cutoff = max(d.max(), cutoff)
+        cutoff += self.tol
 
-    Returns:
-    --------
-    match : list (n,)
-        Indices of matches.
-    """
-    if len(comparators) == 0:
-        return []
+        diff = coords[:, None] - coords[sym]
+        norm = np.linalg.norm(diff, axis=2)
+        neighbors = np.array(np.where(norm < cutoff))
 
-    fdist = comparators - position
-    fdist -= np.round(fdist)
-    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+        neighbors = []
+        for i in index:
+            diff = coords[:, None] - coords[per[i]]
+            norm = np.linalg.norm(diff, axis=2)
+            if select == 'mutual' and len(index) == 2:
+                neighbors += [np.where(norm < cutoff)[0].tolist()]
+            else:
+                neighbors += np.where(norm < cutoff)[0].tolist()
 
-    return match
+        if select == 'inner':
+            return per[neighbors]
+        elif select == 'outer':
+            return np.setdiff1d(per, per[neighbors])
+        elif select == 'mutual':
+            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
 
 
 def get_adsorption_sites(slab,
+                         surface_atoms=None,
                          symmetry_reduced=True,
-                         adsorption_vectors=False,
                          tol=1e-5):
     """Get the adsorption sites of a slab as defined by surface
     symmetries of the surface atoms.
@@ -771,6 +743,8 @@ def get_adsorption_sites(slab,
     slab : atoms object
         The slab to find adsorption sites for. Must have surface
         atoms defined.
+    surface_atoms : list (n,)
+        List of the surface atom indices.
     symmetry_reduced : bool
         Return the symmetrically unique sites only.
     adsorption_vectors : bool
@@ -782,9 +756,12 @@ def get_adsorption_sites(slab,
         Cartesian coordinates of activate sites.
     connectivity : ndarray (n,)
         Number of bonds formed for a given adsorbate.
-    vectors : ndarray (n, 3)
-        Vector associated with minimum surface interaction.
+    symmetry_index : ndarray(n,)
+        Arbitrary indices of symmetric sites.
     """
+    if surface_atoms is not None:
+        slab.set_surface_atoms(surface_atoms)
+
     sites = AdsorptionSites(slab)
 
     if symmetry_reduced:
@@ -795,8 +772,11 @@ def get_adsorption_sites(slab,
     coordinates = sites.coordinates[s]
     connectivity = sites.connectivity[s]
 
-    if adsorption_vectors:
-        vectors = sites.get_adsorption_vectors()[s]
-        return coordinates, connectivity, vectors
+    if symmetry_reduced:
+        return coordinates, connectivity
 
-    return coordinates, connectivity
+    symmetries = sites.get_symmetric_sites(unique=False)
+    unique, counts = np.unique(symmetries, return_counts=True)
+    symmetry_index = np.arange(len(unique)).repeat(counts)
+
+    return coordinates, connectivity, symmetry_index
