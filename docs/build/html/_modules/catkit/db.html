@@ -619,7 +619,8 @@
 <div class="viewcode-block" id="FingerprintDB.parameter_entry"><a class="viewcode-back" href="../../catkit.html#catkit.db.FingerprintDB.parameter_entry">[docs]</a>    <span class="k">def</span> <span class="nf">parameter_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; A function for entering unique parameters into the database.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            symbol (str): A unique symbol the entry can be referenced</span>
 <span class="sd">            by. If None, the symbol will be the ID of the parameter</span>
 <span class="sd">            as a string.</span>
@@ -647,7 +648,8 @@
 <span class="sd">        parameter IDs for a set of provided symbols. If no selection</span>
 <span class="sd">        is provided, return all symbols.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            selection (list): List of symbols in parameters</span>
 <span class="sd">            table to be selected.</span>
 <span class="sd">            display (bool): If True, print parameter descriptions.</span>
@@ -679,7 +681,8 @@
         <span class="sd">&quot;&quot;&quot; Enters a fingerprint value to the database for a</span>
 <span class="sd">        given ase and parameter ID.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            ase_id (int): The ase unique ID associated with an atoms object</span>
 <span class="sd">            in the database.</span>
 <span class="sd">            param_id (int or str): The parameter ID or symbol associated</span>
@@ -708,13 +711,15 @@
         <span class="sd">&quot;&quot;&quot; Get the array of values associated with the provided parameters</span>
 <span class="sd">        for each ase_id provided.</span>
 
-<span class="sd">        Args:</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">            ase_id (list): The ase ID(s) associated with an atoms object in</span>
 <span class="sd">            the database.</span>
 <span class="sd">            params (list): List of symbols or int in parameters table to be</span>
 <span class="sd">            selected.</span>
 
-<span class="sd">        Returns:</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">            n-d array: An array of values associated with the given</span>
 <span class="sd">            parameters (a fingerprint) for each ase_id.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -763,7 +768,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

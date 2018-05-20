@@ -8,8 +8,8 @@ def get_reaction_routes(nu, sigma, empty_routes=True, independent_only=False):
     """Returns an array of reaction routes. Returns all full
     reaction routes by default.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     nu : ndarray (n, m)
         The stoichiometric matrix of n species and m mechanisms.
     sigma : ndarray (m, j)
@@ -20,8 +20,8 @@ def get_reaction_routes(nu, sigma, empty_routes=True, independent_only=False):
         Return only a linearly independent set of full reaction routes.
         Can take less time.
 
-    Returns:
-    --------
+    Returns
+    -------
     FR : ndarray (m, k)
         Enumerated full reaction routes.
     ER : ndarray (m, l)
@@ -95,15 +95,15 @@ def get_heppel_sellers(nu, terminal):
     """Returns an array of linearly independent reaction routes
     as described by Heppel-Sellers reaction route enumeration.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     nu : ndarray (n, m)
         The stoichiometric matrix of n species and m mechanisms.
     terminal : ndarray (j,)
         Indices of the m species to be considered as terminal
 
-    Returns:
-    --------
+    Returns
+    -------
     sigma : ndarray (m, k)
         Linearly independent set of Heppel-Sellers reaction routes.
     """
@@ -182,8 +182,8 @@ def get_response_reactions(epsilon, selection=None, species=False):
     """Returns an array of possible response reaction routes for a given
     chemical formula array.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     epsilon : ndarray (n, m)
         Chemical formula array of n elements by m molecular species.
     selection : ndarray (j,)
@@ -191,8 +191,8 @@ def get_response_reactions(epsilon, selection=None, species=False):
     species : bool
         Return the indices of the chemical species used.
 
-    Returns:
-    --------
+    Returns
+    -------
     RER : ndarray (m, k)
         Possible response reaction routes.
     index : ndarray (j, k)

@@ -193,13 +193,6 @@
 <li class="toctree-l4"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis">Module contents</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="catkit.gen.api.html">catkit.gen.api package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.catmap">catkit.gen.api.catmap module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.rd_kit">catkit.gen.api.rd_kit module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api">Module contents</a></li>
-</ul>
-</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.gen.html#submodules">Submodules</a></li>
@@ -230,52 +223,61 @@
 <span id="catkit-build-module"></span><h2>catkit.build module<a class="headerlink" href="#module-catkit.build" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="catkit.build.molecule">
-<code class="descclassname">catkit.build.</code><code class="descname">molecule</code><span class="sig-paren">(</span><em>species</em>, <em>topology=None</em>, <em>vacuum=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/build.html#molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.molecule" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.build.</code><code class="descname">molecule</code><span class="sig-paren">(</span><em>species</em>, <em>topology=None</em>, <em>vacuum=0</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.build.molecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return gas-phase molecule structures based on species and
 topology.</p>
-<dl class="docutils">
-<dt>species <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>The chemical symbols to construct a molecule from.</dd>
-<dt>topology <span class="classifier-delimiter">:</span> <span class="classifier">int, str, or slice</span></dt>
-<dd>The indices for the distinct topology produced by the generator.</dd>
-<dt>vacuum <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Angstroms of vacuum to pad the molecule with.</dd>
-</dl>
-<dl class="docutils">
-<dt>images <span class="classifier-delimiter">:</span> <span class="classifier">list of objects</span></dt>
-<dd>3D structures of the requested chemical species and topologies.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>species</strong> (<em>str</em>) – The chemical symbols to construct a molecule from.</li>
+<li><strong>topology</strong> (<em>int</em><em>, </em><em>str</em><em>, or </em><em>slice</em>) – The indices for the distinct topology produced by the generator.</li>
+<li><strong>vacuum</strong> (<em>float</em>) – Angstroms of vacuum to pad the molecule with.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>images</strong> – 3D structures of the requested chemical species and topologies.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of objects</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="catkit.build.surface">
-<code class="descclassname">catkit.build.</code><code class="descname">surface</code><span class="sig-paren">(</span><em>elements</em>, <em>size</em>, <em>crystal='fcc'</em>, <em>index=(1</em>, <em>1</em>, <em>1)</em>, <em>fixed=0</em>, <em>vacuum=10</em>, <em>root=None</em>, <em>primitive=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/build.html#surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.surface" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.build.</code><code class="descname">surface</code><span class="sig-paren">(</span><em>elements</em>, <em>size</em>, <em>crystal='fcc'</em>, <em>index=(1</em>, <em>1</em>, <em>1)</em>, <em>fixed=0</em>, <em>vacuum=10</em>, <em>root=None</em>, <em>primitive=True</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.build.surface" title="Permalink to this definition">¶</a></dt>
 <dd><p>A helper function to return the surface associated with a
 given set of input parameters to the general surface generator.</p>
-<dl class="docutils">
-<dt>elements <span class="classifier-delimiter">:</span> <span class="classifier">str or object</span></dt>
-<dd>The atomic symbol to be passed to the as bulk builder function
-or an atoms object representing the bulk structure to use.</dd>
-<dt>size <span class="classifier-delimiter">:</span> <span class="classifier">list (3,)</span></dt>
-<dd>Number of time to expand the x, y, and z primitive cell.</dd>
-<dt>crystal <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>The bulk crystal structure to pass to the ase bulk builder.</dd>
-<dt>index <span class="classifier-delimiter">:</span> <span class="classifier">list (3,) or (4,)</span></dt>
-<dd>The miller index to cleave the surface structure from.</dd>
-<dt>fixed <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of layers to constrain.</dd>
-<dt>vacuum <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Angstroms of vacuum to add to the unit cell.</dd>
-<dt>root <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>If not None, attempt to produce a root unit cell with
-a primitive lattice length multiple this root.</dd>
-<dt>primitive <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Perform an spglib reduction of the slabs unit cell.</dd>
-</dl>
-<dl class="docutils">
-<dt>slab <span class="classifier-delimiter">:</span> <span class="classifier">object</span></dt>
-<dd>Return a slab generated from the specified bulk structure.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>elements</strong> (<em>str</em><em> or </em><em>object</em>) – The atomic symbol to be passed to the as bulk builder function
+or an atoms object representing the bulk structure to use.</li>
+<li><strong>size</strong> (<em>list</em><em> (</em><em>3</em><em>,</em><em>)</em>) – Number of time to expand the x, y, and z primitive cell.</li>
+<li><strong>crystal</strong> (<em>str</em>) – The bulk crystal structure to pass to the ase bulk builder.</li>
+<li><strong>index</strong> (<em>list</em><em> (</em><em>3</em><em>,</em><em>) or </em><em>(</em><em>4</em><em>,</em><em>)</em>) – The miller index to cleave the surface structure from.</li>
+<li><strong>fixed</strong> (<em>int</em>) – Number of layers to constrain.</li>
+<li><strong>vacuum</strong> (<em>float</em>) – Angstroms of vacuum to add to the unit cell.</li>
+<li><strong>root</strong> (<em>int</em>) – If not None, attempt to produce a root unit cell with
+a primitive lattice length multiple this root.</li>
+<li><strong>primitive</strong> (<em>bool</em>) – Perform an spglib reduction of the slabs unit cell.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slab</strong> – Return a slab generated from the specified bulk structure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">object</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -283,7 +285,7 @@ a primitive lattice length multiple this root.</dd>
 <span id="catkit-db-module"></span><h2>catkit.db module<a class="headerlink" href="#module-catkit.db" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="catkit.db.Atom">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom</code><span class="sig-paren">(</span><em>structure</em>, <em>number</em>, <em>coordinates</em>, <em>constraints</em>, <em>magmom</em>, <em>charge</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Atom" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom</code><span class="sig-paren">(</span><em>structure</em>, <em>number</em>, <em>coordinates</em>, <em>constraints</em>, <em>magmom</em>, <em>charge</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Atom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Atom.atom_result">
@@ -359,7 +361,7 @@ a primitive lattice length multiple this root.</dd>
 
 <dl class="class">
 <dt id="catkit.db.Atom_Result">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>atom</em>, <em>forces=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Atom_Result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Atom_Result" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>atom</em>, <em>forces=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Atom_Result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Atom_Result.atom">
@@ -405,7 +407,7 @@ a primitive lattice length multiple this root.</dd>
 
 <dl class="class">
 <dt id="catkit.db.Calculator">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Calculator</code><span class="sig-paren">(</span><em>name</em>, <em>xc=None</em>, <em>kpoints=None</em>, <em>energy_cutoff=None</em>, <em>parameters=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Calculator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Calculator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Calculator</code><span class="sig-paren">(</span><em>name</em>, <em>xc=None</em>, <em>kpoints=None</em>, <em>energy_cutoff=None</em>, <em>parameters=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Calculator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Calculator.atom_result">
@@ -466,8 +468,8 @@ a primitive lattice length multiple this root.</dd>
 
 <dl class="class">
 <dt id="catkit.db.Connect">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Connect</code><span class="sig-paren">(</span><em>engine='sqlite:///example.db'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Connect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Connect</code><span class="sig-paren">(</span><em>engine='sqlite:///example.db'</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A class for accessing a temporary SQLite database. This
 function works as a context manager and should be used as follows:</p>
 <dl class="docutils">
@@ -478,14 +480,14 @@ function works as a context manager and should be used as follows:</p>
 class is referenced.</p>
 <dl class="method">
 <dt id="catkit.db.Connect.add_entry">
-<code class="descname">add_entry</code><span class="sig-paren">(</span><em>images</em>, <em>search_keys=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Connect.add_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Connect.add_entry" title="Permalink to this definition">¶</a></dt>
+<code class="descname">add_entry</code><span class="sig-paren">(</span><em>images</em>, <em>search_keys=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Connect.add_entry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="catkit.db.Element">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Element</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Element" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Element</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Element" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Element.atom">
@@ -516,7 +518,7 @@ class is referenced.</p>
 
 <dl class="class">
 <dt id="catkit.db.Entry">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Entry</code><span class="sig-paren">(</span><em>structure</em>, <em>calculator</em>, <em>trajectory</em>, <em>natoms</em>, <em>energy</em>, <em>fmax</em>, <em>smax=None</em>, <em>search_keys=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Entry" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Entry</code><span class="sig-paren">(</span><em>structure</em>, <em>calculator</em>, <em>trajectory</em>, <em>natoms</em>, <em>energy</em>, <em>fmax</em>, <em>smax=None</em>, <em>search_keys=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Entry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Entry.calculator">
@@ -577,8 +579,8 @@ class is referenced.</p>
 
 <dl class="class">
 <dt id="catkit.db.FingerprintDB">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">FingerprintDB</code><span class="sig-paren">(</span><em>db_name='fingerprints.db'</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">FingerprintDB</code><span class="sig-paren">(</span><em>db_name='fingerprints.db'</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>A class for accessing a temporary SQLite database. This
 function works as a context manager and should be used as follows:</p>
 <dl class="docutils">
@@ -590,15 +592,22 @@ or access an existing one. Upon exiting the indentation, the
 changes to the database will be automatically committed.</p>
 <p>The __init__ function is automatically called when the
 class is referenced.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>db_name (str): Name of the database fileto access. Will
-connect to ‘fingerprints.db’ by default.
-verbose (bool): Will print additional information.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>db_name</strong> (<em>str</em>) – Name of the database fileto access. Will</li>
+<li><strong>to 'fingerprints.db' by default.</strong> (<em>connect</em>) – </li>
+<li><strong>verbose</strong> (<em>bool</em>) – Will print additional information.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.create_table">
-<code class="descname">create_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.create_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.create_table" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.create_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the database table framework used in SQLite.
 This includes 3 tables: images, parameters, and fingerprints.</p>
 <p>The images table currently stores ase_id information and
@@ -612,84 +621,131 @@ along with a float value for each. The ID pair must be unique.</p>
 
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.fingerprint_entry">
-<code class="descname">fingerprint_entry</code><span class="sig-paren">(</span><em>ase_id</em>, <em>param_id</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.fingerprint_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.fingerprint_entry" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fingerprint_entry</code><span class="sig-paren">(</span><em>ase_id</em>, <em>param_id</em>, <em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.fingerprint_entry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enters a fingerprint value to the database for a
 given ase and parameter ID.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ase_id (int): The ase unique ID associated with an atoms object
-in the database.
-param_id (int or str): The parameter ID or symbol associated
-with and entry in the paramters table.
-value (float): The value of the parameter for the atoms object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>(</strong><strong>int</strong><strong>)</strong> (<em>ase_id</em>) – </li>
+<li><strong>the database.</strong> (<em>in</em>) – </li>
+<li><strong>(</strong><strong>int</strong><strong> or </strong><strong>str</strong><strong>)</strong> (<em>param_id</em>) – </li>
+<li><strong>and entry in the paramters table.</strong> (<em>with</em>) – </li>
+<li><strong>(</strong><strong>float</strong><strong>)</strong> (<em>value</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.get_fingerprints">
-<code class="descname">get_fingerprints</code><span class="sig-paren">(</span><em>ase_ids=None</em>, <em>params=[]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.get_fingerprints"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.get_fingerprints" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_fingerprints</code><span class="sig-paren">(</span><em>ase_ids=None</em>, <em>params=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.get_fingerprints" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the array of values associated with the provided parameters
 for each ase_id provided.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>ase_id (list): The ase ID(s) associated with an atoms object in
-the database.
-params (list): List of symbols or int in parameters table to be
-selected.</dd>
-<dt>Returns:</dt>
-<dd>n-d array: An array of values associated with the given
-parameters (a fingerprint) for each ase_id.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>(</strong><strong>list</strong><strong>)</strong> (<em>params</em>) – </li>
+<li><strong>database.</strong> (<em>the</em>) – </li>
+<li><strong>(</strong><strong>list</strong><strong>)</strong> – </li>
+<li><strong>selected.</strong> – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>n-d array</strong> (<em>An array of values associated with the given</em>)</li>
+<li><em>parameters (a fingerprint) for each ase_id.</em></li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.get_parameters">
-<code class="descname">get_parameters</code><span class="sig-paren">(</span><em>selection=None</em>, <em>display=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.get_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.get_parameters" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_parameters</code><span class="sig-paren">(</span><em>selection=None</em>, <em>display=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.get_parameters" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get an array of integer values which correspond to the
 parameter IDs for a set of provided symbols. If no selection
 is provided, return all symbols.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>selection (list): List of symbols in parameters
-table to be selected.
-display (bool): If True, print parameter descriptions.</dd>
-<dt>Returns:</dt>
-<dd>1-d array: Return the integer values of selected parameters.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>(</strong><strong>list</strong><strong>)</strong> (<em>selection</em>) – </li>
+<li><strong>to be selected.</strong> (<em>table</em>) – </li>
+<li><strong>(</strong><strong>bool</strong><strong>)</strong> (<em>display</em>) – </li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Return the integer values of selected parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">1-d array</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.image_entry">
-<code class="descname">image_entry</code><span class="sig-paren">(</span><em>d</em>, <em>identity=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.image_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.image_entry" title="Permalink to this definition">¶</a></dt>
+<code class="descname">image_entry</code><span class="sig-paren">(</span><em>d</em>, <em>identity=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.image_entry" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enters a single ase-db image into the fingerprint database.</p>
 <p>This table can be expanded to contain atoms objects in the future.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>d (object): An ase-db object which can be parsed.
-identity (str): An identifier of the users choice.</dd>
-<dt>Returns:</dt>
-<dd>int: The ase ID colleted for the ase-db object.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>d</strong> (<em>object</em>) – An ase-db object which can be parsed.</li>
+<li><strong>identity</strong> (<em>str</em>) – An identifier of the users choice.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The ase ID colleted for the ase-db object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.db.FingerprintDB.parameter_entry">
-<code class="descname">parameter_entry</code><span class="sig-paren">(</span><em>symbol=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#FingerprintDB.parameter_entry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.FingerprintDB.parameter_entry" title="Permalink to this definition">¶</a></dt>
+<code class="descname">parameter_entry</code><span class="sig-paren">(</span><em>symbol=None</em>, <em>description=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB.parameter_entry" title="Permalink to this definition">¶</a></dt>
 <dd><p>A function for entering unique parameters into the database.</p>
-<dl class="docutils">
-<dt>Args:</dt>
-<dd>symbol (str): A unique symbol the entry can be referenced
-by. If None, the symbol will be the ID of the parameter
-as a string.
-description (str): A description of the parameter.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>(</strong><strong>str</strong><strong>)</strong> (<em>description</em>) – </li>
+<li><strong>If None</strong><strong>, </strong><strong>the symbol will be the ID of the parameter</strong> (<em>by.</em>) – </li>
+<li><strong>a string.</strong> (<em>as</em>) – </li>
+<li><strong>(</strong><strong>str</strong><strong>)</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
 <dt id="catkit.db.Structure">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>cell</em>, <em>pbc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Structure" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>cell</em>, <em>pbc</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Structure" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Structure.atoms">
@@ -765,7 +821,7 @@ description (str): A description of the parameter.</dd>
 
 <dl class="class">
 <dt id="catkit.db.Structure_Result">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>structure</em>, <em>energy</em>, <em>stress=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Structure_Result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Structure_Result" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>structure</em>, <em>energy</em>, <em>stress=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Structure_Result" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Structure_Result.calcualtor_id">
@@ -831,7 +887,7 @@ description (str): A description of the parameter.</dd>
 
 <dl class="class">
 <dt id="catkit.db.Trajectories">
-<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Trajectories</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/db.html#Trajectories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.db.Trajectories" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Trajectories</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Trajectories" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <p>A simple constructor that allows initialization from kwargs.</p>
 <p>Sets attributes on the constructed instance using the names and
@@ -861,7 +917,7 @@ for example, any mapped columns or relationships.</p>
 <span id="catkit-gratoms-module"></span><h2>catkit.gratoms module<a class="headerlink" href="#module-catkit.gratoms" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="catkit.gratoms.Gratoms">
-<em class="property">class </em><code class="descclassname">catkit.gratoms.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.gratoms.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ase.atoms.Atoms</span></code></p>
 <p>Graph based atoms object.</p>
 <p>An Integrated class for an ASE atoms object with a corresponding
@@ -878,7 +934,7 @@ Networkx Graph.</p>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.copy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a copy.</p>
 </dd></dl>
 
@@ -894,26 +950,26 @@ Networkx Graph.</p>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.get_chemical_tags">
-<code class="descname">get_chemical_tags</code><span class="sig-paren">(</span><em>rank=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_chemical_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.get_chemical_tags" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_chemical_tags</code><span class="sig-paren">(</span><em>rank=2</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.get_chemical_tags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a hash descriptive of the chemical formula (rank 0)
 or include bonding (rank 1).</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.get_neighbor_symbols">
-<code class="descname">get_neighbor_symbols</code><span class="sig-paren">(</span><em>u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_neighbor_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.get_neighbor_symbols" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_neighbor_symbols</code><span class="sig-paren">(</span><em>u</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.get_neighbor_symbols" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get chemical symbols for neighboring atoms of u.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.get_surface_atoms">
-<code class="descname">get_surface_atoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.get_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_surface_atoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.get_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return surface atoms.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.get_unsaturated_nodes">
-<code class="descname">get_unsaturated_nodes</code><span class="sig-paren">(</span><em>screen=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_unsaturated_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.get_unsaturated_nodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_unsaturated_nodes</code><span class="sig-paren">(</span><em>screen=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.get_unsaturated_nodes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -923,7 +979,7 @@ or include bonding (rank 1).</p>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.is_isomorph">
-<code class="descname">is_isomorph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.is_isomorph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.is_isomorph" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_isomorph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.is_isomorph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if isomorphic by bond count and atomic number.</p>
 </dd></dl>
 
@@ -934,7 +990,7 @@ or include bonding (rank 1).</p>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.set_surface_atoms">
-<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.set_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign surface atoms.</p>
 </dd></dl>
 
@@ -945,7 +1001,7 @@ or include bonding (rank 1).</p>
 <span id="catkit-learn-module"></span><h2>catkit.learn module<a class="headerlink" href="#module-catkit.learn" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="catkit.learn.online_learning">
-<code class="descclassname">catkit.learn.</code><code class="descname">online_learning</code><span class="sig-paren">(</span><em>X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/learn.html#online_learning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.learn.online_learning" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.learn.</code><code class="descname">online_learning</code><span class="sig-paren">(</span><em>X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.learn.online_learning" title="Permalink to this definition">¶</a></dt>
 <dd><p>A simple utility for performing online learning. The main
 components required are a regression method and a scoring
 technique.</p>
@@ -956,31 +1012,34 @@ These need to be made modular.</p>
 
 <dl class="function">
 <dt id="catkit.learn.optimizer">
-<code class="descclassname">catkit.learn.</code><code class="descname">optimizer</code><span class="sig-paren">(</span><em>obj_func</em>, <em>initial_theta</em>, <em>bounds</em>, <em>gradient=True</em>, <em>minimizer='L-BFGS-B'</em>, <em>hopping=0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/learn.html#optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.learn.optimizer" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.learn.</code><code class="descname">optimizer</code><span class="sig-paren">(</span><em>obj_func</em>, <em>initial_theta</em>, <em>bounds</em>, <em>gradient=True</em>, <em>minimizer='L-BFGS-B'</em>, <em>hopping=0</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.learn.optimizer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Substitute optimizer in scikit-learn Gaussian Process function.</p>
 <p>Note ‘L-BFGS-B’ is equivalent to the standard optimizer used in
 scikit-learn. This function allows for more direct control over the
 arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/reference/optimize.html">https://docs.scipy.org/doc/scipy/reference/optimize.html</a></p>
-<dl class="docutils">
-<dt>obj_func <span class="classifier-delimiter">:</span> <span class="classifier">function</span></dt>
-<dd>scikit-learn objective function.</dd>
-<dt>initial_theta <span class="classifier-delimiter">:</span> <span class="classifier">array (n,)</span></dt>
-<dd>Hyperparameters to be optimized against.</dd>
-<dt>bounds <span class="classifier-delimiter">:</span> <span class="classifier">list of tuples (n, 2)</span></dt>
-<dd>Lower and upper bounds for each hyper parameter.</dd>
-<dt>gradient <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Include the gradient for the optimization function.</dd>
-<dt>minimizer <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>A scipy minimization method.</dd>
-<dt>hopping <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Perform a number of basin hopping steps.</dd>
-</dl>
-<dl class="docutils">
-<dt>theta_opt <span class="classifier-delimiter">:</span> <span class="classifier">list (n,)</span></dt>
-<dd>Optimized hyperparameters.</dd>
-<dt>func_min <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Value of the minimized objective function.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj_func</strong> (<em>function</em>) – scikit-learn objective function.</li>
+<li><strong>initial_theta</strong> (<em>array</em><em> (</em><em>n</em><em>,</em><em>)</em>) – Hyperparameters to be optimized against.</li>
+<li><strong>bounds</strong> (<em>list of tuples</em><em> (</em><em>n</em><em>, </em><em>2</em><em>)</em>) – Lower and upper bounds for each hyper parameter.</li>
+<li><strong>gradient</strong> (<em>bool</em>) – Include the gradient for the optimization function.</li>
+<li><strong>minimizer</strong> (<em>str</em>) – A scipy minimization method.</li>
+<li><strong>hopping</strong> (<em>int</em>) – Perform a number of basin hopping steps.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>theta_opt</strong> (<em>list (n,)</em>) – Optimized hyperparameters.</li>
+<li><strong>func_min</strong> (<em>float</em>) – Value of the minimized objective function.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -989,7 +1048,7 @@ arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/
 <p>Catalysis Kit.</p>
 <dl class="class">
 <dt id="catkit.Gratoms">
-<em class="property">class </em><code class="descclassname">catkit.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ase.atoms.Atoms</span></code></p>
 <p>Graph based atoms object.</p>
 <p>An Integrated class for an ASE atoms object with a corresponding
@@ -1006,7 +1065,7 @@ Networkx Graph.</p>
 
 <dl class="method">
 <dt id="catkit.Gratoms.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.copy" title="Permalink to this definition">¶</a></dt>
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.copy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a copy.</p>
 </dd></dl>
 
@@ -1022,26 +1081,26 @@ Networkx Graph.</p>
 
 <dl class="method">
 <dt id="catkit.Gratoms.get_chemical_tags">
-<code class="descname">get_chemical_tags</code><span class="sig-paren">(</span><em>rank=2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_chemical_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_chemical_tags" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_chemical_tags</code><span class="sig-paren">(</span><em>rank=2</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.get_chemical_tags" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a hash descriptive of the chemical formula (rank 0)
 or include bonding (rank 1).</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.Gratoms.get_neighbor_symbols">
-<code class="descname">get_neighbor_symbols</code><span class="sig-paren">(</span><em>u</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_neighbor_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_neighbor_symbols" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_neighbor_symbols</code><span class="sig-paren">(</span><em>u</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.get_neighbor_symbols" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get chemical symbols for neighboring atoms of u.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.Gratoms.get_surface_atoms">
-<code class="descname">get_surface_atoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_surface_atoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.get_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return surface atoms.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="catkit.Gratoms.get_unsaturated_nodes">
-<code class="descname">get_unsaturated_nodes</code><span class="sig-paren">(</span><em>screen=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.get_unsaturated_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_unsaturated_nodes" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_unsaturated_nodes</code><span class="sig-paren">(</span><em>screen=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.get_unsaturated_nodes" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="attribute">
@@ -1051,7 +1110,7 @@ or include bonding (rank 1).</p>
 
 <dl class="method">
 <dt id="catkit.Gratoms.is_isomorph">
-<code class="descname">is_isomorph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.is_isomorph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.is_isomorph" title="Permalink to this definition">¶</a></dt>
+<code class="descname">is_isomorph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.is_isomorph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if isomorphic by bond count and atomic number.</p>
 </dd></dl>
 
@@ -1062,7 +1121,7 @@ or include bonding (rank 1).</p>
 
 <dl class="method">
 <dt id="catkit.Gratoms.set_surface_atoms">
-<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gratoms.html#Gratoms.set_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign surface atoms.</p>
 </dd></dl>
 
@@ -1092,7 +1151,7 @@ or include bonding (rank 1).</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:37:39.
 
     </p>
   </div>
@@ -1125,7 +1184,6 @@ or include bonding (rank 1).</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

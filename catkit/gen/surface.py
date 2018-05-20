@@ -84,8 +84,8 @@ class SlabGenerator(object):
         The basis is stored separately from the slab generated and is
         only intended for internal use.
 
-        Returns:
-        --------
+        Returns
+        -------
         basis : atoms object
             The basis slab corresponding to the provided bulk.
         """
@@ -138,8 +138,8 @@ class SlabGenerator(object):
         """Return smallest unit cell corresponding to given surface and
         unique surface terminations based on symmetry and nearest neighbors.
 
-        Returns:
-        --------
+        Returns
+        -------
         unique_shift : list
             Unique terminations of a surface.
         """
@@ -186,8 +186,8 @@ class SlabGenerator(object):
     def get_slab(self, size=(1, 1), root=None, iterm=None, primitive=False):
         """Generate a slab object with a certain number of layers.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         size : tuple (2,)
             Repeat the x and y lattice vectors by the indicated
             dimensions
@@ -200,8 +200,8 @@ class SlabGenerator(object):
         primitive : bool
             Whether to reduce the unit cell to its primitive form.
 
-        Returns:
-        --------
+        Returns
+        -------
         slab : atoms object
             The modified basis slab produced based on the layer specifications
             given.
@@ -380,15 +380,15 @@ class SlabGenerator(object):
 
         Assumes the xy-plane is perpendicular to the miller index.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         slab : atoms object
             The slab to find top layer atoms from.
         attach_graph : bool
             Store the slabs graph information in the passed  slab object.
 
-        Returns:
-        --------
+        Returns
+        -------
         top : ndarray (n,)
             Array of atom indices corresponding to the top layer of the slab.
         bottom : ndarray (m,)
@@ -434,14 +434,14 @@ class SlabGenerator(object):
     def adsorption_sites(self, slab, **kwargs):
         """Helper function to return the adsorption sites of the provided slab.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         slab : atoms object
             The slab to find adsorption sites for. Assumes you are using
             the same basis.
 
-        Returns:
-        --------
+        Returns
+        -------
         coordinates : ndarray (n,)
             Coordinates of the adsorption sites
         connectivity : ndarray (n,)
@@ -519,8 +519,8 @@ def root_surface_analysis(slab, max_cell=20, return_vectors=True):
     """A tool to analyze a slab and look for valid roots that exist, up to
     the given cell size. This is adapted from ASE.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     slab : atoms object
         The slab to find adsorption sites for. Assumes you are using
         the same basis.
@@ -529,8 +529,8 @@ def root_surface_analysis(slab, max_cell=20, return_vectors=True):
     return_vectors : bool
         Return the vectors associated with the valid root instances.
 
-    Returns:
-    --------
+    Returns
+    -------
     valid_roots : ndarray (n,)
         Return the integers which represent valid root distances.
         to create a unit cell from.

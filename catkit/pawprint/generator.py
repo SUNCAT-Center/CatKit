@@ -13,8 +13,8 @@ class Fingerprinter():
         """Store the properties of the databases being loaded as
         as needed.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         images : list
             Atoms objects to generate fingerprints for.
         """
@@ -46,16 +46,16 @@ class Fingerprinter():
         """Return the parameters associated with a specific atoms
         object and seed parameters set.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         atoms : object
             Structure to return parameters for, contains n atoms.
         parameters : list of str (m,)
             Seed parameters to use for atom specific parameter
             generation.
 
-        Returns:
-        --------
+        Returns
+        -------
         atoms_parameters : ndarray (m, n)
             General chemical properties specific to this atoms object
             and list of seed parameters.
@@ -73,16 +73,16 @@ class Fingerprinter():
         """Return the fingerprints for a list of images of single atoms
         object for the given parameters.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         parameters : list of str
             Names of seeding parameters available in the parameters
             database.
         operation_list : list of functions
             A list of operation functions to produce the fingerprints from.
 
-        Returns:
-        --------
+        Returns
+        -------
         fingerprints : ndarray (n, m)
             Fingerprints for the images produced from the provided
             seed parameters.
@@ -125,7 +125,7 @@ def _generate_fingerprint(
     """Return the parameters of a convolutions of atomic properties
     based on connectivity in a periodic unit cell.
 
-    Parameters:
+    Parameters
     ----------
     operations : list of functions
         A list of operation functions to produce the fingerprints from.
@@ -138,8 +138,8 @@ def _generate_fingerprint(
         Estimated connectivity matrix where n is the number
         of atoms in the atoms-object.
 
-    Returns:
-    --------
+    Returns
+    -------
     fingerprint : ndarray (m,)
         Fingerprint produced from a given operation and seed parameters.
     """
@@ -156,8 +156,8 @@ def get_connectivity(atoms, method=None):
     """Returns an estimate of the connectivity matrix
     for a given atoms-object from CatGen.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : object
         Molecular structure with out without adsorbates.
     method : str (None or 'voronoi')
@@ -166,8 +166,8 @@ def get_connectivity(atoms, method=None):
         None - standard cutoff radius method.
         voronoi - best suited for bulk characterization.
 
-    Returns:
-    --------
+    Returns
+    -------
     connectivity : ndarray (n, n)
         Estimated connectivity matrix where n is the number
         of atoms in the atoms-object.

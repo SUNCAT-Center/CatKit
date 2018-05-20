@@ -168,8 +168,8 @@
         <span class="sd">&quot;&quot;&quot;Create an extended unit cell of the surface sites for</span>
 <span class="sd">        use in identifying other sites.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        slab : atoms object</span>
 <span class="sd">            The atoms object to manage adsorption sites for. Must contain</span>
 <span class="sd">            surface atom identification.</span>
@@ -263,13 +263,13 @@
 <span class="sd">        TODO: Determine if this can be made more efficient by</span>
 <span class="sd">        removing the &#39;sites&#39; dictionary.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        top_coordinates : ndarray (n, 3)</span>
 <span class="sd">            Cartesian coordinates for the top atoms of the unit cell.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        sites : dict of 3 lists</span>
 <span class="sd">            Dictionary sites containing positions, points, and neighbor lists.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -368,13 +368,13 @@
         <span class="sd">&quot;&quot;&quot;Return an index of the coordinates which are unique by</span>
 <span class="sd">        periodic boundary conditions.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        screen : bool</span>
 <span class="sd">            Return only sites inside the unit cell.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        periodic_match : ndarray (n,)</span>
 <span class="sd">            Indices of the coordinates which are identical by</span>
 <span class="sd">            periodic boundary conditions.</span>
@@ -397,15 +397,15 @@
         <span class="sd">&quot;&quot;&quot;Determine the symmetrically unique adsorption sites</span>
 <span class="sd">        from a list of fractional coordinates.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        unique : bool</span>
 <span class="sd">            Return only the unique symmetrically reduced sites.</span>
 <span class="sd">        screen : bool</span>
 <span class="sd">            Return only sites inside the unit cell.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        sites : dict of lists</span>
 <span class="sd">            Dictionary of sites containing index of site</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -448,8 +448,8 @@
         <span class="sd">&quot;&quot;&quot;Returns the vectors representing the furthest distance from</span>
 <span class="sd">        the neighboring atoms.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        vectors : ndarray (n, 3)</span>
 <span class="sd">            Adsorption vectors for surface sites.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -473,15 +473,15 @@
         <span class="sd">&quot;&quot;&quot;Return the edges of adsorption sties defined as all regions</span>
 <span class="sd">        with adjacent vertices.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        symmetric : bool</span>
 <span class="sd">            Return only the symmetrically reduced edges.</span>
 <span class="sd">        periodic : bool</span>
 <span class="sd">            Return edges which are unique via periodicity.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        edges : ndarray (n, 2)</span>
 <span class="sd">            All edges crossing ridge or vertices indexed by the expanded</span>
 <span class="sd">            unit slab.</span>
@@ -592,8 +592,8 @@
 <div class="viewcode-block" id="Builder.add_adsorbate"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbate">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add and adsorbate to a slab.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        adsorbate : gratoms object</span>
 <span class="sd">            Molecule to connect to the surface.</span>
 <span class="sd">        bonds : int or list of 2 int</span>
@@ -602,8 +602,8 @@
 <span class="sd">            Index of the site or edge to use as the adsorption position. A</span>
 <span class="sd">            value of -1 will return all possible structures.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        slabs : gratoms object</span>
 <span class="sd">            Slab(s) with adsorbate attached.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -888,8 +888,8 @@
     <span class="sd">&quot;&quot;&quot;Get the adsorption sites of a slab as defined by surface</span>
 <span class="sd">    symmetries of the surface atoms.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    slab : atoms object</span>
 <span class="sd">        The slab to find adsorption sites for. Must have surface</span>
 <span class="sd">        atoms defined.</span>
@@ -900,8 +900,8 @@
 <span class="sd">    adsorption_vectors : bool</span>
 <span class="sd">        Return the adsorption vectors.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    coordinates : ndarray (n, 3)</span>
 <span class="sd">        Cartesian coordinates of activate sites.</span>
 <span class="sd">    connectivity : ndarray (n,)</span>
@@ -943,7 +943,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

@@ -44,3 +44,5 @@ latex_documents = [
 ]
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
+
+extensions = ['sphinx.ext.napoleon']

@@ -18,8 +18,8 @@ class AdsorptionSites():
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         slab : atoms object
             The atoms object to manage adsorption sites for. Must contain
             surface atom identification.
@@ -113,13 +113,13 @@ class AdsorptionSites():
         TODO: Determine if this can be made more efficient by
         removing the 'sites' dictionary.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         top_coordinates : ndarray (n, 3)
             Cartesian coordinates for the top atoms of the unit cell.
 
-        Returns:
-        --------
+        Returns
+        -------
         sites : dict of 3 lists
             Dictionary sites containing positions, points, and neighbor lists.
         """
@@ -218,13 +218,13 @@ class AdsorptionSites():
         """Return an index of the coordinates which are unique by
         periodic boundary conditions.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         screen : bool
             Return only sites inside the unit cell.
 
-        Returns:
-        --------
+        Returns
+        -------
         periodic_match : ndarray (n,)
             Indices of the coordinates which are identical by
             periodic boundary conditions.
@@ -247,15 +247,15 @@ class AdsorptionSites():
         """Determine the symmetrically unique adsorption sites
         from a list of fractional coordinates.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         unique : bool
             Return only the unique symmetrically reduced sites.
         screen : bool
             Return only sites inside the unit cell.
 
-        Returns:
-        --------
+        Returns
+        -------
         sites : dict of lists
             Dictionary of sites containing index of site
         """
@@ -298,8 +298,8 @@ class AdsorptionSites():
         """Returns the vectors representing the furthest distance from
         the neighboring atoms.
 
-        Returns:
-        --------
+        Returns
+        -------
         vectors : ndarray (n, 3)
             Adsorption vectors for surface sites.
         """
@@ -323,15 +323,15 @@ class AdsorptionSites():
         """Return the edges of adsorption sties defined as all regions
         with adjacent vertices.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         symmetric : bool
             Return only the symmetrically reduced edges.
         periodic : bool
             Return edges which are unique via periodicity.
 
-        Returns:
-        --------
+        Returns
+        -------
         edges : ndarray (n, 2)
             All edges crossing ridge or vertices indexed by the expanded
             unit slab.
@@ -442,8 +442,8 @@ class Builder(AdsorptionSites):
     def add_adsorbate(self, adsorbate, bonds=None, index=0):
         """Add and adsorbate to a slab.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         adsorbate : gratoms object
             Molecule to connect to the surface.
         bonds : int or list of 2 int
@@ -452,8 +452,8 @@ class Builder(AdsorptionSites):
             Index of the site or edge to use as the adsorption position. A
             value of -1 will return all possible structures.
 
-        Returns:
-        --------
+        Returns
+        -------
         slabs : gratoms object
             Slab(s) with adsorbate attached.
         """
@@ -738,8 +738,8 @@ def get_adsorption_sites(slab,
     """Get the adsorption sites of a slab as defined by surface
     symmetries of the surface atoms.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     slab : atoms object
         The slab to find adsorption sites for. Must have surface
         atoms defined.
@@ -750,8 +750,8 @@ def get_adsorption_sites(slab,
     adsorption_vectors : bool
         Return the adsorption vectors.
 
-    Returns:
-    --------
+    Returns
+    -------
     coordinates : ndarray (n, 3)
         Cartesian coordinates of activate sites.
     connectivity : ndarray (n,)

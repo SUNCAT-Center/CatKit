@@ -20,8 +20,8 @@ def surface(
     """A helper function to return the surface associated with a
     given set of input parameters to the general surface generator.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     elements : str or object
         The atomic symbol to be passed to the as bulk builder function
         or an atoms object representing the bulk structure to use.
@@ -41,8 +41,8 @@ def surface(
     primitive : bool
         Perform an spglib reduction of the slabs unit cell.
 
-    Returns:
-    --------
+    Returns
+    -------
     slab : object
         Return a slab generated from the specified bulk structure.
     """
@@ -70,8 +70,8 @@ def molecule(
     """Return gas-phase molecule structures based on species and
     topology.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     species : str
         The chemical symbols to construct a molecule from.
     topology : int, str, or slice
@@ -79,8 +79,8 @@ def molecule(
     vacuum : float
         Angstroms of vacuum to pad the molecule with.
 
-    Returns:
-    --------
+    Returns
+    -------
     images : list of objects
         3D structures of the requested chemical species and topologies.
     """
