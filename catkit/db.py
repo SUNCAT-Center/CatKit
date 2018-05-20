@@ -471,7 +471,8 @@ class FingerprintDB():
     def parameter_entry(self, symbol=None, description=None):
         """ A function for entering unique parameters into the database.
 
-        Args:
+        Parameters
+        ----------
             symbol (str): A unique symbol the entry can be referenced
             by. If None, the symbol will be the ID of the parameter
             as a string.
@@ -499,7 +500,8 @@ class FingerprintDB():
         parameter IDs for a set of provided symbols. If no selection
         is provided, return all symbols.
 
-        Args:
+        Parameters
+        ----------
             selection (list): List of symbols in parameters
             table to be selected.
             display (bool): If True, print parameter descriptions.
@@ -531,7 +533,8 @@ class FingerprintDB():
         """ Enters a fingerprint value to the database for a
         given ase and parameter ID.
 
-        Args:
+        Parameters
+        ----------
             ase_id (int): The ase unique ID associated with an atoms object
             in the database.
             param_id (int or str): The parameter ID or symbol associated
@@ -560,13 +563,15 @@ class FingerprintDB():
         """ Get the array of values associated with the provided parameters
         for each ase_id provided.
 
-        Args:
+        Parameters
+        ----------
             ase_id (list): The ase ID(s) associated with an atoms object in
             the database.
             params (list): List of symbols or int in parameters table to be
             selected.
 
-        Returns:
+        Returns
+        -------
             n-d array: An array of values associated with the given
             parameters (a fingerprint) for each ase_id.
         """

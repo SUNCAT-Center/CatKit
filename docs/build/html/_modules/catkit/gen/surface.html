@@ -234,8 +234,8 @@
 <span class="sd">        The basis is stored separately from the slab generated and is</span>
 <span class="sd">        only intended for internal use.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        basis : atoms object</span>
 <span class="sd">            The basis slab corresponding to the provided bulk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -288,8 +288,8 @@
         <span class="sd">&quot;&quot;&quot;Return smallest unit cell corresponding to given surface and</span>
 <span class="sd">        unique surface terminations based on symmetry and nearest neighbors.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        unique_shift : list</span>
 <span class="sd">            Unique terminations of a surface.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -336,8 +336,8 @@
 <div class="viewcode-block" id="SlabGenerator.get_slab"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.surface.SlabGenerator.get_slab">[docs]</a>    <span class="k">def</span> <span class="nf">get_slab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iterm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Generate a slab object with a certain number of layers.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        size : tuple (2,)</span>
 <span class="sd">            Repeat the x and y lattice vectors by the indicated</span>
 <span class="sd">            dimensions</span>
@@ -350,8 +350,8 @@
 <span class="sd">        primitive : bool</span>
 <span class="sd">            Whether to reduce the unit cell to its primitive form.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        slab : atoms object</span>
 <span class="sd">            The modified basis slab produced based on the layer specifications</span>
 <span class="sd">            given.</span>
@@ -530,15 +530,15 @@
 
 <span class="sd">        Assumes the xy-plane is perpendicular to the miller index.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        slab : atoms object</span>
 <span class="sd">            The slab to find top layer atoms from.</span>
 <span class="sd">        attach_graph : bool</span>
 <span class="sd">            Store the slabs graph information in the passed  slab object.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        top : ndarray (n,)</span>
 <span class="sd">            Array of atom indices corresponding to the top layer of the slab.</span>
 <span class="sd">        bottom : ndarray (m,)</span>
@@ -584,14 +584,14 @@
 <div class="viewcode-block" id="SlabGenerator.adsorption_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.surface.SlabGenerator.adsorption_sites">[docs]</a>    <span class="k">def</span> <span class="nf">adsorption_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slab</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Helper function to return the adsorption sites of the provided slab.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        slab : atoms object</span>
 <span class="sd">            The slab to find adsorption sites for. Assumes you are using</span>
 <span class="sd">            the same basis.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        coordinates : ndarray (n,)</span>
 <span class="sd">            Coordinates of the adsorption sites</span>
 <span class="sd">        connectivity : ndarray (n,)</span>
@@ -669,8 +669,8 @@
     <span class="sd">&quot;&quot;&quot;A tool to analyze a slab and look for valid roots that exist, up to</span>
 <span class="sd">    the given cell size. This is adapted from ASE.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    slab : atoms object</span>
 <span class="sd">        The slab to find adsorption sites for. Assumes you are using</span>
 <span class="sd">        the same basis.</span>
@@ -679,8 +679,8 @@
 <span class="sd">    return_vectors : bool</span>
 <span class="sd">        Return the vectors associated with the valid root instances.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    valid_roots : ndarray (n,)</span>
 <span class="sd">        Return the integers which represent valid root distances.</span>
 <span class="sd">        to create a unit cell from.</span>
@@ -741,7 +741,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

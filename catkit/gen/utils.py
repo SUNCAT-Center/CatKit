@@ -19,15 +19,15 @@ def trilaterate(centers, r):
     an intersection of a plane whose normal is aligned with the
     points and perpendicular to the positive z coordinate.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     centers : list or ndarray (n,)
         Array of values to have a average taken from.
     r : int
         Number of values to take an average with.
 
-    Returns:
-    --------
+    Returns
+    -------
     intersection : ndarray (3,)
         The point where all spheres/planes intersect.
     """
@@ -74,8 +74,8 @@ def cd(path):
     """Does path management: if the path doesn't exists, create it
     otherwise, move into it until the indentation is broken.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     path : str
         Directory path to create and change into.
     """
@@ -92,8 +92,8 @@ def cd(path):
 def rmean(x, N=5):
     """Calculate the running mean of array x for N instances.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     x : list or ndarray (n,)
         Array of values to have a average taken from.
     N : int
@@ -119,16 +119,16 @@ def expand_cell(atoms, r=6):
     which contains spheres of specified cutoff radius around
     all atom positions.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
     r : float
         Radius of the spheres to expand around each atom.
 
-    Returns:
-    --------
+    Returns
+    -------
     index : ndarray of int
         Indices associated with the original unit cell positions.
     coords : ndarray of (3,) array
@@ -161,16 +161,16 @@ def get_voronoi_neighbors(atoms, r=8):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
     r : float
         Radius of the spheres to expand around each atom.
 
-    Returns:
-    --------
+    Returns
+    -------
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
@@ -205,8 +205,8 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     """Return the connectivity matrix from a simple radial cutoff.
     Multi-bonding occurs through periodic boundary conditions.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
@@ -215,8 +215,8 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     atol: float
         Absolute tolerance to use when computing distances.
 
-    Returns:
-    --------
+    Returns
+    -------
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
@@ -251,15 +251,15 @@ def get_primitive_cell(atoms, tol=1e-8):
     """Atoms object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : object
         Atoms object to search for a primitive unit cell.
     tol : float
         Tolerance for floating point rounding errors.
 
-    Returns:
-    --------
+    Returns
+    -------
     primitive cell : object
         The primitive unit cell returned by spglib if one is found.
     """
@@ -284,15 +284,15 @@ def get_symmetry(atoms, tol=1e-8):
     """Atoms object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : object
         Atoms object to search for symmetric structures of.
     tol : float
         Tolerance for floating point rounding errors.
 
-    Returns:
-    --------
+    Returns
+    -------
     symmetry operations: ndarray (n, n)
         Symmetry operations from spglib.
     """
@@ -309,8 +309,8 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     atoms : object
         Atoms object to search for unique values along.
     axis : int
@@ -322,8 +322,8 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
     tol : float
         The tolerance to search for unique values within.
 
-    Returns:
-    --------
+    Returns
+    -------
     values : ndarray (n,)
         Array of unique values.
     """
@@ -352,13 +352,13 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
 def plane_normal(xyz):
     """Return the surface normal vector to a plane of best fit.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     xyz : ndarray (n, 3)
         3D points to fit plane to.
 
-    Returns:
-    --------
+    Returns
+    -------
     vec : ndarray (1, 3)
         Unit vector normal to the plane of best fit.
     """
@@ -415,15 +415,15 @@ def to_gratoms(atoms):
 def get_atomic_numbers(formula, return_count=False):
     """Return the atomic numbers associated with a chemical formula.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     formula : string
         A chemical formula to parse into atomic numbers.
     return_count : bool
         Return the count of each element in the formula.
 
-    Returns:
-    --------
+    Returns
+    -------
     numbers : ndarray (n,)
         Element numbers in associated species.
     counts : ndarray (n,)
@@ -456,15 +456,15 @@ def get_atomic_numbers(formula, return_count=False):
 def get_reference_energies(species, energies):
     """Get reference energies for the elements in a set of molecules.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     species : list (n,)
         Chemical formulas for each molecular species.
     energies : list (n,)
         Total energies associated with each species.
 
-    Returns:
-    --------
+    Returns
+    -------
     elements : ndarray (n,)
         Atomic elements associated with all species.
     references : ndarray (n,)
@@ -500,15 +500,15 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
     for the requrested atoms indices. Z-coordinates are projected
     to maximum z-coordinate by default.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     xyz_coords : ndarray (n, 3)
         Cartesian coordinates to identify unique xy positions from.
     cutoff : float
         Distance in Angstrons to consider xy-coordinate unique within.
 
-    Returns:
-    --------
+    Returns
+    -------
     xy_pos : ndarray (m, 3)
         Unique xy coordinates projected onto a maximal z coordinate.
     """

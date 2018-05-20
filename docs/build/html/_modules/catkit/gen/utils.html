@@ -169,15 +169,15 @@
 <span class="sd">    an intersection of a plane whose normal is aligned with the</span>
 <span class="sd">    points and perpendicular to the positive z coordinate.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    centers : list or ndarray (n,)</span>
 <span class="sd">        Array of values to have a average taken from.</span>
 <span class="sd">    r : int</span>
 <span class="sd">        Number of values to take an average with.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    intersection : ndarray (3,)</span>
 <span class="sd">        The point where all spheres/planes intersect.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -224,8 +224,8 @@
     <span class="sd">&quot;&quot;&quot;Does path management: if the path doesn&#39;t exists, create it</span>
 <span class="sd">    otherwise, move into it until the indentation is broken.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    path : str</span>
 <span class="sd">        Directory path to create and change into.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -242,8 +242,8 @@
 <div class="viewcode-block" id="rmean"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.rmean">[docs]</a><span class="k">def</span> <span class="nf">rmean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the running mean of array x for N instances.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    x : list or ndarray (n,)</span>
 <span class="sd">        Array of values to have a average taken from.</span>
 <span class="sd">    N : int</span>
@@ -269,16 +269,16 @@
 <span class="sd">    which contains spheres of specified cutoff radius around</span>
 <span class="sd">    all atom positions.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : atoms object</span>
 <span class="sd">        Atoms object with the periodic boundary conditions and</span>
 <span class="sd">        unit cell information to use.</span>
 <span class="sd">    r : float</span>
 <span class="sd">        Radius of the spheres to expand around each atom.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    index : ndarray of int</span>
 <span class="sd">        Indices associated with the original unit cell positions.</span>
 <span class="sd">    coords : ndarray of (3,) array</span>
@@ -311,16 +311,16 @@
     <span class="sd">&quot;&quot;&quot;Return the connectivity matrix from the Voronoi</span>
 <span class="sd">    method. Multi-bonding occurs through periodic boundary conditions.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : atoms object</span>
 <span class="sd">        Atoms object with the periodic boundary conditions and</span>
 <span class="sd">        unit cell information to use.</span>
 <span class="sd">    r : float</span>
 <span class="sd">        Radius of the spheres to expand around each atom.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    connectivity : ndarray (n, n)</span>
 <span class="sd">        Number of edges formed between atoms in a system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -355,8 +355,8 @@
     <span class="sd">&quot;&quot;&quot;Return the connectivity matrix from a simple radial cutoff.</span>
 <span class="sd">    Multi-bonding occurs through periodic boundary conditions.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : atoms object</span>
 <span class="sd">        Atoms object with the periodic boundary conditions and</span>
 <span class="sd">        unit cell information to use.</span>
@@ -365,8 +365,8 @@
 <span class="sd">    atol: float</span>
 <span class="sd">        Absolute tolerance to use when computing distances.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    connectivity : ndarray (n, n)</span>
 <span class="sd">        Number of edges formed between atoms in a system.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -401,15 +401,15 @@
     <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib primitive cell finder:</span>
 <span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Atoms object to search for a primitive unit cell.</span>
 <span class="sd">    tol : float</span>
 <span class="sd">        Tolerance for floating point rounding errors.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    primitive cell : object</span>
 <span class="sd">        The primitive unit cell returned by spglib if one is found.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -434,15 +434,15 @@
     <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib symmetry finder:</span>
 <span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Atoms object to search for symmetric structures of.</span>
 <span class="sd">    tol : float</span>
 <span class="sd">        Tolerance for floating point rounding errors.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    symmetry operations: ndarray (n, n)</span>
 <span class="sd">        Symmetry operations from spglib.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -459,8 +459,8 @@
     <span class="sd">&quot;&quot;&quot;Return unique coordinate values of a given atoms object</span>
 <span class="sd">    for a specified axis.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Atoms object to search for unique values along.</span>
 <span class="sd">    axis : int</span>
@@ -472,8 +472,8 @@
 <span class="sd">    tol : float</span>
 <span class="sd">        The tolerance to search for unique values within.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    values : ndarray (n,)</span>
 <span class="sd">        Array of unique values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -502,13 +502,13 @@
 <div class="viewcode-block" id="plane_normal"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.plane_normal">[docs]</a><span class="k">def</span> <span class="nf">plane_normal</span><span class="p">(</span><span class="n">xyz</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the surface normal vector to a plane of best fit.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    xyz : ndarray (n, 3)</span>
 <span class="sd">        3D points to fit plane to.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    vec : ndarray (1, 3)</span>
 <span class="sd">        Unit vector normal to the plane of best fit.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -565,15 +565,15 @@
 <div class="viewcode-block" id="get_atomic_numbers"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_numbers</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">return_count</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the atomic numbers associated with a chemical formula.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    formula : string</span>
 <span class="sd">        A chemical formula to parse into atomic numbers.</span>
 <span class="sd">    return_count : bool</span>
 <span class="sd">        Return the count of each element in the formula.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    numbers : ndarray (n,)</span>
 <span class="sd">        Element numbers in associated species.</span>
 <span class="sd">    counts : ndarray (n,)</span>
@@ -606,15 +606,15 @@
 <div class="viewcode-block" id="get_reference_energies"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_reference_energies">[docs]</a><span class="k">def</span> <span class="nf">get_reference_energies</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get reference energies for the elements in a set of molecules.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    species : list (n,)</span>
 <span class="sd">        Chemical formulas for each molecular species.</span>
 <span class="sd">    energies : list (n,)</span>
 <span class="sd">        Total energies associated with each species.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    elements : ndarray (n,)</span>
 <span class="sd">        Atomic elements associated with all species.</span>
 <span class="sd">    references : ndarray (n,)</span>
@@ -650,15 +650,15 @@
 <span class="sd">    for the requrested atoms indices. Z-coordinates are projected</span>
 <span class="sd">    to maximum z-coordinate by default.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    xyz_coords : ndarray (n, 3)</span>
 <span class="sd">        Cartesian coordinates to identify unique xy positions from.</span>
 <span class="sd">    cutoff : float</span>
 <span class="sd">        Distance in Angstrons to consider xy-coordinate unique within.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    xy_pos : ndarray (m, 3)</span>
 <span class="sd">        Unique xy coordinates projected onto a maximal z coordinate.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -717,7 +717,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

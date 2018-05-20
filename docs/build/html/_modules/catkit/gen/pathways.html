@@ -178,16 +178,16 @@
         <span class="sd">&quot;&quot;&quot;The __init__ function is automatically called when the</span>
 <span class="sd">        class is referenced.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        db_name: str</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        db_name : str</span>
 <span class="sd">            Name of the database file to access. Will connect to</span>
 <span class="sd">            &#39;reaction-network.db&#39; by default.</span>
-<span class="sd">        base_valence: array (n,)</span>
+<span class="sd">        base_valence : array (n,)</span>
 <span class="sd">            The maximum number of bonds each chemical species may form. Each</span>
 <span class="sd">            entry of the array is the bond limit of the corresponding atomic</span>
 <span class="sd">            number. The 0th entry of the array is ignored.</span>
-<span class="sd">        nbond_limits: array (n, n):</span>
+<span class="sd">        nbond_limits : array (n, n):</span>
 <span class="sd">            The maximum number of bonds that can be formed when species of</span>
 <span class="sd">            index 0 is bonding to a species of index 1. Each entry of the array</span>
 <span class="sd">            is the bond limit of the corresponding atomic number. The 0th entry</span>
@@ -298,11 +298,11 @@
 
 <span class="sd">        Parameters:</span>
 <span class="sd">        -----------</span>
-<span class="sd">        element_pool: dict</span>
+<span class="sd">        element_pool : dict</span>
 <span class="sd">            Atomic symbols keys paired with the maximum number of that atom.</span>
-<span class="sd">        load_molecules: bool</span>
+<span class="sd">        load_molecules : bool</span>
 <span class="sd">            Load any existing molecules from the database.</span>
-<span class="sd">        multiple_bond_search: bool</span>
+<span class="sd">        multiple_bond_search : bool</span>
 <span class="sd">            Allow atoms to form bonds with other atoms in the molecule.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">base_valence</span><span class="p">))</span>
@@ -468,8 +468,8 @@
 <span class="sd">        of molecules. By default, only single bond addition pathways are</span>
 <span class="sd">        enumerated (Also called elementary steps).</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        reconfiguration : bool</span>
 <span class="sd">            Search for reconfiguration paths. Reconfiguration paths are</span>
 <span class="sd">            all those where only the bond order is changed. R1 --&gt; P1.</span>
@@ -701,9 +701,9 @@
 <div class="viewcode-block" id="ReactionNetwork.save_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">save_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated molecules to the ReactionNetwork database.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        molecules: dict</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        molecules : dict</span>
 <span class="sd">            Molecules to be saved to the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">comp_tag</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">molecules</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -742,11 +742,11 @@
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        pathways: list</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        pathways : list</span>
 <span class="sd">            Sorted pathways in the form [R1, R2, P1, P2].</span>
-<span class="sd">        broken_bonds: list</span>
+<span class="sd">        broken_bonds : list</span>
 <span class="sd">            Comma separated strings of index associated with the</span>
 <span class="sd">            two atoms whos bond is broken. List order must match</span>
 <span class="sd">            pathways.</span>
@@ -772,15 +772,15 @@
 <div class="viewcode-block" id="ReactionNetwork.load_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">load_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Load 2D molecule graphs from the database.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        binned: bool</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        binned : bool</span>
 <span class="sd">            Return the molecules in sub-dictionaries of their</span>
 <span class="sd">            corresponding composition and bonding tags.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
-<span class="sd">        molecules: dict</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        molecules : dict</span>
 <span class="sd">            All molecules present in the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -854,15 +854,15 @@
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        broken_bonds: bool</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        broken_bonds : bool</span>
 <span class="sd">            Return the index information of which bond was broken.</span>
 <span class="sd">            Only supported for elementary steps.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
-<span class="sd">        pathways: list</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pathways : list</span>
 <span class="sd">            All pathways present in the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">broken_bonds</span><span class="p">:</span>
@@ -902,11 +902,11 @@
 <div class="viewcode-block" id="ReactionNetwork.save_3d_structure"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_3d_structure">[docs]</a>    <span class="k">def</span> <span class="nf">save_3d_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gratoms</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save Cartesian coordinates into the ReactionNetwork database.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        gratoms: Gratoms or Atoms object</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        gratoms : Gratoms or Atoms object</span>
 <span class="sd">            Object with Cartesian coordinates to be saved.</span>
-<span class="sd">        overwrite: bool</span>
+<span class="sd">        overwrite : bool</span>
 <span class="sd">            Allow the database to overwrite a matching index.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">gratoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span>
@@ -949,15 +949,15 @@
 <div class="viewcode-block" id="ReactionNetwork.load_3d_structures"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_3d_structures">[docs]</a>    <span class="k">def</span> <span class="nf">load_3d_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return Gratoms objects from the ReactionNetwork database.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
-<span class="sd">        ids: int or list of int</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ids : int or list of int</span>
 <span class="sd">            Identifier of the molecule in the database. If None, return all</span>
 <span class="sd">            structure.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
-<span class="sd">        images: list</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        images : list</span>
 <span class="sd">            All Gratoms objects in the database.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -1060,7 +1060,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

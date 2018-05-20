@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     catkit.gen.analysis
-    catkit.gen.api
 
 Submodules
 ----------

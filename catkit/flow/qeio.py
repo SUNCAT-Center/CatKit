@@ -357,7 +357,6 @@ def log_to_atoms(log_file='log', ent=-1, out_file=None):
                         else:
                             atoms.set_scaled_positions(pos)
 
-                        # atoms.wrap()
                         atoms = attach_results(f, atoms)
                         images += [atoms]
 

@@ -8,8 +8,8 @@ def matching_sites(position, comparators, tol=1e-8):
     equal to a given position (with a tolerance), taking into
     account periodic boundary conditions (adaptation from Pymatgen).
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     position : list (3,)
         Fractional coordinate to compare to list.
     comparators : list (3, n)
@@ -17,8 +17,8 @@ def matching_sites(position, comparators, tol=1e-8):
     tol : float
         Absolute tolerance.
 
-    Returns:
-    --------
+    Returns
+    -------
     match : list (n,)
         Indices of matches.
     """

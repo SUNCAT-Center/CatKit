@@ -161,8 +161,8 @@
         <span class="sd">&quot;&quot;&quot;Store the properties of the databases being loaded as</span>
 <span class="sd">        as needed.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        images : list</span>
 <span class="sd">            Atoms objects to generate fingerprints for.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -194,16 +194,16 @@
         <span class="sd">&quot;&quot;&quot;Return the parameters associated with a specific atoms</span>
 <span class="sd">        object and seed parameters set.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        atoms : object</span>
 <span class="sd">            Structure to return parameters for, contains n atoms.</span>
 <span class="sd">        parameters : list of str (m,)</span>
 <span class="sd">            Seed parameters to use for atom specific parameter</span>
 <span class="sd">            generation.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        atoms_parameters : ndarray (m, n)</span>
 <span class="sd">            General chemical properties specific to this atoms object</span>
 <span class="sd">            and list of seed parameters.</span>
@@ -221,16 +221,16 @@
         <span class="sd">&quot;&quot;&quot;Return the fingerprints for a list of images of single atoms</span>
 <span class="sd">        object for the given parameters.</span>
 
-<span class="sd">        Parameters:</span>
-<span class="sd">        -----------</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
 <span class="sd">        parameters : list of str</span>
 <span class="sd">            Names of seeding parameters available in the parameters</span>
 <span class="sd">            database.</span>
 <span class="sd">        operation_list : list of functions</span>
 <span class="sd">            A list of operation functions to produce the fingerprints from.</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">        --------</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
 <span class="sd">        fingerprints : ndarray (n, m)</span>
 <span class="sd">            Fingerprints for the images produced from the provided</span>
 <span class="sd">            seed parameters.</span>
@@ -273,7 +273,7 @@
     <span class="sd">&quot;&quot;&quot;Return the parameters of a convolutions of atomic properties</span>
 <span class="sd">    based on connectivity in a periodic unit cell.</span>
 
-<span class="sd">    Parameters:</span>
+<span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    operations : list of functions</span>
 <span class="sd">        A list of operation functions to produce the fingerprints from.</span>
@@ -286,8 +286,8 @@
 <span class="sd">        Estimated connectivity matrix where n is the number</span>
 <span class="sd">        of atoms in the atoms-object.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    fingerprint : ndarray (m,)</span>
 <span class="sd">        Fingerprint produced from a given operation and seed parameters.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -304,8 +304,8 @@
     <span class="sd">&quot;&quot;&quot;Returns an estimate of the connectivity matrix</span>
 <span class="sd">    for a given atoms-object from CatGen.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">    -----------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Molecular structure with out without adsorbates.</span>
 <span class="sd">    method : str (None or &#39;voronoi&#39;)</span>
@@ -314,8 +314,8 @@
 <span class="sd">        None - standard cutoff radius method.</span>
 <span class="sd">        voronoi - best suited for bulk characterization.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    connectivity : ndarray (n, n)</span>
 <span class="sd">        Estimated connectivity matrix where n is the number</span>
 <span class="sd">        of atoms in the atoms-object.</span>
@@ -339,7 +339,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:00:57.
+      Last updated on Sun, 20 May 2018 11:24:29.
 
     </p>
   </div>

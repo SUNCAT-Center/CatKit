@@ -9,7 +9,8 @@ radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
 
 def bin_hydrogen(hydrogens=1, bins=1):
     """Recursive function for determining distributions of
-    hydrogens across bins"""
+    hydrogens across bins
+    """
     if bins == 1:
         yield [hydrogens]
 

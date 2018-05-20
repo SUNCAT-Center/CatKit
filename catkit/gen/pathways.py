@@ -28,16 +28,16 @@ class ReactionNetwork():
         """The __init__ function is automatically called when the
         class is referenced.
 
-        Parameters:
-        -----------
-        db_name: str
+        Parameters
+        ----------
+        db_name : str
             Name of the database file to access. Will connect to
             'reaction-network.db' by default.
-        base_valence: array (n,)
+        base_valence : array (n,)
             The maximum number of bonds each chemical species may form. Each
             entry of the array is the bond limit of the corresponding atomic
             number. The 0th entry of the array is ignored.
-        nbond_limits: array (n, n):
+        nbond_limits : array (n, n):
             The maximum number of bonds that can be formed when species of
             index 0 is bonding to a species of index 1. Each entry of the array
             is the bond limit of the corresponding atomic number. The 0th entry
@@ -148,11 +148,11 @@ class ReactionNetwork():
 
         Parameters:
         -----------
-        element_pool: dict
+        element_pool : dict
             Atomic symbols keys paired with the maximum number of that atom.
-        load_molecules: bool
+        load_molecules : bool
             Load any existing molecules from the database.
-        multiple_bond_search: bool
+        multiple_bond_search : bool
             Allow atoms to form bonds with other atoms in the molecule.
         """
         numbers = np.zeros(len(self.base_valence))
@@ -318,8 +318,8 @@ class ReactionNetwork():
         of molecules. By default, only single bond addition pathways are
         enumerated (Also called elementary steps).
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         reconfiguration : bool
             Search for reconfiguration paths. Reconfiguration paths are
             all those where only the bond order is changed. R1 --> P1.
@@ -551,9 +551,9 @@ class ReactionNetwork():
     def save_molecules(self, molecules):
         """Save enumerated molecules to the ReactionNetwork database.
 
-        Parameters:
-        -----------
-        molecules: dict
+        Parameters
+        ----------
+        molecules : dict
             Molecules to be saved to the database.
         """
         for comp_tag, data in molecules.items():
@@ -592,11 +592,11 @@ class ReactionNetwork():
         """Save enumerated pathways the ReactionNetwork database.
         More than two reactants or two products is not supported.
 
-        Parameters:
-        -----------
-        pathways: list
+        Parameters
+        ----------
+        pathways : list
             Sorted pathways in the form [R1, R2, P1, P2].
-        broken_bonds: list
+        broken_bonds : list
             Comma separated strings of index associated with the
             two atoms whos bond is broken. List order must match
             pathways.
@@ -622,15 +622,15 @@ class ReactionNetwork():
     def load_molecules(self, ids=None, binned=False):
         """Load 2D molecule graphs from the database.
 
-        Parameters:
-        -----------
-        binned: bool
+        Parameters
+        ----------
+        binned : bool
             Return the molecules in sub-dictionaries of their
             corresponding composition and bonding tags.
 
-        Returns:
-        --------
-        molecules: dict
+        Returns
+        -------
+        molecules : dict
             All molecules present in the database.
         """
         if isinstance(ids, list):
@@ -704,15 +704,15 @@ class ReactionNetwork():
         """Save enumerated pathways the ReactionNetwork database.
         More than two reactants or two products is not supported.
 
-        Parameters:
-        -----------
-        broken_bonds: bool
+        Parameters
+        ----------
+        broken_bonds : bool
             Return the index information of which bond was broken.
             Only supported for elementary steps.
 
-        Returns:
-        --------
-        pathways: list
+        Returns
+        -------
+        pathways : list
             All pathways present in the database.
         """
         if broken_bonds:
@@ -752,11 +752,11 @@ class ReactionNetwork():
     def save_3d_structure(self, gratoms, overwrite=False):
         """Save Cartesian coordinates into the ReactionNetwork database.
 
-        Parameters:
-        -----------
-        gratoms: Gratoms or Atoms object
+        Parameters
+        ----------
+        gratoms : Gratoms or Atoms object
             Object with Cartesian coordinates to be saved.
-        overwrite: bool
+        overwrite : bool
             Allow the database to overwrite a matching index.
         """
         name = gratoms.graph.name
@@ -799,15 +799,15 @@ class ReactionNetwork():
     def load_3d_structures(self, ids=None):
         """Return Gratoms objects from the ReactionNetwork database.
 
-        Parameters:
-        -----------
-        ids: int or list of int
+        Parameters
+        ----------
+        ids : int or list of int
             Identifier of the molecule in the database. If None, return all
             structure.
 
-        Returns:
-        --------
-        images: list
+        Returns
+        -------
+        images : list
             All Gratoms objects in the database.
         """
         if isinstance(ids, list):
