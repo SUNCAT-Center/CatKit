@@ -9,7 +9,7 @@ import json
 try:
     from espresso import espresso
 except(ImportError):
-    from ase.calculator import espresso
+    from ase.calculators import espresso
 
 
 def get_relaxed_calculation(in_file='output.traj'):
