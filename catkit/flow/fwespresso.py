@@ -152,15 +152,14 @@ def get_neb(in_file='input.traj'):
     """
     images = read(in_file, ':')
 
-    for atoms in images:
-        atoms.set_pbc([1, 1, 1])
+    for atoms in images[1:-1]:
         calc = espresso(**atoms.info)
         atoms.set_calculator(calc)
 
     neb = NEB(images)
     opt = BFGS(neb, trajectory='output.traj', logfile=None)
     opt.run(fmax=0.05)
-    out_images = read('output.traj')
+    out_images = read('output.traj', ':')
 
     # Save the calculator to the local disk for later use.
     try:
