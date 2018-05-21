@@ -23,10 +23,14 @@ setuptools.setup(
         'catkit.pawprint',
         'catkit.gen',
         'catkit.gen.api',
-        'catkit.flow'
+        'catkit.flow',
+        'cathub'
     ],
     package_dir={'catkit': 'catkit'},
-
+    entry_points='''
+         [console_scripts]
+         cathub=cathub:cli
+      ''',
     install_requires=requirements,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
 
