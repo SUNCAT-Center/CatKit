@@ -2,8 +2,6 @@
 # (see accompanying license files for details).
 """Catalysis Generator."""
 
-__version__ = '0.4.0'
-
 from collections import MutableMapping
 from ase.data import covalent_radii
 

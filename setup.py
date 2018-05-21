@@ -1,14 +1,21 @@
 import setuptools
 
+with open('requierments.txt', 'r') as f:
+    requirements = f.readlines()
+
+with open('readme.org', 'r') as f:
+    readme = f.readlines()
+
 setuptools.setup(
     name="CatKit",
-    version="0.4.2",
+    version="0.4.4",
     url="https://github.com/SUNCAT-Center/CatKit",
 
     author="Jacob Boes",
     author_email="jrboes@stanford.edu",
 
     description="General purpose tools for high-throughput catalysis.",
+    long_description_content_type=readme,
     license='GPL-3.0',
 
     packages=[
@@ -19,22 +26,8 @@ setuptools.setup(
         'catkit.flow'
     ],
     package_dir={'catkit': 'catkit'},
-    package_data={
-        'catkit': ['data/*.db', 'data/*.json']},
 
-    install_requires=[
-        'ase>=3.16.0',
-        'matplotlib>=2.2.2',
-        'nose>=1.3.7',
-        'numpy>=1.14.2',
-        'scipy>=1.0.1',
-        'networkx>=2.1',
-        'sqlalchemy>=1.2.1',
-        'spglib>=1.10.3',
-        'future>=0.16.0',
-        'sklearn',
-        'python-coveralls',
-    ],
+    install_requires=requirements,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
 
     classifiers=[
