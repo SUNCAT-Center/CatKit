@@ -1,9 +1,9 @@
 import unittest
 from catkit.build import molecule
-from catgen.build import surface
+from catkit.build import surface
 from ase.build import bulk
 import numpy as np
-from np.testing import assert_array_equal
+from numpy.testing import assert_array_equal
 
 
 class TestBuild(unittest.TestCase):
