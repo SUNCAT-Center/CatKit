@@ -21,8 +21,8 @@ def optimizer(obj_func,
     scikit-learn. This function allows for more direct control over the
     arguments. https://docs.scipy.org/doc/scipy/reference/optimize.html
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     obj_func : function
         scikit-learn objective function.
     initial_theta : array (n,)
@@ -36,8 +36,8 @@ def optimizer(obj_func,
     hopping : int
         Perform a number of basin hopping steps.
 
-    Returns:
-    --------
+    Returns
+    -------
     theta_opt : list (n,)
         Optimized hyperparameters.
     func_min : float
@@ -115,7 +115,7 @@ def online_learning(X, y, samples, factors=[1.0, 1.0], nsteps=40, plot=False):
             ylim = ax.get_ylim()
             ax.text(xlim[0] / 9.0, ylim[0] / 9.0, mae)
             plt.tight_layout()
-            plt.savefig('./images/online-learning-RBF-{}.png'.format(n))
+            plt.savefig('./online-learning-RBF-{}.png'.format(n))
             plt.close()
 
         step += 1
