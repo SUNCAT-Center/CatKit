@@ -305,10 +305,10 @@ def make_folders(create_template, template, custom_base, diagnose):
 
 
 @cli.command()
-@click.argument('user')
+@click.argument('user', default='catvisitor')
 def connect(user):
     """Direct connection to PostreSQL server."""
-    import psql_server_connect
+    import cathub.psql_server_connect
     psql_server_connect.main(user)
 
 

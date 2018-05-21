@@ -17,6 +17,7 @@ else:
 
 sys.path.append(catbase)
 
+import cathub.ase_tools
 from cathub.tools import extract_atoms, check_reaction
 
 username = os.environ['USER']

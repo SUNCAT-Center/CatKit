@@ -24,7 +24,8 @@ setuptools.setup(
         'catgen',
         'catgen.api',
         'catflow',
-        'cathub'
+        'cathub',
+        'cathub.ase_tools'
     ],
     entry_points='''
          [console_scripts]

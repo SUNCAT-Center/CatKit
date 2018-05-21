@@ -19,9 +19,9 @@ def main(dbfile, start_id=1, write_reaction=True, write_ase=True,
                 block_size=block_size,
                 start_block=start_block)
 
-dbfile = argv[1]
 
 if __name__ == '__main__':
+    dbfile = argv[1]
     main(dbfile)
 
 
