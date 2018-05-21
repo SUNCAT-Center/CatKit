@@ -62,19 +62,20 @@ def check_reaction(reactants, products):
     folder structure.
     list of reactants -> list of products
     """
-    reactants = [reactant.split('@')[0].strip('star').strip('gas') for reactant in reactants]
-    products = [product.split('@')[0].strip('star').strip('gas') for product in products]
+    reactant_list = [reactant.split('@')[0].strip('star').strip('gas') for reactant in reactants]
+    product_list = [product.split('@')[0].strip('star').strip('gas') for product in products]
 
-    reactant_atoms = [extract_atoms(reactant) for reactant in reactants]
-    product_atoms = [extract_atoms(product) for product in products]
+    reactant_atoms = [extract_atoms(reactant) for reactant in reactant_list]
+    product_atoms = [extract_atoms(product) for product in product_list]
 
     reactants = add_atoms(reactant_atoms)
     products = add_atoms(product_atoms)
 
     r_stars = 0
     p_stars = 0
+
     for i, a in enumerate(reactant_atoms):
-        if a=='' or 'star' in reactants[i]:
+        if a=='' or 'star' in reactant_list[i]:
             r_stars += 1
         elif isinstance(a, float):
             r_stars += a
