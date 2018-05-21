@@ -158,7 +158,7 @@ def get_neb(in_file='input.traj'):
 
     neb = NEB(images)
     opt = BFGS(neb, trajectory='output.traj', logfile=None)
-    opt.run(fmax=0.05)
+    opt.run(fmax=atoms.info.get('fmax'))
     out_images = read('output.traj', ':')
 
     # Save the calculator to the local disk for later use.
