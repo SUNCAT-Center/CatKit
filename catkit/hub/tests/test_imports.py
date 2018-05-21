@@ -9,8 +9,7 @@ import json
 import click
 from click.testing import CliRunner
 
-import cathub
-
+import catkit.hub
 
 class CommandLineTestCase(unittest.TestCase):
     def setUp(self):
