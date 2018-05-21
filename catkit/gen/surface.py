@@ -35,8 +35,8 @@ class SlabGenerator(object):
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         bulk : atoms object
             Bulk structure to produce the slab from.
         miller_index : list (3,) or (4,)
@@ -350,13 +350,13 @@ class SlabGenerator(object):
 
         Assumes the xy-plane is perpendicular to the miller index.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         slab : atoms object
             Atoms to find graph connectivity for.
 
-        Returns:
-        --------
+        Returns
+        -------
         surf_con : ndarray (n, n)
             Connectivity matrix of the surface atoms with periodic boundary
             conditions.

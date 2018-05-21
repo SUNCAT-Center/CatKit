@@ -17,8 +17,8 @@ class Classifier():
         """Return unique coordinate values of a given atoms object
         for a specified axis.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
             atoms : atoms object
         """
         self.atoms = atoms
@@ -34,8 +34,8 @@ class Classifier():
         """Return the indices of the slab atoms using select characterization
         techniques.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         classifier : str
             Classification technique to identify slab atoms.
 
@@ -46,8 +46,8 @@ class Classifier():
         rtol : float
             Relative cutoff distance for tagging layers.
 
-        Returns:
-        --------
+        Returns
+        -------
         slab_atoms : ndarray (n,)
             Index of slab atoms found.
         """
@@ -79,8 +79,8 @@ class Classifier():
     def id_adsorbate_atoms(self, classifier='trivial', tag=False):
         """Identify adsorbed atoms in a given atoms object.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         classifier : str
             Classification technique to identify adsorbate atoms.
 
@@ -89,8 +89,8 @@ class Classifier():
         tag : bool
            Return adsorbate atoms with tags of -2.
 
-        Returns:
-        --------
+        Returns
+        -------
         ads_atoms : ndarray (n,)
             Index of adsorbate atoms found.
         """
@@ -113,8 +113,8 @@ class Classifier():
         """Identify surface atoms of an atoms object. This will
         require that adsorbate atoms have already been identified.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         classifier : str
             Classification technique to identify surface atoms.
 
@@ -122,8 +122,8 @@ class Classifier():
             Create a sweep of proxy atoms above surface. Surface atoms
             are those which are most frequent neighbors of the sweep.
 
-        Returns:
-        --------
+        Returns
+        -------
         surface_atoms : ndarray (n,)
             Index of the surface atoms in the object.
         """
@@ -182,8 +182,8 @@ class Classifier():
         classified on a surface. Requires classification of adsorbate
         atoms.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         classifier : str
             Classification technique to identify individual adsorbates.
 
@@ -193,8 +193,8 @@ class Classifier():
         return_atoms : bool
             Return Gratoms objects instead of adsorbate indices.
 
-        Returns:
-        --------
+        Returns
+        -------
         adsorabtes : list (n,)
             Adsorbate indices of adsorbates in unit cell.
         """

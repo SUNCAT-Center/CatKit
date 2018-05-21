@@ -184,6 +184,13 @@
 <li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="catkit.gen.api.html">catkit.gen.api package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.api.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.catmap">catkit.gen.api.catmap module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.rd_kit">catkit.gen.api.rd_kit module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -195,7 +202,7 @@
 <dl class="class">
 <dt id="catkit.gen.adsorption.AdsorptionSites">
 <em class="property">class </em><code class="descclassname">catkit.gen.adsorption.</code><code class="descname">AdsorptionSites</code><span class="sig-paren">(</span><em>slab</em>, <em>surface_atoms=None</em>, <em>r=8</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Adsorption site object.</p>
 <p>Create an extended unit cell of the surface sites for
 use in identifying other sites.</p>
@@ -331,7 +338,7 @@ from a list of fractional coordinates.</p>
 <dl class="class">
 <dt id="catkit.gen.adsorption.Builder">
 <em class="property">class </em><code class="descclassname">catkit.gen.adsorption.</code><code class="descname">Builder</code><span class="sig-paren">(</span><em>slab</em>, <em>surface_atoms=None</em>, <em>r=8</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.adsorption.Builder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catkit.gen.adsorption.AdsorptionSites" title="catkit.gen.adsorption.AdsorptionSites"><code class="xref py py-class docutils literal"><span class="pre">catkit.gen.adsorption.AdsorptionSites</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#catkit.gen.adsorption.AdsorptionSites" title="catkit.gen.adsorption.AdsorptionSites"><code class="xref py py-class docutils literal notranslate"><span class="pre">catkit.gen.adsorption.AdsorptionSites</span></code></a></p>
 <p>Initial module for creation of 3D slab structures with
 attached adsorbates.</p>
 <p>Create an extended unit cell of the surface sites for
@@ -480,7 +487,7 @@ hydrogens across bins</p>
 <dl class="class">
 <dt id="catkit.gen.pathways.ReactionNetwork">
 <em class="property">class </em><code class="descclassname">catkit.gen.pathways.</code><code class="descname">ReactionNetwork</code><span class="sig-paren">(</span><em>db_name='reaction-network.db'</em>, <em>base_valence=None</em>, <em>nbond_limits=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class for accessing a temporary SQLite database. This
 function works as a context manager and should be used as follows:</p>
 <dl class="docutils">
@@ -580,14 +587,19 @@ Only supported for elementary steps.</td>
 <code class="descname">molecule_search</code><span class="sig-paren">(</span><em>element_pool={'C': 2</em>, <em>'H': 6}</em>, <em>load_molecules=True</em>, <em>multiple_bond_search=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.molecule_search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the enumeration of molecules which can be produced from
 the specified atoms.</p>
-<dl class="docutils">
-<dt>element_pool <span class="classifier-delimiter">:</span> <span class="classifier">dict</span></dt>
-<dd>Atomic symbols keys paired with the maximum number of that atom.</dd>
-<dt>load_molecules <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Load any existing molecules from the database.</dd>
-<dt>multiple_bond_search <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Allow atoms to form bonds with other atoms in the molecule.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>element_pool</strong> (<em>dict</em>) – Atomic symbols keys paired with the maximum number of that atom.</li>
+<li><strong>load_molecules</strong> (<em>bool</em>) – Load any existing molecules from the database.</li>
+<li><strong>multiple_bond_search</strong> (<em>bool</em>) – Allow atoms to form bonds with other atoms in the molecule.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -771,32 +783,32 @@ l response reactions.</li>
 <dl class="class">
 <dt id="catkit.gen.surface.SlabGenerator">
 <em class="property">class </em><code class="descclassname">catkit.gen.surface.</code><code class="descname">SlabGenerator</code><span class="sig-paren">(</span><em>bulk</em>, <em>miller_index=(1</em>, <em>1</em>, <em>1)</em>, <em>layers=4</em>, <em>min_width=None</em>, <em>fixed=0</em>, <em>vacuum=0</em>, <em>fix_stoichiometry=False</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.surface.SlabGenerator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Class for generation of slab unit cells from bulk unit cells.</p>
 <p>Many surface operations rely upon / are made easier through the
 bulk basis cell they are created from. The SlabGenerator class
 is designed to house these operations.</p>
 <p>Generate a slab from a bulk atoms object.</p>
-<dl class="docutils">
-<dt>bulk <span class="classifier-delimiter">:</span> <span class="classifier">atoms object</span></dt>
-<dd>Bulk structure to produce the slab from.</dd>
-<dt>miller_index <span class="classifier-delimiter">:</span> <span class="classifier">list (3,) or (4,)</span></dt>
-<dd>Miller index to construct surface from. If length is 4, then
-Miller-Bravis indices are assumed.</dd>
-<dt>layers <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of layers to include in the slab.</dd>
-<dt>min_width <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Minimum width of slabs produce (Ang). Will override layers.</dd>
-<dt>fixed <span class="classifier-delimiter">:</span> <span class="classifier">int</span></dt>
-<dd>Number of layers to fix in the slab.</dd>
-<dt>vacuum <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Angstroms of vacuum to add to the slab.</dd>
-<dt>fix_stoichiometry <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>Constraints any slab generated to have the same
-stoichiometry as the provided bulk.</dd>
-<dt>tol <span class="classifier-delimiter">:</span> <span class="classifier">float</span></dt>
-<dd>Tolerance for floating point rounding errors.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>bulk</strong> (<em>atoms object</em>) – Bulk structure to produce the slab from.</li>
+<li><strong>miller_index</strong> (<em>list</em><em> (</em><em>3</em><em>,</em><em>) or </em><em>(</em><em>4</em><em>,</em><em>)</em>) – Miller index to construct surface from. If length is 4, then
+Miller-Bravis indices are assumed.</li>
+<li><strong>layers</strong> (<em>int</em>) – Number of layers to include in the slab.</li>
+<li><strong>min_width</strong> (<em>float</em>) – Minimum width of slabs produce (Ang). Will override layers.</li>
+<li><strong>fixed</strong> (<em>int</em>) – Number of layers to fix in the slab.</li>
+<li><strong>vacuum</strong> (<em>float</em>) – Angstroms of vacuum to add to the slab.</li>
+<li><strong>fix_stoichiometry</strong> (<em>bool</em>) – Constraints any slab generated to have the same
+stoichiometry as the provided bulk.</li>
+<li><strong>tol</strong> (<em>float</em>) – Tolerance for floating point rounding errors.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="catkit.gen.surface.SlabGenerator.adsorption_sites">
 <code class="descname">adsorption_sites</code><span class="sig-paren">(</span><em>slab</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.adsorption_sites" title="Permalink to this definition">¶</a></dt>
@@ -824,15 +836,19 @@ the same basis.</td>
 <dd><p>Return the surface connectivity of a slab based on information
 from the bulk basis is was constructed from.</p>
 <p>Assumes the xy-plane is perpendicular to the miller index.</p>
-<dl class="docutils">
-<dt>slab <span class="classifier-delimiter">:</span> <span class="classifier">atoms object</span></dt>
-<dd>Atoms to find graph connectivity for.</dd>
-</dl>
-<dl class="docutils">
-<dt>surf_con <span class="classifier-delimiter">:</span> <span class="classifier">ndarray (n, n)</span></dt>
-<dd>Connectivity matrix of the surface atoms with periodic boundary
-conditions.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>slab</strong> (<em>atoms object</em>) – Atoms to find graph connectivity for.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>surf_con</strong> – Connectivity matrix of the surface atoms with periodic boundary
+conditions.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray (n, n)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -1320,7 +1336,7 @@ points and perpendicular to the positive z coordinate.</p>
 <dl class="class">
 <dt id="catkit.gen.Defaults">
 <em class="property">class </em><code class="descclassname">catkit.gen.</code><code class="descname">Defaults</code><a class="headerlink" href="#catkit.gen.Defaults" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.abc.MutableMapping</span></code>, <code class="xref py py-class docutils literal"><span class="pre">dict</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.MutableMapping</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></p>
 <p>No frills default dictionary class.</p>
 </dd></dl>
 
@@ -1348,7 +1364,7 @@ points and perpendicular to the positive z coordinate.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:37:39.
+      Last updated on Sun, 20 May 2018 21:13:44.
 
     </p>
   </div>

@@ -9,8 +9,8 @@ def reactant_indices(R1, R2, P, broken_bond):
     """Match the indices of a pair of reactants from a
      product and broken bond.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     R1 : networkx MultiGraph
         Graph representing reactant 1
     R2 : networkx MultiGraph
@@ -21,8 +21,8 @@ def reactant_indices(R1, R2, P, broken_bond):
         Indices representing the edge of the product
         to be removed.
 
-    Returns:
-    --------
+    Returns
+    -------
     pindex: ndarrays (n,)
         Indices of the product graph sorted by the order of
         the reactants indices.

@@ -7,15 +7,15 @@ def id_reconstruction(images, save=False):
     """Identify a reconstruction event by analyzing changes in
     the forces.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     images : list of ASE atoms objects
         Relaxation trajectory.
     show : bool
         Create a figure to display the events located.
 
-    Returns:
-    --------
+    Returns
+    -------
     predicted_events: list of int
         index of images predicted before the event occurs.
     """
