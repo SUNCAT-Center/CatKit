@@ -1,0 +1,4 @@
+include MANIFEST.in
+include readme.org
+include requirements.txt
+include catkit/data/*

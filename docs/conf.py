@@ -28,7 +28,7 @@ html_static_path = ['static']
 html_last_updated_fmt = '%a, %d %b %Y %H:%M:%S'
 
 version = '0.4'
-release = '0.4.3'
+release = '0.4.4'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
 

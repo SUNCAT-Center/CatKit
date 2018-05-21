@@ -59,6 +59,8 @@ def surface(
         vacuum=vacuum)
 
     slab = gen.get_slab(size=size, root=root, primitive=primitive)
+    surface_atoms = gen.get_voronoi_surface_atoms(slab, attach_graph=True)
+    slab.set_surface_atoms(surface_atoms[0])
 
     return slab
 
