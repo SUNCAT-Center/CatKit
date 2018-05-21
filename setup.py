@@ -1,6 +1,6 @@
 import setuptools
 
-with open('requierments.txt', 'r') as f:
+with open('requirements.txt', 'r') as f:
     requirements = f.readlines()
 
 with open('readme.org', 'r') as f:
