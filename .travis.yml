@@ -39,7 +39,7 @@ install:
 
 script:
   - nosetests ./catkit --with-coverage --cover-inclusive --cover-package=. --cover-erase
-  - coverage report --omit 'docs/*,./*/tests/*' --show-missing
+  - coverage report --omit 'docs/*,./*/tests/*,./tests/*,data/*' --show-missing
 
 after_success:
   - coveralls
