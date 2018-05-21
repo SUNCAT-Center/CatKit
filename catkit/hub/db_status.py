@@ -1,7 +1,7 @@
 import ase
 from ase.db import *
 from sys import argv
-from cathub.catappsqlite import *
+from catkit.hub.catappsqlite import *
 import os
 
 catbase = os.environ['data'] + 'winther/'

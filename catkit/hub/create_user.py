@@ -1,5 +1,5 @@
 from sys import argv
-from cathub.postgresql import CathubPostgreSQL
+from catkit.hub.postgresql import CathubPostgreSQL
 import os
 
 def main(user):

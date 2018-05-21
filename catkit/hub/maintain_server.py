@@ -1,4 +1,4 @@
-from cathub.postgresql import CathubPostgreSQL
+from catkit.hub.postgresql import CathubPostgreSQL
 
 class MaintainPostgres(CathubPostgreSQL):
     def fill_reaction_system(self):

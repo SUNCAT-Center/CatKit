@@ -5,7 +5,7 @@ from ase import *
 from sys import argv
 from ase.io import read, write
 
-from cathub.ase_tools import gas_phase_references
+from catkit.hub.ase_tools import gas_phase_references
 
 def read_ase(filename):
     import six

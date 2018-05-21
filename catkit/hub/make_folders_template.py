@@ -17,8 +17,8 @@ else:
 
 sys.path.append(catbase)
 
-import cathub.ase_tools
-from cathub.tools import extract_atoms, check_reaction
+import catkit.hub.ase_tools
+from catkit.hub.tools import extract_atoms, check_reaction
 
 username = os.environ['USER']
 
@@ -156,7 +156,7 @@ def main(
 
     gas_names = []
     ads_names = []
-    from cathub.ase_tools import get_state, clear_state, clear_prefactor
+    from catkit.hub.ase_tools import get_state, clear_state, clear_prefactor
     for i in range(len(reactions)):
         rnames = [r.split('@')[0] for r in reactions[i]['reactants'] +
                   reactions[i]['products']]

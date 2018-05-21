@@ -31,7 +31,7 @@ import numpy as np
 
 
 # local imports
-from cathub.ase_tools import gas_phase_references
+from catkit.hub.ase_tools import gas_phase_references
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 

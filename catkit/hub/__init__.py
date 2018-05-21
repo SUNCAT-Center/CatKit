@@ -22,7 +22,7 @@ def cli():
 def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
     """Read folders and collect data in local sqlite3 database"""
     import os
-    import cathub.folder2db
+    import catkit.hub.folder2db
 
     folder_name = folder_name.strip('/')
     skip = []
@@ -47,7 +47,7 @@ def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, db_user):
     """Transfer data from local database to Catalysis Hub server"""
     import os
-    import cathub.db2server
+    import catkit.hub.db2server
     db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
                    write_ase=write_ase,
                    write_publication=write_publication,
@@ -101,7 +101,7 @@ publication_columns = [
 # Keep {0} in string.format for python2.6 compatibility
 def reactions(columns, n_results, queries):
     """Search for reactions"""
-    import cathub.query
+    import catkit.hub.query
     if not isinstance(queries, dict):
         query_dict = {}
         for q in queries:
@@ -139,7 +139,7 @@ def reactions(columns, n_results, queries):
 # Keep {0} in string.format for python2.6 compatibility
 def publications(columns, n_results, queries):
     """Search for publications"""
-    import cathub.query
+    import catkit.hub.query
     if not isinstance(queries, dict):
         query_dict = {}
         for q in queries:
@@ -217,7 +217,7 @@ def make_folders(create_template, template, custom_base, diagnose):
     if you, for example, are using different functionals or are
     doing different reactions on different surfaces.
     """
-    import cathub.make_folders_template
+    import catkit.hub.make_folders_template
     import json
     import os
 
@@ -308,7 +308,7 @@ def make_folders(create_template, template, custom_base, diagnose):
 @click.argument('user', default='catvisitor')
 def connect(user):
     """Direct connection to PostreSQL server."""
-    import cathub.psql_server_connect
+    import catkit.hub.psql_server_connect
     psql_server_connect.main(user)
 
 
@@ -324,7 +324,7 @@ def connect(user):
 @click.argument('final_level')
 def write_user_spec():
     """Write JSON specfile for single DFT calculation."""
-    import cathub.write_user_spec
+    import catkit.hub.write_user_spec
 
 
 @cli.command()
@@ -395,7 +395,7 @@ def write_user_spec():
 
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
-    import cathub.organize
+    import catkit.hub.organize
     import collections
 
     # do argument wrangling  before turning it into an obect
@@ -412,4 +412,4 @@ def organize(**kwargs):
         'options',
         kwargs.keys()
     )(**kwargs)
-    cathub.organize.main(options=options)
+    catkit.hub.organize.main(options=options)

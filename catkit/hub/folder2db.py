@@ -3,9 +3,9 @@ from sys import argv
 
 def main(folder_name, debug=False, skip=[], goto_reaction=None, old=False):
     if old:
-        from cathub.folderreader_old import FolderReader
+        from catkit.hub.folderreader_old import FolderReader
     else:
-        from cathub.folderreader import FolderReader
+        from catkit.hub.folderreader import FolderReader
     FR = FolderReader(folder_name=folder_name, debug=debug)
     FR.write(skip=skip, goto_reaction=goto_reaction)
 

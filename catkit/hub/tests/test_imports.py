@@ -17,22 +17,22 @@ class CommandLineTestCase(unittest.TestCase):
         pass
 
     def test_imports(self):
-        import cathub
-        import cathub.cathubsqlite
-        import cathub.postgresql
-        import cathub.folderreader
-        import cathub.tools
-        import cathub.ase_tools
-        import cathub.folder2db
-        import cathub.db2server
-        import cathub.make_folders_template
-        import cathub.psql_server_connect
-        import cathub.organize
+        import catkit.hub
+        import catkit.hub.cathubsqlite
+        import catkit.hub.postgresql
+        import catkit.hub.folderreader
+        import catkit.hub.tools
+        import catkit.hub.ase_tools
+        import catkit.hub.folder2db
+        import catkit.hub.db2server
+        import catkit.hub.make_folders_template
+        import catkit.hub.psql_server_connect
+        import catkit.hub.organize
 
     def test_cli(self):
         runner = CliRunner()
         
-        from cathub import reactions, publications        
+        from catkit.hub import reactions, publications        
         runner.invoke(reactions)
         runner.invoke(publications)
 

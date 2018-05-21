@@ -417,7 +417,7 @@ class CathubPostgreSQL:
                 self.stdout.write('    Completed transfer of {0} atomic structures.'.format(nrows))
                 self.stdout.write('    Estimated time left: {0} sec'.format(t_av * (n_blocks - block_id)))
 
-        from cathub.cathubsqlite import CathubSQLite
+        from catkit.hub.cathubsqlite import CathubSQLite
         db = CathubSQLite(filename_sqlite)
         con_lite = db._connect()
         cur_lite = con_lite.cursor()

@@ -17,7 +17,7 @@ else:
 
 sys.path.append(catbase)
 
-from cathub.ase_tools import check_traj
+from catkit.hub.ase_tools import check_traj
 
 def main(base):
     for roots, dirs, files in os.walk(base):

@@ -1,5 +1,5 @@
 from sys import argv, stdout, stdin
-from cathub.postgresql import CathubPostgreSQL
+from catkit.hub.postgresql import CathubPostgreSQL
 
 def main(dbfile, start_id=1, write_reaction=True, write_ase=True,
          write_publication=True, write_reaction_system=True,
