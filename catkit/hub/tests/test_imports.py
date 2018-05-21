@@ -35,7 +35,7 @@ class CommandLineTestCase(unittest.TestCase):
         runner.invoke(reactions)
         runner.invoke(publications)
 
-        from cathub import make_folders
+        from catkit.hub import make_folders
         runner.invoke(make_folders, ['--create-template', 'template'])
         runner.invoke(make_folders, ['template'])
 
