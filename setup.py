@@ -4,7 +4,7 @@ with open('requirements.txt', 'r') as f:
     requirements = f.readlines()
 
 with open('readme.org', 'r') as f:
-    readme = f.readlines()
+    readme = f.read()
 
 setuptools.setup(
     name="CatKit",
@@ -15,7 +15,7 @@ setuptools.setup(
     author_email="jrboes@stanford.edu",
 
     description="General purpose tools for high-throughput catalysis.",
-    long_description_content_type=readme,
+    long_description=readme,
     license='GPL-3.0',
 
     packages=[
