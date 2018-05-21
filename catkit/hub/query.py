@@ -6,7 +6,7 @@ import requests
 import pprint
 import ase.db
 
-from catkit.hub..cathubsqlite import CathubSQLite
+from catkit.hub.cathubsqlite import CathubSQLite
 
 all_columns = {'reactions': ['chemicalComposition', 'surfaceComposition',
                              'facet', 'sites', 'coverages', 'reactants',
