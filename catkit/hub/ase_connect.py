@@ -9,22 +9,3 @@ def main():
 
     return db
 
-if __name__ == '__main__':
-    main()
-
-
-
-
-### simple
-
-
-#!/usr/bin/env python
-import os
-import ase.db
-
-host = 'catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com'
-server = 'postgresql://catvisitor:' + os.environ['PASSWORD'] + \
-         '@{0}:5432/catalysishub'.format(host)
-db = ase.db.connect(server)
-
-
