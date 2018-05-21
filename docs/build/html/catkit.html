@@ -193,6 +193,13 @@
 <li class="toctree-l4"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.gen.api.html">catkit.gen.api package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.catmap">catkit.gen.api.catmap module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api.rd_kit">catkit.gen.api.rd_kit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.api.html#module-catkit.gen.api">Module contents</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.gen.html#submodules">Submodules</a></li>
@@ -286,7 +293,7 @@ a primitive lattice length multiple this root.</li>
 <dl class="class">
 <dt id="catkit.db.Atom">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom</code><span class="sig-paren">(</span><em>structure</em>, <em>number</em>, <em>coordinates</em>, <em>constraints</em>, <em>magmom</em>, <em>charge</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Atom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Atom.atom_result">
 <code class="descname">atom_result</code><a class="headerlink" href="#catkit.db.Atom.atom_result" title="Permalink to this definition">¶</a></dt>
@@ -362,7 +369,7 @@ a primitive lattice length multiple this root.</li>
 <dl class="class">
 <dt id="catkit.db.Atom_Result">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Atom_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>atom</em>, <em>forces=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Atom_Result" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Atom_Result.atom">
 <code class="descname">atom</code><a class="headerlink" href="#catkit.db.Atom_Result.atom" title="Permalink to this definition">¶</a></dt>
@@ -408,7 +415,7 @@ a primitive lattice length multiple this root.</li>
 <dl class="class">
 <dt id="catkit.db.Calculator">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Calculator</code><span class="sig-paren">(</span><em>name</em>, <em>xc=None</em>, <em>kpoints=None</em>, <em>energy_cutoff=None</em>, <em>parameters=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Calculator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Calculator.atom_result">
 <code class="descname">atom_result</code><a class="headerlink" href="#catkit.db.Calculator.atom_result" title="Permalink to this definition">¶</a></dt>
@@ -469,7 +476,7 @@ a primitive lattice length multiple this root.</li>
 <dl class="class">
 <dt id="catkit.db.Connect">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Connect</code><span class="sig-paren">(</span><em>engine='sqlite:///example.db'</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Connect" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class for accessing a temporary SQLite database. This
 function works as a context manager and should be used as follows:</p>
 <dl class="docutils">
@@ -488,7 +495,7 @@ class is referenced.</p>
 <dl class="class">
 <dt id="catkit.db.Element">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Element</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Element" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Element.atom">
 <code class="descname">atom</code><a class="headerlink" href="#catkit.db.Element.atom" title="Permalink to this definition">¶</a></dt>
@@ -519,7 +526,7 @@ class is referenced.</p>
 <dl class="class">
 <dt id="catkit.db.Entry">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Entry</code><span class="sig-paren">(</span><em>structure</em>, <em>calculator</em>, <em>trajectory</em>, <em>natoms</em>, <em>energy</em>, <em>fmax</em>, <em>smax=None</em>, <em>search_keys=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Entry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Entry.calculator">
 <code class="descname">calculator</code><a class="headerlink" href="#catkit.db.Entry.calculator" title="Permalink to this definition">¶</a></dt>
@@ -580,7 +587,7 @@ class is referenced.</p>
 <dl class="class">
 <dt id="catkit.db.FingerprintDB">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">FingerprintDB</code><span class="sig-paren">(</span><em>db_name='fingerprints.db'</em>, <em>verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.FingerprintDB" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>A class for accessing a temporary SQLite database. This
 function works as a context manager and should be used as follows:</p>
 <dl class="docutils">
@@ -746,7 +753,7 @@ is provided, return all symbols.</p>
 <dl class="class">
 <dt id="catkit.db.Structure">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure</code><span class="sig-paren">(</span><em>cell</em>, <em>pbc</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Structure" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Structure.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#catkit.db.Structure.atoms" title="Permalink to this definition">¶</a></dt>
@@ -822,7 +829,7 @@ is provided, return all symbols.</p>
 <dl class="class">
 <dt id="catkit.db.Structure_Result">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Structure_Result</code><span class="sig-paren">(</span><em>calculator</em>, <em>structure</em>, <em>energy</em>, <em>stress=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Structure_Result" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <dl class="attribute">
 <dt id="catkit.db.Structure_Result.calcualtor_id">
 <code class="descname">calcualtor_id</code><a class="headerlink" href="#catkit.db.Structure_Result.calcualtor_id" title="Permalink to this definition">¶</a></dt>
@@ -888,10 +895,10 @@ is provided, return all symbols.</p>
 <dl class="class">
 <dt id="catkit.db.Trajectories">
 <em class="property">class </em><code class="descclassname">catkit.db.</code><code class="descname">Trajectories</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.db.Trajectories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
 <p>A simple constructor that allows initialization from kwargs.</p>
 <p>Sets attributes on the constructed instance using the names and
-values in <code class="docutils literal"><span class="pre">kwargs</span></code>.</p>
+values in <code class="docutils literal notranslate"><span class="pre">kwargs</span></code>.</p>
 <p>Only keys that are present as
 attributes of the instance’s class are allowed. These could be,
 for example, any mapped columns or relationships.</p>
@@ -918,7 +925,7 @@ for example, any mapped columns or relationships.</p>
 <dl class="class">
 <dt id="catkit.gratoms.Gratoms">
 <em class="property">class </em><code class="descclassname">catkit.gratoms.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gratoms.Gratoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ase.atoms.Atoms</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ase.atoms.Atoms</span></code></p>
 <p>Graph based atoms object.</p>
 <p>An Integrated class for an ASE atoms object with a corresponding
 Networkx Graph.</p>
@@ -1049,7 +1056,7 @@ arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/
 <dl class="class">
 <dt id="catkit.Gratoms">
 <em class="property">class </em><code class="descclassname">catkit.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.Gratoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ase.atoms.Atoms</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ase.atoms.Atoms</span></code></p>
 <p>Graph based atoms object.</p>
 <p>An Integrated class for an ASE atoms object with a corresponding
 Networkx Graph.</p>
@@ -1151,7 +1158,7 @@ or include bonding (rank 1).</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 11:37:39.
+      Last updated on Sun, 20 May 2018 21:13:44.
 
     </p>
   </div>

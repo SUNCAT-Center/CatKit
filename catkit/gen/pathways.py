@@ -146,8 +146,8 @@ class ReactionNetwork():
         """Return the enumeration of molecules which can be produced from
         the specified atoms.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         element_pool : dict
             Atomic symbols keys paired with the maximum number of that atom.
         load_molecules : bool
