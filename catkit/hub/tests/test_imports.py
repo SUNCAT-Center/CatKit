@@ -11,6 +11,7 @@ from click.testing import CliRunner
 
 import catkit.hub
 
+
 class CommandLineTestCase(unittest.TestCase):
     def setUp(self):
         pass

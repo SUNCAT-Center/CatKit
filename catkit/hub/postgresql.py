@@ -5,7 +5,7 @@ import sys
 
 try:
     from builtins import str as text
-except:
+except BaseException:
     text = str
 
 init_commands = [
@@ -228,7 +228,7 @@ class CathubPostgreSQL:
 
         cur.execute(
             """SELECT column_name FROM information_schema.columns
-            WHERE table_schema = 'public' AND table_name='{0}';"""\
+            WHERE table_schema = 'public' AND table_name='{0}';"""
             .format(table))
         columns = cur.fetchall()
 
@@ -431,9 +431,9 @@ class CathubPostgreSQL:
         if write_publication:
             try:
                 npub = db.get_last_pub_id(cur_lite)
-            except:
+            except BaseException:
                 npub = 1
-            for id_lite in range(1, npub+1):
+            for id_lite in range(1, npub + 1):
                 Npub += 1
                 row = db.read(id=id_lite, table='publication')
                 if len(row) == 0:
@@ -468,7 +468,7 @@ class CathubPostgreSQL:
         if write_reaction:
             n = db.get_last_id(cur_lite)
             select_ase = """SELECT * from reaction_system where id={};"""
-            for id_lite in range(start_id, n+1):
+            for id_lite in range(start_id, n + 1):
                 row = db.read(id_lite)
                 if len(row) == 0:
                     continue
@@ -600,7 +600,7 @@ def get_key_value_str(values, table='reaction'):
     if table == 'publication_system' or table == 'reaction_system':
         start_index = 0
     value_str = "'{0}'".format(values[start_index])
-    for v in values[start_index+1:]:
+    for v in values[start_index + 1:]:
         print("\n\n\nDIR TYPE {v}".format(**locals()))
         print(dir(v))
         print(type(v))

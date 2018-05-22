@@ -8,7 +8,7 @@ catbase = os.environ['data'] + 'winther/'
 
 db = ase.db.connect(catbase + 'atoms.db')
 n = db.count('id>0')
-print('ASE atoms: ',  n)
+print('ASE atoms: ', n)
 
 
 catapp = CatappSQLite(catbase + 'catapp.db')
