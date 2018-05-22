@@ -19,8 +19,7 @@ master_doc = 'index'
 copyright = '2018, CatKit-developers'
 default_role = 'math'
 pygments_style = 'sphinx'
-modindex_common_prefix = ['catkit.']
-autoclass_content = 'both'
+mautoclass_content = 'both'
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
