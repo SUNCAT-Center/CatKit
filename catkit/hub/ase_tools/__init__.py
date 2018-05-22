@@ -7,6 +7,7 @@ from ase.io import read, write
 
 from catkit.hub.ase_tools import gas_phase_references
 
+
 def read_ase(filename):
     import six
     if isinstance(filename, six.string_types):
@@ -44,11 +45,13 @@ def check_traj(filename, strict=True, verbose=True):
             return False
     return True
 
+
 def get_reference(filename):
     atoms = read_ase(filename)
     energy = atoms.get_potential_energy()
     name = atoms.get_chemical_formula()
     return {name: str(energy)}
+
 
 def get_pbc(filename):
     atoms = read_ase(filename)
@@ -195,7 +198,7 @@ def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
         # in python3 iteritems goes away in favor of items
         for i, traj in enumerate(trajlist):
             try:
-                trajname =  clear_prefactor(reaction[key][i])
+                trajname = clear_prefactor(reaction[key][i])
             except:
                 trajname = None
             if trajname in energy_corrections.keys():
@@ -215,16 +218,15 @@ def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
         # Is a different empty surface used for the TS?
         if 'TSempty' in traj_files.keys():
             for key in reaction_atoms.keys():
-                if '' in  reaction_atoms[key]:
+                if '' in reaction_atoms[key]:
                     index = reaction_atoms[key].index('')
                     traj_empty = traj_files[key][index]
-            traj_tsempty =  traj_files['TSempty'][0]
-            # print(traj_tsempty, traj_empty)
+            traj_tsempty = traj_files['TSempty'][0]
             tsemptydiff = get_energy(traj_tsempty) - get_energy(traj_empty)
 
         for i, traj in enumerate(traj_files['reactants']):
             try:
-                trajname =  clear_prefactor(reaction['reactants'][i])
+                trajname = clear_prefactor(reaction['reactants'][i])
             except:
                 trajname = None
             if trajname in energy_corrections.keys():
@@ -288,6 +290,7 @@ def get_layers(atoms):
 
 
 def get_surface_composition(filename):
+    filename = "{]".format(filename)
     atoms = read_ase(filename)
 
     if len(np.unique(atoms.get_atomic_numbers())) == 1:
@@ -374,7 +377,8 @@ def get_bulk_composition(filename):
     same_next_layer = compositions[1:] == compositions[:-1]
     bulk_compositions = compositions[:-1][same_next_layer]
 
-    if len(bulk_compositions) > 0 and all(c == bulk_compositions[0] for c in bulk_compositions):
+    if len(bulk_compositions) > 0 and \
+       all(c == bulk_compositions[0] for c in bulk_compositions):
         bulk_composition = bulk_compositions[0]
     else:
         bulk_composition = None
@@ -398,7 +402,6 @@ def check_in_ase(filename, ase_db, energy=None):
             n += 1
             ids.append(row.id)
     if n > 0:
-        print('{} already in ASE database'.format(formula))
         id = ids[0]
         unique_id = db_ase.get(id)['unique_id']
         return id, unique_id
@@ -417,12 +420,12 @@ def write_ase(filename, db_file, user=None, data=None, **key_value_pairs):
     atoms = read_ase(filename)
     atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
-    #db_ase.user = user
     _normalize_key_value_pairs_inplace(key_value_pairs)
     id = db_ase.write(atoms, data=data, **key_value_pairs)
     print('writing atoms to ASE db row id = {}'.format(id))
     unique_id = db_ase.get(id)['unique_id']
     return unique_id
+
 
 def update_ase(db_file, identity,  **key_value_pairs):
     """ Connect to ASE db"""
@@ -430,8 +433,10 @@ def update_ase(db_file, identity,  **key_value_pairs):
 
     _normalize_key_value_pairs_inplace(key_value_pairs)
     count = db_ase.update(identity, **key_value_pairs)
-    print('Updating {0} key value pairs in ASE db row id = {1}'.format(count, id))
+    print('Updating {0} key value pairs in ASE db row id = {1}'
+          .format(count, identity))
     return
+
 
 def get_reaction_from_folder(folder_name):
     reaction = {}
@@ -456,7 +461,7 @@ def get_reaction_from_folder(folder_name):
                          'products': products})
     else:
         raise AssertionError('problem with folder {}'.format(folder_name))
-    
+
     sites = {}
     for key, mollist in reaction.items():
         for n, mol in enumerate(mollist):
@@ -467,7 +472,6 @@ def get_reaction_from_folder(folder_name):
             if 'gas' not in mol and 'star' not in mol:
                 reaction[key][n] = mol + 'star'
 
-
     for key, mollist in reaction.items():
         n_star = mollist.count('star')
         if n_star > 1:
@@ -475,8 +479,6 @@ def get_reaction_from_folder(folder_name):
                 mollist.remove('star')
             mollist.append(str(n_star) + 'star')
 
-    #from tools import check_reaction
-    #check_reaction(reaction['reactants'], reaction['products'])
     return reaction, sites
 
 
@@ -536,7 +538,7 @@ def get_reaction_atoms(reaction):
             if key == 'reactants':
                 prefactors_TS[key][index] += diff
 
-    if n_r > 1: # Balance slabs for transition state
+    if n_r > 1:  # Balance slabs for transition state
         count_empty = 0
         if '' in reaction_atoms['reactants']:
             index = reaction_atoms['reactants'].index('')
