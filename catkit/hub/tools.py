@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+import os
+
 
 def extract_atoms(molecule):
     # return a string with all atoms in molecule
@@ -44,17 +46,19 @@ def extract_atoms(molecule):
 
     return sign + ''.join(sorted(atoms))
 
+
 def add_atoms(atoms_list):
     add = ''
     sub = ''
     for atoms in atoms_list:
         if isinstance(atoms, float):
             continue
-        if len(atoms)>0 and atoms[0] == '-':
+        if len(atoms) > 0 and atoms[0] == '-':
             sub += atoms[1:]
         else:
             add += atoms
     return add.replace(sub, '', 1)
+
 
 def check_reaction(reactants, products):
     """
@@ -62,8 +66,10 @@ def check_reaction(reactants, products):
     folder structure.
     list of reactants -> list of products
     """
-    reactant_list = [reactant.split('@')[0].strip('star').strip('gas') for reactant in reactants]
-    product_list = [product.split('@')[0].strip('star').strip('gas') for product in products]
+    reactant_list = [reactant.split('@')[0].strip(
+        'star').strip('gas') for reactant in reactants]
+    product_list = [product.split('@')[0].strip(
+        'star').strip('gas') for product in products]
 
     reactant_atoms = [extract_atoms(reactant) for reactant in reactant_list]
     product_atoms = [extract_atoms(product) for product in product_list]
@@ -75,22 +81,19 @@ def check_reaction(reactants, products):
     p_stars = 0
 
     for i, a in enumerate(reactant_atoms):
-        if a=='' or 'star' in reactant_list[i]:
+        if a == '' or 'star' in reactant_list[i]:
             r_stars += 1
         elif isinstance(a, float):
             r_stars += a
     for a in product_atoms:
-        if a=='':
+        if a == '':
             p_stars += 1
         elif isinstance(a, float):
             p_stars += a
     assert ''.join(sorted(reactants)) == ''.join(sorted(products))
-    #assert r_stars == p_stars, 'Please match the number of surfaces on each side. Left side: {} *s, right side: {} *s'.format(r_stars, p_stars)
 
 
 def get_catbase():
-    import os
-
     if 'SHERLOCK' in os.environ:
         sherlock = os.environ['SHERLOCK']
         if sherlock == '1':
@@ -105,8 +108,6 @@ def get_catbase():
 
 
 def get_bases(folder_name):
-    import os
-
     catbase = get_catbase()
 
     if os.environ['USER'] == 'winther':
@@ -118,4 +119,3 @@ def get_bases(folder_name):
 
     user_base = catbase + folder_name
     return catbase, data_base, user, user_base
-
