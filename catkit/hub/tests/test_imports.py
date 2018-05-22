@@ -28,18 +28,18 @@ class CommandLineTestCase(unittest.TestCase):
         import catkit.hub.psql_server_connect
         import catkit.hub.organize
 
-    def test_cli(self):
+    def test_cli_query(self):
         runner = CliRunner()
-        
-        from catkit.hub import reactions, publications        
+        from catkit.hub.cli import reactions, publications
         runner.invoke(reactions)
         runner.invoke(publications)
 
-        from catkit.hub import make_folders
+    def test_cli_make_folders(self):
+        from catkit.hub.cli import make_folders
+        runner = CliRunner()
         runner.invoke(make_folders, ['--create-template', 'template'])
         runner.invoke(make_folders, ['template'])
 
-                      
+
 if __name__ == '__main__':
     unittest.main()
-        
