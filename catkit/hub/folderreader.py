@@ -106,7 +106,7 @@ class FolderReader:
                     db.update(id, key_values)
                     print('Updated reaction db row id = {}'.format(id))
                 else:
-                    print('Allready in reaction db with row id = {}'.format(id))
+                    print('Already in reaction db with row id = {}'.format(id))
 
     def write_publication(self, pub_data):
         with CathubSQLite(self.cathub_db) as db:
@@ -115,14 +115,13 @@ class FolderReader:
                 pid = db.write_publication(pub_data)
                 print('Written to publications db row id = {}'.format(pid))
             else:
-                print('Allready in reaction db with row id = {}'.format(pid))
+                print('Already in reaction db with row id = {}'.format(pid))
         return pid
 
     def update_sqlite(self, skip=[], goto_reaction=None, key_names='all'):
         for key_values in self.read(skip=skip, goto_reaction=goto_reaction):
             with CathubSQLite(self.cathub_db) as db:
                 id = db.check(key_values['reaction_energy'])
-                #print('Allready in reaction db with row id = {}'.format(id))
                 if id is not None:
                     db.update(id, key_values, key_names)
 
@@ -212,7 +211,11 @@ class FolderReader:
     def read_bulk(self, root, files):
         
         self.metal, self.crystal = root.split('/')[-1].split('_')
-        
+
+        print('------------------------------------------------------')
+        print('                    Surface:  {}'.format(self.metal))
+        print('------------------------------------------------------')
+
         self.ase_ids = {}
         traj_bulk = ['{}/{}'.format(root,f) for f in files if f.endswith('.traj') and 'bulk' in f][0]
         
@@ -270,7 +273,7 @@ class FolderReader:
 
         self.reaction, self.sites = get_reaction_from_folder(folder_name)  # reaction dict
 
-        print('-------------- REACTION:  {} --> {} -----------------'\
+        print('----------- REACTION:  {} --> {} --------------'\
             .format('+'.join(self.reaction['reactants']),
                     '+'.join(self.reaction['products'])))
 
