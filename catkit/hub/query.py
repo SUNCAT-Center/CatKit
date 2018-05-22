@@ -13,13 +13,16 @@ all_columns = {'reactions': ['chemicalComposition', 'surfaceComposition',
                              'products', 'Equation',
                              'reactionEnergy', 'activationEnergy',
                              'dftCode', 'dftFunctional',
-                             'username', 'pubId'],               
-               'publication': ['pubId', 'title', 'authors', 'journal', 'number', 'volume',
+                             'username', 'pubId'],
+               'publication': ['pubId', 'title', 'authors', 'journal',
+                               'number', 'volume',
                                'pages', 'year', 'publisher', 'doi', 'tags'],
-               'publications': ['pubId', 'title', 'authors', 'journal', 'volume', 'number',
+               'publications': ['pubId', 'title', 'authors', 'journal',
+                                'volume', 'number',
                                 'pages', 'year', 'publisher', 'doi', 'tags'],
                'reactionSystems': ['name', 'energyCorrection', 'aseId'],
                'publicationSystems': ['pubId', 'aseId']}
+
 
 def query(table='reactions',
           columns=['chemicalComposition',
@@ -29,13 +32,13 @@ def query(table='reactions',
           n_results=10,
           queries={},
           print_output=False):
-    
+
     query_string = graphql_query(table=table,
                                  subtables=subtables,
                                  columns=columns,
                                  n_results=n_results,
                                  queries=queries)
-    
+
     return execute_graphQL(query_string)
 
 
@@ -53,6 +56,7 @@ def execute_graphQL(query_string):
     pprint.pprint(data)
     return data
 
+
 def graphql_query(table='reactions',
                   subtables=[],
                   columns=['chemicalComposition',
@@ -60,7 +64,6 @@ def graphql_query(table='reactions',
                            'products'],
                   n_results=10,
                   queries={}):
-
 
     statement = '{'
     statement += '{}(first: {}'.format(table, n_results)
@@ -74,7 +77,7 @@ def graphql_query(table='reactions',
                 statement += ', {}: false'.format(key)
         else:
             statement += ', {}: {}'.format(key, value)
-            
+
     statement += ') {\n'
     statement += ' totalCount\n  edges {\n    node { \n'
     for column in columns:
@@ -108,9 +111,9 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
             queries.update({key: '{0}'.format(value)})
 
     subtables = []
-    #if write_local:
+    # if write_local:
     subtables = ['reactionSystems', 'publication']
-        
+
     data = query(table='reactions', subtables=subtables,
                  columns=all_columns['reactions'],
                  n_results=n_results, queries=queries)
@@ -119,12 +122,12 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
         return data
 
     for row in data['data']['reactions']['edges']:
-        with CathubSQLite('Reactions.db') as db:       
+        with CathubSQLite('Reactions.db') as db:
             row = row['node']
             key_values = {}
             for key in all_columns['reactions']:
                 v = row[key]
-                #if isinstance(v, unicode):
+                # if isinstance(v, unicode):
                 #    v = v.encode('utf-8')
                 try:
                     v = json.loads(v)
@@ -133,7 +136,7 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
                 key_values[convert(key)] = v
             ase_ids = {}
             energy_corrections = {}
-            
+
             for row_rs in row['reactionSystems']:
                 if row_rs['name'] == 'N/A':
                     continue
@@ -152,9 +155,10 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
             for key in all_columns['publications']:
                 pub_key_values[convert(key)] = row_p[key]
             db.write_publication(pub_key_values)
-            
+
             # reactions and reaction_systems
-            id = db.check(key_values['chemical_composition'], key_values['reaction_energy'])
+            id = db.check(key_values['chemical_composition'],
+                          key_values['reaction_energy'])
             if id is None:
                 id = db.write(key_values)
             else:
@@ -164,11 +168,12 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
             with ase.db.connect('Reactions.db') as ase_db:
                 for unique_id in ase_ids.values():
                     if ase_db.count('unique_id={}'.format(unique_id)) == 0:
-                        atomsrow = get_atomsrow_by_id(unique_id)                        
-                        ase_db.write(atomsrow) 
+                        atomsrow = get_atomsrow_by_id(unique_id)
+                        ase_db.write(atomsrow)
 
     return data
-    
+
+
 def get_publications(**kwargs):
     queries = {}
     for key, value in kwargs.items():
@@ -184,28 +189,29 @@ def get_publications(**kwargs):
             queries.update({key: '{0}'.format(value)})
 
     return query(table='publications', columns=publication_columns,
-                  queries=queries)
+                 queries=queries)
 
 
 def get_ase_db():
-     ps = os.environ.get('DB_PASSWORD')
-     return  ase.db.connect('postgresql://catvisitor:{}@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub'.format(ps))
+    ps = os.environ.get('DB_PASSWORD')
+    return ase.db.connect('postgresql://catvisitor:{}@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub'.format(ps))
 
 
-def get_atomsrow_by_id(unique_id):   
-    db = get_ase_db()    
-    row = db.get('unique_id={}'.format(unique_id))    
+def get_atomsrow_by_id(unique_id):
+    db = get_ase_db()
+    row = db.get('unique_id={}'.format(unique_id))
     return row
 
-#def get_atomsrow_by_ids(unique_ids):
+# def get_atomsrow_by_ids(unique_ids):
 #    db = get_ase_db()
 #    con = db._connect()
 #    cur = con.cursor()
-    
+
 
 def get_atoms_by_id(unique_id):
     row = get_atomsrow_by_id(unique_id)
     return row.toatoms()
+
 
 def map_column_names(column):
     mapping = {'surface': 'chemicalComposition'}
@@ -214,16 +220,15 @@ def map_column_names(column):
         return mapping[column]
     else:
         return column
-    
+
 
 if __name__ == '__main__':
     query = query(table='reactions',
-                 columns=['chemicalComposition',
-                          'reactants',
-                          'products'],
-                 n_results=10,
-                 queries={'chemicalComposition': "~Pt"})
-
+                  columns=['chemicalComposition',
+                           'reactants',
+                           'products'],
+                  n_results=10,
+                  queries={'chemicalComposition': "~Pt"})
 
 
 def convert(name):
