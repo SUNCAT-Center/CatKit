@@ -9,7 +9,7 @@ from ase.atoms import string2symbols
 
 import catkit.hub.folder2db
 import catkit.hub.db2server
-import afoldecatkit.hub.organize
+import catkit.hub.organize
 from catkit.hub import query, make_folders_template, psql_server_connect
 
 
