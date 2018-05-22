@@ -34,9 +34,6 @@ Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io
 
 For additional detail see the [[./docs/catkit/flow/flow.org][CatFlow documentation]].
 
-* CatHUB: Catalysis Hub
-Coming soon.
-
 * CatHub: Catalysis-Hub.org interface...
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.

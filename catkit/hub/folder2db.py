@@ -1,6 +1,7 @@
 import os
 from sys import argv
 
+
 def main(folder_name, debug=False, skip=[], goto_reaction=None, old=False):
     if old:
         from catkit.hub.folderreader_old import FolderReader

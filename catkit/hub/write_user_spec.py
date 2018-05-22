@@ -1,17 +1,6 @@
+import os
 import json
 from sys import argv
-import os
-
-try:  #sherlock 1 or 2
-    sherlock = os.environ['SHERLOCK']
-    if sherlock == '1':
-        catbase = '/home/winther/data_catapp/'
-    elif sherlock == '2':
-        catbase = '/home/users/winther/data_catapp/'
-except:  # SUNCAT
-    catbase = '/nfs/slac/g/suncatfs/data_catapp/'
-
-print(catbase)
 
 user, pub, DFT, XC, reaction, metal, facet, site, final = argv[1:10]
 
@@ -25,13 +14,10 @@ user_dict = {'user': user,
              'XC_level': int(XC),
              'reaction_level': int(reaction),
              'metal_level': int(metal),
-             'facet_level':int(facet),
+             'facet_level': int(facet),
              'site_level': site,
              'final_level': int(final)
              }
 
 user_file = '{0}winther/user_specific/{1}.txt'.format(catbase, user)
 json.dump(user_dict, open(user_file, 'w'))
-
-
-
