@@ -87,9 +87,6 @@ def main(
     facets # If complicated structure: use term you would use in publication
     """
 
-    # Check reactions
-    assert len(reactants) == len(products_A) == len(products_B)
-
     for reaction in reactions:
         check_reaction(reaction['reactants'], reaction['products'])
 
