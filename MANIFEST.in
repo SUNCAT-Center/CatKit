@@ -2,4 +2,3 @@ include MANIFEST.in
 include readme.org
 include requirements.txt
 include catkit/data/*
-include catkit/hub/readme.org
