@@ -345,6 +345,14 @@ def write_user_spec():
     help="Regular expression that matches"
     " file (paths) are should be ignored.")
 @click.option(
+    '-f', '--facet-name',
+    default='',
+    type=str,
+    help="organize will use the first 3-digit number from file path."
+    "A user specified option can be set with this flag."
+        )
+
+@click.option(
     '-g', '--max-density-gas',
     type=float,
     default=0.002,
