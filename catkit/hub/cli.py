@@ -9,15 +9,13 @@ from ase.atoms import string2symbols
 
 import catkit.hub.folder2db
 import catkit.hub.db2server
-import catkit.hub.query
-import catkit.hub.make_folders_template
-import catkit.hub.psql_server_connect
-import catkit.hub.organize
+import afoldecatkit.hub.organize
+from catkit.hub import query, make_folders_template, psql_server_connect
+
 
 @click.group()
 def cli():
     pass
-
 
 @cli.command()
 @click.argument('folder_name')
@@ -25,8 +23,10 @@ def cli():
 @click.option(
     '--skip-folders',
     default='',
-    help="""subfolders not to read, given as the name of a single folder, or a string with names of more folders seperated by ', '""")
-@click.option('--goto-reaction', help="""name of reaction folder to skip to""")
+    help="""subfolders not to read, given as the name of a single folder, 
+    or a string with names of more folders seperated by ', '""")
+@click.option('--goto-reaction',
+              help="""name of reaction folder to skip ahead to""")
 @click.option('--old', default=False)
 def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
     """Read folders and collect data in local sqlite3 database"""
@@ -35,8 +35,8 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
-
-    folder2db.main(folder_name, debug, skip, goto_reaction, old)
+    catkit.hub.folder2db.main(folder_name, debug,
+                              skip, goto_reaction, old)
 
 
 @cli.command()
