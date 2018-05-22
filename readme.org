@@ -25,8 +25,7 @@ It also has functionality for enumeration of other systems relevant to the field
 - [X] Reaction mechanisms
 - [X] Reaction routes
 
-For additional details regarding how the generator operates, including example usage, see the [[./docs/catkit/gen/gen.org][CatGen documentation]].
-
+For additional details regarding how the generator operates, including example usage, see the [[./docs/catkit/gen/gen.org][CatGen documentatio
 * CatFlow: Catalysis Workflow
 CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
 
@@ -34,8 +33,16 @@ Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io
 
 For additional detail see the [[./docs/catkit/flow/flow.org][CatFlow documentation]].
 
-* CatHUB: Catalysis Hub
-Coming soon.
+* CatHub: Catalysis-Hub.org
+CatHub provides an interface to the reaction energy database on [[http://www.catalysis-hub.org][Catalysis-Hub.org]].
+
+The module includes a command line interface that can be used to access and upload to the database:
+
+Run `cathub`:
+
+    cathub --help
+
+See the [[./docs/catkit/hub/hub.org][CatHub documentation]] for details on how to use the cli.
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
