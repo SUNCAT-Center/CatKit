@@ -40,7 +40,7 @@ The module includes a command line interface that can be used to access and uplo
 
 Run `cathub`:
 
-- :: cathub --help
+- cathub --help
 
 See the [[./docs/catkit/hub/hub.org][CatHub documentation]] for details on how to use the cli.
 
