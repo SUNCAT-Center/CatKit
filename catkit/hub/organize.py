@@ -441,8 +441,8 @@ def create_folders(options, structures, root=''):
 
 
 def main(options):
-    pickle_file = options.foldername.strip().strip(
-        '/').strip('.').strip('/') + '.cache.pckl'
+    pickle_file = options.foldername.strip().rstrip(
+        '/').strip('.').rstrip('/') + '.cache.pckl'
 
     if Path(pickle_file).exists() and Path(pickle_file).stat().st_size:
         with open(pickle_file, 'rb') as infile:
