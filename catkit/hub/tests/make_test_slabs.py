@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import copy
+import os
 
 import ase
 import ase.build
@@ -9,6 +10,7 @@ import ase.io
 import ase.lattice.surface
 import ase.calculators.singlepoint
 
+path = os.path.abspath(os.path.join(os.path.dirname(__file__))) + '/unorganized/'
 
 slab1 = ase.lattice.surface.fcc111('Pt', [2, 2, 4], vacuum=10)
 slab1.set_calculator(
@@ -25,7 +27,7 @@ slab1.set_calculator(
             energy=510,
             )
         )
-ase.io.write('empty_slab_111_ads.traj', slab1)
+ase.io.write(path + 'empty_slab_111_ads.traj', slab1)
 
 mol = ase.atoms.Atoms('O',
         cell=[
@@ -40,7 +42,7 @@ mol.set_calculator(
             atoms=mol,
             )
         )
-ase.io.write('ads.traj', mol )
+ase.io.write(path + 'ads.traj', mol )
 
 mol = ase.atoms.Atoms('H2',
         cell=[
@@ -55,4 +57,4 @@ mol.set_calculator(
             atoms=mol,
             )
         )
-ase.io.write('ads2.traj', mol )
+ase.io.write(path + 'ads2.traj', mol )
