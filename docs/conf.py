@@ -1,7 +1,12 @@
 import sphinx_rtd_theme
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
+# http://www.sphinx-doc.org/en/master/extensions.html
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -30,5 +35,3 @@ version = '0.4'
 release = '0.4.4'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
-
-extensions = ['sphinx.ext.napoleon']
