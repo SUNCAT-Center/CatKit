@@ -89,7 +89,7 @@ def collect_structures(foldername, options):
                 filetype = ase.io.formats.filetype(posix_filename)
             except Exception as e:
                 continue
-            if filetype:
+            if filetype == 'traj':
                 try:
                     structure = ase.io.read(posix_filename)
                     structure.info['filename'] = posix_filename
