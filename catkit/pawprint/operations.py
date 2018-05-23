@@ -58,7 +58,6 @@ def autocorrelation(
         connectivity=None,
         d=0):
     """Autocorrelation convolution for systems without pbc."""
-
     G = nx.Graph(connectivity)
     D = nx.floyd_warshall_numpy(G)
     S = np.zeros_like(D)

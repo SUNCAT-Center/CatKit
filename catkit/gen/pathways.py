@@ -754,8 +754,8 @@ class ReactionNetwork():
 
         Parameters
         ----------
-        gratoms : Gratoms or Atoms object
-            Object with Cartesian coordinates to be saved.
+        gratoms : Atoms object
+            Structure containing Cartesian coordinates to be saved.
         overwrite : bool
             Allow the database to overwrite a matching index.
         """
