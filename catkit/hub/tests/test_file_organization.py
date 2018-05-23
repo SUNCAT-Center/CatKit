@@ -8,24 +8,29 @@ import collections
 import catkit.hub.organize
 
 print(os.path.abspath(__file__))
+path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+
 
 class Struct:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
-#def test_debugging():
+# def test_debugging():
     #raise UserWarning(sys.path)
+
 
 def test_file_organization():
 
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-    subprocess.call(('python {path}/make_test_slabs.py'.format(path=path)).split())
-    subprocess.call(('cathub organize . --adsorbates O,H2'.format(path=path)).split())
+    subprocess.call(
+        ('python {path}/make_test_slabs.py'.format(path=path)).split())
+    subprocess.call(
+        ('cathub organize {path}/unorganized --adsorbates O,H2'.format(path=path)).split())
+
 
 def test_file_organization_module():
     options = Struct(**{
         'adsorbates': 'O,H2',
-        'foldername': '.',
+        'foldername': '{path}/unorganized'.format(path=path),
         'verbose': True,
         'include_pattern': '.',
         'exclude_pattern': '%%$^#$',
@@ -36,10 +41,9 @@ def test_file_organization_module():
         'max_energy': 10,
         'keep_all_energies': True,
 
-        })
+    })
 
     catkit.hub.organize.main(options)
-
 
 
 if __name__ == '__main__':
