@@ -97,6 +97,11 @@ def collect_structures(foldername, options):
                         posix_filename)
                     structures.append(structure)
                     print(structure)
+                except StopIteration:
+                    print("Warning: StopIteration {posix_filename} hit."
+                          .format(
+                              posix_filename=posix_filename,
+                          ))
                 except IndexError:
                     print("Warning: File {posix_filename} looks incomplete"
                           .format(
@@ -107,12 +112,25 @@ def collect_structures(foldername, options):
                         posix_filename=posix_filename,
                         e=e,
                         ))
+                except AssertionError as e:
+                    print("Hit an assertion error with {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                        ))
+                except ValueError as e:
+                    print("Trouble reading {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                        ))
 
     return structures
 
 
 def fuzzy_match(structures, options):
     # sort by density
+    structures = [structure for structure in structures
+                  if structure.number_of_lattice_vectors == 3
+            ]
     structures = sorted(structures,
                         key=lambda x: len(x) / x.get_volume()
                         )
@@ -149,7 +167,7 @@ def fuzzy_match(structures, options):
         if facet_match:
             structure.info['facet'] = facet_match.group()
         else:
-            structure.info['facet'] = 'unknown'
+            structure.info['facet'] = options.facet_name or 'facet'
 
         density = len(structure) / structure.get_volume()
         if options.verbose:
@@ -427,8 +445,8 @@ def create_folders(options, structures, root=''):
             d = Path(root).joinpath(key)
             Path(d).mkdir(parents=True, exist_ok=True)
             if Path(root).parent.as_posix() == '.':
-                with open(
-                        Path(root).joinpath('publication.txt'),
+                with open(str(
+                        Path(root).joinpath('publication.txt')),
                         'w') as outfile:
                     outfile.write(PUBLICATION_TEMPLATE)
             create_folders(options, structures[key], root=d)
