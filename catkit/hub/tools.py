@@ -1,10 +1,8 @@
-#!/usr/bin/python
-
 import os
 
 
 def extract_atoms(molecule):
-    # return a string with all atoms in molecule
+    """Return a string with all atoms in molecule"""
     if molecule == '':
         return molecule
     try:
@@ -61,8 +59,7 @@ def add_atoms(atoms_list):
 
 
 def check_reaction(reactants, products):
-    """
-    check the stoichiometry and format of chemical reaction used for
+    """Check the stoichiometry and format of chemical reaction used for
     folder structure.
     list of reactants -> list of products
     """

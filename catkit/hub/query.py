@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import re
 import os
 import json
 import requests
@@ -102,6 +102,7 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
         key = map_column_names(key)
         if key == 'distinct':
             if value in ['True', 'true']:
+                # WARNING: undefined variable name 'query_dict'
                 query_dict.update({key: True})
                 continue
         try:
@@ -180,6 +181,7 @@ def get_publications(**kwargs):
         key = map_column_names(key)
         if key == 'distinct':
             if value in ['True', 'true']:
+                # WARNING: undefined variable name 'query_dict'
                 query_dict.update({key: True})
                 continue
         try:
@@ -188,6 +190,7 @@ def get_publications(**kwargs):
         except BaseException:
             queries.update({key: '{0}'.format(value)})
 
+    # WARNING: undefined variable name 'publication_columns'
     return query(table='publications', columns=publication_columns,
                  queries=queries)
 
@@ -223,6 +226,11 @@ def map_column_names(column):
         return column
 
 
+def convert(name):
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+
+
 if __name__ == '__main__':
     query = query(table='reactions',
                   columns=['chemicalComposition',
@@ -230,9 +238,3 @@ if __name__ == '__main__':
                            'products'],
                   n_results=10,
                   queries={'chemicalComposition': "~Pt"})
-
-
-def convert(name):
-    import re
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
