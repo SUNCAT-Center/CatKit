@@ -1,16 +1,10 @@
+from .cathubsqlite import CathubSQLite
+from .tools import get_bases
+from .import ase_tools
+import numpy as np
 import os
-import csv
 import copy
-import sqlite3
-from sys import argv
 import json
-from catkit.hub.ase_tools import *
-from catkit.hub.cathubsqlite import CathubSQLite
-from catkit.hub.tools import get_bases
-import glob
-from ase.io.trajectory import convert
-import ase
-from ase import db
 
 
 class FolderReader:
@@ -24,8 +18,6 @@ class FolderReader:
         self.catbase, self.data_base, self.user, self.user_base \
             = get_bases(folder_name=folder_name)
         self.user_base_level = len(self.user_base.split("/"))
-
-        omit_folders = []
 
         self.pub_level = 1
         self.DFT_level = 2
@@ -51,7 +43,7 @@ class FolderReader:
         if len(skip) > 0:
             for skip_f in skip:
                 self.omit_folders.append(skip_f)
-        up = 0
+
         found_reaction = False
         for root, dirs, files in os.walk(self.user_base):
             for omit_folder in self.omit_folders:  # user specified omit_folder
@@ -224,21 +216,22 @@ class FolderReader:
 
         ase_id = None
 
-        if not check_traj(traj_bulk, self.strict, False):
+        if not ase_tools.check_traj(traj_bulk, self.strict, False):
             return
 
-        energy = get_energies([traj_bulk])
+        energy = ase_tools.get_energies([traj_bulk])
 
         key_value_pairs = {"name": self.metal,
                            'state': 'bulk',
                            'epot': energy}
 
-        id, ase_id = check_in_ase(traj_bulk, self.cathub_db)  # self.ase_db)
+        id, ase_id = ase_tools.check_in_ase(
+            traj_bulk, self.cathub_db)  # self.ase_db)
         if ase_id is None:
-            ase_id = write_ase(traj_bulk, self.cathub_db,
-                               self.user, **key_value_pairs)
+            ase_id = ase_tools.write_ase(traj_bulk, self.cathub_db,
+                                         self.user, **key_value_pairs)
         elif self.update:
-            update_ase(self.cathub_db, id, **key_value_pairs)
+            ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
 
             self.ase_ids.update({'bulk' + self.crystal: ase_id})
 
@@ -250,30 +243,30 @@ class FolderReader:
             '{}/{}'.format(root, f) for f in files if f.endswith('.traj') and 'empty' in f][0]
 
         ase_id = None
-        if not check_traj(self.empty_traj, self.strict, False):
+        if not ase_tools.check_traj(self.empty_traj, self.strict, False):
             return
 
-        energy = get_energies([self.empty_traj])
+        energy = ase_tools.get_energies([self.empty_traj])
         key_value_pairs = {"name": self.metal,
                            'state': 'star',
                            'epot': energy}
 
         key_value_pairs.update({'species': ''})
 
-        id, ase_id = check_in_ase(
+        id, ase_id = ase_tools.check_in_ase(
             self.empty_traj, self.cathub_db)  # self.ase_db)
 
         if ase_id is None:
-            ase_id = write_ase(self.empty_traj, self.cathub_db,
-                               self.user, **key_value_pairs)
+            ase_id = ase_tools.write_ase(self.empty_traj, self.cathub_db,
+                                         self.user, **key_value_pairs)
         elif self.update:
-            update_ase(self.cathub_db, id, **key_value_pairs)
+            ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
         self.ase_ids.update({'star': ase_id})
 
     def read_reaction(self, root, files):
         folder_name = root.split('/')[-1]
 
-        self.reaction, self.sites = get_reaction_from_folder(
+        self.reaction, self.sites = ase_tools.get_reaction_from_folder(
             folder_name)  # reaction dict
 
         print('----------- REACTION:  {} --> {} --------------'
@@ -281,7 +274,7 @@ class FolderReader:
                       '+'.join(self.reaction['products'])))
 
         self.reaction_atoms, self.prefactors, self.prefactors_TS, \
-            self.states = get_reaction_atoms(self.reaction)
+            self.states = ase_tools.get_reaction_atoms(self.reaction)
 
         # Create empty dictionaries
         r_empty = ['' for n in range(len(self.reaction_atoms['reactants']))]
@@ -295,18 +288,21 @@ class FolderReader:
             ase_id = None
             found = False
 
-            if not check_traj(traj, self.strict, False):
+            if not ase_tools.check_traj(traj, self.strict, False):
                 return
             chemical_composition = \
-                ''.join(sorted(get_chemical_formula(traj, mode='all')))
-            chemical_composition_hill = get_chemical_formula(traj, mode='hill')
+                ''.join(sorted(ase_tools.get_chemical_formula(
+                    traj, mode='all')))
+            chemical_composition_hill = ase_tools.get_chemical_formula(
+                traj, mode='hill')
 
-            energy = get_energies([traj])
+            energy = ase_tools.get_energies([traj])
             key_value_pairs.update({"name": chemical_composition_hill,
                                     'state': 'gas',
                                     'epot': energy})
 
-            id, ase_id = check_in_ase(traj, self.cathub_db)  # self.ase_db)
+            id, ase_id = ase_tools.check_in_ase(
+                traj, self.cathub_db)  # self.ase_db)
 
             for key, mollist in self.reaction_atoms.items():
                 for i, molecule in enumerate(mollist):
@@ -318,14 +314,17 @@ class FolderReader:
                         found = True
                         self.traj_files[key][i] = traj
 
-                        species = clear_prefactor(self.reaction[key][i])
-                        key_value_pairs.update({'species':
-                                                clear_state(species)})
+                        species = ase_tools.clear_prefactor(
+                            self.reaction[key][i])
+                        key_value_pairs.update(
+                            {'species': ase_tools.clear_state(species)})
                         if ase_id is None:
-                            ase_id = write_ase(traj, self.cathub_db,
-                                               self.user, **key_value_pairs)
+                            ase_id = ase_tools.write_ase(traj, self.cathub_db,
+                                                         self.user,
+                                                         **key_value_pairs)
                         elif self.update:
-                            update_ase(self.cathub_db, id, **key_value_pairs)
+                            ase_tools.update_ase(self.cathub_db,
+                                                 id, **key_value_pairs)
                         self.ase_ids.update({species: ase_id})
 
             # if found is False:
@@ -354,7 +353,6 @@ class FolderReader:
                 return
 
         n_atoms = np.array([])
-        empty_i = None
         ts_i = None
         tsempty_i = None
         chemical_composition_slabs = []
@@ -366,20 +364,20 @@ class FolderReader:
                 ts_i = i
 
             traj = '{}/{}'.format(root, f)
-            if not check_traj(traj, self.strict, False):
+            if not ase_tools.check_traj(traj, self.strict, False):
                 breakloop = True
                 break
             chemical_composition_slabs = \
                 np.append(chemical_composition_slabs,
-                          get_chemical_formula(traj, mode='all'))
-            n_atoms = np.append(n_atoms, get_number_of_atoms(traj))
+                          ase_tools.get_chemical_formula(traj, mode='all'))
+            n_atoms = np.append(n_atoms, ase_tools.get_number_of_atoms(traj))
 
         if breakloop:
             return
 
         traj_empty = self.empty_traj
 
-        empty_atn = get_atomic_numbers(traj_empty)
+        empty_atn = ase_tools.get_atomic_numbers(traj_empty)
 
         # Identify TS
         # if ts_i is not None:
@@ -400,32 +398,32 @@ class FolderReader:
 
         key_value_pairs = {}
 
-        key_value_pairs.update({'name': get_chemical_formula(traj_empty),
+        key_value_pairs.update({'name': ase_tools.get_chemical_formula(traj_empty),
                                 #'site': self.sites,
                                 'facet': self.ase_facet,
-                                'layers': get_n_layers(traj_empty),
+                                'layers': ase_tools.get_n_layers(traj_empty),
                                 'state': 'star'})
         ase_id = None
-        id, ase_id = check_in_ase(traj_empty, self.cathub_db)
+        id, ase_id = ase_tools.check_in_ase(traj_empty, self.cathub_db)
         for key, mollist in self.reaction_atoms.items():
             if '' in mollist:
                 n = mollist.index('')
                 self.traj_files[key][n] = traj_empty
                 key_value_pairs.update({'species': ''})
             if ase_id is None:
-                ase_id = write_ase(traj_empty, self.cathub_db,
-                                   self.user, **key_value_pairs)
+                ase_id = ase_tools.write_ase(traj_empty, self.cathub_db,
+                                             self.user, **key_value_pairs)
             elif self.update:
-                update_ase(self.cathub_db, id, **key_value_pairs)
+                ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
 
             self.ase_ids.update({'star': ase_id})
 
         for i, f in enumerate(traj_slabs):
             traj = '{}/{}'.format(root, f)
             ase_id = None
-            id, ase_id = check_in_ase(traj, self.cathub_db)
+            id, ase_id = ase_tools.check_in_ase(traj, self.cathub_db)
             found = False
-            key_value_pairs.update({'epot': get_energies([traj])})
+            key_value_pairs.update({'epot': ase_tools.get_energies([traj])})
 
             if i == ts_i:
                 found = True
@@ -434,10 +432,10 @@ class FolderReader:
                 prefactor_scale.update({'TS': [1]})
                 key_value_pairs.update({'species': 'TS'})
                 if ase_id is None:
-                    ase_id = write_ase(traj, self.cathub_db,
-                                       self.user, **key_value_pairs)
+                    ase_id = ase_tools.write_ase(traj, self.cathub_db,
+                                                 self.user, **key_value_pairs)
                 elif self.update:
-                    update_ase(self.cathub_db, id, **key_value_pairs)
+                    ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
                 self.ase_ids.update({'TSstar': ase_id})
                 continue
 
@@ -448,14 +446,14 @@ class FolderReader:
                 prefactor_scale.update({'TSempty': [1]})
                 key_value_pairs.update({'species': ''})
                 if ase_id is None:
-                    ase_id = write_ase(traj, self.cathub_db,
-                                       self.user, **key_value_pairs)
+                    ase_id = ase_tools.write_ase(traj, self.cathub_db,
+                                                 self.user, **key_value_pairs)
                 elif self.update:
-                    update_ase(self.cathub_db, id, **key_value_pairs)
+                    ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
                 self.ase_ids.update({'TSemptystar': ase_id})
                 continue
 
-            res_atn = get_atomic_numbers(traj)
+            res_atn = ase_tools.get_atomic_numbers(traj)
             if not (
                     np.array(res_atn) > 8).any() and (
                     np.array(empty_atn) > 8).any():
@@ -475,7 +473,7 @@ class FolderReader:
                 for n, molecule in enumerate(mollist):
                     if found:
                         continue
-                    molecule_atn = get_numbers_from_formula(molecule)
+                    molecule_atn = ase_tools.get_numbers_from_formula(molecule)
                     for k in range(1, 5):
                         if found:
                             continue
@@ -498,23 +496,23 @@ class FolderReader:
 
                         if found:
                             n_ads = k
-                            ads_i = n
-                            ads_key = key
                             self.traj_files[key][n] = traj
 
-                            species = clear_prefactor(self.reaction[key][n])
+                            species = ase_tools.clear_prefactor(
+                                self.reaction[key][n])
 
-                            id, ase_id = check_in_ase(traj, self.cathub_db)
+                            id, ase_id = ase_tools.check_in_ase(
+                                traj, self.cathub_db)
                             key_value_pairs.update({'species':
-                                                    clear_state(species),
+                                                    ase_tools.clear_state(species),
                                                     'n': n_ads,
                                                     'site': self.sites[species]}
                                                    )
                             if ase_id is None:
-                                ase_id = write_ase(
+                                ase_id = ase_tools.write_ase(
                                     traj, self.cathub_db, self.user, **key_value_pairs)
                             elif self.update:
-                                update_ase(
+                                ase_tools.update_ase(
                                     self.cathub_db, id, **key_value_pairs)
                             self.ase_ids.update({species: ase_id})
 
@@ -537,8 +535,7 @@ class FolderReader:
         #    for chemical_composition in chemical_compositions:
 
         surface_composition = self.metal
-        bulk_composition = get_bulk_composition(traj_empty)
-        chemical_composition = get_chemical_formula(traj_empty)
+        chemical_composition = ase_tools.get_chemical_formula(traj_empty)
 
         prefactors_final = copy.deepcopy(self.prefactors)
         for key in self.prefactors:
@@ -559,9 +556,12 @@ class FolderReader:
 
         try:
             reaction_energy, activation_energy = \
-                get_reaction_energy(self.traj_files, self.reaction, self.reaction_atoms,
-                                    self.states, prefactors_final,
-                                    self.prefactors_TS, self.energy_corrections)
+                ase_tools.get_reaction_energy(
+                    self.traj_files, self.reaction,
+                    self.reaction_atoms,
+                    self.states, prefactors_final,
+                    self.prefactors_TS,
+                    self.energy_corrections)
 
         except BaseException:
             if self.debug:
@@ -573,26 +573,26 @@ class FolderReader:
 
         expr = -10 < reaction_energy < 10
 
-        if not debug_assert(expr,
-                            'reaction energy is wrong: {} eV: {}'
-                            .format(reaction_energy, root),
-                            self.debug):
+        if not ase_tools.debug_assert(expr,
+                                      'reaction energy is wrong: {} eV: {}'
+                                      .format(reaction_energy, root),
+                                      self.debug):
 
             return
 
         expr = activation_energy is None or reaction_energy < activation_energy < 5
-        if not debug_assert(expr,
-                            'activation energy is wrong: {} eV: {}'
-                            .format(activation_energy, root),
-                            self.debug):
+        if not ase_tools.debug_assert(expr,
+                                      'activation energy is wrong: {} eV: {}'
+                                      .format(activation_energy, root),
+                                      self.debug):
             print(self.traj_files, prefactors_final, self.prefactors_TS)
 
         reaction_info = {'reactants': {},
                          'products': {}}
-        products = {}
+
         for key in ['reactants', 'products']:
             for i, r in enumerate(self.reaction[key]):
-                r = clear_prefactor(r)
+                r = ase_tools.clear_prefactor(r)
                 reaction_info[key].update({r: self.prefactors[key][i]})
 
         self.key_value_pairs_reaction = {
@@ -609,8 +609,7 @@ class FolderReader:
             'dft_functional': self.DFT_functional,
             'pub_id': self.pub_id,
             'doi': self.doi,
-            'year': int(
-                self.year),
+            'year': int(self.year),
             'ase_ids': self.ase_ids,
             'energy_corrections': self.energy_corrections,
             'username': self.user}

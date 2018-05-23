@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import psycopg2
 import os
 import sys
@@ -126,7 +125,6 @@ class CathubPostgreSQL:
         self.stdout = stdout
 
     def _connect(self):
-        import os
         con = psycopg2.connect(host=self.server,
                                user=self.user,
                                password=self.password,

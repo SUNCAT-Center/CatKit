@@ -1,5 +1,5 @@
+from .postgresql import CathubPostgreSQL
 from sys import argv
-from catkit.hub.postgresql import CathubPostgreSQL
 import os
 
 

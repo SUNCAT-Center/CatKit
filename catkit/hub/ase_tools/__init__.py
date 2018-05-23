@@ -1,11 +1,8 @@
-#!/usr/bin/python
+from ase import Atoms
+from ase.io import read
 import numpy as np
 import ase
-from ase import *
-from sys import argv
-from ase.io import read, write
-
-from catkit.hub.ase_tools import gas_phase_references
+import copy
 
 
 def read_ase(filename):
@@ -190,12 +187,10 @@ def get_state(name):
 
 def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
                         prefactors, prefactors_TS, energy_corrections):
-
     energies = {}
     for key in traj_files.keys():
         energies.update({key: ['' for n in range(len(traj_files[key]))]})
     for key, trajlist in traj_files.items():
-        # in python3 iteritems goes away in favor of items
         for i, traj in enumerate(trajlist):
             try:
                 trajname = clear_prefactor(reaction[key][i])
@@ -277,7 +272,24 @@ def tag_atoms(atoms, types=None):
 
 
 def get_layers(atoms):
+    # WARNING: this function is defined twice
+    # with different parameter choices
     tolerance = 0.2
+    d = atoms.positions[:, 2]
+    keys = np.argsort(d)
+    ikeys = np.argsort(keys)
+    mask = np.concatenate(([True], np.diff(d[keys]) > tolerance))
+    layer_i = np.cumsum(mask)[ikeys]
+
+    if layer_i.min() == 1:
+        layer_i -= 1
+    return layer_i
+
+
+def get_layers(atoms):
+    # WARNING: this function is defined twice
+    # with different parameter choices
+    tolerance = 0.01
     d = atoms.positions[:, 2]
     keys = np.argsort(d)
     ikeys = np.argsort(keys)
@@ -307,51 +319,11 @@ def get_surface_composition(filename):
     return surface_composition
 
 
-def tag_atoms(atoms, types=None):
-    non_metals = ['H', 'He', 'B', 'C', 'N', 'O', 'F', 'Ne',
-                  'Si', 'P', 'S', 'Cl', 'Ar',
-                  'Ge', 'As', 'Se', 'Br', 'Kr',
-                  'Sb', 'Te', 'I', 'Xe',
-                  'Po', 'At', 'Rn']
-
-    layer_i = get_layers(atoms)
-    top_layer_i = np.max(layer_i)
-    i = 0
-
-    for i in range(0, top_layer_i + 1):
-        atoms_i = np.where(layer_i == top_layer_i - i)[0]
-        if len(np.where(layer_i == top_layer_i - i)[0]) == 1 and i < 4:
-            atom = atoms[atoms_i[0]]
-            if types is not None:
-                if atom.symbol in types:
-                    atom.tag = 0
-            elif types is None:
-                if atom.symbol in non_metals:
-                    atom.tag = 0
-        else:
-            for l in atoms_i:
-                atoms[l].tag = i + 1
-    return atoms
-
-
 def get_n_layers(filename):
     atoms = read_ase(filename)
     layer_i = get_layers(atoms)
     n = np.max(layer_i)
     return n
-
-
-def get_layers(atoms):
-    tolerance = 0.01
-    d = atoms.positions[:, 2]
-    keys = np.argsort(d)
-    ikeys = np.argsort(keys)
-    mask = np.concatenate(([True], np.diff(d[keys]) > tolerance))
-    layer_i = np.cumsum(mask)[ikeys]
-
-    if layer_i.min() == 1:
-        layer_i -= 1
-    return layer_i
 
 
 def get_bulk_composition(filename):
@@ -386,8 +358,7 @@ def get_bulk_composition(filename):
 
 
 def check_in_ase(filename, ase_db, energy=None):
-    """ Check if entry is allready in ASE db
-    """
+    """Check if entry is allready in ASE db"""
 
     db_ase = ase.db.connect(ase_db)
     atoms = read_ase(filename)
@@ -416,7 +387,7 @@ def _normalize_key_value_pairs_inplace(data):
 
 
 def write_ase(filename, db_file, user=None, data=None, **key_value_pairs):
-    """ Connect to ASE db"""
+    """Connect to ASE db"""
     atoms = read_ase(filename)
     atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
@@ -428,7 +399,7 @@ def write_ase(filename, db_file, user=None, data=None, **key_value_pairs):
 
 
 def update_ase(db_file, identity, **key_value_pairs):
-    """ Connect to ASE db"""
+    """Connect to ASE db"""
     db_ase = ase.db.connect(db_file)
 
     _normalize_key_value_pairs_inplace(key_value_pairs)
@@ -500,7 +471,6 @@ def get_reaction_atoms(reaction):
             state = get_state(molecule)
             states[key].append(state)
 
-    import copy
     prefactors_TS = copy.deepcopy(prefactors)
 
     # Balance the number of slabs on each side of reaction
@@ -568,4 +538,3 @@ def debug_assert(expression, message, debug=False):
         assert expression, message
 
     return True
-# def handle_gas_species():

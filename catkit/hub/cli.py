@@ -1,16 +1,15 @@
+from . import query
+from . import make_folders_template
+from . import psql_server_connect
+from . import folder2db as _folder2db
+from . import db2server as _db2server
+from . import organize as _organize
+from ase.atoms import string2symbols
 import os
 import json
 import click
 import six
-import pprint
 import collections
-
-from ase.atoms import string2symbols
-
-import catkit.hub.folder2db
-import catkit.hub.db2server
-import catkit.hub.organize
-from catkit.hub import query, make_folders_template, psql_server_connect
 
 
 @click.group()
@@ -36,8 +35,8 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
-    catkit.hub.folder2db.main(folder_name, debug,
-                              skip, goto_reaction, old)
+    _folder2db.main(folder_name, debug,
+                   skip, goto_reaction, old)
 
 
 @cli.command()
@@ -54,7 +53,7 @@ def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, db_user):
     """Transfer data from local database to Catalysis Hub server"""
 
-    db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
+    _db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
                    write_ase=write_ase,
                    write_publication=write_publication,
                    write_reaction_system=write_reaction_system,
@@ -395,4 +394,4 @@ def organize(**kwargs):
         'options',
         kwargs.keys()
     )(**kwargs)
-    catkit.hub.organize.main(options=options)
+    _organize.main(options=options)

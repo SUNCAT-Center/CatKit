@@ -1,8 +1,6 @@
+from .ase_tools import check_traj
+from sys import argv
 import os
-from sys import path, argv
-import ase
-
-from catkit.hub.ase_tools import check_traj
 
 
 def main(base):
