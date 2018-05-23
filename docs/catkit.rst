@@ -6,9 +6,10 @@ Subpackages
 
 .. toctree::
 
-    catkit.flow
     catkit.gen
     catkit.pawprint
+    catkit.flow
+    catkit.hub
 
 Submodules
 ----------

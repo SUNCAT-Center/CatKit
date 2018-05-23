@@ -24,20 +24,20 @@ def check_traj(filename, strict=True, verbose=True):
         atoms = read_ase(filename)
         if verbose:
             print('traj file read!')
-    except:
+    except BaseException:
         try:
             convert(filename)
             if verbose:
                 print('Converting to new ase format!')
             atoms = read_ase(filename)
-        except:
+        except BaseException:
             print('Could not read traj file: {}'.format(filename))
             return False
 
     try:
         atoms.get_potential_energy()
         assert not math.isnan(atoms.get_potential_energy()), 'Energy is NaN!'
-    except:
+    except BaseException:
         if strict:
             raise RuntimeError('No energy for .traj file: {}'.format(filename))
         else:
@@ -151,7 +151,7 @@ def get_atoms(molecule):
         return molecule, prefactor
     try:
         return '', float(molecule)
-    except:
+    except BaseException:
         pass
     if not molecule[0].isalpha():
         i = 0
@@ -199,7 +199,7 @@ def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
         for i, traj in enumerate(trajlist):
             try:
                 trajname = clear_prefactor(reaction[key][i])
-            except:
+            except BaseException:
                 trajname = None
             if trajname in energy_corrections.keys():
                 Ecor = energy_corrections[trajname]
@@ -227,7 +227,7 @@ def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
         for i, traj in enumerate(traj_files['reactants']):
             try:
                 trajname = clear_prefactor(reaction['reactants'][i])
-            except:
+            except BaseException:
                 trajname = None
             if trajname in energy_corrections.keys():
                 Ecor = energy_corrections[trajname]
@@ -411,7 +411,7 @@ def check_in_ase(filename, ase_db, energy=None):
 
 def _normalize_key_value_pairs_inplace(data):
     for key in data:
-        if type(data[key]) is np.int64:
+        if isinstance(data[key], np.int64):
             data[key] = int(data[key])
 
 
@@ -427,7 +427,7 @@ def write_ase(filename, db_file, user=None, data=None, **key_value_pairs):
     return unique_id
 
 
-def update_ase(db_file, identity,  **key_value_pairs):
+def update_ase(db_file, identity, **key_value_pairs):
     """ Connect to ASE db"""
     db_ase = ase.db.connect(db_file)
 

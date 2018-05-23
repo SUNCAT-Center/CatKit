@@ -10,12 +10,13 @@ if 'SHERLOCK' in os.environ:  # Sherlock 1 or 2
         catbase = '/home/winther/data_catapp'
     elif sherlock == '2':
         catbase = '/home/users/winther/data_catapp'
-elif 'SLAC_ENVIRON' in os.environ:  #SUNCAT
+elif 'SLAC_ENVIRON' in os.environ:  # SUNCAT
     catbase = '/nfs/slac/g/suncatfs/data_catapp/'
 else:
     catbase = None
 
 sys.path.append(catbase)
+
 
 def main(folder):
     miss_list = []
@@ -35,6 +36,7 @@ def main(folder):
     else:
         print('all files there!')
     return
+
 
 if __name__ == "__main__":
     from sys import argv
