@@ -1,10 +1,7 @@
+from ase.db.sqlite import SQLite3Database
 import sqlite3
 import json
 
-import ase
-from ase.db.sqlite import SQLite3Database
-
-import numpy as np
 
 init_commands = [
     """ CREATE TABLE publication (
@@ -57,10 +54,19 @@ init_commands = [
 
 
 class CathubSQLite:
+    """TODO: Please document me."""
+
     def __init__(self, filename):
+        """TODO: Please document me.
+
+        Parameters
+        ----------
+        default : str
+            used for autoincrement id
+        """
         self.filename = filename
         self.initialized = False
-        self.default = 'NULL'  # used for autoincrement id
+        self.default = 'NULL'
         self.connection = None
         self.id = None
         self.pid = None
@@ -108,9 +114,8 @@ class CathubSQLite:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        cur.execute('SELECT * FROM \n {} \n WHERE \n {}.id={}'.format(table,
-                                                                      table,
-                                                                      id))
+        cur.execute('SELECT * FROM \n {} \n WHERE \n {}.id={}'.format(
+            table, table, id))
         row = cur.fetchall()
 
         if len(row) == 14:  # Old schema
@@ -357,7 +362,8 @@ def get_key_value_str(values):
     dft_functional, publication, doi, year, ase_ids, user"""
     value_str = "'{}'".format(values[1])
     for v in values[2:]:
-        try:    # Unicode in python2 - must be a better way of handling this.
+        try:
+            # Unicode in python2 - must be a better way of handling this.
             if isinstance(v, unicode):
                 v = v.encode('ascii', 'ignore')
         except NameError:
@@ -373,7 +379,6 @@ def get_key_value_str(values):
 
 
 def get_key_value_list(key_list, values, table='reaction'):
-
     total_keys = {'reaction': ['chemical_composition', 'surface_composition',
                                'facet', 'sites', 'coverages', 'reactants',
                                'products', 'reaction_energy',
@@ -400,7 +405,8 @@ def get_key_value_list(key_list, values, table='reaction'):
 def get_value_strlist(value_list):
     value_strlist = []
     for v in value_list:
-        try:  # Unicode in python2 - must be a better way of handling this.
+        try:
+            # Unicode in python2 - must be a better way of handling this.
             if isinstance(v, unicode):
                 v = v.encode('ascii', 'ignore')
         except NameError:

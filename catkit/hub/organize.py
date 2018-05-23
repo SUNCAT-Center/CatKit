@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
-
 # builtin imports
-import difflib
-import optparse
 import pickle
-import pprint
 import re
 
 # A lot of functions from os.path
@@ -31,7 +27,7 @@ import numpy as np
 
 
 # local imports
-from catkit.hub.ase_tools import gas_phase_references
+from .ase_tools import gas_phase_references
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
@@ -83,6 +79,7 @@ def collect_structures(foldername, options):
             print(i, posix_filename)
         if posix_filename.endswith('publication.txt'):
             with open(posix_filename) as infile:
+                # This variable does not appear to be used.
                 PUBLICATION_TEMPLATE = infile.read()
         elif Path(posix_filename).is_file():
             try:

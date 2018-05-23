@@ -1,4 +1,3 @@
-import os
 import json
 from sys import argv
 
@@ -19,5 +18,6 @@ user_dict = {'user': user,
              'final_level': int(final)
              }
 
+# WARNING: undefined variable name catbase
 user_file = '{0}winther/user_specific/{1}.txt'.format(catbase, user)
 json.dump(user_dict, open(user_file, 'w'))
