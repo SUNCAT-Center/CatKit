@@ -17,13 +17,14 @@ from catkit.hub import query, make_folders_template, psql_server_connect
 def cli():
     pass
 
+
 @cli.command()
 @click.argument('folder_name')
 @click.option('--debug', default=False)
 @click.option(
     '--skip-folders',
     default='',
-    help="""subfolders not to read, given as the name of a single folder, 
+    help="""subfolders not to read, given as the name of a single folder,
     or a string with names of more folders seperated by ', '""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
@@ -118,7 +119,7 @@ def reactions(columns, n_results, queries):
             try:
                 value = int(value)
                 query_dict.update({key: value})
-            except:
+            except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
     #columns = [columns]
@@ -155,7 +156,7 @@ def publications(columns, n_results, queries):
             try:
                 value = int(value)
                 query_dict.update({key: value})
-            except:
+            except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
 
@@ -309,7 +310,8 @@ def make_folders(create_template, template, custom_base, diagnose):
 @click.argument('user', default='catvisitor')
 def connect(user):
     """Direct connection to PostreSQL server."""
-    psql_server_connect.main(user)    
+    psql_server_connect.main(user)
+
 
 @cli.command()
 @click.argument(
@@ -376,7 +378,6 @@ def connect(user):
     default=False,
     show_default=True,
     help="Show more debugging messages.")
-
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
 

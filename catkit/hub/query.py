@@ -107,7 +107,7 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
         try:
             value = int(value)
             queries.update({key: value})
-        except:
+        except BaseException:
             queries.update({key: '{0}'.format(value)})
 
     subtables = []
@@ -131,7 +131,7 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
                 #    v = v.encode('utf-8')
                 try:
                     v = json.loads(v)
-                except:
+                except BaseException:
                     pass
                 key_values[convert(key)] = v
             ase_ids = {}
@@ -185,7 +185,7 @@ def get_publications(**kwargs):
         try:
             value = int(value)
             queries.update({key: value})
-        except:
+        except BaseException:
             queries.update({key: '{0}'.format(value)})
 
     return query(table='publications', columns=publication_columns,
@@ -194,7 +194,8 @@ def get_publications(**kwargs):
 
 def get_ase_db():
     ps = os.environ.get('DB_PASSWORD')
-    return ase.db.connect('postgresql://catvisitor:{}@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub'.format(ps))
+    return ase.db.connect(
+        'postgresql://catvisitor:{}@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub'.format(ps))
 
 
 def get_atomsrow_by_id(unique_id):

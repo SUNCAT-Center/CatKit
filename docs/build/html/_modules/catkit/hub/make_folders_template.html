@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub.make_folders_template &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>catkit.hub.make_folders_template</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.hub.make_folders_template</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/python</span>
+<span class="kn">from</span> <span class="nn">.tools</span> <span class="k">import</span> <span class="n">check_reaction</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="n">username</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;USER&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># ---------publication info------------</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.make_folders_template.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+        <span class="n">title</span><span class="p">,</span>
+        <span class="n">authors</span><span class="p">,</span>
+        <span class="n">year</span><span class="p">,</span>
+        <span class="n">journal</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">volume</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">number</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">pages</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">publisher</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">doi</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">tags</span><span class="o">=</span><span class="p">[],</span>
+        <span class="n">DFT_code</span><span class="o">=</span><span class="s1">&#39;Quantum ESPRESSO&#39;</span><span class="p">,</span>
+        <span class="n">DFT_functional</span><span class="o">=</span><span class="s1">&#39;BEEF-vdW&#39;</span><span class="p">,</span>
+        <span class="n">reactions</span><span class="o">=</span><span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;reactants&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;2.0H2Ogas&#39;</span><span class="p">,</span> <span class="s1">&#39;-1.5H2gas&#39;</span><span class="p">,</span> <span class="s1">&#39;star&#39;</span><span class="p">],</span>
+             <span class="s1">&#39;products&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;OOHstar@ontop&#39;</span><span class="p">]}],</span>
+        <span class="n">energy_corrections</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">bulk_compositions</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Pt&#39;</span><span class="p">,</span> <span class="s1">&#39;Ag&#39;</span><span class="p">],</span>
+        <span class="n">crystal_structures</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;fcc&#39;</span><span class="p">,</span> <span class="s1">&#39;hcp&#39;</span><span class="p">],</span>
+        <span class="n">facets</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;111&#39;</span><span class="p">],</span>
+        <span class="n">custom_base</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Automatically generate an organized folder structure for a DFT</span>
+<span class="sd">    calculation.</span>
+
+<span class="sd">    Start by copying the script to a folder in your username</span>
+<span class="sd">    and assign the right information to the arguments in the function.</span>
+
+<span class="sd">    You can change the parameters and run the script several times if you,</span>
+<span class="sd">    for example, are using different functionals or are doing different</span>
+<span class="sd">    reactions on different surfaces.</span>
+
+<span class="sd">    Remember to include the reaction that gives the adsorption energy of</span>
+<span class="sd">    reaction intermediates, taking gas phase molecules as references</span>
+<span class="sd">    (preferably H20, H2, CH4, CO, NH3).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    title : str</span>
+<span class="sd">        Publication or working title if not yet published.</span>
+<span class="sd">    authors : list</span>
+<span class="sd">        Author names, e.g. [&#39;Doe, John&#39;, &#39;Einstein, Albert&#39;]</span>
+<span class="sd">    year : str</span>
+<span class="sd">        Year of (submission?)</span>
+<span class="sd">    journal : str</span>
+<span class="sd">        Publications journal name</span>
+<span class="sd">    volume : str, optional</span>
+<span class="sd">        Publications volume number</span>
+<span class="sd">    number : str, optional</span>
+<span class="sd">        Publication number</span>
+<span class="sd">    pages : str, optional</span>
+<span class="sd">        Publication page numbers</span>
+<span class="sd">    publisher : str, optional</span>
+<span class="sd">        Publisher name</span>
+<span class="sd">    doi : str, optional</span>
+<span class="sd">        DOI of publication</span>
+<span class="sd">    tags : list, optional</span>
+<span class="sd">        User defined quire tags</span>
+<span class="sd">    DFT_code : str, optional</span>
+<span class="sd">        e.g. &#39;Quantum ESPRESSO&#39;</span>
+<span class="sd">    DFT_functional : str, optional</span>
+<span class="sd">        Calculator functional used, e.g. &#39;BEEF-vdW&#39;</span>
+<span class="sd">    reactions : list of dict, optional</span>
+<span class="sd">        A new dictionary is required for each reaction, and should include two</span>
+<span class="sd">        lists, &#39;reactants&#39; and &#39;products&#39;. Remember to include a minus sign and</span>
+<span class="sd">        prefactor in the name when relevant. If your reaction is not balanced,</span>
+<span class="sd">        you will receive an error when running the script.</span>
+
+<span class="sd">        Include the phase if mixing gas phase and surface phase.</span>
+<span class="sd">        e.g. &#39;star&#39; for empty site or adsorbed phase, &#39;gas&#39; if in gas phase.</span>
+
+<span class="sd">        Include the adsorption site if relevant.</span>
+<span class="sd">        e.g. star@top or star@bridge.</span>
+
+<span class="sd">        For example, we can write an entry for the adsorption of CH2:</span>
+<span class="sd">        CH4(g) - H2(g) + * -&gt; CH2*</span>
+
+<span class="sd">        as:</span>
+<span class="sd">        {&#39;reactants&#39;: [&#39;CH4gas&#39;, &#39;H2gas&#39;, &#39;star&#39;],</span>
+<span class="sd">        &#39;products&#39;: [&#39;CH2star@bridge&#39;]}</span>
+
+<span class="sd">        A complete entry could read:</span>
+<span class="sd">        reactions = [</span>
+<span class="sd">        {&#39;reactants&#39;: [&#39;CH4gas&#39;, &#39;-H2gas&#39;, &#39;star&#39;],</span>
+<span class="sd">        &#39;products&#39;: [&#39;CH2star@bridge&#39;]},</span>
+<span class="sd">        {&#39;reactants&#39;: [&#39;CH4gas&#39;, &#39;-0.5H2gas&#39;, &#39;star&#39;],</span>
+<span class="sd">        &#39;products&#39;: [&#39;CH3star@top&#39;]}]</span>
+
+<span class="sd">    energy_corrections : dict, optional</span>
+<span class="sd">        e.g. {&#39;H2gas&#39;: 0.1}</span>
+<span class="sd">    bulk_compositions  : list of str, optional</span>
+<span class="sd">        e.g. [&#39;Pt&#39;, &#39;Ag&#39;]</span>
+<span class="sd">    crystal_structures : list of str, optional</span>
+<span class="sd">        e.g. [&#39;fcc&#39;, &#39;hcp&#39;]</span>
+<span class="sd">    facets : list, optional</span>
+<span class="sd">        For complicated structures use term you would use in publication.</span>
+<span class="sd">        e.g. [&#39;111&#39;]</span>
+<span class="sd">    custom_base : str, optional</span>
+<span class="sd">        TODO</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">reaction</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">:</span>
+        <span class="n">check_reaction</span><span class="p">(</span><span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">],</span> <span class="n">reaction</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">])</span>
+
+    <span class="c1"># Set up directories</span>
+    <span class="k">if</span> <span class="n">custom_base</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">custom_base</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">catbase</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">curdir</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">catbase</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+    <span class="n">publication_shortname</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">authors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                                          <span class="n">title</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">year</span><span class="p">)</span>
+
+    <span class="n">publication_base</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="n">publication_shortname</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">publication_base</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">publication_base</span><span class="p">)</span>
+
+    <span class="c1"># save publication info to publications.txt</span>
+    <span class="n">publication_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="n">title</span><span class="p">,</span>
+                        <span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="n">authors</span><span class="p">,</span>
+                        <span class="s1">&#39;journal&#39;</span><span class="p">:</span> <span class="n">journal</span><span class="p">,</span>
+                        <span class="s1">&#39;volume&#39;</span><span class="p">:</span> <span class="n">volume</span><span class="p">,</span>
+                        <span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="n">number</span><span class="p">,</span>
+                        <span class="s1">&#39;pages&#39;</span><span class="p">:</span> <span class="n">pages</span><span class="p">,</span>
+                        <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="n">year</span><span class="p">,</span>
+                        <span class="s1">&#39;publisher&#39;</span><span class="p">:</span> <span class="n">publisher</span><span class="p">,</span>
+                        <span class="s1">&#39;doi&#39;</span><span class="p">:</span> <span class="n">doi</span><span class="p">,</span>
+                        <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="n">tags</span>
+                        <span class="p">}</span>
+
+    <span class="n">pub_txt</span> <span class="o">=</span> <span class="n">publication_base</span> <span class="o">+</span> <span class="s1">&#39;publication.txt&#39;</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">publication_dict</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">pub_txt</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">energy_corrections</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">energy_txt</span> <span class="o">=</span> <span class="n">publication_base</span> <span class="o">+</span> <span class="s1">&#39;energy_corrections.txt&#39;</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">energy_corrections</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="n">energy_txt</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">publication_base</span> <span class="o">+</span> <span class="n">DFT_code</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">bulk_base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="n">DFT_functional</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="n">gas_base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">bulk_base</span> <span class="o">+</span> <span class="s1">&#39;/gas/&#39;</span><span class="p">)</span>
+
+    <span class="n">gas_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">ads_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="kn">from</span> <span class="nn">catkit.hub.ase_tools</span> <span class="k">import</span> <span class="n">get_state</span><span class="p">,</span> <span class="n">clear_state</span><span class="p">,</span> <span class="n">clear_prefactor</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reactions</span><span class="p">)):</span>
+        <span class="n">rnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span> <span class="o">+</span>
+                  <span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;products&#39;</span><span class="p">]]</span>
+        <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_state</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rnames</span><span class="p">]</span>
+        <span class="n">gas_names</span> <span class="o">+=</span> <span class="p">[</span><span class="n">clear_state</span><span class="p">(</span><span class="n">clear_prefactor</span><span class="p">(</span><span class="n">rnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">))</span> <span class="k">if</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gas&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">gas_names</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">gas_base</span> <span class="o">+</span> <span class="s1">&#39;MISSING: </span><span class="si">{}</span><span class="s1">_gas.traj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+    <span class="k">for</span> <span class="n">bulk</span> <span class="ow">in</span> <span class="n">bulk_compositions</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">crystal_structure</span> <span class="ow">in</span> <span class="n">crystal_structures</span><span class="p">:</span>
+            <span class="n">bulk_name</span> <span class="o">=</span> <span class="n">bulk</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">crystal_structure</span>
+            <span class="n">facet_base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">bulk_base</span> <span class="o">+</span> <span class="n">bulk_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">facet_base</span> <span class="o">+</span> <span class="s1">&#39;MISSING: </span><span class="si">{}</span><span class="s1">_bulk.traj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bulk_name</span><span class="p">),</span>
+                      <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+                <span class="k">pass</span>
+
+            <span class="k">for</span> <span class="n">facet</span> <span class="ow">in</span> <span class="n">facets</span><span class="p">:</span>
+                <span class="n">reaction_base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">facet_base</span> <span class="o">+</span> <span class="n">facet</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">reaction_base</span> <span class="o">+</span> <span class="s1">&#39;MISSING: empty_slab.traj&#39;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">bulk_name</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+                    <span class="k">pass</span>
+
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">reactions</span><span class="p">)):</span>
+                    <span class="n">rname</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;reactants&#39;</span><span class="p">])</span>
+                    <span class="n">pname</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;products&#39;</span><span class="p">])</span>
+                    <span class="n">reaction_name</span> <span class="o">=</span> <span class="s1">&#39;__&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">rname</span><span class="p">,</span> <span class="n">pname</span><span class="p">])</span>
+                    <span class="n">base</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="n">reaction_base</span> <span class="o">+</span> <span class="n">reaction_name</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                    <span class="n">rnames</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span>
+                              <span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span> <span class="o">+</span>
+                              <span class="n">reactions</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s1">&#39;products&#39;</span><span class="p">]]</span>
+                    <span class="n">states</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_state</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">rnames</span><span class="p">]</span>
+
+                    <span class="n">ads_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">clear_prefactor</span><span class="p">(</span><span class="n">clear_state</span><span class="p">(</span><span class="n">rnames</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+                                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">states</span><span class="p">))</span>
+                                 <span class="k">if</span> <span class="n">states</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;star&#39;</span><span class="p">]</span>
+
+                    <span class="k">for</span> <span class="n">ads</span> <span class="ow">in</span> <span class="n">ads_names</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">ads</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">base</span> <span class="o">+</span> <span class="s1">&#39;MISSING: </span><span class="si">{}</span><span class="s1">.traj&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ads</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">):</span>
+                            <span class="k">pass</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

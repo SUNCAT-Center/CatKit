@@ -152,11 +152,11 @@ class SlabGenerator(object):
         # Find all symmetries which are rotations about the z-axis
         z_symmetry = []
         for i, rotation in enumerate(rotations):
-            if (abs(rotation[2][0]) < self.tol
-                    and abs(rotation[2][1]) < self.tol
-                    and abs(rotation[0][2]) < self.tol
-                    and abs(rotation[1][2]) < self.tol
-                    and abs(rotation[2][2] - 1.0) < self.tol):
+            if (abs(rotation[2][0]) < self.tol and
+                abs(rotation[2][1]) < self.tol and
+                abs(rotation[0][2]) < self.tol and
+                abs(rotation[1][2]) < self.tol and
+                    abs(rotation[2][2] - 1.0) < self.tol):
 
                 if not np.isclose(
                         translations[i][2], z_symmetry, rtol=self.tol).any():

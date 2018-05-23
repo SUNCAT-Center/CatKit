@@ -9,7 +9,7 @@ def extract_atoms(molecule):
         return molecule
     try:
         return float(molecule)
-    except:
+    except BaseException:
         pass
     atoms = ''
     if not molecule[0].isalpha():

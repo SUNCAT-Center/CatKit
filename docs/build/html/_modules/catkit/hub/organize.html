@@ -1,0 +1,665 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub.organize &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>catkit.hub.organize</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.hub.organize</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="c1"># builtin imports</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># A lot of functions from os.path</span>
+<span class="c1"># in python 2 moved to os. and changed</span>
+<span class="c1"># their signature. Pathlib can be</span>
+<span class="c1"># installed under python2.X with</span>
+<span class="c1"># pip install pathlib2 and is in</span>
+<span class="c1"># standard library in Python 3,</span>
+<span class="c1"># hence we use it as a compatiblity</span>
+<span class="c1"># library</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pathlib</span> <span class="k">import</span> <span class="n">Path</span>
+    <span class="n">Path</span><span class="p">()</span><span class="o">.</span><span class="n">expanduser</span><span class="p">()</span>
+<span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pathlib2</span> <span class="k">import</span> <span class="n">Path</span>
+
+
+<span class="c1"># other library imports</span>
+<span class="kn">import</span> <span class="nn">Levenshtein</span>
+<span class="kn">import</span> <span class="nn">ase.atoms</span>
+<span class="kn">import</span> <span class="nn">ase.io</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="c1"># local imports</span>
+<span class="kn">from</span> <span class="nn">.ase_tools</span> <span class="k">import</span> <span class="n">gas_phase_references</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">threshold</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1800</span><span class="p">,</span> <span class="n">edgeitems</span><span class="o">=</span><span class="mi">80</span><span class="p">)</span>
+
+<span class="n">PUBLICATION_TEMPLATE</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;{</span>
+<span class="s2">    &quot;title&quot;: &quot;&quot;,</span>
+<span class="s2">    &quot;authors&quot;: [&quot;&quot;],</span>
+<span class="s2">    &quot;journal&quot;: &quot;&quot;,</span>
+<span class="s2">    &quot;volume&quot;: &quot;&quot;,</span>
+<span class="s2">    &quot;number&quot;: &quot;&quot;,</span>
+<span class="s2">     &quot;pages&quot;: &quot;&quot;,</span>
+<span class="s2">     &quot;year&quot;: &quot;&quot;,</span>
+<span class="s2">     &quot;publisher&quot;: &quot;&quot;,</span>
+<span class="s2">     &quot;doi&quot;: &quot;&quot;,</span>
+<span class="s2">     &quot;tags&quot;: []</span>
+<span class="s2">}&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="get_chemical_formula"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.get_chemical_formula">[docs]</a><span class="k">def</span> <span class="nf">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compatibility function, return mode=metal, when</span>
+<span class="sd">    available, mode=hill, when not (ASE &lt;= 3.13)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="symbols"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.symbols">[docs]</a><span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="read_ase"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.read_ase">[docs]</a><span class="k">def</span> <span class="nf">read_ase</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dirname </span><span class="si">{dirname}</span><span class="s2">: Names </span><span class="si">{names}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">,</span>
+        <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+    <span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="collect_structures"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.collect_structures">[docs]</a><span class="k">def</span> <span class="nf">collect_structures</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">filename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;**/*&#39;</span><span class="p">)):</span>
+        <span class="n">posix_filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="o">.</span><span class="n">as_posix</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">posix_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">posix_filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;publication.txt&#39;</span><span class="p">):</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+                <span class="c1"># This variable does not appear to be used.</span>
+                <span class="n">PUBLICATION_TEMPLATE</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">Path</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">filetype</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">filetype</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">filetype</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">structure</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span>
+                    <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">posix_filename</span>
+                    <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">filetype</span><span class="p">(</span>
+                        <span class="n">posix_filename</span><span class="p">)</span>
+                    <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: File </span><span class="si">{posix_filename}</span><span class="s2"> looks incomplete&quot;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                              <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
+                          <span class="p">))</span>
+                <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error with </span><span class="si">{posix_filename}</span><span class="s2">: </span><span class="si">{e}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
+                        <span class="n">e</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
+                    <span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">structures</span></div>
+
+
+<div class="viewcode-block" id="fuzzy_match"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.fuzzy_match">[docs]</a><span class="k">def</span> <span class="nf">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="c1"># sort by density</span>
+    <span class="n">structures</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span>
+                        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+                        <span class="p">)</span>
+
+    <span class="c1"># group in to bulk, surface, or bulk</span>
+    <span class="n">molecules</span><span class="p">,</span> <span class="n">surfaces</span><span class="p">,</span> <span class="n">bulks</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+    <span class="n">gas_phase_candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">reference_energy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">collected_energies</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">collected_structures</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Group By Densities&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===================&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">include_pattern</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">include_pattern</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]):</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">exclude_pattern</span> \
+                    <span class="ow">and</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+                        <span class="n">options</span><span class="o">.</span><span class="n">exclude_pattern</span><span class="p">,</span>
+                        <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]):</span>
+                <span class="k">continue</span>
+
+        <span class="k">elif</span> <span class="n">options</span><span class="o">.</span><span class="n">exclude_pattern</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+                    <span class="n">options</span><span class="o">.</span><span class="n">exclude_pattern</span><span class="p">,</span>
+                    <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]):</span>
+                <span class="k">continue</span>
+
+        <span class="c1"># add more info from filename</span>
+        <span class="n">facet_match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+            <span class="s1">&#39;(?&lt;=[^0-9])?[0-9]{3,3}(?=[^0-9])?&#39;</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">facet_match</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facet_match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+
+        <span class="n">density</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span> <span class="o">/</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;  </span><span class="si">{density:10.3f}</span><span class="s2"> </span><span class="si">{filename}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">density</span><span class="o">=</span><span class="n">density</span><span class="p">,</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">],</span>
+            <span class="p">))</span>
+        <span class="k">if</span> <span class="n">density</span> <span class="o">&lt;</span> <span class="n">options</span><span class="o">.</span><span class="n">max_density_gas</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;molecule&#39;</span>
+            <span class="n">molecules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="n">collected_structures</span> \
+                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">],</span> <span class="p">{})</span> \
+                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;XC_FUNCTIONAL&#39;</span><span class="p">,</span> <span class="p">{})</span> \
+                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;gas&#39;</span><span class="p">,</span> <span class="p">{})</span> \
+                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">structure</span><span class="p">),</span> <span class="n">structure</span><span class="p">)</span>
+
+            <span class="n">formula</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">formula</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">exclude_reference</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+                <span class="n">gas_phase_candidates</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">structure</span><span class="p">))</span>
+                <span class="n">reference_energy</span><span class="p">[</span><span class="n">formula</span><span class="p">]</span> <span class="o">=</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           GAS&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span>
+                          <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+
+        <span class="k">elif</span> <span class="n">density</span> <span class="o">&lt;</span> <span class="n">options</span><span class="o">.</span><span class="n">max_density_slab</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;surface&#39;</span>
+            <span class="n">surfaces</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           SURFACE&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span>
+                      <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;state&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;bulk&#39;</span>
+            <span class="n">bulks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;           BULK&quot;</span><span class="p">,</span> <span class="n">formula</span><span class="p">,</span> <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">])</span>
+
+    <span class="c1"># sort surfaces by volume to get difference facets</span>
+    <span class="n">surfaces</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">surfaces</span><span class="p">,</span>
+                      <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+                      <span class="p">)</span>
+
+    <span class="c1"># Get minimal set of gas phase candidates</span>
+    <span class="n">gas_phase_candidates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">sorted</span><span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">gas_phase_candidates</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">CANDIDATES </span><span class="si">{gas_phase_candidates}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">gas_phase_candidates</span><span class="o">=</span><span class="n">gas_phase_candidates</span><span class="p">,</span>
+        <span class="p">))</span>
+
+    <span class="n">volume_groups</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">1e-5</span>
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">GROUP BY VOLUME</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">surface</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">surfaces</span><span class="p">,</span>
+                          <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">get_volume</span><span class="p">(),):</span>
+        <span class="n">formula</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">volume</span> <span class="ow">in</span> <span class="n">volume_groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">volume</span> <span class="o">-</span> <span class="n">surface</span><span class="o">.</span><span class="n">get_volume</span><span class="p">())</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+                <span class="n">volume_groups</span><span class="p">[</span><span class="n">volume</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">surface</span><span class="p">)</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">volume_groups</span><span class="p">[</span><span class="n">surface</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()]</span> <span class="o">=</span> <span class="p">[</span><span class="n">surface</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">((</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">=============== NEW VOLUME&quot;</span>
+                       <span class="s2">&quot; </span><span class="si">{volume}</span><span class="s2"> ============&quot;</span>
+                       <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">volume</span><span class="o">=</span><span class="n">surface</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">surface</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">volume</span> <span class="ow">in</span> <span class="n">volume_groups</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Inspect volume </span><span class="si">{volume}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">volume</span><span class="o">=</span><span class="n">volume</span><span class="p">,</span>
+            <span class="p">))</span>
+        <span class="n">surfaces</span> <span class="o">=</span> <span class="n">volume_groups</span><span class="p">[</span><span class="n">volume</span><span class="p">]</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">surfaces</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">N</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+            <span class="n">distance</span><span class="p">[:]</span> <span class="o">=</span> <span class="mi">99</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">structure1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surfaces</span><span class="p">):</span>
+                <span class="n">formula1</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">structure1</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">structure2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surfaces</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;=</span> <span class="n">i</span><span class="p">:</span>
+                        <span class="n">formula2</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">structure2</span><span class="p">)</span>
+                        <span class="n">distance</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span>
+                            <span class="n">formula1</span><span class="p">,</span> <span class="n">formula2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">surf1</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surfaces</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">surf2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">surfaces</span><span class="p">):</span>
+
+                <span class="n">f1</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">surf1</span><span class="p">)</span>
+                <span class="n">formula1</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">surf1</span><span class="p">)</span>
+                <span class="n">f2</span> <span class="o">=</span> <span class="n">symbols</span><span class="p">(</span><span class="n">surf2</span><span class="p">)</span>
+                <span class="n">formula2</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">surf2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">distance</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+                    <span class="n">additions</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">subtractions</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">equal</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="n">opcodes</span> <span class="o">=</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">opcodes</span><span class="p">(</span><span class="n">f1</span><span class="p">,</span> <span class="n">f2</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">i1</span><span class="p">,</span> <span class="n">i2</span><span class="p">,</span> <span class="n">j1</span><span class="p">,</span> <span class="n">j2</span> <span class="ow">in</span> <span class="n">opcodes</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;insert&#39;</span><span class="p">:</span>
+                            <span class="n">additions</span> <span class="o">+=</span> <span class="n">f2</span><span class="p">[</span><span class="n">j1</span><span class="p">:</span><span class="n">j2</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;delete&#39;</span><span class="p">:</span>
+                            <span class="n">subtractions</span> <span class="o">+=</span> <span class="n">f2</span><span class="p">[</span><span class="n">j1</span><span class="p">:</span><span class="n">j2</span><span class="p">]</span>
+                        <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;equal&#39;</span><span class="p">:</span>
+                            <span class="n">equal</span> <span class="o">+=</span> <span class="n">f1</span><span class="p">[</span><span class="n">i1</span><span class="p">:</span><span class="n">i2</span><span class="p">]</span>
+                    <span class="n">subtractions</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="nb">sorted</span><span class="p">(</span>
+                            <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span>
+                                <span class="n">subtractions</span><span class="p">)))</span>
+                    <span class="n">additions</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                        <span class="nb">sorted</span><span class="p">(</span>
+                                <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span>
+                                    <span class="n">additions</span><span class="p">)))</span>
+
+                    <span class="n">equal_formula</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span>
+                        <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">equal</span><span class="p">))</span>
+
+                    <span class="c1"># check if we have some additions of subtractions</span>
+                    <span class="c1"># and either one (or both) are in user specifid</span>
+                    <span class="c1"># adsorbates</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">additions</span> <span class="ow">or</span> <span class="n">subtractions</span><span class="p">)</span> \
+                            <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">additions</span> <span class="ow">or</span>
+                                 <span class="n">additions</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">adsorbates</span><span class="p">)</span> \
+                            <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">subtractions</span> <span class="ow">or</span>
+                                 <span class="n">subtractions</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">adsorbates</span><span class="p">):</span>
+
+                        <span class="n">dE</span> <span class="o">=</span> <span class="n">surf2</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> \
+                            <span class="o">-</span> <span class="n">surf1</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+                        <span class="n">difference_symbols</span> <span class="o">=</span> \
+                            <span class="n">gas_phase_references</span><span class="o">.</span><span class="n">molecules2symbols</span><span class="p">(</span>
+                                <span class="p">[</span><span class="n">additions</span><span class="p">,</span> <span class="n">subtractions</span><span class="p">],</span>
+                            <span class="p">)</span>
+                        <span class="n">references</span> <span class="o">=</span> \
+                            <span class="n">gas_phase_references</span><span class="o">.</span><span class="n">construct_reference_system</span><span class="p">(</span>
+                                <span class="n">difference_symbols</span><span class="p">,</span> <span class="n">gas_phase_candidates</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="n">atomic_references</span> <span class="o">=</span> <span class="p">{}</span>
+                        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">references</span><span class="p">:</span>
+                            <span class="n">atomic_references</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+
+                        <span class="n">stoichiometry_factors</span> <span class="o">=</span>  \
+                            <span class="n">gas_phase_references</span><span class="o">.</span><span class="n">get_stoichiometry_factors</span><span class="p">(</span>
+                                <span class="n">additions</span> <span class="o">+</span> <span class="n">subtractions</span><span class="p">,</span> <span class="n">references</span><span class="p">,</span>
+                            <span class="p">)</span>
+
+                        <span class="n">formula</span> <span class="o">=</span> <span class="s1">&#39;* -&gt;&#39;</span>
+                        <span class="n">adsorbate</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span>
+                            <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">additions</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">additions</span><span class="p">:</span>
+                            <span class="n">formula</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> \
+                                <span class="n">get_chemical_formula</span><span class="p">(</span>
+                                    <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">additions</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span>
+                        <span class="k">if</span> <span class="n">subtractions</span><span class="p">:</span>
+                            <span class="n">formula</span> <span class="o">+=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> \
+                                <span class="n">get_chemical_formula</span><span class="p">(</span>
+                                    <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">Atoms</span><span class="p">(</span><span class="n">subtractions</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;*&#39;</span>
+
+                        <span class="n">gas_phase_corrections</span> <span class="o">=</span> <span class="p">{}</span>
+
+                        <span class="k">for</span> <span class="n">addition</span> <span class="ow">in</span> <span class="n">additions</span><span class="p">:</span>
+                            <span class="n">stoich_factors</span> <span class="o">=</span> <span class="n">stoichiometry_factors</span><span class="p">[</span><span class="n">addition</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">stoich_factors</span><span class="p">:</span>
+                                <span class="n">dE</span> <span class="o">-=</span> <span class="n">stoich_factors</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">*</span> \
+                                    <span class="n">reference_energy</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
+                                <span class="n">gas_phase_corrections</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> \
+                                    <span class="n">gas_phase_corrections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                        <span class="n">ref</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="n">stoich_factors</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
+
+                        <span class="k">for</span> <span class="n">subtraction</span> <span class="ow">in</span> <span class="n">subtractions</span><span class="p">:</span>
+                            <span class="n">stoich_factors</span> <span class="o">=</span> <span class="n">stoichiometry_factors</span><span class="p">[</span><span class="n">subtraction</span><span class="p">]</span>
+                            <span class="k">for</span> <span class="n">ref</span> <span class="ow">in</span> <span class="n">stoich_factors</span><span class="p">:</span>
+                                <span class="n">dE</span> <span class="o">+=</span> <span class="n">stoich_factors</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">*</span> \
+                                    <span class="n">reference_energy</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
+                                <span class="n">gas_phase_corrections</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span> <span class="o">=</span> \
+                                    <span class="n">gas_phase_corrections</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                        <span class="n">ref</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">stoich_factors</span><span class="p">[</span><span class="n">ref</span><span class="p">]</span>
+
+                        <span class="k">for</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">gas_phase_corrections</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                            <span class="k">if</span> <span class="n">factor</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">sign</span> <span class="o">=</span> <span class="s1">&#39; + &#39;</span> <span class="k">if</span> <span class="n">factor</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39; +- &#39;</span>
+                                <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">factor</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">factor</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mf">1e-3</span><span class="p">:</span>
+                                    <span class="n">factor</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">factor</span><span class="p">)))</span>
+                                    <span class="k">if</span> <span class="n">factor</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+                                        <span class="n">factor</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">factor</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">factor</span><span class="p">))</span>
+
+                                <span class="n">fleft</span><span class="p">,</span> <span class="n">fright</span> <span class="o">=</span> <span class="n">formula</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; -&gt; &#39;</span><span class="p">)</span>
+                                <span class="n">formula</span> <span class="o">=</span> <span class="n">fleft</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">+</span> <span class="n">factor</span> <span class="o">+</span> \
+                                    <span class="n">molecule</span> <span class="o">+</span> <span class="s1">&#39;(g)&#39;</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">fright</span>
+
+                        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">dE</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">options</span><span class="o">.</span><span class="n">max_energy</span><span class="p">:</span>
+                            <span class="n">energy</span> <span class="o">=</span> <span class="n">dE</span>
+
+                            <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;</span><span class="si">{equal_formula:16s}</span><span class="s2">&quot;</span>
+                                   <span class="s2">&quot; (</span><span class="si">{surface_facet}</span><span class="s2">)&quot;</span>
+                                   <span class="s2">&quot; </span><span class="si">{formula:30s}</span><span class="s2">&quot;</span>
+                                   <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">formula</span><span class="o">=</span><span class="n">formula</span><span class="p">,</span>
+                                <span class="n">equal_formula</span><span class="o">=</span><span class="n">equal_formula</span><span class="p">,</span>
+                                <span class="n">surface_facet</span><span class="o">=</span><span class="n">surf1</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span>
+                            <span class="p">)</span>
+                            <span class="n">equation</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot; </span><span class="si">{formula:30s}</span><span class="s2">&quot;</span>
+                                        <span class="p">)</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">formula</span><span class="o">=</span><span class="n">formula</span><span class="p">,</span>
+                                <span class="n">equal_formula</span><span class="o">=</span><span class="n">equal_formula</span><span class="p">,</span>
+                                <span class="n">surface_facet</span><span class="o">=</span><span class="n">surf1</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span>
+                            <span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;-&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;__&#39;</span><span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;star&#39;</span><span class="p">)</span> \
+                                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(g)&#39;</span><span class="p">,</span> <span class="s1">&#39;gas&#39;</span><span class="p">)</span>
+                            <span class="c1"># We keep the empty structure whether or not</span>
+                            <span class="c1"># we keep all structures</span>
+                            <span class="n">collected_structures</span> \
+                                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">],</span> <span class="p">{})</span> \
+                                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;XC_FUNCTIONAL&#39;</span><span class="p">,</span> <span class="p">{})</span> \
+                                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">equal_formula</span><span class="p">,</span> <span class="p">{})</span> \
+                                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">surf1</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">],</span> <span class="p">{})</span> \
+                                <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;empty_slab&#39;</span><span class="p">,</span> <span class="n">surf1</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">options</span><span class="o">.</span><span class="n">keep_all_energies</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">energy</span> <span class="o">&lt;</span> <span class="n">collected_energies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                        <span class="n">key</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">)):</span>
+                                    <span class="n">collected_energies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
+                                    <span class="n">collected_structures</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                        <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">],</span>
+                                        <span class="p">{})</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                        <span class="s1">&#39;XC_FUNCTIONAL&#39;</span><span class="p">,</span>
+                                        <span class="p">{})</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                        <span class="n">equal_formula</span><span class="p">,</span>
+                                        <span class="p">{})</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                        <span class="n">surf1</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">],</span>
+                                        <span class="p">{})</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                        <span class="n">equation</span><span class="p">,</span>
+                                        <span class="p">{})[</span><span class="n">adsorbate</span><span class="p">]</span> <span class="o">=</span> <span class="n">surf2</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># amend number if colliding keys are found</span>
+                                <span class="n">matching_keys</span> <span class="o">=</span> <span class="p">[</span>
+                                    <span class="n">_key</span> <span class="k">for</span> <span class="n">_key</span> <span class="ow">in</span> <span class="n">collected_energies</span>
+                                    <span class="k">if</span> <span class="n">_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="p">]</span>
+                                <span class="n">key</span> <span class="o">+=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matching_keys</span><span class="p">))</span>
+                                <span class="n">collected_energies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy</span>
+                                <span class="n">collected_structures</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                    <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">],</span> <span class="p">{})</span> \
+                                    <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;XC_FUNCTIONAL&#39;</span><span class="p">,</span> <span class="p">{})</span> \
+                                    <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">equal_formula</span><span class="p">,</span> <span class="p">{})</span> \
+                                    <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">surf1</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">],</span> <span class="p">{})</span> \
+                                    <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                    <span class="n">equation</span><span class="p">,</span> <span class="p">{})</span> <span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                                    <span class="n">adsorbate</span> <span class="o">+</span> <span class="s1">&#39;@site_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                                        <span class="nb">len</span><span class="p">(</span><span class="n">matching_keys</span><span class="p">)),</span> <span class="n">surf2</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">Collected Reaction Energies&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;===========================&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">energy</span> <span class="ow">in</span> <span class="n">collected_energies</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{key:40s}</span><span class="s2">: </span><span class="si">{energy:.3f}</span><span class="s2"> eV&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+            <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
+        <span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">collected_structures</span></div>
+
+
+<div class="viewcode-block" id="create_folders"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.create_folders">[docs]</a><span class="k">def</span> <span class="nf">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+                        <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;publication.txt&#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+                    <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">PUBLICATION_TEMPLATE</span><span class="p">)</span>
+            <span class="n">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.traj&#39;</span><span class="p">)),</span>
+                <span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+                <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;traj&#39;</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">pickle_file</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span>
+        <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.cache.pckl&#39;</span>
+
+    <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
+            <span class="n">structures</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">infile</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">structures</span> <span class="o">=</span> <span class="n">collect_structures</span><span class="p">(</span><span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
+            <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">outfile</span><span class="p">)</span>
+
+    <span class="n">structures</span> <span class="o">=</span> <span class="n">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+    <span class="n">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span>
+                   <span class="n">root</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.organized&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,7 +1,12 @@
 import sphinx_rtd_theme
+import os
+import sys
+sys.path.insert(0, os.path.abspath('..'))
 
+# http://www.sphinx-doc.org/en/master/extensions.html
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -19,8 +24,7 @@ master_doc = 'index'
 copyright = '2018, CatKit-developers'
 default_role = 'math'
 pygments_style = 'sphinx'
-modindex_common_prefix = ['catkit.']
-autoclass_content = 'both'
+mautoclass_content = 'both'
 
 html_theme = 'sphinx_rtd_theme'
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -31,5 +35,3 @@ version = '0.4'
 release = '0.4.4'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
-
-extensions = ['sphinx.ext.napoleon']

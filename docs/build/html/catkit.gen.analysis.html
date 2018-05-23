@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>catkit.gen.analysis package &mdash; CatKit 0.4.3 documentation</title>
+  <title>catkit.gen.analysis package &mdash; CatKit 0.4.4 documentation</title>
   
 
   
@@ -87,9 +87,10 @@
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">catkit</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
 <li class="toctree-l4 current"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
 <li class="toctree-l4"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a></li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
@@ -181,36 +182,26 @@
 <span id="catkit-gen-analysis-classifier-module"></span><h2>catkit.gen.analysis.classifier module<a class="headerlink" href="#module-catkit.gen.analysis.classifier" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="catkit.gen.analysis.classifier.Classifier">
-<em class="property">class </em><code class="descclassname">catkit.gen.analysis.classifier.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="descclassname">catkit.gen.analysis.classifier.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Class for classification of various aspects of an an atomic
 unit cell.</p>
 <p>Currently, a tool for classification of adsorbates on surface
 environments and the active sites they rest on.</p>
-<p>Return unique coordinate values of a given atoms object
-for a specified axis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atoms</strong> (<em>atoms object</em>) – </td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="catkit.gen.analysis.classifier.Classifier.id_adsorbate_atoms">
-<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbate_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify adsorbed atoms in a given atoms object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify adsorbate atoms.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify adsorbate atoms.</p>
 <p>’trivial’:
 Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
 </li>
-<li><strong>tag</strong> (<em>bool</em>) – Return adsorbate atoms with tags of -2.</li>
+<li><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return adsorbate atoms with tags of -2.</li>
 </ul>
 </td>
 </tr>
@@ -226,7 +217,7 @@ Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.classifier.Classifier.id_adsorbates">
-<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of Gratoms objects for each adsorbate
 classified on a surface. Requires classification of adsorbate
 atoms.</p>
@@ -235,18 +226,18 @@ atoms.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify individual adsorbates.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify individual adsorbates.</p>
 <p>’radial’:
 Use standard cutoff distances to identify neighboring atoms.</p>
 </li>
-<li><strong>return_atoms</strong> (<em>bool</em>) – Return Gratoms objects instead of adsorbate indices.</li>
+<li><strong>return_atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return Gratoms objects instead of adsorbate indices.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>adsorabtes</strong> – Adsorbate indices of adsorbates in unit cell.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list (n,)</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a> (n,)</p>
 </td>
 </tr>
 </tbody>
@@ -255,7 +246,7 @@ Use standard cutoff distances to identify neighboring atoms.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.classifier.Classifier.id_slab_atoms">
-<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_slab_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the indices of the slab atoms using select characterization
 techniques.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -263,12 +254,12 @@ techniques.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify slab atoms.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify slab atoms.</p>
 <p>’trivial’:
 Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
 </li>
-<li><strong>tag</strong> (<em>bool</em>) – Return adsorbate atoms with tags of 2.</li>
-<li><strong>rtol</strong> (<em>float</em>) – Relative cutoff distance for tagging layers.</li>
+<li><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return adsorbate atoms with tags of 2.</li>
+<li><strong>rtol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Relative cutoff distance for tagging layers.</li>
 </ul>
 </td>
 </tr>
@@ -284,14 +275,14 @@ Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.classifier.Classifier.id_surface_atoms">
-<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.classifier.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify surface atoms of an atoms object. This will
 require that adsorbate atoms have already been identified.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify surface atoms.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify surface atoms.</p>
 <p>’voronoi_sweep’:
 Create a sweep of proxy atoms above surface. Surface atoms
 are those which are most frequent neighbors of the sweep.</p>
@@ -312,7 +303,7 @@ are those which are most frequent neighbors of the sweep.</p>
 <span id="catkit-gen-analysis-matching-module"></span><h2>catkit.gen.analysis.matching module<a class="headerlink" href="#module-catkit.gen.analysis.matching" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="catkit.gen.analysis.matching.reactant_indices">
-<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">reactant_indices</code><span class="sig-paren">(</span><em>R1</em>, <em>R2</em>, <em>P</em>, <em>broken_bond</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.matching.reactant_indices" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">reactant_indices</code><span class="sig-paren">(</span><em>R1</em>, <em>R2</em>, <em>P</em>, <em>broken_bond</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/matching.html#reactant_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.matching.reactant_indices" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
 <dt>Match the indices of a pair of reactants from a</dt>
 <dd>product and broken bond.</dd>
@@ -325,7 +316,7 @@ are those which are most frequent neighbors of the sweep.</p>
 <li><strong>R1</strong> (<em>networkx MultiGraph</em>) – Graph representing reactant 1</li>
 <li><strong>R2</strong> (<em>networkx MultiGraph</em>) – Graph representing reactant 2</li>
 <li><strong>P</strong> (<em>networkx MultiGraph</em>) – Graph representing the product</li>
-<li><strong>broken_bond</strong> (<em>list</em><em> (</em><em>2</em><em>,</em><em>)</em>) – Indices representing the edge of the product
+<li><strong>broken_bond</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>2</em><em>,</em><em>)</em>) – Indices representing the edge of the product
 to be removed.</li>
 </ul>
 </td>
@@ -343,7 +334,7 @@ the reactants indices.</p>
 
 <dl class="function">
 <dt id="catkit.gen.analysis.matching.slab_indices">
-<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">slab_indices</code><span class="sig-paren">(</span><em>slab0</em>, <em>slab1</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.matching.slab_indices" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.analysis.matching.</code><code class="descname">slab_indices</code><span class="sig-paren">(</span><em>slab0</em>, <em>slab1</em>, <em>mask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/matching.html#slab_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.matching.slab_indices" title="Permalink to this definition">¶</a></dt>
 <dd><p>Match the indices of similar atoms between two slabs.</p>
 </dd></dl>
 
@@ -352,7 +343,7 @@ the reactants indices.</p>
 <span id="catkit-gen-analysis-reconfiguration-module"></span><h2>catkit.gen.analysis.reconfiguration module<a class="headerlink" href="#module-catkit.gen.analysis.reconfiguration" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="catkit.gen.analysis.reconfiguration.id_reconstruction">
-<code class="descclassname">catkit.gen.analysis.reconfiguration.</code><code class="descname">id_reconstruction</code><span class="sig-paren">(</span><em>images</em>, <em>save=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.reconfiguration.id_reconstruction" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.analysis.reconfiguration.</code><code class="descname">id_reconstruction</code><span class="sig-paren">(</span><em>images</em>, <em>save=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/reconfiguration.html#id_reconstruction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.reconfiguration.id_reconstruction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify a reconstruction event by analyzing changes in
 the forces.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -361,7 +352,7 @@ the forces.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>images</strong> (<em>list of ASE atoms objects</em>) – Relaxation trajectory.</li>
-<li><strong>show</strong> (<em>bool</em>) – Create a figure to display the events located.</li>
+<li><strong>show</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Create a figure to display the events located.</li>
 </ul>
 </td>
 </tr>
@@ -380,36 +371,26 @@ the forces.</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.gen.analysis" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="catkit.gen.analysis.Classifier">
-<em class="property">class </em><code class="descclassname">catkit.gen.analysis.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.Classifier" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<em class="property">class </em><code class="descclassname">catkit.gen.analysis.</code><code class="descname">Classifier</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Class for classification of various aspects of an an atomic
 unit cell.</p>
 <p>Currently, a tool for classification of adsorbates on surface
 environments and the active sites they rest on.</p>
-<p>Return unique coordinate values of a given atoms object
-for a specified axis.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>atoms</strong> (<em>atoms object</em>) – </td>
-</tr>
-</tbody>
-</table>
 <dl class="method">
 <dt id="catkit.gen.analysis.Classifier.id_adsorbate_atoms">
-<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_adsorbate_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbate_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbate_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify adsorbed atoms in a given atoms object.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify adsorbate atoms.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify adsorbate atoms.</p>
 <p>’trivial’:
 Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
 </li>
-<li><strong>tag</strong> (<em>bool</em>) – Return adsorbate atoms with tags of -2.</li>
+<li><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return adsorbate atoms with tags of -2.</li>
 </ul>
 </td>
 </tr>
@@ -425,7 +406,7 @@ Adsorbate atoms assumed to have atomic number != 13 or &lt; 21.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.Classifier.id_adsorbates">
-<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_adsorbates</code><span class="sig-paren">(</span><em>classifier='radial'</em>, <em>return_atoms=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_adsorbates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_adsorbates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of Gratoms objects for each adsorbate
 classified on a surface. Requires classification of adsorbate
 atoms.</p>
@@ -434,18 +415,18 @@ atoms.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify individual adsorbates.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify individual adsorbates.</p>
 <p>’radial’:
 Use standard cutoff distances to identify neighboring atoms.</p>
 </li>
-<li><strong>return_atoms</strong> (<em>bool</em>) – Return Gratoms objects instead of adsorbate indices.</li>
+<li><strong>return_atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return Gratoms objects instead of adsorbate indices.</li>
 </ul>
 </td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>adsorabtes</strong> – Adsorbate indices of adsorbates in unit cell.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list (n,)</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a> (n,)</p>
 </td>
 </tr>
 </tbody>
@@ -454,7 +435,7 @@ Use standard cutoff distances to identify neighboring atoms.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.Classifier.id_slab_atoms">
-<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_slab_atoms</code><span class="sig-paren">(</span><em>classifier='trivial'</em>, <em>tag=False</em>, <em>rtol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_slab_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_slab_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the indices of the slab atoms using select characterization
 techniques.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -462,12 +443,12 @@ techniques.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify slab atoms.</p>
+<li><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify slab atoms.</p>
 <p>’trivial’:
 Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
 </li>
-<li><strong>tag</strong> (<em>bool</em>) – Return adsorbate atoms with tags of 2.</li>
-<li><strong>rtol</strong> (<em>float</em>) – Relative cutoff distance for tagging layers.</li>
+<li><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return adsorbate atoms with tags of 2.</li>
+<li><strong>rtol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Relative cutoff distance for tagging layers.</li>
 </ul>
 </td>
 </tr>
@@ -483,14 +464,14 @@ Slab atoms assumed to have atomic number == 13 or &gt;= 21.</p>
 
 <dl class="method">
 <dt id="catkit.gen.analysis.Classifier.id_surface_atoms">
-<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">id_surface_atoms</code><span class="sig-paren">(</span><em>classifier='voronoi_sweep'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/gen/analysis/classifier.html#Classifier.id_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.analysis.Classifier.id_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Identify surface atoms of an atoms object. This will
 require that adsorbate atoms have already been identified.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classifier</strong> (<em>str</em>) – <p>Classification technique to identify surface atoms.</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>classifier</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – <p>Classification technique to identify surface atoms.</p>
 <p>’voronoi_sweep’:
 Create a sweep of proxy atoms above surface. Surface atoms
 are those which are most frequent neighbors of the sweep.</p>
@@ -530,7 +511,7 @@ are those which are most frequent neighbors of the sweep.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Sun, 20 May 2018 21:13:44.
+      Last updated on Tue, 22 May 2018 21:32:52.
 
     </p>
   </div>
@@ -552,7 +533,7 @@ are those which are most frequent neighbors of the sweep.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'0.4.3',
+            VERSION:'0.4.4',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
@@ -563,6 +544,7 @@ are those which are most frequent neighbors of the sweep.</p>
       <script type="text/javascript" src="_static/jquery.js"></script>
       <script type="text/javascript" src="_static/underscore.js"></script>
       <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
 
   
 

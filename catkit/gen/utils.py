@@ -141,9 +141,10 @@ def expand_cell(atoms, r=6):
 
     pbc = atoms.get_pbc()
     low = np.floor(-nmax * pbc)
-    high = np.ceil(nmax * pbc + 1)
+    high = np.ceil(np.abs(nmax) * pbc + 1)
 
     offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
+
     ncell = np.prod(offsets.shape[:-1])
 
     cart = np.dot(offsets, atoms.cell)

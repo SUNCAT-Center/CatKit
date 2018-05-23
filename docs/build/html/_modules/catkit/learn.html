@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.learn &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+        
+      <li>catkit.learn</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.learn</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">minimize</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="k">import</span> <span class="n">basinhopping</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">sklearn.gaussian_process.kernels</span> <span class="k">import</span> <span class="n">WhiteKernel</span><span class="p">,</span> <span class="n">DotProduct</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="k">import</span> <span class="n">mean_absolute_error</span>
+<span class="kn">from</span> <span class="nn">sklearn.gaussian_process</span> <span class="k">import</span> <span class="n">GaussianProcessRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn</span> <span class="k">import</span> <span class="n">preprocessing</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="optimizer"><a class="viewcode-back" href="../../catkit.html#catkit.learn.optimizer">[docs]</a><span class="k">def</span> <span class="nf">optimizer</span><span class="p">(</span><span class="n">obj_func</span><span class="p">,</span>
+              <span class="n">initial_theta</span><span class="p">,</span>
+              <span class="n">bounds</span><span class="p">,</span>
+              <span class="n">gradient</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+              <span class="n">minimizer</span><span class="o">=</span><span class="s1">&#39;L-BFGS-B&#39;</span><span class="p">,</span>
+              <span class="n">hopping</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+              <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Substitute optimizer in scikit-learn Gaussian Process function.</span>
+
+<span class="sd">    Note &#39;L-BFGS-B&#39; is equivalent to the standard optimizer used in</span>
+<span class="sd">    scikit-learn. This function allows for more direct control over the</span>
+<span class="sd">    arguments. https://docs.scipy.org/doc/scipy/reference/optimize.html</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    obj_func : function</span>
+<span class="sd">        scikit-learn objective function.</span>
+<span class="sd">    initial_theta : array (n,)</span>
+<span class="sd">        Hyperparameters to be optimized against.</span>
+<span class="sd">    bounds : list of tuples (n, 2)</span>
+<span class="sd">        Lower and upper bounds for each hyper parameter.</span>
+<span class="sd">    gradient : bool</span>
+<span class="sd">        Include the gradient for the optimization function.</span>
+<span class="sd">    minimizer : str</span>
+<span class="sd">        A scipy minimization method.</span>
+<span class="sd">    hopping : int</span>
+<span class="sd">        Perform a number of basin hopping steps.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    theta_opt : list (n,)</span>
+<span class="sd">        Optimized hyperparameters.</span>
+<span class="sd">    func_min : float</span>
+<span class="sd">        Value of the minimized objective function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">margs</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="n">minimizer</span><span class="p">,</span>
+        <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">(</span><span class="n">gradient</span><span class="p">,</span> <span class="p">),</span>
+        <span class="s1">&#39;jac&#39;</span><span class="p">:</span> <span class="n">gradient</span><span class="p">,</span>
+        <span class="s1">&#39;bounds&#39;</span><span class="p">:</span> <span class="n">bounds</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">hopping</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">basinhopping</span><span class="p">(</span>
+            <span class="n">obj_func</span><span class="p">,</span>
+            <span class="n">initial_theta</span><span class="p">,</span>
+            <span class="n">minimizer_kwargs</span><span class="o">=</span><span class="n">margs</span><span class="p">,</span>
+            <span class="n">niter</span><span class="o">=</span><span class="n">hopping</span><span class="p">,</span>
+            <span class="n">T</span><span class="o">=</span><span class="mf">1e2</span><span class="p">,</span>
+            <span class="n">stepsize</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span><span class="n">obj_func</span><span class="p">,</span> <span class="n">initial_theta</span><span class="p">,</span> <span class="o">**</span><span class="n">margs</span><span class="p">)</span>
+    <span class="n">theta_opt</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">x</span>
+    <span class="n">func_min</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">fun</span>
+
+    <span class="k">return</span> <span class="n">theta_opt</span><span class="p">,</span> <span class="n">func_min</span></div>
+
+
+<div class="viewcode-block" id="online_learning"><a class="viewcode-back" href="../../catkit.html#catkit.learn.online_learning">[docs]</a><span class="k">def</span> <span class="nf">online_learning</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">factors</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="n">nsteps</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">plot</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A simple utility for performing online learning. The main</span>
+<span class="sd">    components required are a regression method and a scoring</span>
+<span class="sd">    technique.</span>
+
+<span class="sd">    Currently, the scoring methodology and regressor are baked in.</span>
+<span class="sd">    These need to be made modular.</span>
+
+<span class="sd">    Minimum 3 samples are required for 3 fold cross validation.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+
+    <span class="n">kernel</span> <span class="o">=</span> <span class="n">DotProduct</span><span class="p">()</span> <span class="o">+</span> <span class="n">WhiteKernel</span><span class="p">()</span>
+    <span class="n">regressor</span> <span class="o">=</span> <span class="n">GaussianProcessRegressor</span><span class="p">(</span>
+        <span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">,</span> <span class="n">n_restarts_optimizer</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">step</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">step</span> <span class="o">&lt;</span> <span class="n">nsteps</span><span class="p">:</span>
+        <span class="n">X0</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+        <span class="n">y0</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">samples</span><span class="p">]</span>
+
+        <span class="n">regressor</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+        <span class="n">yp</span><span class="p">,</span> <span class="n">ys</span> <span class="o">=</span> <span class="n">regressor</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">return_std</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Provides some form of normalization.</span>
+        <span class="c1"># Multiples denote relative importance</span>
+        <span class="n">yp_scale</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">yp</span><span class="p">)</span> <span class="o">*</span> <span class="n">factors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">ys_scale</span> <span class="o">=</span> <span class="n">preprocessing</span><span class="o">.</span><span class="n">scale</span><span class="p">(</span><span class="n">ys</span><span class="p">)</span> <span class="o">*</span> <span class="n">factors</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="n">ys_scale</span> <span class="o">-</span> <span class="n">yp_scale</span>
+        <span class="n">srt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">score</span><span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">srt</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">samples</span><span class="p">:</span>
+                <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="n">s</span><span class="p">]])</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">plot</span><span class="p">:</span>
+            <span class="n">mae</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">mean_absolute_error</span><span class="p">(</span><span class="n">yp</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">errorbar</span><span class="p">(</span><span class="n">ids</span><span class="p">,</span> <span class="n">yp</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">ys</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">y</span><span class="p">[</span><span class="n">samples</span><span class="p">],</span> <span class="s1">&#39;o&#39;</span><span class="p">,</span> <span class="n">zorder</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">xlim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+            <span class="n">ylim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">9.0</span><span class="p">,</span> <span class="n">ylim</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mf">9.0</span><span class="p">,</span> <span class="n">mae</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;./online-learning-RBF-</span><span class="si">{}</span><span class="s1">.png&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n</span><span class="p">))</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">samples</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
