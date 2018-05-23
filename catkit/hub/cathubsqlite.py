@@ -1,6 +1,9 @@
 import sqlite3
 import json
 
+import ase
+from ase.db.sqlite import SQLite3Database
+
 import numpy as np
 
 init_commands = [
@@ -52,13 +55,6 @@ init_commands = [
     FOREIGN KEY (id) REFERENCES reaction(id)
     );"""]
 
-#index_statements = [
-#    'CREATE INDEX idxpubid ON publication(pub_id)',
-#    'CREATE INDEX idxrecen ON reaction(reaction_energy)',
-#    'CREATE INDEX idxchemcomp ON reaction(chemical_composition)',
-#    'CREATE INDEX idxuser ON reaction(user)',
-#]
-
 
 class CathubSQLite:
     def __init__(self, filename):
@@ -88,18 +84,9 @@ class CathubSQLite:
     def _initialize(self, con):
         if self.initialized:
             return
-
-        import ase
-        from ase.db.sqlite import SQLite3Database
         SQLite3Database()._initialize(con)
 
         self._metadata = {}
-
-        cur = con.execute(
-            'SELECT COUNT(*) FROM sqlite_master WHERE name="catapp"')
-
-        if cur.fetchone()[0] > 0:
-            self.update_names(con)
 
         cur = con.execute(
             'SELECT COUNT(*) FROM sqlite_master WHERE name="reaction"')
@@ -110,6 +97,10 @@ class CathubSQLite:
             self.id = 1
             self.pid = 1
             con.commit()
+
+        if self.id is None:
+            self.id = self.get_last_id(cur) + 1
+            self.pid = self.get_last_pub_id(cur) + 1
 
         self.initialized = True
 
@@ -131,13 +122,7 @@ class CathubSQLite:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        if self.pid is None:
-            try:
-                pid = self.get_last_pub_id(cur) + 1
-            except:
-                pid = 1
-        else:
-            pid = self.pid
+        pid = self.pid
 
         values = (pid,
                   values['pub_id'],
@@ -150,12 +135,13 @@ class CathubSQLite:
                   values['year'],
                   values['publisher'],
                   values['doi'],
-                  json.dumps(values['tags'])
-        )
+                  json.dumps(values['tags']))
 
         q = ', '.join('?' * len(values))
         cur.execute('INSERT OR IGNORE INTO publication VALUES ({})'.format(q),
                     values)
+        self.pid = pid + 1
+
         return pid
 
     def check_ase_ids(self, values, ase_ids):
@@ -170,19 +156,15 @@ class CathubSQLite:
             if '_' in spec:
                 n_split += 1
 
-        assert len(reaction_species) <= len(ase_values) + n_split, 'ASE ids missing!'
+        assert len(reaction_species) <= len(ase_values) + n_split, \
+            'ASE ids missing!'
         return
 
     def write(self, values, data=None):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        #if self.id is None:
-        #    try:
-        #id = self.last_id#self.get_last_id(cur) + 1
-        #    except:
-        #        id = 1
-        #else:
+
         id = self.id
 
         pub_id = values['pub_id']
@@ -219,15 +201,20 @@ class CathubSQLite:
                 energy_correction = energy_corrections[name]
             else:
                 energy_correction = 0
-            reaction_structure_values.append([name, energy_correction, ase_id, id])
-            cur.execute('INSERT OR IGNORE INTO publication_system(ase_id, pub_id) VALUES (?, ?)', [ase_id, pub_id])
+            reaction_structure_values.append([name, energy_correction,
+                                              ase_id, id])
+            insert_statement = """INSERT OR IGNORE INTO
+            publication_system(ase_id, pub_id) VALUES (?, ?)"""
+            cur.execute(insert_statement, [ase_id, pub_id])
+
         cur.executemany('INSERT INTO reaction_system VALUES (?, ?, ?, ?)',
                         reaction_structure_values)
 
         if self.connection is None:
             con.commit()
             con.close()
-        self.id = id
+
+        self.id = id + 1
 
         return id
 
@@ -236,7 +223,6 @@ class CathubSQLite:
         self._initialize(con)
         cur = con.cursor()
 
-        #values['year'] = int(values['year'])
         pub_id = values['pub_id']
         ase_ids = values['ase_ids']
         energy_corrections = values['energy_corrections']
@@ -255,6 +241,7 @@ class CathubSQLite:
 
         update_command = 'UPDATE reaction SET {} WHERE id = {};'\
             .format(execute_str, id)
+
         cur.execute(update_command)
 
         delete_command = 'DELETE from reaction_system WHERE id = {}'.format(id)
@@ -262,8 +249,13 @@ class CathubSQLite:
 
         reaction_structure_values = []
         for name, ase_id in ase_ids.items():
-            reaction_structure_values.append([name, energy_corrections.get(name), ase_id, id])
-            cur.execute('INSERT OR IGNORE INTO publication_system(ase_id, pub_id) VALUES (?, ?)', [ase_id, pub_id])
+            reaction_structure_values.append([name,
+                                              energy_corrections.get(name),
+                                              ase_id, id])
+            insert_statement = """INSERT OR IGNORE INTO
+            publication_system(ase_id, pub_id) VALUES (?, ?)"""
+            cur.execute(insert_statement, [ase_id, pub_id])
+
         cur.executemany('INSERT INTO reaction_system VALUES (?, ?, ?, ?)',
                         reaction_structure_values)
 
@@ -274,21 +266,28 @@ class CathubSQLite:
 
     def get_last_id(self, cur):
         cur.execute('SELECT seq FROM sqlite_sequence WHERE name="reaction"')
-        print('SELECT seq FROM sqlite_sequence WHERE name="reaction"')
-        print(cur)
-        id = cur.fetchone()[0]
+        result = cur.fetchone()
+        if result is not None:
+            id = result[0]
+        else:
+            id = 0
         return id
 
     def get_last_pub_id(self, cur):
         cur.execute('SELECT seq FROM sqlite_sequence WHERE name="publication"')
-        id = cur.fetchone()[0]
-        return id
+        result = cur.fetchone()
+        if result is not None:
+            pid = result[0]
+        else:
+            pid = 0
+        return pid
 
     def check(self, chemical_composition, reaction_energy):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        statement = 'SELECT reaction.id FROM \n reaction \n WHERE \n reaction.chemical_composition=? and reaction.reaction_energy=?'
+        statement = """SELECT reaction.id FROM reaction WHERE
+        reaction.chemical_composition=? and reaction.reaction_energy=?"""
         argument = [chemical_composition, reaction_energy]
 
         cur.execute(statement, argument)
@@ -299,11 +298,16 @@ class CathubSQLite:
             id = None
         return id
 
-    def check_reaction_on_surface(self, chemical_composition, reactants, products):
+    def check_reaction_on_surface(self, chemical_composition, reactants,
+                                  products):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        statement = "SELECT reaction.id FROM \n reaction \n WHERE \n reaction.chemical_composition='{}' and reaction.reactants='{}' and reaction.products='{}';".format(chemical_composition, json.dumps(reactants), json.dumps(products))
+        statement = """SELECT reaction.id FROM reaction WHERE
+        reaction.chemical_composition='{}' and reaction.reactants='{}'
+        and reaction.products='{}';""".format(chemical_composition,
+                                              json.dumps(reactants),
+                                              json.dumps(products))
 
         cur.execute(statement)
         rows = cur.fetchall()
@@ -317,7 +321,8 @@ class CathubSQLite:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        statement = 'SELECT id FROM \n publication \n WHERE \n publication.pub_id=?'
+        statement = """
+        SELECT id FROM publication WHERE publication.pub_id=?"""
         argument = [pub_id]
 
         cur.execute(statement, argument)
@@ -332,7 +337,9 @@ class CathubSQLite:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        statement = 'SELECT id FROM \n publication_system \n WHERE \n publication.pub_id=? and publication.ase_id=?'
+        statement = """
+        SELECT id FROM publication_system WHERE
+        publication.pub_id=? and publication.ase_id=?"""
         argument = [pub_id, ase_id]
 
         cur.execute(statement, argument)
@@ -344,13 +351,17 @@ class CathubSQLite:
         return id
 
 
-
 def get_key_value_str(values):
-    key_str = 'chemical_composition, surface_composition, facet, sites, reactants, products, reaction_energy, activation_energy, dft_code, dft_functional, publication, doi, year, ase_ids, user'
+    key_str = """chemical_composition, surface_composition, facet, sites,
+    reactants,products, reaction_energy, activation_energy, dft_code,
+    dft_functional, publication, doi, year, ase_ids, user"""
     value_str = "'{}'".format(values[1])
     for v in values[2:]:
-        if isinstance(v, unicode):
-            v = v.encode('ascii','ignore')
+        try:    # Unicode in python2 - must be a better way of handling this.
+            if isinstance(v, unicode):
+                v = v.encode('ascii', 'ignore')
+        except NameError:
+            pass
         if isinstance(v, str) or isinstance(v, dict):
             value_str += ", '{}'".format(v)
         elif v is None or v == '':
@@ -363,13 +374,16 @@ def get_key_value_str(values):
 
 def get_key_value_list(key_list, values, table='reaction'):
 
-    total_keys = {'reaction': ['chemical_composition', 'surface_composition', 'facet',
-                               'sites', 'coverages', 'reactants', 'products', 'reaction_energy',
-                               'activation_energy', 'dft_code', 'dft_functional',
-                               'username', 'pub_id'],
-                  'publication': ['pub_id', 'title', 'authors', 'journal', 'volume', 'number',
-                                  'pages', 'year', 'publisher', 'doi', 'tags'],
-                  'reaction_system': ['name', 'energy_correction', 'ase_id', 'reaction_id'],
+    total_keys = {'reaction': ['chemical_composition', 'surface_composition',
+                               'facet', 'sites', 'coverages', 'reactants',
+                               'products', 'reaction_energy',
+                               'activation_energy', 'dft_code',
+                               'dft_functional', 'username', 'pub_id'],
+                  'publication': ['pub_id', 'title', 'authors', 'journal',
+                                  'volume', 'number', 'pages', 'year',
+                                  'publisher', 'doi', 'tags'],
+                  'reaction_system': ['name', 'energy_correction',
+                                      'ase_id', 'reaction_id'],
                   'publication_system': ['ase_id, pub_id']}
     total_key_list = total_keys[table]
 
@@ -382,11 +396,15 @@ def get_key_value_list(key_list, values, table='reaction'):
     value_list = [values[key] for key in key_list]
     return key_list, value_list
 
+
 def get_value_strlist(value_list):
     value_strlist = []
     for v in value_list:
-        if isinstance(v, unicode):
-            v = v.encode('ascii','ignore')
+        try:  # Unicode in python2 - must be a better way of handling this.
+            if isinstance(v, unicode):
+                v = v.encode('ascii', 'ignore')
+        except NameError:
+            pass
         if isinstance(v, dict):
             v = json.dumps(v)
             value_strlist.append("'{}'".format(v))
@@ -398,7 +416,3 @@ def get_value_strlist(value_list):
             value_strlist.append("{}".format(v))
 
     return value_strlist
-
-
-
-

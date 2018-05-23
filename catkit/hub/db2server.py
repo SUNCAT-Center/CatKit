@@ -1,6 +1,7 @@
 from sys import argv, stdout, stdin
 from catkit.hub.postgresql import CathubPostgreSQL
 
+
 def main(dbfile, start_id=1, write_reaction=True, write_ase=True,
          write_publication=True, write_reaction_system=True,
          block_size=1000, start_block=0,
@@ -23,6 +24,3 @@ def main(dbfile, start_id=1, write_reaction=True, write_ase=True,
 if __name__ == '__main__':
     dbfile = argv[1]
     main(dbfile)
-
-
-
