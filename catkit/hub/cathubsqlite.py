@@ -234,7 +234,7 @@ class CathubSQLite:
         energy_corrections = values['energy_corrections']
 
         if ase_ids is not None:
-            self.check_ase_ids(values, ase_ids)
+            check_ase_ids(values, ase_ids)
         else:
             ase_ids = {}
         values = (values['chemical_composition'],
@@ -305,7 +305,7 @@ class CathubSQLite:
         energy_corrections = values['energy_corrections']
 
         if ase_ids is not None:
-            self.check_ase_ids(values, ase_ids)
+            check_ase_ids(values, ase_ids)
         else:
             ase_ids = {}
 
@@ -453,7 +453,7 @@ class CathubSQLite:
         return id
 
 
-def check_ase_ids(self, values, ase_ids):
+def check_ase_ids(values, ase_ids):
     ase_values = ase_ids.values()
     assert len(set(ase_values)) == len(ase_values), 'Duplicate ASE ids!'
 
