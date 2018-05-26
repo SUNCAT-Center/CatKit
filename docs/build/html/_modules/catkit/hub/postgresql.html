@@ -1,0 +1,831 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub.postgresql &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>catkit.hub.postgresql</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.hub.postgresql</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">psycopg2</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">builtins</span> <span class="k">import</span> <span class="nb">str</span> <span class="k">as</span> <span class="n">text</span>
+<span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span>
+
+<span class="n">init_commands</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sd">&quot;&quot;&quot;CREATE TABLE publication (</span>
+<span class="sd">    id SERIAL PRIMARY KEY,</span>
+<span class="sd">    pub_id text UNIQUE,</span>
+<span class="sd">    title text,</span>
+<span class="sd">    authors jsonb,</span>
+<span class="sd">    journal text,</span>
+<span class="sd">    volume text,</span>
+<span class="sd">    number text,</span>
+<span class="sd">    pages text,</span>
+<span class="sd">    year smallint,</span>
+<span class="sd">    publisher text,</span>
+<span class="sd">    doi text,</span>
+<span class="sd">    tags jsonb</span>
+<span class="sd">    );&quot;&quot;&quot;</span><span class="p">,</span>
+
+    <span class="sd">&quot;&quot;&quot;CREATE TABLE publication_system (</span>
+<span class="sd">    ase_id text REFERENCES systems(unique_id) ON DELETE CASCADE,</span>
+<span class="sd">    pub_id text REFERENCES publication(pub_id) ON DELETE CASCADE,</span>
+<span class="sd">    PRIMARY KEY (pub_id, ase_id)</span>
+<span class="sd">    );&quot;&quot;&quot;</span><span class="p">,</span>
+
+    <span class="sd">&quot;&quot;&quot;CREATE TABLE reaction (</span>
+<span class="sd">    id SERIAL PRIMARY KEY,</span>
+<span class="sd">    chemical_composition text,</span>
+<span class="sd">    surface_composition text,</span>
+<span class="sd">    facet text,</span>
+<span class="sd">    sites jsonb,</span>
+<span class="sd">    coverages jsonb,</span>
+<span class="sd">    reactants jsonb,</span>
+<span class="sd">    products jsonb,</span>
+<span class="sd">    reaction_energy numeric,</span>
+<span class="sd">    activation_energy numeric,</span>
+<span class="sd">    dft_code text,</span>
+<span class="sd">    dft_functional text,</span>
+<span class="sd">    username text,</span>
+<span class="sd">    pub_id text REFERENCES publication (pub_id) ON DELETE CASCADE</span>
+<span class="sd">    );&quot;&quot;&quot;</span><span class="p">,</span>
+
+    <span class="sd">&quot;&quot;&quot;CREATE TABLE reaction_system (</span>
+<span class="sd">    name text,</span>
+<span class="sd">    energy_correction numeric,</span>
+<span class="sd">    ase_id text REFERENCES systems(unique_id) ON DELETE CASCADE,</span>
+<span class="sd">    id integer REFERENCES reaction(id) ON DELETE CASCADE,</span>
+<span class="sd">    PRIMARY KEY (id, ase_id)</span>
+<span class="sd">    )&quot;&quot;&quot;</span>
+<span class="p">]</span>
+
+<span class="n">index_statements</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;CREATE INDEX idxpubid ON publication (pub_id);&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CREATE INDEX idxreacten ON reaction (reaction_energy);&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CREATE INDEX idxchemcomp ON reaction (chemical_composition);&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CREATE INDEX idxreact ON reaction USING GIN (reactants);&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CREATE INDEX idxprod ON reaction USING GIN (products);&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;CREATE INDEX idxuser ON reaction (username);&#39;</span>
+<span class="p">]</span>
+
+<span class="n">tsvector_statements</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sd">&quot;&quot;&quot;ALTER TABLE publication ADD COLUMN pubtextsearch tsvector;&quot;&quot;&quot;</span><span class="p">,</span>
+
+
+    <span class="c1"># &quot;&quot;&quot;CREATE TRIGGER tsvectorupdatepub BEFORE INSERT OR UPDATE</span>
+    <span class="c1"># ON publication FOR EACH ROW EXECUTE PROCEDURE</span>
+    <span class="c1"># UPDATE publication SET pubtextsearch =</span>
+    <span class="c1"># to_tsvector(&#39;english&#39;, coalesce(title, &#39;&#39;) || &#39; &#39; ||</span>
+    <span class="c1"># coalesce(authors::text, &#39;&#39;) || &#39; &#39; || coalesce(year::text, &#39;&#39;) || &#39; &#39; ||</span>
+    <span class="c1"># coalesce(tags::text, &#39;&#39;))</span>
+    <span class="c1"># ;&quot;&quot;&quot;,</span>
+    <span class="c1"># tsvector_update_trigger(pubtextsearch, &#39;pg_catalog.english&#39;,</span>
+    <span class="c1"># title, authors, year, tags)</span>
+
+    <span class="sd">&quot;&quot;&quot;ALTER TABLE reaction ADD COLUMN textsearch tsvector;&quot;&quot;&quot;</span><span class="p">,</span>
+
+    <span class="c1"># &quot;&quot;&quot;CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE</span>
+    <span class="c1"># ON reaction FOR EACH ROW EXECUTE PROCEDURE</span>
+    <span class="c1"># tsvector_update_trigger(textsearch, &#39;pg_catalog.english&#39;,</span>
+    <span class="c1"># chemical_compotision, facet, reactants, products);&quot;&quot;&quot;,</span>
+
+    <span class="s1">&#39;CREATE INDEX idxsearch ON reaction USING GIN (textsearch);&#39;</span>
+<span class="p">]</span>
+<span class="n">tsvector_update</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="sd">&quot;&quot;&quot;UPDATE publication SET pubtextsearch =</span>
+<span class="sd">    to_tsvector(&#39;simple&#39;, coalesce(title, &#39;&#39;) || &#39; &#39; ||</span>
+<span class="sd">    coalesce(authors::text, &#39;&#39;) || &#39; &#39; || coalesce(year::text, &#39;&#39;) || &#39; &#39; ||</span>
+<span class="sd">    coalesce(tags::text, &#39;&#39;));</span>
+<span class="sd">    &quot;&quot;&quot;</span><span class="p">,</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    UPDATE reaction SET textsearch =</span>
+<span class="sd">    to_tsvector(&#39;simple&#39;, coalesce(regexp_replace(</span>
+<span class="sd">    regexp_replace(chemical_composition,</span>
+<span class="sd">    &#39;([0-9])&#39;, &#39;&#39;, &#39;g&#39;), &#39;()([A-Z])&#39;, &#39;\1 \2&#39;,&#39;g&#39;), &#39;&#39;) || &#39; &#39; ||</span>
+<span class="sd">    coalesce(facet, &#39;&#39;) || &#39; &#39; ||</span>
+<span class="sd">    replace(replace(coalesce(reactants::text, &#39;&#39;) || &#39; &#39; ||</span>
+<span class="sd">    coalesce(products::text, &#39;&#39;), &#39;star&#39;,&#39;&#39;), &#39;gas&#39;, &#39;&#39;));</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="CathubPostgreSQL"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL">[docs]</a><span class="k">class</span> <span class="nc">CathubPostgreSQL</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="o">=</span><span class="s1">&#39;catroot&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span>
+                 <span class="n">stdout</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">user</span> <span class="o">==</span> <span class="s1">&#39;catroot&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="s1">&#39;public&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="s1">&#39;public&#39;</span>  <span class="c1"># user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="s1">&#39;catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com&#39;</span>
+        <span class="k">if</span> <span class="n">password</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="n">stdin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+
+    <span class="k">def</span> <span class="nf">_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="n">psycopg2</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">,</span>
+                               <span class="n">user</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                               <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                               <span class="n">port</span><span class="o">=</span><span class="mi">5432</span><span class="p">,</span>
+                               <span class="n">database</span><span class="o">=</span><span class="s1">&#39;catalysishub&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">con</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">):</span>  <span class="c1"># , exc_value, tb):</span>
+        <span class="k">if</span> <span class="n">exc_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">rollback</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;_initialize start</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">set_schema</span> <span class="o">=</span> <span class="s1">&#39;SET search_path = </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">set_schema</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s2">&quot;_initialize set schema to </span><span class="si">{self.schema}</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+
+        <span class="kn">from</span> <span class="nn">ase.db.postgresql</span> <span class="k">import</span> <span class="n">PostgreSQLDatabase</span>
+        <span class="n">PostgreSQLDatabase</span><span class="p">()</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT to_regclass(&#39;publication&#39;);&quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># publication doesn&#39;t exist</span>
+            <span class="k">for</span> <span class="n">init_command</span> <span class="ow">in</span> <span class="n">init_commands</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">init_command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">init_command</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="n">index_statements</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">statement</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="n">tsvector_statements</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">(</span><span class="n">statement</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialized</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="CathubPostgreSQL.create_user"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.create_user">[docs]</a>    <span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pwgen</span> <span class="k">import</span> <span class="n">pwgen</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;CREATE SCHEMA </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+        <span class="c1"># self._initialize(schema=schema_name)</span>
+        <span class="n">password</span> <span class="o">=</span> <span class="n">pwgen</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s2">&quot;CREATE USER </span><span class="si">{0}</span><span class="s2"> with PASSWORD &#39;</span><span class="si">{0}</span><span class="s2">&#39;;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s1">&#39;GRANT ALL PRIVILEGES ON SCHEMA </span><span class="si">{0}</span><span class="s1"> TO </span><span class="si">{1}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;GRANT USAGE ON SCHEMA public TO </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s1">&#39;GRANT SELECT ON ALL TABLES IN SCHEMA public TO </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s1">&#39;ALTER ROLE </span><span class="si">{0}</span><span class="s1"> SET search_path TO </span><span class="si">{1}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">user</span><span class="p">))</span>
+
+        <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">schema</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">=</span> <span class="n">user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+
+        <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="s1">&#39;CREATED USER </span><span class="si">{0}</span><span class="s1"> WITH PASSWORD </span><span class="si">{1}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.status"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(id) from </span><span class="si">{0}</span><span class="s2">;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">))</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.read"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;SELECT column_name FROM information_schema.columns</span>
+<span class="sd">            WHERE table_schema = &#39;public&#39; AND table_name=&#39;{0}&#39;;&quot;&quot;&quot;</span>
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">))</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM </span><span class="se">\n</span><span class="s1"> </span><span class="si">{0}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">,</span>
+                                                         <span class="n">table</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SELECT * FROM </span><span class="se">\n</span><span class="s1"> </span><span class="si">{0}</span><span class="s1"> </span><span class="se">\n</span><span class="s1"> WHERE </span><span class="se">\n</span><span class="s1"> </span><span class="si">{1}</span><span class="s1">.id=</span><span class="si">{2}</span><span class="s1">&#39;</span>
+                        <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="nb">id</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">row</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.write_publication"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_values</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="c1"># pub_id = pub_values[1].encode(&#39;ascii&#39;,&#39;ignore&#39;)</span>
+        <span class="n">pub_id</span> <span class="o">=</span> <span class="n">pub_values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;SELECT id from publication where pub_id=&#39;{0}&#39;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pub_id</span><span class="p">))</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># len(row) &gt; 0:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">row</span>  <span class="c1"># [0]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> <span class="n">get_key_value_str</span><span class="p">(</span><span class="n">pub_values</span><span class="p">,</span> <span class="s1">&#39;publication&#39;</span><span class="p">)</span>
+            <span class="n">insert_command</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;INSERT INTO publication (</span><span class="si">{0}</span><span class="s2">) VALUES</span>
+<span class="s2">            (</span><span class="si">{1}</span><span class="s2">) RETURNING id;&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+
+            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">insert_command</span><span class="p">)</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">id</span><span class="p">,</span> <span class="n">pub_id</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.write"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
+
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> <span class="n">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="p">)</span>
+
+        <span class="n">insert_command</span> <span class="o">=</span> <span class="s1">&#39;INSERT INTO </span><span class="si">{0}</span><span class="s1"> (</span><span class="si">{1}</span><span class="s1">) VALUES (</span><span class="si">{2}</span><span class="s1">) RETURNING id;&#39;</span>\
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">insert_command</span><span class="p">)</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.update"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">key_names</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> <span class="n">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">update_command</span> <span class="o">=</span> <span class="s1">&#39;UPDATE reaction SET (</span><span class="si">{0}</span><span class="s1">) = (</span><span class="si">{1}</span><span class="s1">) WHERE id = </span><span class="si">{2}</span><span class="s1">;&#39;</span>\
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">,</span> <span class="nb">id</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">update_command</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.update_publication"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.update_publication">[docs]</a>    <span class="k">def</span> <span class="nf">update_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_dict</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">json</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">pub_id</span> <span class="o">=</span> <span class="n">pub_dict</span><span class="p">[</span><span class="s1">&#39;pub_id&#39;</span><span class="p">]</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="n">pub_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+        <span class="n">key_str</span> <span class="o">=</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pub_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">value_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;NULL&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="n">update_command</span> <span class="o">=</span> \
+            <span class="sd">&quot;&quot;&quot;UPDATE publication SET ({0}) = ({1}) WHERE pub_id=&#39;{2}&#39;;&quot;&quot;&quot;</span>\
+            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">,</span> <span class="n">pub_id</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">update_command</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">update_command</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.delete"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">authorlist</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">doi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">doi</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">delete_command</span> <span class="o">=</span>\
+                <span class="sd">&quot;&quot;&quot;DELETE from reaction</span>
+<span class="sd">                WHERE</span>
+<span class="sd">                publication -&gt; &#39;authors&#39; = &#39;{0}&#39; and year = {2};&quot;&quot;&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">authorlist</span><span class="p">,</span> <span class="n">year</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">delete_command</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">count</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.transfer"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.transfer">[docs]</a>    <span class="k">def</span> <span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_sqlite</span><span class="p">,</span> <span class="n">start_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">write_ase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">write_publication</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">write_reaction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">write_reaction_system</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                 <span class="n">start_block</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Starting transfer</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Finished initialization</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Got a cursor</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">set_schema</span> <span class="o">=</span> <span class="s1">&#39;SET search_path = </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">set_schema</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">os</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Imported os</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="kn">import</span> <span class="nn">ase.db</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Imported ase.db</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Building server_name</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">server_name</span> <span class="o">=</span> <span class="s2">&quot;postgres://</span><span class="si">{0}</span><span class="s2">:</span><span class="si">{1}</span><span class="s2">@</span><span class="si">{2}</span><span class="s2">:5432/catalysishub&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Connecting to </span><span class="si">{server_name}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+
+        <span class="n">nrows</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">write_ase</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Transfering atomic structures&#39;</span><span class="p">)</span>
+            <span class="n">db</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">filename_sqlite</span><span class="p">)</span>
+            <span class="n">n_structures</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+            <span class="n">n_blocks</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_structures</span> <span class="o">/</span> <span class="n">block_size</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">t_av</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">block_id</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_block</span><span class="p">,</span> <span class="n">n_blocks</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">block_id</span> <span class="o">-</span> <span class="n">start_block</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">b0</span> <span class="o">=</span> <span class="n">block_id</span> <span class="o">*</span> <span class="n">block_size</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">b1</span> <span class="o">=</span> <span class="p">(</span><span class="n">block_id</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">block_size</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">block_id</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span>
+                                  <span class="s1">&#39;from &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b0</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">b1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">block_id</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">==</span> <span class="n">n_blocks</span><span class="p">:</span>
+                    <span class="n">b1</span> <span class="o">=</span> <span class="n">n_structures</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="n">rows</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&lt;id&lt;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">b0</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">b1</span><span class="p">)))</span>
+
+                <span class="k">with</span> <span class="n">ase</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">server_name</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;postgresql&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">db2</span><span class="p">:</span>
+
+                    <span class="n">db2</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+
+                <span class="n">nrows</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span>
+                <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="n">dt</span> <span class="o">=</span> <span class="n">t2</span> <span class="o">-</span> <span class="n">t1</span>
+                <span class="n">t_av</span> <span class="o">=</span> <span class="p">(</span><span class="n">t_av</span> <span class="o">*</span> <span class="n">i</span> <span class="o">+</span> <span class="n">dt</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s1">&#39;  Finnished Block </span><span class="si">{0}</span><span class="s1"> / </span><span class="si">{1}</span><span class="s1"> in </span><span class="si">{2}</span><span class="s1"> sec&#39;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">block_id</span><span class="p">,</span> <span class="n">n_blocks</span><span class="p">,</span> <span class="n">dt</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                    <span class="s1">&#39;    Completed transfer of </span><span class="si">{0}</span><span class="s1"> atomic structures.&#39;</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nrows</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;    Estimated time left: </span><span class="si">{0}</span><span class="s1"> sec&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">t_av</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_blocks</span> <span class="o">-</span> <span class="n">block_id</span><span class="p">)))</span>
+
+        <span class="kn">from</span> <span class="nn">catkit.hub.cathubsqlite</span> <span class="k">import</span> <span class="n">CathubSQLite</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="n">filename_sqlite</span><span class="p">)</span>
+        <span class="n">con_lite</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="n">cur_lite</span> <span class="o">=</span> <span class="n">con_lite</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="c1"># write publication</span>
+        <span class="n">Npub</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Npubstruc</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">write_publication</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">npub</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">get_last_pub_id</span><span class="p">(</span><span class="n">cur_lite</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                <span class="n">npub</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">id_lite</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">npub</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">Npub</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">id_lite</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;publication&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">pid</span><span class="p">,</span> <span class="n">pub_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+            <span class="c1"># Publication structures connection</span>
+            <span class="n">cur_lite</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT * from publication_system;&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="n">rows</span> <span class="o">=</span> <span class="n">cur_lite</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+                <span class="n">Npubstruc</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">row</span><span class="p">[:]</span>
+                <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> <span class="n">get_key_value_str</span><span class="p">(</span>
+                    <span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;publication_system&#39;</span><span class="p">)</span>
+
+                <span class="n">set_schema</span> <span class="o">=</span> <span class="s1">&#39;SET search_path = </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">set_schema</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[SET SCHEMA] </span><span class="si">{set_schema}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+
+                <span class="n">insert_command</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;INSERT INTO publication_system (</span><span class="si">{0}</span><span class="s2">)</span>
+<span class="s2">                VALUES (</span><span class="si">{1}</span><span class="s2">) ON CONFLICT DO NOTHING;&quot;&quot;&quot;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+
+                <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">insert_command</span><span class="p">)</span>
+                <span class="c1"># self.write(values, table=&#39;publication_system&#39;)</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+
+        <span class="n">Ncat</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">Ncatstruc</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="n">write_reaction</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">get_last_id</span><span class="p">(</span><span class="n">cur_lite</span><span class="p">)</span>
+            <span class="n">select_ase</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;SELECT * from reaction_system where id=</span><span class="si">{}</span><span class="s2">;&quot;&quot;&quot;</span>
+            <span class="k">for</span> <span class="n">id_lite</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start_id</span><span class="p">,</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">id_lite</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">13</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="mi">6</span><span class="p">],</span> <span class="n">values</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span>
+                                <span class="n">values</span><span class="p">[</span><span class="mi">8</span><span class="p">],</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">update_rs</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;Updated reaction db with row id = </span><span class="si">{}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+                    <span class="n">update_rs</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">Ncat</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                        <span class="s1">&#39;Written to reaction db row id = </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+
+                <span class="n">cur_lite</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select_ase</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">id_lite</span><span class="p">))</span>
+                <span class="n">rows</span> <span class="o">=</span> <span class="n">cur_lite</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">write_reaction_system</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">update_rs</span><span class="p">:</span>
+                        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Delete from reaction_system231</span>
+<span class="s2">                        where reaction_id=</span><span class="si">{0}</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+                        <span class="n">Ncatstruc</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="n">values</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+                        <span class="n">values</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="nb">id</span>
+
+                        <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span> <span class="o">=</span> \
+                            <span class="n">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction_system&#39;</span><span class="p">)</span>
+
+                        <span class="n">set_schema</span> <span class="o">=</span> <span class="s1">&#39;SET search_path = </span><span class="si">{0}</span><span class="s1">;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">schema</span><span class="p">)</span>
+                        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">set_schema</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;[SET SCHEMA] </span><span class="si">{set_schema}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+
+                        <span class="n">insert_command</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;INSERT INTO reaction_system</span>
+<span class="s2">                        (</span><span class="si">{0}</span><span class="s2">) VALUES (</span><span class="si">{1}</span><span class="s2">) ON CONFLICT DO NOTHING;&quot;&quot;&quot;</span>\
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span><span class="p">)</span>
+
+                        <span class="nb">print</span><span class="p">(</span>
+                            <span class="s2">&quot;[INSERT COMMAND] </span><span class="si">{insert_command}</span><span class="s2">&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+                        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">insert_command</span><span class="p">)</span>
+
+                <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>  <span class="c1"># Commit reaction_system for each row</span>
+
+        <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="n">tsvector_update</span><span class="p">:</span>
+            <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;Inserted into:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  systems: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">nrows</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  publication: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Npub</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  publication_system: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Npubstruc</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  reaction: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ncat</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  reaction_system: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ncatstruc</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.check"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_id</span><span class="p">,</span> <span class="n">chemical_composition</span><span class="p">,</span> <span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">,</span>
+              <span class="n">reaction_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="s1">&#39;pub_id, chemical_composition,  reactants, products&#39;</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">pub_id</span><span class="p">,</span> <span class="n">chemical_composition</span><span class="p">,</span> <span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">]</span>
+        <span class="n">placeholder</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;&#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;, &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">reaction_energy</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">placeholder</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{}</span><span class="s2">&quot;</span>
+            <span class="n">keys</span> <span class="o">+=</span> <span class="s1">&#39;, reaction_energy&#39;</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reaction_energy</span><span class="p">)</span>
+
+        <span class="n">placeholder</span> <span class="o">+=</span> <span class="s2">&quot;&quot;&quot;);&quot;&quot;&quot;</span>
+        <span class="n">arguments</span> <span class="o">=</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span> <span class="o">+</span> <span class="n">values</span>
+
+        <span class="n">statement</span> <span class="o">=</span> \
+            <span class="sd">&quot;&quot;&quot;SELECT id</span>
+<span class="sd">        FROM reaction WHERE</span>
+<span class="sd">        ({}) =</span>
+<span class="sd">        (&quot;&quot;&quot;</span> <span class="o">+</span> <span class="n">placeholder</span>
+
+        <span class="n">statement</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">arguments</span><span class="p">)</span>
+
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="nb">id</span></div>
+
+<div class="viewcode-block" id="CathubPostgreSQL.publication_status"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.publication_status">[docs]</a>    <span class="k">def</span> <span class="nf">publication_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+        <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+
+        <span class="n">select_statement</span> <span class="o">=</span> \
+            <span class="sd">&quot;&quot;&quot;SELECT distinct publication</span>
+<span class="sd">        FROM reaction WHERE</span>
+<span class="sd">        publication -&gt;&gt; &#39;doi&#39; is null</span>
+<span class="sd">        OR</span>
+<span class="sd">        publication -&gt; &#39;doi&#39; is null;&quot;&quot;&quot;</span>
+        <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select_statement</span><span class="p">)</span>
+        <span class="n">pubs</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">pubs</span></div></div>
+
+
+<div class="viewcode-block" id="get_key_value_str"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.postgresql.get_key_value_str">[docs]</a><span class="k">def</span> <span class="nf">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
+    <span class="n">key_str</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reaction&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;chemical_composition, surface_composition,</span>
+<span class="s2">    facet, sites, coverages, reactants, products, reaction_energy,</span>
+<span class="s2">    activation_energy, dft_code, dft_functional, username, pub_id&quot;&quot;&quot;</span><span class="p">,</span>
+               <span class="s1">&#39;publication&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;pub_id, title, authors, journal,</span>
+<span class="s2">               volume, number, pages, year, publisher, doi, tags&quot;&quot;&quot;</span><span class="p">,</span>
+               <span class="s1">&#39;reaction_system&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;name, energy_correction, ase_id, id&quot;&quot;&quot;</span><span class="p">,</span>
+               <span class="s1">&#39;publication_system&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;ase_id, pub_id&quot;&quot;&quot;</span><span class="p">}</span>
+
+    <span class="n">start_index</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">table</span> <span class="o">==</span> <span class="s1">&#39;publication_system&#39;</span> <span class="ow">or</span> <span class="n">table</span> <span class="o">==</span> <span class="s1">&#39;reaction_system&#39;</span><span class="p">:</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">value_str</span> <span class="o">=</span> <span class="s2">&quot;&#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">start_index</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n\n</span><span class="s2">DIR TYPE </span><span class="si">{v}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
+        <span class="c1"># if isinstance(v, text):</span>
+        <span class="c1"># v = v.encode(&#39;utf8&#39;,&#39;ignore&#39;)</span>
+        <span class="c1"># print(&quot;ISINSTANCE TEXT {v}&quot;.format(**locals()))</span>
+        <span class="c1"># elif hasattr(v, &#39;encode&#39;):</span>
+        <span class="c1"># v = v.encode(&#39;utf8&#39;,&#39;ignore&#39;)</span>
+        <span class="c1"># print(&quot;HASATTR ENCODE {v}&quot;.format(**locals()))</span>
+
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">v</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;NULL&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, &#39;</span><span class="si">{0}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">key_str</span><span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">value_str</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

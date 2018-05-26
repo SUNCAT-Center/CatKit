@@ -1,0 +1,596 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub.ase_tools.gas_phase_references &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules.html">catkit</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../ase_tools.html">catkit.hub.ase_tools</a> &raquo;</li>
+        
+      <li>catkit.hub.ase_tools.gas_phase_references</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.hub.ase_tools.gas_phase_references</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">ase.atoms</span>
+<span class="kn">import</span> <span class="nn">ase.data</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">optparse</span>
+<span class="kn">import</span> <span class="nn">pprint</span>
+
+
+<div class="viewcode-block" id="molecules2symbols"><a class="viewcode-back" href="../../../../catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.molecules2symbols">[docs]</a><span class="k">def</span> <span class="nf">molecules2symbols</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">add_hydrogen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take a list of molecules and return just a list of atomic</span>
+<span class="sd">    symbols, possibly adding hydrogen</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span>
+            <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span>
+                    <span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span>
+                    <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">_x</span><span class="p">)),</span> <span class="n">molecules</span><span class="p">)</span>
+            <span class="p">))</span>
+        <span class="p">)),</span>
+        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_y</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">_y</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="n">add_hydrogen</span> <span class="ow">and</span> <span class="s1">&#39;H&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+        <span class="n">symbols</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">symbols</span></div>
+
+
+<div class="viewcode-block" id="construct_reference_system"><a class="viewcode-back" href="../../../../catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.construct_reference_system">[docs]</a><span class="k">def</span> <span class="nf">construct_reference_system</span><span class="p">(</span>
+    <span class="n">symbols</span><span class="p">,</span>
+    <span class="n">candidates</span><span class="o">=</span><span class="p">[</span>
+        <span class="s1">&#39;H2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;H2O&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;NH3&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CH4&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;CO&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;SH2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;HCl&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;N2&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;O2&#39;</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Take a list of symbols and construct gas phase</span>
+<span class="sd">    references system, when possible avoiding O2.</span>
+<span class="sd">    Candidates can be rearranged, where earlier candidates</span>
+<span class="sd">    get higher preference than later candidates</span>
+
+<span class="sd">    assume symbols sorted by atomic number</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">references</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">added_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+        <span class="n">added_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">added_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">references</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="n">symbols</span><span class="p">):</span>
+                <span class="n">references</span><span class="p">[</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="n">candidate</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">UserWarning</span><span class="p">(</span>
+                <span class="s2">&quot;No candidate satisfied </span><span class="si">{symbol}</span><span class="s2">. Add more candidates&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">references</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                  <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                  <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_atomic_stoichiometry"><a class="viewcode-back" href="../../../../catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.get_atomic_stoichiometry">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_stoichiometry</span><span class="p">(</span><span class="n">references</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Given a list of references (tuples of (symbol, molecule))</span>
+<span class="sd">    return stoichiometry matrix that connects atomic symbols</span>
+<span class="sd">    to its molecular references.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">references</span><span class="p">)</span>
+    <span class="n">stoichiometry</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="n">n</span><span class="p">),</span> <span class="nb">float</span><span class="p">)</span>
+    <span class="n">stoichiometry</span><span class="p">[:]</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">key_index</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">species</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">references</span><span class="p">):</span>
+
+        <span class="c1"># in case species uses a suffix like _gas</span>
+        <span class="n">species</span> <span class="o">=</span> <span class="n">species</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">key_index</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">composition</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">species</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">composition</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">key_index</span><span class="p">[</span><span class="n">symbol</span><span class="p">]]</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">/</span> <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*=</span> <span class="n">stoichiometry</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">stoichiometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_stoichiometry_factors"><a class="viewcode-back" href="../../../../catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.get_stoichiometry_factors">[docs]</a><span class="k">def</span> <span class="nf">get_stoichiometry_factors</span><span class="p">(</span><span class="n">adsorbates</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Take a list of adsorabtes and a corresponding reference</span>
+<span class="sd">    system and return a list of dictionaries encoding the</span>
+<span class="sd">    stoichiometry factors converting between adsorbates and</span>
+<span class="sd">    reference molecules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stoichiometry</span> <span class="o">=</span> <span class="n">get_atomic_stoichiometry</span><span class="p">(</span><span class="n">references</span><span class="p">)</span>
+    <span class="n">stoichiometry_factors</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">adsorbate</span> <span class="ow">in</span> <span class="n">adsorbates</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">adsorbate</span><span class="p">):</span>
+            <span class="n">symbol_index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span> <span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">references</span><span class="p">))</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="p">(</span><span class="n">ref_symbol</span><span class="p">,</span> <span class="n">ref_molecule</span><span class="p">))</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">stoichiometry</span><span class="p">[</span><span class="n">symbol_index</span><span class="p">],</span> <span class="n">references</span><span class="p">):</span>
+                <span class="n">stoichiometry_factors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="n">adsorbate</span><span class="p">,</span>
+                    <span class="p">{})[</span><span class="n">ref_molecule</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoichiometry_factors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span>
+                    <span class="n">adsorbate</span><span class="p">,</span>
+                    <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">ref_molecule</span><span class="p">,</span>
+                    <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">factor</span>
+
+        <span class="n">nonzero_factors</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">stoichiometry_factors</span><span class="p">[</span><span class="n">adsorbate</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="mf">0.</span><span class="p">):</span>
+                <span class="n">nonzero_factors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">stoichiometry_factors</span><span class="p">[</span><span class="n">adsorbate</span><span class="p">]</span> <span class="o">=</span> <span class="n">nonzero_factors</span>
+
+    <span class="k">return</span> <span class="n">stoichiometry_factors</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c1"># store previously create test results</span>
+    <span class="n">test_results</span> <span class="o">=</span> <span class="p">[{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NH&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span> <span class="s1">&#39;OH&#39;</span><span class="p">,</span> <span class="s1">&#39;CH3&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;S&#39;</span><span class="p">,</span> <span class="s1">&#39;H2S&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH3&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">},</span>
+                                               <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                                                      <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span>
+                                                      <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;NH&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                                                      <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;O&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span>
+                                                     <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;OH&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
+                                                      <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;SH&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span>
+                                                      <span class="s1">&#39;H2S&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;S&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CO&#39;</span><span class="p">:</span>
+                                               <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;O&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[</span>
+                         <span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                         <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                         <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;N&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CO&#39;</span><span class="p">:</span>
+                                               <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;CO2&#39;</span><span class="p">:</span>
+                                               <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;NO&#39;</span><span class="p">:</span>
+                                               <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span>
+                                                <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                                                <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                                               <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl2&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;Cl2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+                        <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                        <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span>
+                        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                            <span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;CO2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+                            <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                            <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">]},</span>
+                    <span class="p">{</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">:</span>
+                     <span class="p">[</span><span class="s1">&#39;H3&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">],</span>
+                     <span class="s1">&#39;references&#39;</span><span class="p">:</span> <span class="p">[(</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">)],</span>
+                     <span class="s1">&#39;stoichiometry&#39;</span><span class="p">:</span> <span class="p">[[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span>
+                                       <span class="p">[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]],</span>
+                     <span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">:</span> <span class="p">{</span>
+                         <span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;CO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;CO2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;CH4&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">},</span>
+                         <span class="s1">&#39;Cl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;H3&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="mf">1.5</span><span class="p">},</span>
+                         <span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;HCl&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;NO&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.5</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="s1">&#39;NH3&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">},</span>
+                         <span class="s1">&#39;O2&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;H2&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.0</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">:</span> <span class="mf">2.0</span><span class="p">}},</span>
+                     <span class="s1">&#39;symbols&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">]}]</span>
+
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">optparse</span><span class="o">.</span><span class="n">OptionParser</span><span class="p">()</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;verbose&#39;</span><span class="p">,</span>
+                      <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;-e&#39;</span><span class="p">,</span> <span class="s1">&#39;--extra-verbose&#39;</span><span class="p">,</span>
+                      <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;extra_verbose&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_option</span><span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;--no-test&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;test&#39;</span><span class="p">,</span>
+                      <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_false&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">options</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">verbose</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span>
+    <span class="n">extra_verbose</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">extra_verbose</span>
+
+    <span class="n">examples</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[</span><span class="s1">&#39;NH&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;SH&#39;</span><span class="p">,</span> <span class="s1">&#39;OH&#39;</span><span class="p">,</span> <span class="s1">&#39;CH3&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl2&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">],</span>
+        <span class="p">[</span><span class="s1">&#39;H3&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">,</span> <span class="s1">&#39;O2&#39;</span><span class="p">,</span> <span class="s1">&#39;CO&#39;</span><span class="p">,</span> <span class="s1">&#39;CO2&#39;</span><span class="p">,</span> <span class="s1">&#39;Cl&#39;</span><span class="p">,</span> <span class="s1">&#39;HCl&#39;</span><span class="p">,</span> <span class="s1">&#39;CH4&#39;</span><span class="p">,</span> <span class="s1">&#39;H2O&#39;</span><span class="p">],</span>
+    <span class="p">]</span>
+
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">adsorbates</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="se">\n\n\n\n\n</span><span class="s2">--------------------------------------------------&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ADSORBATES </span><span class="si">{adsorbates}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;adsorbates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adsorbates</span>
+
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">molecules2symbols</span><span class="p">(</span><span class="n">adsorbates</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;SYMBOlS </span><span class="si">{symbols}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;symbols&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">symbols</span>
+
+        <span class="n">references</span> <span class="o">=</span> <span class="n">construct_reference_system</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;REFERENCES </span><span class="si">{references}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;references&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">references</span>
+
+        <span class="n">stoichiometry</span> <span class="o">=</span> <span class="n">get_atomic_stoichiometry</span><span class="p">(</span><span class="n">references</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;STOICHIOMETRY MATRIX&quot;</span><span class="p">)</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">stoichiometry</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;stoichiometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoichiometry</span>
+
+        <span class="n">stoichiometry_factors</span> <span class="o">=</span> <span class="n">get_stoichiometry_factors</span><span class="p">(</span>
+            <span class="n">adsorbates</span><span class="p">,</span> <span class="n">references</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;STOICHIOMETRY FACTORS&quot;</span><span class="p">)</span>
+            <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">stoichiometry_factors</span><span class="p">)</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;stoichiometry_factors&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">stoichiometry_factors</span>
+
+    <span class="k">if</span> <span class="n">extra_verbose</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n\n\n\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">test</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="n">results</span> <span class="o">==</span> <span class="n">test_results</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

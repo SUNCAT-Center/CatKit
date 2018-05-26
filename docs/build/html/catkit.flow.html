@@ -1,0 +1,426 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.flow package &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="catkit.hub package" href="catkit.hub.html" />
+    <link rel="prev" title="catkit.pawprint package" href="catkit.pawprint.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">catkit</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">catkit.flow package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">catkit</a> &raquo;</li>
+        
+          <li><a href="catkit.html">catkit package</a> &raquo;</li>
+        
+      <li>catkit.flow package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/catkit.flow.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-flow-package">
+<h1>catkit.flow package<a class="headerlink" href="#catkit-flow-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.flow.fwespresso">
+<span id="catkit-flow-fwespresso-module"></span><h2>catkit.flow.fwespresso module<a class="headerlink" href="#module-catkit.flow.fwespresso" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.flow.fwespresso.get_neb">
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_neb</code><span class="sig-paren">(</span><em>in_file='input.traj'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwespresso.html#get_neb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_neb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a ASE NEB optimization with the ase-espresso
+calculator with the keywords defined inside the atoms object information.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the input file to load from the local directory.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwespresso.get_pdos">
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_pdos</code><span class="sig-paren">(</span><em>out_file='dos.msg'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwespresso.html#get_pdos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_pdos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and save the projected DOS. Requires a previously relaxed
+calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the output file to save the results to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwespresso.get_potential_energy">
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_potential_energy</code><span class="sig-paren">(</span><em>in_file='input.traj'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwespresso.html#get_potential_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_potential_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performs a ASE get_potential_energy() call with the ase-espresso calculator
+with the keywords defined inside the atoms object information.</p>
+<p>This can be a singlepoint calculation or a full relaxation depending
+on the keywords.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the input file to load from the local directory.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwespresso.get_relaxed_calculation">
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_relaxed_calculation</code><span class="sig-paren">(</span><em>in_file='output.traj'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwespresso.html#get_relaxed_calculation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_relaxed_calculation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attach a stored calculator in the current directory to the
+provided atoms object.</p>
+<p>Then return the atoms object with the calculator attached.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the relaxed trajectroy file to load.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwespresso.get_total_potential">
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_total_potential</code><span class="sig-paren">(</span><em>out_file='potential.msg'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwespresso.html#get_total_potential"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_total_potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate and save the total potential. Requires a previously relaxed
+calculation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the output file to save the results to.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.flow.fwio">
+<span id="catkit-flow-fwio-module"></span><h2>catkit.flow.fwio module<a class="headerlink" href="#module-catkit.flow.fwio" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.flow.fwio.array_to_list">
+<code class="descclassname">catkit.flow.fwio.</code><code class="descname">array_to_list</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwio.html#array_to_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwio.array_to_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function to covert all arrays in a structure of
+embeded dictionaries and lists into lists themselves.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwio.atoms_to_encode">
+<code class="descclassname">catkit.flow.fwio.</code><code class="descname">atoms_to_encode</code><span class="sig-paren">(</span><em>images</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwio.html#atoms_to_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwio.atoms_to_encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts an list of atoms objects to an encoding
+from a .traj file.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.fwio.encode_to_atoms">
+<code class="descclassname">catkit.flow.fwio.</code><code class="descname">encode_to_atoms</code><span class="sig-paren">(</span><em>encode</em>, <em>out_file='input.traj'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/fwio.html#encode_to_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwio.encode_to_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dump the encoding to a local traj file.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.flow.hpcio">
+<span id="catkit-flow-hpcio-module"></span><h2>catkit.flow.hpcio module<a class="headerlink" href="#module-catkit.flow.hpcio" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.flow.hpcio.get_nnodes">
+<code class="descclassname">catkit.flow.hpcio.</code><code class="descname">get_nnodes</code><span class="sig-paren">(</span><em>server=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/hpcio.html#get_nnodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.hpcio.get_nnodes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the number of nodes being used in this environment.</p>
+<p>This is meant to be run on a calculation node.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.hpcio.get_server">
+<code class="descclassname">catkit.flow.hpcio.</code><code class="descname">get_server</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/hpcio.html#get_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.hpcio.get_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>A function for determining which server the job is currently running on.</p>
+<p>This is meant to be run on a calculation node.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.flow.qeio">
+<span id="catkit-flow-qeio-module"></span><h2>catkit.flow.qeio module<a class="headerlink" href="#module-catkit.flow.qeio" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.flow.qeio.attach_results">
+<code class="descclassname">catkit.flow.qeio.</code><code class="descname">attach_results</code><span class="sig-paren">(</span><em>f</em>, <em>atoms</em>, <em>write_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/qeio.html#attach_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.attach_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the TS corrected energy for a scf instance
+in a log file and attach them to the given atoms obejct.</p>
+<p>Will also attach the forces and stress if applicable.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.qeio.cd">
+<code class="descclassname">catkit.flow.qeio.</code><code class="descname">cd</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/qeio.html#cd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.cd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does path management: if the path doesn’t exists, create it
+otherwise, move into it.</p>
+<p>This is a context manager function, so it should be used as a with:
+e.x.</p>
+<dl class="docutils">
+<dt>with cd(‘the/path/is/real’):</dt>
+<dd>‘do things in the new path’</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.qeio.geometry_hash">
+<code class="descclassname">catkit.flow.qeio.</code><code class="descname">geometry_hash</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/qeio.html#geometry_hash"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.geometry_hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>A hash based strictly on the geometry features of
+an atoms object: positions, cell, and symbols.</p>
+<p>This is intended for planewave basis set calculations,
+so pbc is not considered.</p>
+<p>Each element is sorted in the algorithem to help prevent
+new hashs for identical geometries.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.qeio.log_to_atoms">
+<code class="descclassname">catkit.flow.qeio.</code><code class="descname">log_to_atoms</code><span class="sig-paren">(</span><em>log_file='log'</em>, <em>ent=-1</em>, <em>out_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/qeio.html#log_to_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.log_to_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse a QE log file for atoms trajectory and return a list
+of atoms objects representative of the relaxation path.</p>
+<p>NOTE: trajectory information is only returned for calculations
+run with BFGS internal to QE.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.flow.qeio.write_to_db">
+<code class="descclassname">catkit.flow.qeio.</code><code class="descname">write_to_db</code><span class="sig-paren">(</span><em>path</em>, <em>db_name='master.db'</em>, <em>keys={}</em>, <em>traj=False</em>, <em>pdos=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/catkit/flow/qeio.html#write_to_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.write_to_db" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to write an ASE database entry for
+each atoms image inside a QE directory.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.flow">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.flow" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catkit.hub.html" class="btn btn-neutral float-right" title="catkit.hub package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catkit.pawprint.html" class="btn btn-neutral" title="catkit.pawprint package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Tue, 22 May 2018 21:32:52.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

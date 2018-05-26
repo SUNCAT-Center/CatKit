@@ -1,133 +1,58 @@
 #+Title: CatKit: Catalysis Kit
 #+Author: SUNCAT Method Development Team
 #+OPTIONS: toc:nil
+#+LATEX_HEADER: \setlength{\parindent}{0em}
 
 #+BEGIN_HTML
 <a href='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'><img src='https://travis-ci.org/SUNCAT-Center/CatKit.svg?branch=master'/></a>
 <a href='https://coveralls.io/github/SUNCAT-Center/CatKit?branch=master'><img src='https://coveralls.io/repos/github/SUNCAT-Center/CatKit/badge.svg?branch=master' alt='Coverage Status' /></a>
+<a href='http://catkit.readthedocs.io/en/latest/?badge=latest'><img src='https://readthedocs.org/projects/catkit/badge/?version=latest' alt='Documentation Status' /></a>
 #+END_HTML
 
 Welcome to CatKit! A staging ground for computational tools which are generally useful for catalysis research. The goal of the project is to provide a communal location for those interested in hosting such tools under a common banner. In doing so, we hope to provide the infrastructure to produce more advanced functionality based on modular components of individual contributors.
 
-* Graph-atoms (Gratoms) object
-The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
+You can find our [[http://catkit.readthedocs.io/en/latest/?badge=latest][full documentation here]].
 
-** Graph information
-The =Gratoms= object primary function is to conveniently store and manage graph information.
+* Installation
+** Pip installation
+CatKit is most easily installed with pip using:
 
-#+BEGIN_SRC python :results output org drawer
-from catkit import Gratoms
-from catgen.molecules import get_topologies
-
-atoms0 = get_topologies('C4', saturate=True)[0]
-
-print(type(atoms0))
-print('\nAtomic numbers:\n{}\n'.format(atoms0.numbers))
-print('Connectivity matrix:\n{}'.format(atoms0.connectivity))
-
-atoms1 = atoms0.copy()
-del atoms1[0]
-
-print('\nAtomic numbers:\n{}\n'.format(atoms1.numbers))
-print('Connectivity matrix:\n{}'.format(atoms1.connectivity))
-print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
-
-atoms2 = atoms1 + Gratoms('C')
-
-print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
-print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
-
-atoms2.graph.add_edges_from([(0, 13), (1, 13), (2, 13), (3, 13)])
-
-print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
-print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
-
-print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms2)))
+#+BEGIN_SRC sh
+pip install catkit
 #+END_SRC
 
-#+RESULTS:
-:RESULTS:
-<class 'catkit.gratoms.Gratoms'>
+For Mac OSX, homebrew can be used in place of pip
 
-Atomic numbers:
-[6 6 6 6 1 1 1 1 1 1 1 1 1 1]
+#+BEGIN_SRC sh
+brew install catkit
+#+END_SRC
 
-Connectivity matrix:
-[[0 1 1 1 1 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 1 1 1 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 1 1 1 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 1 1 1]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 1 0 0 0 0 0 0 0 0 0 0]]
+For usage on high-performance computers, installation will need to be performed locally which can be done using:
 
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1]
+#+BEGIN_SRC sh
+pip install --user catkit
+#+END_SRC
 
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 1 1 1 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 1 1 1]
- [0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0]]
+These commands will install all of the necessary dependencies for you. 
 
-Are isomorphs: False
+** Source installation
+Alternatively, a version with the most recent commits can be install through git by running the following in your home directory.
 
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+#+BEGIN_SRC sh
+git clone https://github.com/SUNCAT-Center/CatKit.git catkit
+#+END_SRC
 
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 1 1 1 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 1 1 1 0]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+Then, add =~/catkit= to your =PYTHONPATH= by adding the following line to your =~/.bashrc= file.
 
-Atomic numbers:
-[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+#+BEGIN_SRC sh
+export PYTHONPATH=~/catkit:$PYTHONPATH
+#+END_SRC
 
-Connectivity matrix:
-[[0 0 0 0 1 1 1 0 0 0 0 0 0 1]
- [0 0 0 0 0 0 0 1 1 1 0 0 0 1]
- [0 0 0 0 0 0 0 0 0 0 1 1 1 1]
- [0 0 0 0 0 0 0 0 0 0 0 0 0 1]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
- [1 1 1 1 0 0 0 0 0 0 0 0 0 0]]
+Or, one can use pip to install from the master branch directly:
 
-Are isomorphs: True
-:END:
+#+BEGIN_SRC sh
+pip install --upgrade git+https://github.com/SUNCAT-Center/CatKit.git catkit
+#+END_SRC
 
 * CatGen: Catalysis Generator
 CatGen is an enumeration module designed to construct various catalytic structures.
@@ -143,14 +68,24 @@ It also has functionality for enumeration of other systems relevant to the field
 - [X] Reaction mechanisms
 - [X] Reaction routes
 
-For additional details regarding how the generator operates, including example usage, see the [[./catgen/readme.org][CatGen readme]].
-
+For additional details regarding how the generator operates, including example usage, see the [[./docs/catkit/gen/gen.org][CatGen documentatio
 * CatFlow: Catalysis Workflow
 CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
 
 Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io/fireworks/][Fireworks]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[http://suncat.stanford.edu/][SUNCAT]] group as Stanford.
 
-For additional detail see the [[./catflow/readme.org][CatFlow readme]].
+For additional detail see the [[./docs/catkit/flow/flow.org][CatFlow documentation]].
+
+* CatHub: Catalysis-Hub.org
+CatHub provides an interface to the reaction energy database on [[http://www.catalysis-hub.org][Catalysis-Hub.org]].
+
+The module includes a command line interface that can be used to access and upload to the database:
+
+Run `cathub`:
+
+- cathub --help
+
+See the [[./docs/catkit/hub/hub.org][CatHub documentation]] for details on how to use the cli.
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.
