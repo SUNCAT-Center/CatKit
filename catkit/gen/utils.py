@@ -248,7 +248,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     return connectivity
 
 
-def get_primitive_cell(atoms, tol=1e-8):
+def get_spglib_cell(atoms, primitive=False, idealize=True, tol=1e-8):
     """Atoms object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
@@ -256,6 +256,10 @@ def get_primitive_cell(atoms, tol=1e-8):
     ----------
     atoms : object
         Atoms object to search for a primitive unit cell.
+    primitive : bool
+        Reduce the atoms object into a primitive form.
+    idealize : bool
+        Convert the cell into the spglib standardized form.
     tol : float
         Tolerance for floating point rounding errors.
 
@@ -269,10 +273,11 @@ def get_primitive_cell(atoms, tol=1e-8):
     numbers = atoms.get_atomic_numbers()
 
     cell = (lattice, positions, numbers)
-    cell = spglib.find_primitive(cell, symprec=tol)
+    cell = spglib.standardize_cell(
+        cell, to_primitive=primitive, no_idealize=~idealize, symprec=tol)
 
     if cell is None:
-        return None
+        return atoms
 
     _lattice, _positions, _numbers = cell
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
@@ -303,10 +308,13 @@ def get_symmetry(atoms, tol=1e-8):
 
     cell = (lattice, positions, numbers)
 
-    return spglib.get_symmetry(cell, symprec=tol)
+    symmetry = spglib.get_symmetry(cell, symprec=tol)
+    rotations, translations = symmetry['rotations'], symmetry['translations']
+
+    return rotations, translations
 
 
-def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-5):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
@@ -314,25 +322,20 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
     ----------
     atoms : object
         Atoms object to search for unique values along.
-    axis : int
-        Value of 0, 1, or 2 associated with x, y, and z coordinates.
-    direct : bool
-        Whether to use direct coordinates or Cartesian.
+    axis : int (0, 1, or 2)
+        Look for unique values along the x, y, or z axis.
     tag : bool
-        Assign ase-like tags to each layer of the slab.
+        Assign ASE-like tags to each layer of the slab.
     tol : float
         The tolerance to search for unique values within.
 
     Returns
     -------
     values : ndarray (n,)
-        Array of unique values.
+        Array of unique positions in fractional coordinates.
     """
-    if direct:
-        positions = (atoms.get_scaled_positions() + tol) % 1
-        positions -= tol
-    else:
-        positions = atoms.positions
+    positions = (atoms.get_scaled_positions() + tol) % 1
+    positions -= tol
 
     values = [positions[0][axis]]
     for d in positions[1:, axis]:
@@ -400,7 +403,6 @@ def isomorphic_molecules(graph0, graph1):
 
 def to_gratoms(atoms):
     """Convert and atom object to a gratoms object."""
-
     gratoms = Gratoms(
         numbers=atoms.numbers,
         positions=atoms.positions,

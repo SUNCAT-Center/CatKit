@@ -14,8 +14,6 @@ def surface(
         index=(1, 1, 1),
         fixed=0,
         vacuum=10,
-        root=None,
-        primitive=True,
         **kwargs):
     """A helper function to return the surface associated with a
     given set of input parameters to the general surface generator.
@@ -35,11 +33,6 @@ def surface(
         Number of layers to constrain.
     vacuum : float
         Angstroms of vacuum to add to the unit cell.
-    root : int
-        If not None, attempt to produce a root unit cell with
-        a primitive lattice length multiple this root.
-    primitive : bool
-        Perform an spglib reduction of the slabs unit cell.
 
     Returns
     -------
@@ -58,7 +51,7 @@ def surface(
         fixed=fixed,
         vacuum=vacuum)
 
-    slab = gen.get_slab(size=size, root=root, primitive=primitive)
+    slab = gen.get_slab(size=size)
     surface_atoms = gen.get_voronoi_surface_atoms(slab, attach_graph=True)
     slab.set_surface_atoms(surface_atoms[0])
 
@@ -68,6 +61,7 @@ def surface(
 def molecule(
         species,
         topology=None,
+        adsorption=False,
         vacuum=0):
     """Return gas-phase molecule structures based on species and
     topology.
@@ -78,6 +72,9 @@ def molecule(
         The chemical symbols to construct a molecule from.
     topology : int, str, or slice
         The indices for the distinct topology produced by the generator.
+    adsorption : bool
+        Construct the molecule as though it were adsorbed to a surface
+        parallel to the z-axis.
     vacuum : float
         Angstroms of vacuum to pad the molecule with.
 
@@ -98,7 +95,7 @@ def molecule(
 
         root = None
         for i, branch in enumerate(branches):
-            _branch_molecule(atoms, branch, base_root=root)
+            _branch_molecule(atoms, branch, root, adsorption)
             root = 0
 
         if vacuum:
