@@ -529,7 +529,7 @@ class Builder(AdsorptionSites):
         branches = list(nx.bfs_successors(atoms.graph, bond))
 
         if len(branches[0][1]) != 0:
-            vectors = self.get_adsorption_vectors(screen=False)
+            vectors = self.get_adsorption_vectors(screen=False, unique=False)
             uvec0 = vectors[ind]
             uvec1 = slab.cell[1] / norm(slab.cell[1])
             uvec2 = np.cross(uvec0, uvec1)
@@ -581,7 +581,7 @@ class Builder(AdsorptionSites):
         # Temporarily break adsorbate
         atoms.graph.remove_edge(*bonds)
 
-        vectors = self.get_adsorption_vectors(screen=False)
+        vectors = self.get_adsorption_vectors(screen=False, unique=False)
         uvec1 = vectors[edges[edge_index]]
         uvec2 = np.cross(uvec1, uvec0)
         uvec2 /= -norm(uvec2, axis=1)[:, None]
