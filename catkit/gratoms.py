@@ -6,6 +6,7 @@ from ase.data import chemical_symbols
 import networkx.algorithms.isomorphism as iso
 import numpy as np
 import copy
+import warnings
 sym = np.array(chemical_symbols)
 em = iso.numerical_edge_match('bonds', 1)
 nm = iso.numerical_node_match('number', 1)
@@ -239,8 +240,9 @@ class Gratoms(Atoms):
                     'Cannot repeat along undefined lattice vector')
 
         if self.pbc.any() and len(self.edges()) > 0:
-            raise ValueError("Edge conservation not currently supported with "
-                             "pbc. Remove pbc or edges first.")
+            warnings.warn(
+                ("Edge conservation not currently supported with "
+                 "pbc. Remove pbc or edges first."))
 
         M = np.product(m)
         n = len(self)

@@ -4,6 +4,10 @@
 
 from collections import MutableMapping
 from ase.data import covalent_radii
+import numpy as np
+
+radicals = np.ones(92)
+radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
 
 
 class Defaults(MutableMapping, dict):
@@ -11,7 +15,8 @@ class Defaults(MutableMapping, dict):
 
     def __init__(self):
         self.update({
-            'covalent_radii': covalent_radii.copy()
+            'covalent_radii': covalent_radii.copy(),
+            'radicals': radicals,
         })
 
     def __setitem__(self, key, val):

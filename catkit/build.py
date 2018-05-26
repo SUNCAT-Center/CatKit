@@ -28,7 +28,7 @@ def surface(
     crystal : str
         The bulk crystal structure to pass to the ase bulk builder.
     index : list (3,) or (4,)
-        The miller index to cleave the surface structure from.
+        The miller index to cleave the surface structure from. If 4 values
     fixed : int
         Number of layers to constrain.
     vacuum : float
@@ -87,7 +87,7 @@ def molecule(
 
     if len(molecule_graphs) > 1:
         _slice = utils.parse_slice(topology)
-        molecule_graphs = get_topologies(species)[_slice]
+        molecule_graphs = molecule_graphs[_slice]
 
     images = []
     for atoms in molecule_graphs:
