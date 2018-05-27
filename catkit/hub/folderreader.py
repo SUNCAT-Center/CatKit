@@ -18,13 +18,13 @@ class FolderReader:
     level:
 
     0    folder_name
-    1    └── publication
-    2        └── dft_code
-    3            └── dft_functional
-    4                ├── gas
-    4                └── metal1
-    5                    └── facet
-    6                        └── reaction
+    1    |-- publication
+    2        |-- dft_code
+    3            |-- dft_functional
+    4                |-- gas
+    4                |-- metal1
+    5                    |-- facet
+    6                        |-- reaction
 
     Parameters
     ----------
