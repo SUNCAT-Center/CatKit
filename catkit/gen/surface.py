@@ -4,8 +4,10 @@ from . import utils
 from . import adsorption
 import numpy as np
 from numpy.linalg import norm, solve
+from ase.build.tools import cut
 from ase.build import rotate
 from ase.constraints import FixAtoms
+from itertools import product
 import networkx as nx
 import warnings
 import scipy
@@ -25,8 +27,8 @@ class SlabGenerator(object):
 
     def __init__(self,
                  bulk,
-                 miller_index=(1, 1, 1),
-                 layers=4,
+                 miller_index,
+                 layers,
                  vacuum=None,
                  fixed=None,
                  standardize_bulk=True,
@@ -299,7 +301,7 @@ class SlabGenerator(object):
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
 
-        slab *= (size[0], size[1], 1)
+        slab = self.set_size(slab, size)
 
         translation = slab[0].position.copy()
         translation[2] = 0
@@ -438,9 +440,72 @@ class SlabGenerator(object):
 
         return output
 
+    def set_size(self, slab, size):
+        """Set the size of a slab based one of three methods.
+
+        1. An integer value performs a search of valid matrix operations
+        to perform on the ab-basis vectors to return a set which with
+        a minimal sum of distances and an angle closes to 90 degrees.
+
+        2. A list-like of length 2 will multiply the existing basis
+        vectors by that amount.
+
+        3. A list of two list-likes of length 2 will be interpreted
+        as matrix notation to multiply the ab-basis vectors by.
+
+        Parameters
+        ----------
+        slab : Atoms object
+            Slab to be made into the requested size.
+        size : int, list (2,) or (2, 2)
+            Size of the unit cell to create as described above.
+
+        Returns:
+        --------
+        supercell : Gratoms object
+            Supercell of the requested size.
+        """
+        supercell = slab
+
+        if isinstance(size, int):
+            a = max(int(size / 2), 1) + size % 2
+            T = np.mgrid[-a:a + 1, 0:a + 1].reshape(2, -1).T
+
+            metrics = []
+            for i, M in enumerate(product(T, repeat=2)):
+                M = np.array(M)
+                if ~np.isclose(abs(np.linalg.det(M)), size):
+                    continue
+
+                vector = np.dot(M.T, slab.cell[:2, :2])
+
+                d = np.linalg.norm(vector, axis=1)
+                angle = np.dot(vector[0], vector[1]) / np.prod(d)
+                diff = np.diff(d)[0]
+
+                # obtuse angle
+                if angle < 0 or diff < 0:
+                    continue
+
+                metrics += [[d.sum(), angle, M]]
+
+            if metrics:
+                matrix = sorted(metrics, key=lambda x: (x[0], x[1]))[0][-1]
+                supercell = transform_ab(supercell, matrix)
+
+        elif isinstance(size, (list, tuple, np.ndarray)):
+            size = np.array(size, dtype=int)
+
+            if size.shape == (2,):
+                supercell *= (size[0], size[1], 1)
+            elif size.shape == (2, 2):
+                supercell = transform_ab(supercell, size)
+
+        return supercell
+
 
 def ext_gcd(a, b):
-    """Extension of greatest common denominator."""
+    """Extension of greatest common divisor."""
     if b == 0:
         return 1, 0
     elif a % b == 0:
@@ -468,3 +533,33 @@ def get_normal_vectors(atoms):
     normal_vectors = np.cross(rotation1, rotation2, axis=0)
 
     return normal_vectors
+
+
+def transform_ab(atoms, matrix):
+    """Transform the slab basis vectors parallel to the z-plane
+    by matrix notation. This can result in changing the slabs
+    cell size. This can also result in very unusual slab dimensions.
+
+    Parameters
+    ----------
+    slab : Atoms object
+        The slab to be transformed.
+    matrix : array_like (2, 2)
+        The matrix notation transformation of the a and b
+        basis vectors.
+
+    Returns
+    -------
+    atoms : Atoms object
+        Slab after transformation.
+    """
+    M = np.eye(3)
+    M[:2, :2] = np.array(matrix).T
+    atoms = cut(atoms, *M)
+
+    ind = np.lexsort(
+        (atoms.positions[:, 0],
+         atoms.positions[:, 1],
+         atoms.positions[:, 2]))
+
+    return atoms[ind]
