@@ -47,13 +47,16 @@ def surface(
     gen = SlabGenerator(
         atoms,
         miller_index=index,
-        layers=size[2],
+        layers=size[-1],
         fixed=fixed,
         vacuum=vacuum)
 
+    if len(size) == 2:
+        size = size[0]
+    elif len(size) == 3:
+        size = size[:2]
+
     slab = gen.get_slab(size=size)
-    surface_atoms = gen.get_voronoi_surface_atoms(slab, attach_graph=True)
-    slab.set_surface_atoms(surface_atoms[0])
 
     return slab
 

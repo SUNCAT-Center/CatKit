@@ -2,6 +2,7 @@ from builtins import super
 import networkx as nx
 from networkx import Graph, MultiGraph
 from ase import Atoms, Atom
+from ase.constraints import FixConstraint, FixBondLengths
 from ase.data import chemical_symbols
 import networkx.algorithms.isomorphism as iso
 import numpy as np
@@ -51,15 +52,12 @@ class Gratoms(Atoms):
             else:
                 self._graph = Graph()
 
-        nodes = [[i, {
-            'number': n
-        }] for i, n in enumerate(self.arrays['numbers'])]
+        nodes = [[i, {'number': n}]
+                 for i, n in enumerate(self.arrays['numbers'])]
         self._graph.add_nodes_from(nodes)
 
         if isinstance(edges, list):
             self._graph.add_edges_from(edges)
-
-        self._surface_atoms = None
 
     @property
     def graph(self):
@@ -89,11 +87,14 @@ class Gratoms(Atoms):
 
     def get_surface_atoms(self):
         """Return surface atoms."""
-        return self._surface_atoms
+        surf_atoms = np.where(self.get_array('surface_atoms'))[0]
+        return surf_atoms
 
     def set_surface_atoms(self, surface_atoms):
         """Assign surface atoms."""
-        self._surface_atoms = surface_atoms
+        n = np.zeros(len(self))
+        n[surface_atoms] = 1
+        self.set_array('surface_atoms', n)
 
     def get_neighbor_symbols(self, u):
         """Get chemical symbols for neighboring atoms of u."""
@@ -149,8 +150,65 @@ class Gratoms(Atoms):
         for name, a in self.arrays.items():
             atoms.arrays[name] = a.copy()
         atoms.constraints = copy.deepcopy(self.constraints)
-        atoms._graph = self.graph.copy()
+        if hasattr(self, '_graph'):
+            atoms._graph = self._graph.copy()
 
+        return atoms
+
+    def __getitem__(self, i):
+        """Return a subset of the atoms.
+
+        i -- scalar integer, list of integers, or slice object
+        describing which atoms to return.
+
+        If i is a scalar, return an Atom object. If i is a list or a
+        slice, return an Atoms object with the same cell, pbc, and
+        other associated info as the original Atoms object. The
+        indices of the constraints will be shuffled so that they match
+        the indexing in the subset returned.
+
+        """
+
+        if isinstance(i, int):
+            natoms = len(self)
+            if i < -natoms or i >= natoms:
+                raise IndexError('Index out of range.')
+
+            return Atom(atoms=self, index=i)
+        elif isinstance(i, list) and len(i) > 0:
+            # Make sure a list of booleans will work correctly and not be
+            # interpreted at 0 and 1 indices.
+            i = np.array(i)
+
+        conadd = []
+        # Constraints need to be deepcopied, but only the relevant ones.
+        for con in copy.deepcopy(self.constraints):
+            if isinstance(con, (FixConstraint, FixBondLengths)):
+                try:
+                    con.index_shuffle(self, i)
+                    conadd.append(con)
+                except IndexError:
+                    pass
+
+        atoms = self.__class__(cell=self._cell, pbc=self._pbc, info=self.info,
+                               celldisp=self._celldisp)
+
+        atoms.arrays = {}
+        for name, a in self.arrays.items():
+            atoms.arrays[name] = a[i].copy()
+
+        # Copy the graph, conserving correct indexing
+        if self.nodes:
+            nodes = [[i, {'number': n}]
+                     for i, n in enumerate(self.arrays['numbers'])]
+            atoms.graph.add_nodes_from(nodes)
+
+            for u, v in self.graph.edges():
+                if u not in i or v not in i:
+                    continue
+                atoms.graph.add_edge(i[u], i[v])
+
+        atoms.constraints = conadd
         return atoms
 
     def __iadd__(self, other):
@@ -224,10 +282,10 @@ class Gratoms(Atoms):
         for name, a in self.arrays.items():
             self.arrays[name] = a[mask]
 
-        self._graph.remove_nodes_from(i)
-
-        mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
-        nx.relabel_nodes(self._graph, mapping, copy=False)
+        if self.nodes:
+            self._graph.remove_nodes_from(i)
+            mapping = dict(zip(np.where(mask)[0], np.arange(len(self))))
+            nx.relabel_nodes(self._graph, mapping, copy=False)
 
     def __imul__(self, m):
         """In-place repeat of atoms."""

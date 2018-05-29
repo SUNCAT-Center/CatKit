@@ -2,13 +2,12 @@ from __future__ import division
 from catkit import Gratoms
 from . import utils
 from . import adsorption
+from . import geometry
 import numpy as np
 from numpy.linalg import norm, solve
-from ase.build.tools import cut
 from ase.build import rotate
 from ase.constraints import FixAtoms
 from itertools import product
-import networkx as nx
 import warnings
 import scipy
 try:
@@ -31,8 +30,9 @@ class SlabGenerator(object):
                  layers,
                  vacuum=None,
                  fixed=None,
-                 standardize_bulk=True,
                  fix_stoichiometry=False,
+                 attach_graph=False,
+                 standardize_bulk=True,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
@@ -58,13 +58,17 @@ class SlabGenerator(object):
             Angstroms of vacuum to apply to the slab.
         fixed : int
             Number of slab layers to constrain.
+        fix_stoichiometry : bool
+            Constraints any slab generated to have the same
+            stoichiometric ratio as the provided bulk.
+        attach_graph : bool
+            Attach the connectivity graph generated from the bulk structure.
+            This is only necessary for fingerprinting and setting it to False
+            can save time. Surface atoms will be found regardless.
         standardize_bulk : bool
             Covert the bulk input to its standard form before and
             produce the cleave from it. This is highly recommended as
             Miller indices are not defined for non-standard cells.
-        fix_stoichiometry : bool
-            Constraints any slab generated to have the same
-            stoichiometric ratio as the provided bulk.
         tol : float
             Tolerance for floating point rounding errors.
         """
@@ -75,6 +79,7 @@ class SlabGenerator(object):
         self.fix_stoichiometry = fix_stoichiometry
         self.unique_terminations = None
         self.standardized = standardize_bulk
+        self.attach_graph = attach_graph
         self.slab_basis = None
         self.slab = None
 
@@ -158,6 +163,9 @@ class SlabGenerator(object):
             numbers=bulk.get_atomic_numbers(),
             pbc=True)
 
+        if not self.attach_graph:
+            del new_bulk._graph
+
         new_bulk.set_scaled_positions(scaled)
         new_bulk.set_cell(np.dot(new_lattice, bulk.cell), scale_atoms=True)
 
@@ -230,7 +238,7 @@ class SlabGenerator(object):
 
         Returns
         -------
-        ibasis :Gratoms object
+        ibasis : Gratoms object
             Prepared, ith basis.
         """
         terminations = self.get_unique_terminations()
@@ -252,6 +260,27 @@ class SlabGenerator(object):
 
         minimum_repetitions = np.ceil(self.layers / len(bulk_layers))
         ibasis *= (1, 1, int(minimum_repetitions))
+
+        exbasis = ibasis * (1, 1, 2)
+        connectivity = utils.get_voronoi_neighbors(exbasis)
+
+        n = len(ibasis)
+        diff = connectivity[:n, n:].sum(axis=1)
+        surf_atoms = diff != 0
+
+        if np.all(diff):
+            warnings.warn(
+                ("Your slab has no bulk atoms and may be too thin "
+                 "to identify surface atoms correctly. This may cause "
+                 "surface adsorption site identification to fail."))
+
+        # TODO: Graph generation needs to go here once handling of
+        # unit cell repetitions is implemented.
+
+        indices = np.argwhere(surf_atoms).flatten()
+        zcoords = ibasis.get_scaled_positions()[:, 2] - 0.5
+        surface_atoms = indices[zcoords[indices] > 0]
+        ibasis.set_surface_atoms(surface_atoms)
 
         utils.get_unique_coordinates(
             ibasis, tag=True, tol=self.tol)
@@ -283,12 +312,9 @@ class SlabGenerator(object):
             The modified basis slab produced based on the layer specifications
             given.
         """
-        slab = self.get_slab_basis(iterm)
+        slab = self.get_slab_basis(iterm).copy()
 
-        # Orthogonalize the z-coordinate
-        slab.cell[2] = [0, 0, slab.cell[2][2]]
-
-        # Trim the bottom of the cell
+        # Trim the bottom of the cell, bulk symmetry will be lost
         if not self.fix_stoichiometry:
             zlayers = utils.get_unique_coordinates(slab, tol=self.tol)
             reverse_sort = np.sort(zlayers)[::-1]
@@ -303,6 +329,11 @@ class SlabGenerator(object):
 
         slab = self.set_size(slab, size)
 
+        # Orthogonalize the z-coordinate
+        # Breaks bulk periodicity in the c-basis
+        slab.cell[2] = [0, 0, slab.cell[2][2]]
+        slab.set_pbc([1, 1, 0])
+
         translation = slab[0].position.copy()
         translation[2] = 0
         slab.translate(-translation)
@@ -313,7 +344,9 @@ class SlabGenerator(object):
              slab.positions[:, 1],
              slab.positions[:, 2]))
         slab = slab[ind]
-        slab.set_pbc([1, 1, 0])
+
+        roundoff = np.isclose(slab.cell, 0)
+        slab.cell[roundoff] = 0
 
         if self.fixed:
             tags = slab.get_tags()
@@ -326,93 +359,6 @@ class SlabGenerator(object):
         self.slab = slab
 
         return slab
-
-    def get_graph_from_bulk(self, slab, attach=False):
-        """Return the surface connectivity of a slab based on information
-        from the bulk basis is was constructed from.
-
-        Assumes the xy-plane is perpendicular to the miller index.
-
-        Parameters
-        ----------
-        slab : atoms object
-            Atoms to find graph connectivity for.
-
-        Returns
-        -------
-        surf_con : ndarray (n, n)
-            Connectivity matrix of the surface atoms with periodic boundary
-            conditions.
-        """
-        bulk_con = utils.get_voronoi_neighbors(self._bulk)
-        d = self._bulk.get_all_distances(mic=True)
-        maxd = d[bulk_con > 0].max()
-
-        surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
-
-        if attach:
-            G = nx.MultiGraph(surf_con)
-            slab.graph.add_edges_from(G.edges(data=True))
-
-        return surf_con
-
-    def get_voronoi_surface_atoms(self, slab, attach_graph=True):
-        """Find the under-coordinated atoms at the upper and lower
-        fraction of a given unit cell based on the bulk structure it
-        originated from.
-
-        Assumes the xy-plane is perpendicular to the miller index.
-
-        Parameters
-        ----------
-        slab : atoms object
-            The slab to find top layer atoms from.
-        attach_graph : bool
-            Store the slabs graph information in the passed  slab object.
-
-        Returns
-        -------
-        top : ndarray (n,)
-            Array of atom indices corresponding to the top layer of the slab.
-        bottom : ndarray (m,)
-            Array of atom indices corresponding to the bottom layer of
-            the slab.
-        """
-        bulk_con = utils.get_voronoi_neighbors(self._bulk)
-        d = self._bulk.get_all_distances(mic=True)
-
-        # This is potentially problematic for very small unit cells
-        # as it does not take periodicity into account
-        maxd = d[bulk_con > 0].max()
-        bulk_con = utils.get_cutoff_neighbors(self._bulk, cutoff=maxd)
-
-        bulk_degree = bulk_con.sum(axis=0)
-        surf_con = utils.get_cutoff_neighbors(slab, cutoff=maxd)
-        surf_degree = surf_con.sum(axis=0)
-
-        if attach_graph:
-            edges = utils.connectivity_to_edges(surf_con)
-            slab.graph.add_weighted_edges_from(edges, weight='bonds')
-
-        # Expand bulk topology to match number of atoms in slab
-        rep = np.ceil(len(surf_degree) / len(bulk_degree))
-        bulk_degree = np.repeat(bulk_degree, rep)
-
-        diff_degree = surf_degree - bulk_degree[:len(surf_degree)]
-        surf_atoms = np.nonzero(diff_degree)[0]
-        bulk_atoms = set(np.arange(len(slab))) - set(surf_atoms)
-
-        if len(bulk_atoms) == 0:
-            warnings.warn(
-                ("Your slab has no bulk atoms and may be too thin "
-                 "to identify surface atoms correctly. This may cause "
-                 "surface adsorption site identification to fail."))
-
-        hwp = slab.positions[surf_atoms] - slab.get_center_of_mass()
-        top = surf_atoms[hwp.T[2] > 0]
-        bottom = surf_atoms[hwp.T[2] < 0]
-
-        return top, bottom
 
     def adsorption_sites(self, slab, **kwargs):
         """Helper function to return the adsorption sites of the provided slab.
@@ -430,11 +376,6 @@ class SlabGenerator(object):
         connectivity : ndarray (n,)
             Connectivity of the adsorption sites
         """
-        if slab != self.slab or slab.get_surface_atoms() is None:
-            surface_sites = self.get_voronoi_surface_atoms(slab)[0]
-            slab.set_surface_atoms(surface_sites)
-            self.slab = slab
-
         output = adsorption.get_adsorption_sites(
             slab=slab, **kwargs)
 
@@ -468,6 +409,9 @@ class SlabGenerator(object):
         supercell = slab
 
         if isinstance(size, int):
+            if size == 1:
+                pass
+
             a = max(int(size / 2), 1) + size % 2
             T = np.mgrid[-a:a + 1, 0:a + 1].reshape(2, -1).T
 
@@ -501,7 +445,80 @@ class SlabGenerator(object):
             elif size.shape == (2, 2):
                 supercell = transform_ab(supercell, size)
 
+        if self.attach_graph:
+            # TODO: Creating the graph at this point is not ideal.
+            # Need to be able to handle expansion of the unit cell
+            # before this can be moved back to basis creation
+            n = len(supercell)
+            exsupercell = supercell * (1, 1, 2)
+            connectivity = utils.get_voronoi_neighbors(exsupercell)
+            edges = utils.connectivity_to_edges(connectivity[:n, :n])
+            supercell.graph.add_weighted_edges_from(edges, weight='bonds')
+
         return supercell
+
+
+def transform_ab(slab, matrix):
+    """Transform the slab basis vectors parallel to the z-plane
+    by matrix notation. This can result in changing the slabs
+    cell size. This can also result in very unusual slab dimensions,
+    use with caution.
+
+    Parameters
+    ----------
+    slab : Atoms object
+        The slab to be transformed.
+    matrix : array_like (2, 2)
+        The matrix notation transformation of the a and b
+        basis vectors.
+
+    Returns
+    -------
+    slab : Atoms object
+        Slab after transformation.
+    """
+    M = np.eye(3)
+    M[:2, :2] = np.array(matrix).T
+
+    newcell = np.dot(M, slab.cell)
+    scorners_newcell = np.array([
+        [0, 0], [0, 0],
+        [0, 1], [1, 1]])
+
+    corners = np.dot(scorners_newcell, newcell[:2, :2])
+    scorners = np.linalg.solve(slab.cell[:2, :2].T, corners.T).T
+
+    rep = np.ceil(scorners.ptp(axis=0)).astype(int)
+
+    slab *= (rep[0], rep[1], 1)
+    slab.set_cell(newcell)
+
+    coords = slab.get_scaled_positions()
+    original_index = np.arange(coords.shape[0])
+    periodic_match = original_index.copy()
+    for i, j in enumerate(periodic_match):
+        if i != j:
+            continue
+
+        matched = geometry.matching_sites(coords[i], coords)
+        periodic_match[matched] = i
+
+    repeated = np.where(periodic_match != original_index)
+    del slab[repeated]
+
+    # Align the longest remaining basis vector with x
+    vdist = norm(slab.cell[:2], axis=1)
+    r = np.argmax(vdist)
+    slab.rotate(slab.cell[r], 'x', rotate_cell=True)
+
+    if r == 1:
+        slab.cell[0] *= -1
+        slab.cell[[0, 1]] = slab.cell[[1, 0]]
+
+    if slab.cell[1][1] < 0:
+        slab.cell[1] *= -1
+
+    return slab
 
 
 def ext_gcd(a, b):
@@ -533,33 +550,3 @@ def get_normal_vectors(atoms):
     normal_vectors = np.cross(rotation1, rotation2, axis=0)
 
     return normal_vectors
-
-
-def transform_ab(atoms, matrix):
-    """Transform the slab basis vectors parallel to the z-plane
-    by matrix notation. This can result in changing the slabs
-    cell size. This can also result in very unusual slab dimensions.
-
-    Parameters
-    ----------
-    slab : Atoms object
-        The slab to be transformed.
-    matrix : array_like (2, 2)
-        The matrix notation transformation of the a and b
-        basis vectors.
-
-    Returns
-    -------
-    atoms : Atoms object
-        Slab after transformation.
-    """
-    M = np.eye(3)
-    M[:2, :2] = np.array(matrix).T
-    atoms = cut(atoms, *M)
-
-    ind = np.lexsort(
-        (atoms.positions[:, 0],
-         atoms.positions[:, 1],
-         atoms.positions[:, 2]))
-
-    return atoms[ind]
