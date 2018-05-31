@@ -62,13 +62,6 @@ def symbols(atoms):
     return ''.join(symbols)
 
 
-def read_ase(structures, dirname, names):
-    print("Dirname {dirname}: Names {names}".format(
-        dirname=dirname,
-        names=names,
-    ))
-
-
 def collect_structures(foldername, options):
     structures = []
     if options.verbose:
