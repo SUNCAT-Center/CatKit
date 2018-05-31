@@ -20,21 +20,6 @@ notifications:
 cache:
     apt: true
     pip: true
-    directories:
-        - $HOME/miniconda/LICENSE.txt
-        - $HOME/miniconda/bin
-        - $HOME/miniconda/conda-meta (meta info on installed packages)
-        - $HOME/miniconda/envs
-        - $HOME/miniconda/etc
-        - $HOME/miniconda/gcc (not sure why it exists)
-        - $HOME/miniconda/include
-        - $HOME/miniconda/lib
-        - $HOME/miniconda/lib64
-        - $HOME/miniconda/libexec
-        - $HOME/miniconda/sbin
-        - $HOME/miniconda/share
-        - $HOME/miniconda/ssl
-
 
 before_script:
   - psql -c 'create database travis_ci_test;' -U postgres
@@ -55,7 +40,9 @@ before_install:
   - source activate condaenv
 
 install:
+  - sudo wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list
   - sudo apt-get update
+  - sudo apt-get install intel-mkl-2018.2-046
   - conda info -a
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -y
