@@ -29,6 +29,9 @@ slab1.set_calculator(
         )
 ase.io.write(path + 'empty_slab_111_ads.traj', slab1)
 
+with open(path + 'OUTCAR', 'w') as outfile:
+    outfile.write('This is a non-sensical test file to test some fallback options.\n')
+
 mol = ase.atoms.Atoms('O',
         cell=[
             [15., 0., 0.],
