@@ -26,6 +26,9 @@ before_script:
   - export PATH=/usr/local/bin:$PATH
 
 before_install:
+  - sudo wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list
+  - sudo apt-get update
+  - sudo apt-get install intel-mkl-2018.2-046
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
     else
@@ -40,9 +43,6 @@ before_install:
   - source activate condaenv
 
 install:
-  - sudo wget https://apt.repos.intel.com/setup/intelproducts.list -O /etc/apt/sources.list.d/intelproducts.list
-  - sudo apt-get update
-  - sudo apt-get install intel-mkl-2018.2-046
   - conda info -a
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -y
