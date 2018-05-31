@@ -41,6 +41,11 @@ class CommandLineTestCase(unittest.TestCase):
         runner.invoke(make_folders, ['--create-template', 'template'])
         runner.invoke(make_folders, ['template'])
 
+    def test_cli_read_folders(self):
+        from catkit.hub.cli import folder2db
+        runner = CliRunner()
+        runner.invoke(folder2db, ['aayush/'])
+
 
 if __name__ == '__main__':
     unittest.main()
