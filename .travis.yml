@@ -20,6 +20,20 @@ notifications:
 cache:
     apt: true
     pip: true
+    directories:
+        - $HOME/miniconda/LICENSE.txt
+        - $HOME/miniconda/bin
+        - $HOME/miniconda/conda-meta (meta info on installed packages)
+        - $HOME/miniconda/envs
+        - $HOME/miniconda/etc
+        - $HOME/miniconda/gcc (not sure why it exists)
+        - $HOME/miniconda/include
+        - $HOME/miniconda/lib
+        - $HOME/miniconda/lib64
+        - $HOME/miniconda/libexec
+        - $HOME/miniconda/sbin
+        - $HOME/miniconda/share
+        - $HOME/miniconda/ssl
 
 
 before_script:
