@@ -67,7 +67,8 @@ index_statements = [
 tsvector_statements = [
     """ALTER TABLE publication ADD COLUMN pubtextsearch tsvector;""",
 
-
+    # Trigger doesn't work with all versions. Will make this work
+    # later
     # """CREATE TRIGGER tsvectorupdatepub BEFORE INSERT OR UPDATE
     # ON publication FOR EACH ROW EXECUTE PROCEDURE
     # UPDATE publication SET pubtextsearch =
@@ -107,15 +108,19 @@ tsvector_update = [
 
 
 class CathubPostgreSQL:
+    """ Class for setting up the catalysis hub reaction energy database
+    on postgreSQL server.
+    """
+
     def __init__(self, user='catroot', password=None, stdin=sys.stdin,
                  stdout=sys.stdout):
         self.initialized = False
         self.connection = None
         self.id = None
-        if user == 'catroot':
+        if user == 'catroot' or user == 'catvisitor':
             self.schema = 'public'
         else:
-            self.schema = 'public'  # user
+            self.schema = user
         self.user = user
         self.server = 'catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com'
         if password is None:
@@ -171,7 +176,7 @@ class CathubPostgreSQL:
                 self.stdout.write(statement + '\n')
                 cur.execute(statement)
             for statement in tsvector_statements:
-                self.stdout(statement + '\n')
+                self.stdout.write(statement + '\n')
                 cur.execute(statement)
             con.commit()
         self.initialized = True
@@ -181,18 +186,22 @@ class CathubPostgreSQL:
         from pwgen import pwgen
         con = self.connection or self._connect()
         cur = con.cursor()
+
         cur.execute('CREATE SCHEMA {0};'.format(user))
         # self._initialize(schema=schema_name)
         password = pwgen(8)
         cur.execute(
-            "CREATE USER {0} with PASSWORD '{0}';".format(user, password))
+            "CREATE USER {0} with PASSWORD '{1}';".format(user, password))
         cur.execute(
-            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO {1};'.format(user, user))
+            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO {1};'.format(user))
         cur.execute('GRANT USAGE ON SCHEMA public TO {0};'.format(user))
         cur.execute(
             'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {0};'.format(user))
         cur.execute(
-            'ALTER ROLE {0} SET search_path TO {1};'.format(user, user))
+            'ALTER ROLE {0} SET search_path TO {0};'.format(user))
+
+        self.stdout.write(
+            'CREATED USER {0} WITH PASSWORD {1}\n'.format(user, password))
 
         con.commit()
         con.close()
@@ -200,14 +209,29 @@ class CathubPostgreSQL:
         self.schema = user
         self.user = user
         self.password = password
-        con = self.connection or self._connect()
+        con = self._connect()
         self._initialize(con)
 
         con.commit()
         con.close()
 
+        return self
+
+    def remove_user(self, user):
+        assert self.user == 'catroot'
+        con = self.connection or self._connect()
+        cur = con.cursor()
+        cur.execute('DROP SCHEMA {0} CASCADE;'.format(user))
+        cur.execute('REVOKE USAGE ON SCHEMA public FROM {0};'.format(user))
+        cur.execute(
+            'REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM {0};'
+            .format(user))
+        cur.execute(
+            'DROP ROLE {0};'.format(user))
         self.stdout.write(
-            'CREATED USER {0} WITH PASSWORD {1}\n'.format(user, password))
+            'REMOVED USER {0}\n'.format(user))
+        con.commit()
+        con.close()
 
         return self
 
@@ -393,8 +417,8 @@ class CathubPostgreSQL:
                 t1 = time.time()
                 b0 = block_id * block_size + 1
                 b1 = (block_id + 1) * block_size + 1
-                self.stdout.write(str(block_id) + ' ' +
-                                  'from ' + str(b0) + ' to ' + str(b1) + '\n')
+                # self.stdout.write(str(block_id) + ' ' +
+                #                  'from ' + str(b0) + ' to ' + str(b1) + '\n')
                 if block_id + 1 == n_blocks:
                     b1 = n_structures + 1
 
@@ -411,7 +435,7 @@ class CathubPostgreSQL:
 
                 self.stdout.write(
                     '  Finnished Block {0} / {1} in {2} sec'
-                    .format(block_id, n_blocks, dt))
+                    .format(block_id + 1, n_blocks, dt))
                 self.stdout.write(
                     '    Completed transfer of {0} atomic structures.'
                     .format(nrows))
@@ -507,15 +531,15 @@ class CathubPostgreSQL:
                         set_schema = 'SET search_path = {0};'.format(
                             self.schema)
                         cur.execute(set_schema)
-                        print("[SET SCHEMA] {set_schema}".format(**locals()))
+                        # print("[SET SCHEMA] {set_schema}".format(**locals()))
 
                         insert_command = """INSERT INTO reaction_system
                         ({0}) VALUES ({1}) ON CONFLICT DO NOTHING;"""\
                             .format(key_str, value_str)
 
-                        print(
-                            "[INSERT COMMAND] {insert_command}"
-                            .format(**locals()))
+                        # print(
+                        #     "[INSERT COMMAND] {insert_command}"
+                        #     .format(**locals()))
                         cur.execute(insert_command)
 
                 con.commit()  # Commit reaction_system for each row
@@ -599,9 +623,9 @@ def get_key_value_str(values, table='reaction'):
         start_index = 0
     value_str = "'{0}'".format(values[start_index])
     for v in values[start_index + 1:]:
-        print("\n\n\nDIR TYPE {v}".format(**locals()))
-        print(dir(v))
-        print(type(v))
+        # print("\n\n\nDIR TYPE {v}".format(**locals()))
+        # print(dir(v))
+        # print(type(v))
         # if isinstance(v, text):
         # v = v.encode('utf8','ignore')
         # print("ISINSTANCE TEXT {v}".format(**locals()))
@@ -615,6 +639,6 @@ def get_key_value_str(values, table='reaction'):
             value_str += ", '{0}'".format(v)
         else:
             value_str += ", {0}".format(v)
-        print(value_str)
+        # print(value_str)
 
     return key_str[table], value_str

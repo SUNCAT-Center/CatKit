@@ -50,6 +50,8 @@ def execute_graphQL(query_string):
     print('')
     print(query_string)
     print('')
+    print('Getting data from server...')
+    print('')
     data = requests.post(root, {'query': query_string}).json()
     print('Result:')
     print('')
@@ -97,6 +99,11 @@ def graphql_query(table='reactions',
 
 
 def get_reactions(n_results=20, write_db=False, **kwargs):
+    """
+    Get reactions from server
+
+    Give key value strings as arguments
+    """
     queries = {}
     for key, value in kwargs.items():
         key = map_column_names(key)
@@ -112,9 +119,10 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
             queries.update({key: '{0}'.format(value)})
 
     subtables = []
-    # if write_local:
-    subtables = ['reactionSystems', 'publication']
-
+    if write_db:
+        subtables = ['reactionSystems', 'publication']
+    else:
+        subtables = []
     data = query(table='reactions', subtables=subtables,
                  columns=all_columns['reactions'],
                  n_results=n_results, queries=queries)
@@ -122,6 +130,7 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
     if not write_db:
         return data
 
+    print('Writing result to Reactions.db')
     for row in data['data']['reactions']['edges']:
         with CathubSQLite('Reactions.db') as db:
             row = row['node']

@@ -36,7 +36,7 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
         for sk in s.split(','):
             skip.append(sk)
     _folder2db.main(folder_name, debug,
-                   skip, goto_reaction, old)
+                    skip, goto_reaction, old)
 
 
 @cli.command()
@@ -48,19 +48,21 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
 @click.option('--write_publication', default=True, type=bool)
 @click.option('--block-size', default=1000, type=int)
 @click.option('--start-block', default=0, type=int)
-@click.option('--db_user', default='catroot', type=str)
+@click.option('--db_user', default='upload', type=str)
+@click.option('--db-password', type=str)
 def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, db_user):
+              write_reaction_system, block_size, start_block, db_user,
+              db_password):
     """Transfer data from local database to Catalysis Hub server"""
 
     _db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
-                   write_ase=write_ase,
-                   write_publication=write_publication,
-                   write_reaction_system=write_reaction_system,
-                   block_size=block_size,
-                   start_block=start_block,
-                   db_user=db_user,
-                   )
+                    write_ase=write_ase,
+                    write_publication=write_publication,
+                    write_reaction_system=write_reaction_system,
+                    block_size=block_size,
+                    start_block=start_block,
+                    db_user=db_user,
+                    db_password=db_password)
 
 
 reaction_columns = [
@@ -102,7 +104,10 @@ publication_columns = [
     '-q',
     default={},
     multiple='True',
-    help="Make a selection on one of the columns: {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt \n -q reactants=CO for reactions with CO as a reactants".format(reaction_columns))
+    help="""Make a selection on one of the columns:
+    {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing
+    Pt \n -q reactants=CO for reactions with CO as a reactants"""
+    .format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def reactions(columns, n_results, queries):
     """Search for reactions"""
@@ -121,7 +126,6 @@ def reactions(columns, n_results, queries):
             except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
-    #columns = [columns]
     query.query(
         table='reactions',
         columns=columns,
@@ -140,7 +144,9 @@ def reactions(columns, n_results, queries):
     '-q',
     default={},
     multiple=True,
-    help="Make a selection on one of the columns: {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich \n year=2017".format(publication_columns))
+    help="""Make a selection on one of the columns:
+    {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich
+    \n year=2017""".format(publication_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def publications(columns, n_results, queries):
     """Search for publications"""
@@ -240,8 +246,10 @@ def make_folders(create_template, template, custom_base, diagnose):
         'reactions': [
                 {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
                  'products': ['OOHstar@top']},
-                {'reactants': ['CCH3star@bridge'], 'products': ['Cstar@hollow', 'CH3star@ontop']},
-                {'reactants': ['CH4gas', '-0.5H2gas', 'star'], 'products': ['CH3star@ontop']}
+                {'reactants': ['CCH3star@bridge'],
+                 'products': ['Cstar@hollow', 'CH3star@ontop']},
+                {'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+                 'products': ['CH3star@ontop']}
         ],
         'bulk_compositions': ['Pt'],
         'crystal_structures': ['fcc', 'hcp'],
@@ -251,8 +259,8 @@ def make_folders(create_template, template, custom_base, diagnose):
         if create_template:
             if os.path.exists(template):
                 raise UserWarning(
-                    "File {template} already exists. Refusing to overwrite".format(
-                        **locals()))
+                    "File {template} already exists. Refusing to overwrite"
+                    .format(**locals()))
             with open(template, 'w') as outfile:
                 outfile.write(
                     json.dumps(
@@ -383,7 +391,8 @@ def organize(**kwargs):
     # do argument wrangling  before turning it into an obect
     # since namedtuples are immutable
     if len(kwargs['adsorbates']) == 0:
-        print("Warning: no adsorbates specified, can't pick up reaction reaction energies.")
+        print("""Warning: no adsorbates specified,
+        can't pick up reaction reaction energies.""")
         print("         Enter adsorbates like so --adsorbates CO,O,CO2")
         print("         [Comma-separated list without spaces.]")
     kwargs['adsorbates'] = list(map(
