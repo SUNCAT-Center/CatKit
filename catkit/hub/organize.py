@@ -81,7 +81,7 @@ def collect_structures(foldername, options):
             with open(posix_filename) as infile:
 
                 global PUBLICATION_TEMPLATE
-                PUBLICATION_TEMPLATE= infile.read()
+                PUBLICATION_TEMPLATE = infile.read()
         elif Path(posix_filename).is_file():
             try:
                 filetype = ase.io.formats.filetype(posix_filename)
@@ -114,12 +114,12 @@ def collect_structures(foldername, options):
                     print("Hit an assertion error with {posix_filename}: {e}".format(
                         posix_filename=posix_filename,
                         e=e,
-                        ))
+                    ))
                 except ValueError as e:
                     print("Trouble reading {posix_filename}: {e}".format(
                         posix_filename=posix_filename,
                         e=e,
-                        ))
+                    ))
 
     return structures
 
@@ -128,7 +128,7 @@ def fuzzy_match(structures, options):
     # filter out cell with ill-defined unit cells
     structures = [structure for structure in structures
                   if structure.number_of_lattice_vectors == 3
-            ]
+                  ]
     # sort by density
     structures = sorted(structures,
                         key=lambda x: len(x) / x.get_volume()
