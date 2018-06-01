@@ -25,13 +25,11 @@ def get_server():
     return server, local
 
 
-def get_nnodes(server=None):
+def get_nnodes():
     """Get the number of nodes being used in this environment. This is meant
     to be run on a calculation node.
     """
-    local = True
-    if not server:
-        server, local = get_server()
+    server, local = get_server()
 
     evars = os.environ
 

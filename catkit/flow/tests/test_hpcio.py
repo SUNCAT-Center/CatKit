@@ -35,11 +35,20 @@ class TestHPCIO(unittest.TestCase):
 
     def test_get_nnodes(self):
         """Test get_nnodes function."""
-        servers = ['slac', 'sherlock', 'nersc']
+        os.environ['LSB_HOSTS'] = 'N C S'
+        os.environ['SLURM_NNODES'] = '4'
+
+        globalv = {'LSB_EXEC_CLUSTER': ['slac', 3],
+                   'SLURM_CLUSTER_NAME': ['sherlock', 4],
+                   'SLURM_CLUSTER_NAME': ['nersc', 4]}
 
         # Test defines servers
-        for server in servers:
-            hpcio.get_nnodes(server)
+        for cluster, var in globalv.items():
+            os.environ[cluster] = var[0]
+            nodes = hpcio.get_nnodes()
+            assert(nodes == var[1])
+
+            del os.environ[cluster]
 
         # Try getting from local environment
         os.environ['CLUSTER'] = 'slac'
