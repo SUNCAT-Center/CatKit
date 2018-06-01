@@ -358,12 +358,6 @@ def connect(user):
     help="Regular expression that matches"
          " only those files that are included.",)
 @click.option(
-    '-j', '--json',
-    type=bool,
-    is_flag=True,
-    help="Store intermediate filetype as json"
-    "instead of traj files")
-@click.option(
     '-m', '--max-energy',
     type=float,
     default=10.,
@@ -390,6 +384,12 @@ def connect(user):
     show_default=True,
     help="Specify the maximum density (#atoms/A^3) "
     " at which the structure are considered slabs and not bulk")
+@click.option(
+    '-t', '--traj',
+    type=bool,
+    is_flag=True,
+    help="Store intermediate filetype as traj"
+    "instead of json files")
 @click.option(
     '-v', '--verbose',
     is_flag=True,
