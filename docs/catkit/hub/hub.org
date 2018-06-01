@@ -1,37 +1,51 @@
-#+Title:CatHub: Catalysis-Hub.org interface
-#+Author:Kirsten T Winther
-#+OPTIONS: toc:nil
+* +Title:CatHub: Catalysis-Hub.org interface
 
-## Using the cathub cli
+* +Author:Kirsten T Winther, Max J Hoffmann
 
-Run `cathub`, like so
+* +OPTIONS: toc:nil
 
-  - cathub --help
+** Using the cathub command line interface
+
+Run =cathub=, like so
+
+-  =cathub --help=
 
 or with any of its sub-commands, like so
 
-  - cathub make_folders_template --help
+-  =cathub make_folders_template --help=
 
-## Examples
+** Examples
 
 To create an .json input file
 
-  - cathub make_folders_template project1.json --create-template
+-  =cathub make_folders_template project1.json --create-template=
 
 To create a folder structure from a .json input file
 
-  - cathub make_folders_template project1.json
+-  =cathub make_folders_template project1.json=
+
+To convert a folder containing adsorption energy calculations into a
+a folder structure suitable for catalysis-hub.org submission
+ (will not change existing files and create a new folder with suffix .organized)
+
+- =cathub organize <folder-name> --adsorbates O,OH,OOH=
+
+This is aimed for single-adsorbate reaction energies. Structure are matched
+base on unit cell and chemical formula. Consult for more options
+
+- =cathub organize --help=
 
 Querying the Catalysis Hub database:
 
-  - cathub reactions -q reactants=CO -q chemicalComposition=~Pt
+-  =cathub reactions -q reactants=CO -q chemicalComposition=~Pt=
 
-  - cathub publications -q title=~Evolution -q year=2017
+-  =cathub publications -q title=~Evolution -q year=2017=
 
 Reading folders into sqlite3 db file:
 
-  - cathub folder2db <foldername>
+-  =cathub folder2db <foldername>=
 
 Sending the data to the Catalysis Hub server:
 
-  - cathub db2server <dbfile>
+-  =cathub db2server <dbfile>=
+

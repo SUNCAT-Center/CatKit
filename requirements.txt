@@ -10,7 +10,7 @@ future>=0.16.0
 msgpack
 sklearn
 python-coveralls
-click==6.7
-psycopg2==2.7.3.2
-python-Levenshtein==0.12.0
-pathlib2==2.3.2
+click>=6.7
+psycopg2>=2
+python-Levenshtein>=0.12
+pathlib2>=2.3
