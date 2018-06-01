@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-06-01 Fri 02:28 -->
+<!-- 2018-06-01 Fri 05:25 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CatKit</title>
@@ -240,32 +240,32 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgddb8063">1. Graph-atoms (Gratoms) object</a>
+<li><a href="#org5d48d22">1. Graph-atoms (Gratoms) object</a>
 <ul>
-<li><a href="#orgac8c877">1.1. Graph information</a></li>
+<li><a href="#org5e186c7">1.1. Graph information</a></li>
 </ul>
 </li>
-<li><a href="#org05ed632">2. PawPrint</a>
+<li><a href="#org465cffd">2. PawPrint</a>
 <ul>
-<li><a href="#org81ae3b7">2.1. Non-local fingerprint generation</a></li>
-<li><a href="#org75bed77">2.2. Local fingerprint generation</a></li>
-<li><a href="#org5dc0c5c">2.3. Writing personalized operations</a></li>
+<li><a href="#orgfd3e435">2.1. Non-local fingerprint generation</a></li>
+<li><a href="#org053acfc">2.2. Local fingerprint generation</a></li>
+<li><a href="#orgcd22f18">2.3. Writing personalized operations</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgddb8063" class="outline-2">
-<h2 id="orgddb8063"><span class="section-number-2">1</span> Graph-atoms (Gratoms) object</h2>
+<div id="outline-container-org5d48d22" class="outline-2">
+<h2 id="org5d48d22"><span class="section-number-2">1</span> Graph-atoms (Gratoms) object</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 The <code>Gratoms</code> object is a child class of the ASE <code>Atoms</code> object class. Effectively, this means that it has all the same functionality as an <code>Atoms</code> object with some additional features as well.
 </p>
 </div>
 
-<div id="outline-container-orgac8c877" class="outline-3">
-<h3 id="orgac8c877"><span class="section-number-3">1.1</span> Graph information</h3>
+<div id="outline-container-org5e186c7" class="outline-3">
+<h3 id="org5e186c7"><span class="section-number-3">1.1</span> Graph information</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 The <code>Gratoms</code> object primary function is to conveniently store and manage graph information.
@@ -952,8 +952,8 @@ Are isomorphs: False
 </div>
 </div>
 
-<div id="outline-container-org05ed632" class="outline-2">
-<h2 id="org05ed632"><span class="section-number-2">2</span> PawPrint</h2>
+<div id="outline-container-org465cffd" class="outline-2">
+<h2 id="org465cffd"><span class="section-number-2">2</span> PawPrint</h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in <a href="./pawprint/operations.py">./pawprint/operations.py</a>.
@@ -1248,8 +1248,8 @@ A list of atoms objects can also be passed to any of the generators.This will in
 </p>
 </div>
 
-<div id="outline-container-org81ae3b7" class="outline-3">
-<h3 id="org81ae3b7"><span class="section-number-3">2.1</span> Non-local fingerprint generation</h3>
+<div id="outline-container-orgfd3e435" class="outline-3">
+<h3 id="orgfd3e435"><span class="section-number-3">2.1</span> Non-local fingerprint generation</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 Currently, the fingerprint generator has operations for producing convolutions over all atoms in a provided list of atoms objects. There is only a single type of convolution which performs this type of operation currently:
@@ -1268,16 +1268,14 @@ These functions can take additional keyword arguments as well, these are provide
 
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #0000FF;">from</span> catkit.pawprint <span style="color: #0000FF;">import</span> Fingerprinter
-<span style="color: #0000FF;">from</span> ase.build <span style="color: #0000FF;">import</span> fcc111
+<span style="color: #0000FF;">from</span> catkit.build <span style="color: #0000FF;">import</span> surface
 <span style="color: #0000FF;">from</span> ase.build <span style="color: #0000FF;">import</span> bulk
 <span style="color: #0000FF;">import</span> numpy <span style="color: #0000FF;">as</span> np
-<span style="color: #0000FF;">from</span> catkit.gen <span style="color: #0000FF;">import</span> defaults
-<span style="color: #BA36A5;">defaults</span>[<span style="color: #008000;">'covalent_radii'</span>] += 0.15
 
 <span style="color: #BA36A5;">bulk</span> = bulk(<span style="color: #008000;">'Pd'</span>, cubic=<span style="color: #D0372D;">True</span>)
 bulk[3]<span style="color: #BA36A5;">.symbol</span> = <span style="color: #008000;">'Pt'</span>
 
-<span style="color: #BA36A5;">slab</span> = fcc111(<span style="color: #008000;">'Al'</span>, size=(2, 2, 3), a=3.8, vacuum=10.0)
+<span style="color: #BA36A5;">slab</span> = surface(<span style="color: #008000;">'Al'</span>, size=(2, 2, 3), a=3.8, vacuum=10)
 
 <span style="color: #BA36A5;">images</span> = [bulk, slab]
 
@@ -1296,7 +1294,7 @@ bulk[3]<span style="color: #BA36A5;">.symbol</span> = <span style="color: #00800
 <span style="color: #BA36A5;">fingerprints</span> = fp.get_fp(parameters, operations)
 
 <span style="color: #0000FF;">print</span>(<span style="color: #008000;">'#+attr_latex: :mode math :environment matrix'</span>)
-<span style="color: #0000FF;">for</span> fp <span style="color: #0000FF;">in</span> fingerprints:
+<span style="color: #0000FF;">for</span> fp <span style="color: #0000FF;">in</span> np.array(fingerprints):
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #BA36A5;">fp_table</span> = np.<span style="color: #006FE0;">round</span>(fp, 3)
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #0000FF;">print</span>(<span style="color: #008000;">'|'</span> + <span style="color: #008000;">'|'</span>.join(fp_table.astype(<span style="color: #006FE0;">str</span>)))
 </pre>
@@ -1341,8 +1339,8 @@ bulk[3]<span style="color: #BA36A5;">.symbol</span> = <span style="color: #00800
 </div>
 </div>
 
-<div id="outline-container-org75bed77" class="outline-3">
-<h3 id="org75bed77"><span class="section-number-3">2.2</span> Local fingerprint generation</h3>
+<div id="outline-container-org053acfc" class="outline-3">
+<h3 id="org053acfc"><span class="section-number-3">2.2</span> Local fingerprint generation</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 Localized fingerprints can also be generated. This is demonstrated for a catalytic structure of Palladium with a single Carbon adsorbate.
@@ -1426,8 +1424,8 @@ The generators purpose is not to restrict which fingerprints can be generated, h
 </div>
 </div>
 
-<div id="outline-container-org5dc0c5c" class="outline-3">
-<h3 id="org5dc0c5c"><span class="section-number-3">2.3</span> Writing personalized operations</h3>
+<div id="outline-container-orgcd22f18" class="outline-3">
+<h3 id="orgcd22f18"><span class="section-number-3">2.3</span> Writing personalized operations</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 Currently, the default structure of and operation is as follows:
@@ -1526,7 +1524,7 @@ atoms.set_tags(tags)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Jacob Boes</p>
-<p class="date">Created: 2018-06-01 Fri 02:28</p>
+<p class="date">Created: 2018-06-01 Fri 05:25</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

@@ -153,12 +153,13 @@
            <div itemprop="articleBody">
             
   <h1>Source code for catkit.pawprint.generator</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pkg_resources</span>
+<span></span><span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">operations</span>
+<span class="kn">from</span> <span class="nn">..</span> <span class="k">import</span> <span class="n">Gratoms</span>
+<span class="kn">from</span> <span class="nn">..gen</span> <span class="k">import</span> <span class="n">utils</span>
+<span class="kn">import</span> <span class="nn">pkg_resources</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">ase</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">operations</span>
-<span class="kn">from</span> <span class="nn">..gen</span> <span class="k">import</span> <span class="n">utils</span>
 
 
 <div class="viewcode-block" id="Fingerprinter"><a class="viewcode-back" href="../../../modules/catkit.pawprint.html#catkit.pawprint.generator.Fingerprinter">[docs]</a><span class="k">class</span> <span class="nc">Fingerprinter</span><span class="p">():</span>
@@ -249,7 +250,11 @@
             <span class="n">method</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">):</span>
                 <span class="n">method</span> <span class="o">=</span> <span class="s1">&#39;voronoi&#39;</span>
-            <span class="n">connectivity</span> <span class="o">=</span> <span class="n">get_connectivity</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">Gratoms</span><span class="p">):</span>
+                <span class="n">connectivity</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">connectivity</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">connectivity</span> <span class="o">=</span> <span class="n">get_connectivity</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">operation</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">operation_list</span><span class="p">):</span>
                 <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -346,7 +351,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Fri, 01 Jun 2018 04:21:35.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

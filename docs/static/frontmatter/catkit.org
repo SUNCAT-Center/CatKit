@@ -185,16 +185,14 @@ These functions can take additional keyword arguments as well, these are provide
 
 #+BEGIN_SRC python :results output org drawer :exports both
 from catkit.pawprint import Fingerprinter
-from ase.build import fcc111
+from catkit.build import surface
 from ase.build import bulk
 import numpy as np
-from catkit.gen import defaults
-defaults['covalent_radii'] += 0.15
 
 bulk = bulk('Pd', cubic=True)
 bulk[3].symbol = 'Pt'
 
-slab = fcc111('Al', size=(2, 2, 3), a=3.8, vacuum=10.0)
+slab = surface('Al', size=(2, 2, 3), a=3.8, vacuum=10)
 
 images = [bulk, slab]
 
@@ -213,7 +211,7 @@ fp = Fingerprinter(images)
 fingerprints = fp.get_fp(parameters, operations)
 
 print('#+attr_latex: :mode math :environment matrix')
-for fp in fingerprints:
+for fp in np.array(fingerprints):
     fp_table = np.round(fp, 3)
     print('|' + '|'.join(fp_table.astype(str)))
 #+END_SRC

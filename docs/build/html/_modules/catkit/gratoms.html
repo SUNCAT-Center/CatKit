@@ -321,7 +321,6 @@
 <span class="sd">        other associated info as the original Atoms object. The</span>
 <span class="sd">        indices of the constraints will be shuffled so that they match</span>
 <span class="sd">        the indexing in the subset returned.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)):</span>
@@ -354,8 +353,8 @@
 
         <span class="c1"># Copy the graph, conserving correct indexing</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="n">n</span><span class="p">}]</span>
-                     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arrays</span><span class="p">[</span><span class="s1">&#39;numbers&#39;</span><span class="p">])]</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="p">[[</span><span class="n">_</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="n">n</span><span class="p">}]</span>
+                     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">arrays</span><span class="p">[</span><span class="s1">&#39;numbers&#39;</span><span class="p">])]</span>
             <span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
 
             <span class="n">j</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
@@ -496,7 +495,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Fri, 01 Jun 2018 04:21:35.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

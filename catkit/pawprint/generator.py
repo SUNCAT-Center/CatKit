@@ -1,9 +1,10 @@
+from . import operations
+from .. import Gratoms
+from ..gen import utils
 import pkg_resources
 import json
 import numpy as np
 import ase
-from . import operations
-from ..gen import utils
 
 
 class Fingerprinter():
@@ -94,7 +95,11 @@ class Fingerprinter():
             method = None
             if np.all(atoms.pbc):
                 method = 'voronoi'
-            connectivity = get_connectivity(atoms, method=method)
+
+            if isinstance(atoms, Gratoms):
+                connectivity = atoms.connectivity
+            else:
+                connectivity = get_connectivity(atoms, method=method)
 
             for j, operation in enumerate(operation_list):
                 kwargs = {}

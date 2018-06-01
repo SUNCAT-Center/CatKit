@@ -43,6 +43,9 @@ class TestBuild(unittest.TestCase):
         atoms = bulk('Pd', cubic=True)
         slab = surface(atoms, size=(2, 2, 4), vacuum=10)
 
+        # Test orthogonalization search
+        slab = surface(atoms, size=(1, 4), vacuum=10)
+
     def test_molecule(self):
         """Test catkit.build.molecule generator."""
         images = molecule('H')
