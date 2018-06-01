@@ -1,8 +1,6 @@
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.pathways import ReactionNetwork
-from catkit.gen.api.rd_kit import plot_molecule
-from catkit.gen.api.rd_kit import get_uff_coordinates
 from ase.utils import formula_hill
 from ase.build import bulk
 import networkx as nx
@@ -106,7 +104,6 @@ def test_adsorption_examples():
 
     periodic = sites.get_periodic_sites()
     symmetric = sites.get_symmetric_sites()
-    print(periodic)
     np.testing.assert_allclose(symmetric, periodic)
 
     atoms = bulk('Pd', 'fcc', a=5, cubic=True)
@@ -137,17 +134,6 @@ def test_gas_phase_example():
         molecules = rn.load_molecules()
 
         assert (len(molecules) == 17)
-
-        for i, molecule in molecules.items():
-            plot_molecule(
-                molecule, file_name='./molecule-{}.png'.format(i))
-
-            molecule = get_uff_coordinates(molecule, steps=50)
-            rn.save_3d_structure(molecule)
-
-        images = rn.load_3d_structures()
-
-        assert (len(images) == 17)
 
         rn.path_search(reconfiguration=False, substitution=False)
         rn.plot_reaction_network(file_name='./reaction-network.png')
