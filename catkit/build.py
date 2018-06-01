@@ -11,7 +11,7 @@ def surface(
         elements,
         size,
         crystal='fcc',
-        index=(1, 1, 1),
+        miller=(1, 1, 1),
         fixed=0,
         vacuum=10,
         **kwargs):
@@ -27,8 +27,9 @@ def surface(
         Number of time to expand the x, y, and z primitive cell.
     crystal : str
         The bulk crystal structure to pass to the ase bulk builder.
-    index : list (3,) or (4,)
+    miller : list (3,) or (4,)
         The miller index to cleave the surface structure from. If 4 values
+        are used, 
     fixed : int
         Number of layers to constrain.
     vacuum : float
@@ -46,7 +47,7 @@ def surface(
 
     gen = SlabGenerator(
         atoms,
-        miller_index=index,
+        miller_index=miller,
         layers=size[-1],
         fixed=fixed,
         vacuum=vacuum)

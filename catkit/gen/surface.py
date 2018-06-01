@@ -409,9 +409,6 @@ class SlabGenerator(object):
         supercell = slab
 
         if isinstance(size, int):
-            if size == 1:
-                pass
-
             a = max(int(size / 2), 1) + size % 2
             T = np.mgrid[-a:a + 1, 0:a + 1].reshape(2, -1).T
 

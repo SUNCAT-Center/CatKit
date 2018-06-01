@@ -262,9 +262,9 @@ class AdsorptionSites():
         symmetry_match = self._symmetric_sites
 
         if symmetry_match is None:
-            symmetry = utils.get_symmetry(self.slab, tol=self.tol)
-            rotations = np.swapaxes(symmetry['rotations'], 1, 2)
-            translations = symmetry['translations']
+            rotations, translations = utils.get_symmetry(
+                self.slab, tol=self.tol)
+            rotations = np.swapaxes(rotations, 1, 2)
             affine = np.append(rotations, translations[:, None], axis=1)
 
             points = self.frac_coords
@@ -392,7 +392,7 @@ class AdsorptionSites():
         other = self.connectivity != 1
         dt = Delaunay(self.coordinates[:, :2][top])
 
-        fig = plt.figure(figsize=(6, 3.5), frameon=False)
+        fig = plt.figure(figsize=(6 * 2, 3.5 * 2), frameon=False)
         ax = fig.add_axes([0, 0, 1, 1])
 
         ax.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
@@ -402,7 +402,7 @@ class AdsorptionSites():
         ax.axis('off')
 
         if savefile:
-            plt.savefig(savefile)
+            plt.savefig(savefile, transparent=True)
         else:
             plt.show()
 
