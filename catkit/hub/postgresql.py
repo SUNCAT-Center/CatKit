@@ -1,6 +1,14 @@
-import psycopg2
 import os
 import sys
+import time
+import json
+import psycopg2
+from psycopg2.extras import execute_values
+import ase.db
+from ase.db.postgresql import PostgreSQLDatabase
+from pwgen import pwgen
+
+from .cathubsqlite import CathubSQLite
 
 try:
     from builtins import str as text
@@ -143,7 +151,7 @@ class CathubPostgreSQL:
         self.connection = self._connect()
         return self
 
-    def __exit__(self, exc_type):  # , exc_value, tb):
+    def __exit__(self, exc_type):
         if exc_type is None:
             self.connection.commit()
         else:
@@ -158,23 +166,27 @@ class CathubPostgreSQL:
 
         self.stdout.write("_initialize start\n")
 
-        set_schema = 'SET search_path = {0};'.format(self.schema)
+        set_schema = 'ALTER ROLE {0} SET search_path TO {0};'\
+                     .format(self.user, self.schema)
         cur.execute(set_schema)
+        con.commit()
 
         self.stdout.write(
             "_initialize set schema to {self.schema}\n".format(**locals()))
 
-        from ase.db.postgresql import PostgreSQLDatabase
         PostgreSQLDatabase()._initialize(con)
 
         cur.execute("""SELECT to_regclass('publication');""")
         if cur.fetchone()[0] is None:  # publication doesn't exist
+            self.stdout.write("_initialize create tables:\n")
             for init_command in init_commands:
                 self.stdout.write(init_command + '\n')
                 cur.execute(init_command)
+            self.stdout.write("_initialize create indexes:\n")
             for statement in index_statements:
                 self.stdout.write(statement + '\n')
                 cur.execute(statement)
+            self.stdout.write("_initialize create text search columns:\n")
             for statement in tsvector_statements:
                 self.stdout.write(statement + '\n')
                 cur.execute(statement)
@@ -183,7 +195,6 @@ class CathubPostgreSQL:
         return self
 
     def create_user(self, user):
-        from pwgen import pwgen
         con = self.connection or self._connect()
         cur = con.cursor()
 
@@ -192,8 +203,12 @@ class CathubPostgreSQL:
         password = pwgen(8)
         cur.execute(
             "CREATE USER {0} with PASSWORD '{1}';".format(user, password))
+        cur.execute('GRANT USAGE ON SCHEMA {0} TO {0};'.format(user))
         cur.execute(
-            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO {1};'.format(user))
+            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO {0};'.format(user))
+        cur.execute('GRANT USAGE ON SCHEMA {0} TO catroot;'.format(user))
+        cur.execute(
+            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO catroot;'.format(user))
         cur.execute('GRANT USAGE ON SCHEMA public TO {0};'.format(user))
         cur.execute(
             'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {0};'.format(user))
@@ -217,7 +232,8 @@ class CathubPostgreSQL:
 
         return self
 
-    def remove_user(self, user):
+    def delete_user(self, user):
+        """ Delete user and all data"""
         assert self.user == 'catroot'
         con = self.connection or self._connect()
         cur = con.cursor()
@@ -325,7 +341,6 @@ class CathubPostgreSQL:
         return id
 
     def update_publication(self, pub_dict):
-        import json
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -378,10 +393,46 @@ class CathubPostgreSQL:
 
         return count
 
-    def transfer(self, filename_sqlite, start_id=1, write_ase=True,
+    def truncate_schema(self):
+        """ Delete all data in schema. Only for test use!"""
+
+        assert not self.schema == 'public'
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+
+        cur.execute('DELETE FROM publication;')
+        cur.execute('TRUNCATE systems CASCADE;')
+
+        con.commit()
+        con.close()
+
+        return
+
+    def transfer(self, filename_sqlite, block_size=1000,
+                 start_block=0, write_ase=True,
                  write_publication=True, write_reaction=True,
-                 write_reaction_system=True, block_size=1000,
-                 start_block=0):
+                 write_reaction_system=True, check=False):
+        """ Transfer data from local sqlite3 .db file to the
+        catalysis-hub postgreSQL server
+
+        Parameters:
+        filename_sqlite: str
+            name of .db file
+        block_size: int (default 1000) 
+            Number of atomic structures and reactions to write together
+            in each block.
+        start_block: int (default 0)
+            Block to start with
+        write_ase: bool
+            whether or not to write atomic structures
+        write_publication: bool
+            whether or not to transfer publication table
+        write_reaction: bool
+            whether or not to transfer reaction table
+        write_reaction_system: bool
+            whether or not to write reaction_system table
+        """
 
         self.stdout.write('Starting transfer\n')
         con = self.connection or self._connect()
@@ -389,16 +440,6 @@ class CathubPostgreSQL:
         self.stdout.write('Finished initialization\n')
         cur = con.cursor()
         self.stdout.write('Got a cursor\n')
-
-        set_schema = 'SET search_path = {0};'.format(self.schema)
-        cur.execute(set_schema)
-
-        import os
-        import time
-        self.stdout.write('Imported os\n')
-
-        import ase.db
-        self.stdout.write('Imported ase.db\n')
         self.stdout.write('Building server_name\n')
         server_name = "postgres://{0}:{1}@{2}:5432/catalysishub".format(
             self.user, self.password, self.server)
@@ -407,7 +448,7 @@ class CathubPostgreSQL:
 
         nrows = 0
         if write_ase:
-            print('Transfering atomic structures')
+            self.stdout.write('Transfering atomic structures\n')
             db = ase.db.connect(filename_sqlite)
             n_structures = db.count()
             n_blocks = int(n_structures / block_size) + 1
@@ -415,17 +456,15 @@ class CathubPostgreSQL:
             for block_id in range(start_block, n_blocks):
                 i = block_id - start_block
                 t1 = time.time()
-                b0 = block_id * block_size + 1
+                b0 = block_id * block_size
                 b1 = (block_id + 1) * block_size + 1
-                # self.stdout.write(str(block_id) + ' ' +
-                #                  'from ' + str(b0) + ' to ' + str(b1) + '\n')
+
                 if block_id + 1 == n_blocks:
                     b1 = n_structures + 1
 
-                rows = list(db.select('{}<id<{}'.format(b0 - 1, b1)))
+                rows = list(db.select('{}<id<{}'.format(b0, b1)))
 
                 with ase.db.connect(server_name, type='postgresql') as db2:
-
                     db2.write(rows)
 
                 nrows += len(rows)
@@ -434,23 +473,22 @@ class CathubPostgreSQL:
                 t_av = (t_av * i + dt) / (i + 1)
 
                 self.stdout.write(
-                    '  Finnished Block {0} / {1} in {2} sec'
+                    '  Finnished Block {0} / {1} in {2} sec\n'
                     .format(block_id + 1, n_blocks, dt))
                 self.stdout.write(
-                    '    Completed transfer of {0} atomic structures.'
+                    '    Completed transfer of {0} atomic structures\n'
                     .format(nrows))
-                self.stdout.write('    Estimated time left: {0} sec'.format(
-                    t_av * (n_blocks - block_id)))
+                self.stdout.write('    Estimated time left: {0} sec\n'.format(
+                    t_av * (n_blocks - block_id - 1)))
 
-        from catkit.hub.cathubsqlite import CathubSQLite
         db = CathubSQLite(filename_sqlite)
         con_lite = db._connect()
         cur_lite = con_lite.cursor()
 
-        # write publication
         Npub = 0
         Npubstruc = 0
         if write_publication:
+            self.stdout.write('Transfering publications\n')
             try:
                 npub = db.get_last_pub_id(cur_lite)
             except BaseException:
@@ -465,84 +503,130 @@ class CathubPostgreSQL:
 
             # Publication structures connection
             cur_lite.execute("""SELECT * from publication_system;""")
+            publication_system_values = []
             rows = cur_lite.fetchall()
             for row in rows:
                 Npubstruc += 1
-                values = row[:]
-                key_str, value_str = get_key_value_str(
+                values = list(row)
+                key_str, value_list = get_key_value_list(
                     values, table='publication_system')
 
-                set_schema = 'SET search_path = {0};'.format(self.schema)
-                cur.execute(set_schema)
-                print("[SET SCHEMA] {set_schema}".format(**locals()))
+                publication_system_values += [tuple(value_list)]
 
-                insert_command = """INSERT INTO publication_system ({0})
-                VALUES ({1}) ON CONFLICT DO NOTHING;"""\
-                    .format(key_str, value_str)
+            insert_command = """INSERT INTO publication_system ({0})
+            VALUES %s ON CONFLICT DO NOTHING;"""\
+                .format(key_str)
 
-                cur.execute(insert_command)
-                # self.write(values, table='publication_system')
+            execute_values(cur=cur, sql=insert_command,
+                           argslist=publication_system_values)
             con.commit()
+            self.stdout.write('  Completed transfer of publications\n')
 
         Ncat = 0
         Ncatstruc = 0
 
         if write_reaction:
-            n = db.get_last_id(cur_lite)
-            select_ase = """SELECT * from reaction_system where id={};"""
-            for id_lite in range(start_id, n + 1):
-                row = db.read(id_lite)
-                if len(row) == 0:
-                    continue
-                values = row[0]
+            self.stdout.write('Transfering reactions')
+            reaction_values = []
+            reaction_system_values = []
+            n_react = db.get_last_id(cur_lite)
 
-                id = self.check(values[13], values[1], values[6], values[7],
-                                values[8], strict=True)
-                update_rs = False
+            n_blocks = int(n_react / block_size) + 1
+            t_av = 0
+            for block_id in range(start_block, n_blocks):
+                Ncat0 = Ncat
+                Ncatstruc0 = Ncatstruc
 
-                if id is not None:
-                    id = self.update(id, values)
-                    self.stdout.write(
-                        'Updated reaction db with row id = {}\n'.format(id))
-                    update_rs = True
-                else:
-                    Ncat += 1
-                    id = self.write(values)
-                    self.stdout.write(
-                        'Written to reaction db row id = {0}\n'.format(id))
+                i = block_id - start_block
+                t1 = time.time()
+                b0 = block_id * block_size + 1
+                b1 = (block_id + 1) * block_size + 1
+                if block_id + 1 == n_blocks:
+                    b1 = n_react + 1
 
-                cur_lite.execute(select_ase.format(id_lite))
-                rows = cur_lite.fetchall()
-                if write_reaction_system:
-                    if update_rs:
-                        cur.execute("""Delete from reaction_system231
-                        where reaction_id={0}""".format(id))
-                    for row in rows:
-                        Ncatstruc += 1
-                        values = list(row)
-                        if len(values) == 3:
-                            values.insert(1, None)
+                temp_id = 0
+                for id_lite in range(b0, b1):
+                    row = db.read(id_lite)
+                    if len(row) == 0:
+                        continue
+                    values = row[0]
 
-                        values[3] = id
+                    # id = self.check(values[13], values[1], values[6], values[7],
+                    #                values[8], strict=True)
+                    id = None
+                    update_rs = False
+                    if id is not None:
+                        id = self.update(id, values)
+                        self.stdout.write(
+                            'Updated reaction db with row id = {}\n'.format(id))
+                        update_rs = True
+                    else:
+                        Ncat += 1
+                        key_str, value_list =\
+                            get_key_value_list(values)
+                        value_list[0] = 'DEFAULT'
+                        reaction_values += [tuple(value_list)]
 
-                        key_str, value_str = \
-                            get_key_value_str(values, table='reaction_system')
+                        cur_lite.execute("SELECT * from reaction_system where id={};"
+                                         .format(id_lite))
+                        rows = cur_lite.fetchall()
+                        if write_reaction_system:
+                            if update_rs:
+                                cur.execute("""Delete from reaction_system
+                                where id={0}""".format(id))
+                            for row in rows:
+                                Ncatstruc += 1
+                                values = list(row)
+                                if len(values) == 3:
+                                    values.insert(1, None)
 
-                        set_schema = 'SET search_path = {0};'.format(
-                            self.schema)
-                        cur.execute(set_schema)
-                        # print("[SET SCHEMA] {set_schema}".format(**locals()))
+                                values[3] = temp_id
 
-                        insert_command = """INSERT INTO reaction_system
-                        ({0}) VALUES ({1}) ON CONFLICT DO NOTHING;"""\
-                            .format(key_str, value_str)
+                                key_str2, value_list = \
+                                    get_key_value_list(
+                                        values, table='reaction_system')
 
-                        # print(
-                        #     "[INSERT COMMAND] {insert_command}"
-                        #     .format(**locals()))
-                        cur.execute(insert_command)
+                            reaction_system_values += [value_list]
+                    temp_id += 1
 
-                con.commit()  # Commit reaction_system for each row
+                #set_schema = 'SET search_path = {0};'.format(self.schema)
+                # cur.execute(set_schema)
+                q = 'DEFAULT' + ', ' + ', '.join('?' * 13)
+                q = '({})'.format(q.replace('?', '%s'))
+
+                insert_command = """INSERT INTO reaction
+                ({0}) VALUES %s ON CONFLICT DO NOTHING RETURNING ID;""".format(key_str)
+
+                execute_values(cur=cur, sql=insert_command, argslist=reaction_values,
+                               template=q)
+
+                ids = cur.fetchall()
+
+                for reacsys in reaction_system_values:
+                    reacsys[3] = ids[reacsys[3]][0]  # set real id
+                    reacsys = tuple(reacsys)
+
+                insert_command = """INSERT INTO reaction_system
+                ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str2)
+
+                execute_values(cur=cur, sql=insert_command,
+                               argslist=reaction_system_values)
+                con.commit()
+
+                t2 = time.time()
+                dt = t2 - t1
+                t_av = (t_av * i + dt) / (i + 1)
+
+                self.stdout.write(
+                    '  Finnished Block {0} / {1} in {2} sec \n'
+                    .format(block_id + 1, n_blocks, dt))
+                self.stdout.write(
+                    '    Completed transfer of {0} reactions. \n'
+                    .format(Ncat - Ncat0))
+                self.stdout.write('    Estimated time left: {0} sec \n'.format(
+                    t_av * (n_blocks - block_id - 1)))
+
+            self.stdout.write('  Completed transfer of reactions\n')
 
         for statement in tsvector_update:
             cur.execute(statement)
@@ -642,3 +726,21 @@ def get_key_value_str(values, table='reaction'):
         # print(value_str)
 
     return key_str[table], value_str
+
+
+def get_key_value_list(values, table='reaction'):
+    key_str = {'reaction': """id, chemical_composition, surface_composition,
+    facet, sites, coverages, reactants, products, reaction_energy,
+    activation_energy, dft_code, dft_functional, username, pub_id""",
+               'publication': """pub_id, title, authors, journal,
+               volume, number, pages, year, publisher, doi, tags""",
+               'reaction_system': """name, energy_correction, ase_id, id""",
+               'publication_system': """ase_id, pub_id"""}
+
+    start_index = 0
+    if table == 'publication_system' or table == 'reaction_system':
+        start_index = -1
+    value_list = []
+    for v in values[start_index + 1:]:
+        value_list += [v]
+    return key_str[table], value_list
