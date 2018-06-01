@@ -62,13 +62,6 @@ def symbols(atoms):
     return ''.join(symbols)
 
 
-def read_ase(structures, dirname, names):
-    print("Dirname {dirname}: Names {names}".format(
-        dirname=dirname,
-        names=names,
-    ))
-
-
 def collect_structures(foldername, options):
     structures = []
     if options.verbose:
@@ -93,7 +86,15 @@ def collect_structures(foldername, options):
                     structure.info['filename'] = posix_filename
                     structure.info['filetype'] = ase.io.formats.filetype(
                         posix_filename)
-                    structures.append(structure)
+                    try:
+                        structure.get_potential_energy()
+                        # ensure that the structure has an energy
+                        structures.append(structure)
+                    except:
+                        print("Did not add {posix_filename} since it has no energy"
+                              .format(
+                                  posix_filename=posix_filename,
+                                  ))
                     print(structure)
                 except StopIteration:
                     print("Warning: StopIteration {posix_filename} hit."
@@ -439,6 +440,11 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
+    if options.json:
+        out_format = 'json'
+    else:
+        out_format = 'traj'
+
     for key in structures:
         if isinstance(structures[key], dict):
             d = Path(root).joinpath(key)
@@ -453,9 +459,9 @@ def create_folders(options, structures, root=''):
             create_folders(options, structures[key], root=d)
         else:
             ase.io.write(
-                str(Path(root).joinpath(key + '.traj')),
+                str(Path(root).joinpath(key + '.' + out_format)),
                 structures[key],
-                format='traj',
+                format=out_format,
             )
 
 
