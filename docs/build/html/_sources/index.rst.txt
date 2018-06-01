@@ -17,6 +17,11 @@ Contents
 ========
 
 .. toctree::
+   :hidden:
+
+   About <self>
+
+.. toctree::
 
     frontmatter/catkit
     frontmatter/catgen

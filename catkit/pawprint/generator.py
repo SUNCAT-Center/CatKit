@@ -33,7 +33,7 @@ class Fingerprinter():
 
         if data is None:
             path = pkg_resources.resource_filename(
-                'catogm', 'data/properties.json')
+                'catkit', 'data/properties.json')
 
             with open(path, 'r') as f:
                 data = json.load(f)
