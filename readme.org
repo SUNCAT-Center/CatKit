@@ -42,10 +42,17 @@ Alternatively, a version with the most recent commits can be install through git
 git clone https://github.com/SUNCAT-Center/CatKit.git catkit
 #+END_SRC
 
-Then, add =~/catkit= to your =PYTHONPATH= by adding the following line to your =~/.bashrc= file.
+Then, add =~/catkit/bin= and =~/catkit/= to your =PATH= and =PYTHONPATH= environment variables by adding the following line to your =~/.bashrc= file.
 
 #+BEGIN_SRC sh
 export PYTHONPATH=~/catkit:$PYTHONPATH
+export PATH=~/catkit/bin:PATH
+#+END_SRC
+
+And install the package:
+#+BEGIN_SRC sh
+cd catkit/
+python setup.py install
 #+END_SRC
 
 Or, one can use pip to install from the master branch directly:
