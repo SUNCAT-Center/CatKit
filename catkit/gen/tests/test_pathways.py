@@ -1,5 +1,3 @@
-from catkit.gen.api.rd_kit import plot_molecule
-from catkit.gen.api.rd_kit import get_uff_coordinates
 from catkit.gen.pathways import ReactionNetwork
 import os
 
@@ -22,13 +20,6 @@ def test_molecule_generation():
         pathways = rn.load_pathways()
         assert (len(pathways) == 27)
 
-        for i, molecule in molecules.items():
-            plot_molecule(molecule, file_name='temp/molecule-{}.png'.format(i))
-
-            molecule = get_uff_coordinates(molecule, steps=50)
-            rn.save_3d_structure(molecule)
-
-        rn.load_3d_structures()
         rn.plot_reaction_network(file_name='temp/reaction-network.png')
 
     os.unlink(db_name)
@@ -110,3 +101,4 @@ def test_molecule_generation():
 
 if __name__ == "__main__":
     test_molecule_generation()
+
