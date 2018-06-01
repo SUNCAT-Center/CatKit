@@ -7,9 +7,7 @@ import numpy as np
 from numpy.linalg import norm, solve
 import networkx.algorithms.isomorphism as iso
 import networkx as nx
-import contextlib
 import spglib
-import os
 import re
 
 
@@ -69,26 +67,6 @@ def trilaterate(centers, r):
     return intersection
 
 
-@contextlib.contextmanager
-def cd(path):
-    """Does path management: if the path doesn't exists, create it
-    otherwise, move into it until the indentation is broken.
-
-    Parameters
-    ----------
-    path : str
-        Directory path to create and change into.
-    """
-    cwd = os.getcwd()
-    try:
-        if not os.path.exists(path):
-            os.makedirs(path)
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(cwd)
-
-
 def rmean(x, N=5):
     """Calculate the running mean of array x for N instances.
 
@@ -99,8 +77,8 @@ def rmean(x, N=5):
     N : int
         Number of values to take an average with.
 
-    Returns:
-    --------
+    Returns
+    -------
     rmean : ndarray (n + 1,)
         Mean value of the running average.
     """
@@ -532,9 +510,7 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
 
 
 def parse_slice(slice_name):
-    """Return a correctly parsed slice from input of
-    varying types.
-    """
+    """Return a correctly parsed slice from input of varying types."""
     if isinstance(slice_name, (slice)):
         _slice = slice_name
 

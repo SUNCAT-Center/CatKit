@@ -134,16 +134,19 @@ def write_to_db(path, db_name='master.db', keys={}, traj=False, pdos=False):
 
 @contextlib.contextmanager
 def cd(path):
-    """ Does path management: if the path doesn't exists, create it
-    otherwise, move into it.
+    """Does path management: if the path doesn't exists, create it
+    otherwise, move into it until the indentation is broken.
 
-    This is a context manager function, so it should be used as a with:
-    e.x.
+    e.g.
 
     with cd('the/path/is/real'):
         'do things in the new path'
-    """
 
+    Parameters
+    ----------
+    path : str
+        Directory path to create and change into.
+    """
     cwd = os.getcwd()
     try:
         if not os.path.exists(path):

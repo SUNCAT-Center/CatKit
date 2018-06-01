@@ -122,6 +122,7 @@ Connectivity matrix:
 
 Are isomorphs: True
 :END:
+
 * PawPrint
 The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in [[./pawprint/operations.py]].
 

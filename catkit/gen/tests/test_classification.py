@@ -6,7 +6,7 @@ from catkit.build import molecule
 class TestAnalysis(unittest.TestCase):
     """Test features of the analysis module."""
 
-    def test_classifier():
+    def test_classifier(self):
         """Test identification of adsorbate atoms and slab atoms."""
         atoms = molecule('C2H2')[0]
 

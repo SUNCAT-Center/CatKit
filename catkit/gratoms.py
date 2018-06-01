@@ -169,7 +169,7 @@ class Gratoms(Atoms):
 
         """
 
-        if isinstance(i, int):
+        if isinstance(i, (int, np.int64)):
             natoms = len(self)
             if i < -natoms or i >= natoms:
                 raise IndexError('Index out of range.')
@@ -199,15 +199,15 @@ class Gratoms(Atoms):
 
         # Copy the graph, conserving correct indexing
         if self.nodes:
-            j = np.argsort(i)
             nodes = [[i, {'number': n}]
                      for i, n in enumerate(self.arrays['numbers'])]
             atoms.graph.add_nodes_from(nodes)
 
+            j = i.tolist()
             for u, v in self.graph.edges():
                 if u not in i or v not in i:
                     continue
-                atoms.graph.add_edge(j[u], j[v])
+                atoms.graph.add_edge(j.index(u), j.index(v))
 
         atoms.constraints = conadd
         return atoms

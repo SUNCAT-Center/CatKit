@@ -1,6 +1,7 @@
 #+Title: CatGen: Catalysis Generator
 #+Author:Jacob Boes
 #+OPTIONS: toc:nil
+#+SETUPFILE: ../static/theme-readtheorg.setup
 
 Currently, the primary function of CatGen is for automated enumeration of various systems of atoms and other catalytically relevant properties. This is performed through symmetries which exist in these chemical systems. These symmetries take the form of translations and rotations in bulk structures where well defined lattices exist. For gas-phase, symmetries are defined through bonds formation rules.
 
@@ -27,21 +28,15 @@ The surface module is designed to leverage information about the bulk structure 
 - [X] Enumerate surface adsorption sites
 
 *** Slab enumeration:
-Example surface generation for the 2 terminations of a fcc(2, 1, 1) surface construction of an L1_{0} CuPd_{3} cubic alloy.
+Example surface generation for the 2 terminations of a fcc(211) surface construction of an L1_{0} CuPd_{3} cubic alloy.
 
-#+CAPTION: First termination of 9 layer slab of CuPd_{3}.
-[[../../static/CuPd3-term-0.png]] [[../../static/CuPd3-term-0-top.png]]
-
-#+CAPTION: Second termination of 9 layer slab of CuPd_{3}.
-[[../../static/CuPd3-term-1.png]] [[../../static/CuPd3-term-1-top.png]]
-
-#+BEGIN_SRC python :results silent :exports code
+#+BEGIN_SRC python :results silent :exports none
 from catkit.gen.surface import SlabGenerator
 from ase.io import write
 from ase.build import bulk
 
 # Make a test slab
-atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms = bulk('Pd', 'fcc', cubic=True)
 atoms[3].symbol = 'Cu'
 
 gen = SlabGenerator(
@@ -56,24 +51,104 @@ for i, t in enumerate(terminations):
     slab = gen.get_slab(iterm=i)
 
     # Create side and top-down visuals
-    img_name = '../../static/CuPd3-term-{}.pov'.format(i)
+    img_name = '../static/CuPd3-term-{}.pov'.format(i)
     write(
         img_name,
         slab,
         show_unit_cell=2,
-        rotation='-90x')
+        rotation='-90x',
+        run_povray=True,
+    )
 
     write(
         img_name.replace('.pov', '-top.pov'),
         slab,
-        show_unit_cell=2)
+        show_unit_cell=2,
+        run_povray=True
+    )
+#+END_SRC
+
+#+CAPTION: First termination of 9 layer slab of CuPd_{3}.
+[[../static/CuPd3-term-0.png]] [[../static/CuPd3-term-0-top.png]]
+
+#+CAPTION: Second termination of 9 layer slab of CuPd_{3}.
+[[../static/CuPd3-term-1.png]] [[../static/CuPd3-term-1-top.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase.visualize import view
+
+# Make a test slab
+atoms = bulk('Pd', 'fcc', cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=(2, 1, 1),
+    layers=9,
+    fixed=5,
+    vacuum=4)
+
+terminations = gen.get_unique_terminations()
+
+images = []
+for i, t in enumerate(terminations):
+    images += [gen.get_slab(iterm=i)]
+
+view(images)
+#+END_SRC
+
+For convenience, the =catkit.build= module has a surface constructor which takes any arguments for ASE's bulk generators as well as the SlabGenerator.
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.build import surface
+from ase.build import bulk
+
+# Make a test slab
+atoms = bulk('Pd', 'fcc', cubic=True)
+atoms[3].symbol = 'Cu'
+
+slab = surface(atoms,
+               size=(1, 1, 9), miller=(2, 1, 1),
+               vacuum=9, fixed=5)
+
+slab.edit()
 #+END_SRC
 
 *** Slab graph and surface atoms:
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-#+CAPTION: Slab of hcp Pd with (1, 1, 0) miller index. Top surface atoms have been changed to Au. 
-[[../../static/Pd-surface-atoms.png]]
+#+BEGIN_SRC python  :results silent :exports none
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
+bulk = bulk('Pd', 'hcp', a=3, cubic=True)
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(1, 1, 0),
+    layers=6,
+    vacuum=4)
+
+atoms = gen.get_slab()
+
+for i in atoms.get_surface_atoms():
+    atoms[i].symbol = 'Au'
+
+write(
+    '../static/Pd-surface-atoms.pov',
+    atoms,
+    show_unit_cell=2,
+    rotation='-90x',
+    run_povray=True,
+)
+#+END_SRC
+
+#+CAPTION: Slab of hcp Pd with (110) miller index. Top surface atoms have been changed to Au. 
+[[../static/Pd-surface-atoms.png]]
 
 #+BEGIN_SRC python  :results output org drawer :exports both
 from catkit.gen.surface import SlabGenerator
@@ -87,35 +162,25 @@ gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 0),
     layers=6,
-    fixed=2,
     vacuum=4)
 
 atoms = gen.get_slab()
-con_matrix = gen.get_graph_from_bulk(atoms, attach=True)
-print(con_matrix)
+print(atoms.connectivity)
 
-# We can identify both top and bottom sites.
-top, bottom = gen.get_voronoi_surface_atoms(atoms)
-atoms.set_surface_atoms(top)
-
-for i in top:
+for i in atoms.get_surface_atoms():
     atoms[i].symbol = 'Au'
 
-write(
-    '../../static/Pd-surface-atoms.pov',
-    atoms,
-    show_unit_cell=2,
-    rotation='-90x')
+atoms.edit()
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-[[0 2 2 2 1 0 0 0 0 0 0 0]
- [2 0 2 2 0 1 0 0 0 0 0 0]
+[[0 2 2 2 0 1 0 0 0 0 0 0]
+ [2 0 2 2 1 0 0 0 0 0 0 0]
  [2 2 0 2 2 2 1 0 0 0 0 0]
  [2 2 2 0 2 2 0 1 0 0 0 0]
- [1 0 2 2 0 2 2 2 1 0 0 0]
- [0 1 2 2 2 0 2 2 0 1 0 0]
+ [0 1 2 2 0 2 2 2 1 0 0 0]
+ [1 0 2 2 2 0 2 2 0 1 0 0]
  [0 0 1 0 2 2 0 2 2 2 1 0]
  [0 0 0 1 2 2 2 0 2 2 0 1]
  [0 0 0 0 1 0 2 2 0 2 2 2]
@@ -124,15 +189,12 @@ write(
  [0 0 0 0 0 0 0 1 2 2 2 0]]
 :END:
 
-By using the ``attach'' flag this connectivity matrix has already been converted into a NetworkX graph and attached to the Gratoms object for future use.
+CatGen automatically attaches the connectivity matrix into a NetworkX graph and stores it in the Gratoms object for future use.
 
 *** Simple site enumeration:
 With a generated slab, we can also produce the unique adsorption sites which would be present on a given surface.
 
-#+CAPTION: Symmetry unique sites of CuPd_{3} (111). Green denote 3-fold hollows, white are bridge, and red are top sites.
-[[../../static/CuPd3_111-sites.png]]
-
-#+BEGIN_SRC python :results silent :exports code
+#+BEGIN_SRC python :results silent :exports none
 from catkit.gen.surface import SlabGenerator
 from ase.build import bulk
 from ase.io import write
@@ -145,10 +207,9 @@ gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 1),
     layers=3,
-    fixed=2,
     vacuum=10)
 
-atoms = gen.get_slab(primitive=True)
+atoms = gen.get_slab()
 coordinates, connectivity = gen.adsorption_sites(atoms)
 
 atm = {1: 'X', 2: 'He', 3: 'F'}
@@ -157,9 +218,39 @@ for i, c in enumerate(coordinates):
     atoms += Atom(atm[typ], c + [0, 0, 2])
 
 write(
-    '../../static/CuPd3_111-sites.pov',
+    '../static/CuPd3_111-sites.pov',
     atoms,
-    show_unit_cell=2)
+    show_unit_cell=2,
+    run_povray=True,
+)
+#+END_SRC
+
+#+CAPTION: Symmetry unique sites of CuPd_{3} (111). Green denote 3-fold hollows, white are bridge, and red are top sites.
+[[../static/CuPd3_111-sites.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase import Atom
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(1, 1, 1),
+    layers=3,
+    vacuum=10)
+
+atoms = gen.get_slab()
+coordinates, connectivity = gen.adsorption_sites(atoms)
+
+atm = {1: 'X', 2: 'He', 3: 'F'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
+
+atoms.edit()
 #+END_SRC
 
 ** Adsorption module
@@ -173,14 +264,35 @@ Using the =AdsorptionSites= class form the adsorption module provides more power
 - [X] Connectivity between adsorption sites
 
 *** ``Manual'' Adsorption site enumeration and visualization:
-Adsorption site enumeration in Catkit.Gen is solely dependent upon surface atom identification. This can be performed automatically using =catkit.gen.surface.SlabGenerator=, however, this function relies upon bulk properties which are not always available.
+Adsorption site enumeration in CatGen is solely dependent upon surface atom identification. This is performed automatically using =catkit.gen.surface.SlabGenerator= or =catkit.build.surface=, however, this function relies upon bulk properties which are not always available.
 
-Here, we show how the surface sites can be assigned manually which is often convenient enough. Other means of surface site identification will be added in a future release.
+Here, we show how the surface sites can be assigned manually which is often convenient enough.
 
 Surface atoms are used to define top sites (green), which are then used to define remaining sites (red) via Delaunay triangulation symmetries.
 
+#+BEGIN_SRC python :results silent :exports none
+from catkit.gen.adsorption import AdsorptionSites
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(1, 1, 1),
+    layers=3,
+    vacuum=4)
+
+atoms = gen.get_slab()
+atoms.set_surface_atoms([8, 9, 10, 11])
+
+sites = AdsorptionSites(atoms)
+sites.plot('../static/Pd3Cu-adsorption-sites.png')
+#+END_SRC
+
 #+CAPTION: Delaunay triangulation of surface atoms for fcc(111) structure.
-[[../../static/Pd3Cu-adsorption-sites.png]]
+[[../static/Pd3Cu-adsorption-sites.png]]
 
 #+BEGIN_SRC python :results silent :exports code
 from catkit.gen.adsorption import AdsorptionSites
@@ -196,22 +308,57 @@ gen = SlabGenerator(
     layers=3,
     vacuum=4)
 
-atoms = gen.get_slab(primitive=True)
+atoms = gen.get_slab()
 atoms.set_surface_atoms([8, 9, 10, 11])
 
 sites = AdsorptionSites(atoms)
-sites.plot('../../static/Pd3Cu-adsorption-sites.png')
+sites.plot('./Pd3Cu-adsorption-sites.png')
 #+END_SRC
 
 *** Extended site enumeration:
-For more complex adsorption enumeration, we often require more detailed information 
+For more complex adsorption enumeration, we often require more detailed information.
 
-The =AdsorptionSite= class also produces an expanded unit cell which is useful for operations which require observation of periodic boundary conditions. This extended unit cell can be accessed by toggling the ``screen'' argument.
+The =AdsorptionSite= class also produces an expanded unit cell which is useful for operations which require observation of periodic boundary conditions. This extended unit cell can be accessed by toggling the =screen= argument.
 
-All possible adsorption sites of of CuPd_{3} (3, 2, 1). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
+All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
 
-#+CAPTION: Delaunay triangulation of surface atoms for fcc(111) structure.
-[[../../static/CuPd3_321-sites.png]]
+#+BEGIN_SRC python :results silent :exports none
+from catkit.gen.adsorption import AdsorptionSites
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(3, 2, 1),
+    layers=13,
+    vacuum=5)
+
+atoms = gen.get_slab(size=1)
+
+sites = AdsorptionSites(atoms)
+coordinates = sites.get_coordinates()
+connectivity = sites.get_connectivity()
+
+atm = {1: 'X', 2: 'He', 3: 'F', 4: 'N'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
+
+write(
+    '../static/CuPd3_321-sites.pov',
+    atoms,
+    show_unit_cell=2,
+    run_povray=True,
+)
+#+END_SRC
+
+#+CAPTION: Unique adsorption site enumeration for fcc(321) alloy.
+[[../static/CuPd3_321-sites.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports code
 from catkit.gen.adsorption import AdsorptionSites
@@ -229,10 +376,8 @@ gen = SlabGenerator(
     layers=13,
     vacuum=5)
 
-atoms = gen.get_slab(primitive=True)
+atoms = gen.get_slab(size=1)
 
-top, _ = gen.get_voronoi_surface_atoms(atoms)
-atoms.set_surface_atoms(top)
 sites = AdsorptionSites(atoms)
 
 # Positon of each site
@@ -260,41 +405,38 @@ for i, c in enumerate(coordinates):
     typ = connectivity[i]
     atoms += Atom(atm[typ], c + [0, 0, 2])
 
-write(
-    '../../static/CuPd3_321-sites.pov',
-    atoms,
-    show_unit_cell=2)
+atoms.edit()
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
 Coordinates:
- [[ 8.94427191  3.58568583 10.34522484]
- [11.18033989  5.97614305 11.68153105]
- [ 0.55901699  1.34463219 12.0156076 ]
- [10.62132289  7.61958238 12.0156076 ]
- [ 3.91311896  3.43628225 12.0156076 ]
- [ 1.67705098  5.52793232 12.0156076 ]
- [ 8.94427191  8.06779311 11.68153105]
- [ 9.5032889   0.44821073 12.6837607 ]
- [11.55301788  7.86858834 12.34968415]
- [ 3.35410197  7.07176927 11.90424875]
- [ 9.31694991  5.47813113 11.01337794]
- [10.0623059   1.79284291 11.68153105]] 
+ [[-9.69352122e-16  2.98807152e+00  1.03452248e+01]
+ [ 2.23606798e+00  5.97614305e-01  1.16815310e+01]
+ [ 5.59016994e-01  6.12554662e+00  1.26837607e+01]
+ [ 8.94427191e+00  6.87256450e+00  1.16815310e+01]
+ [ 1.11803399e+00  7.76898596e+00  1.23496842e+01]
+ [ 2.79508497e+00  5.22912517e+00  1.20156076e+01]
+ [ 5.03115295e+00  4.33270371e+00  1.13474545e+01]
+ [ 7.26722093e+00  1.94224649e+00  1.26837607e+01]
+ [ 6.33552594e+00  6.67335974e+00  1.10133779e+01]
+ [ 1.86338998e+00  2.49005960e+00  1.10133779e+01]
+ [ 8.57159391e+00  4.28290252e+00  1.23496842e+01]
+ [ 7.82623792e+00  5.97614305e-01  1.16815310e+01]] 
 
 Connectivity:
  [1 1 2 2 2 2 2 2 3 3 3 4] 
 
 Topology:
- [array([16]) array([21]) array([18, 24]) array([21, 22]) array([20, 23])
- array([21, 23]) array([19, 22]) array([22, 24]) array([21, 24, 22])
- array([24, 23, 17]) array([21, 19, 16]) array([16, 24, 22, 18])] 
+ [array([16]) array([21]) array([23, 25]) array([18, 23]) array([25, 21])
+ array([19, 25]) array([19, 20]) array([22, 24]) array([20, 18, 17])
+ array([21, 19, 16]) array([20, 24, 23]) array([17, 24, 18, 22])] 
 
 Sites by periodicity:
- [ 40  45 168 206 249 254 284 302 358 388 410 449] 
+ [ 40  45 203 242 250 282 287 294 389 409 415 451] 
 
 Sites by symmetry:
- [ 40  45 168 206 249 254 284 302 358 388 410 449]
+ [ 40  45 203 242 250 282 287 294 389 409 415 451]
 :END:
 
 When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
@@ -304,14 +446,11 @@ In this case there are no symmetrically reducible sites, so =get_symmetric_sites
 NOTE: The indices of the periodic and symmetry site functions are in reference to the extended unit cell.
 
 *** Adsorption vectors
-The most commonly studied miller indices, such as fcc(1, 1, 1), produce a flat surface. This means the most favorable angle of adsorption will always be perpendicular to the surface. This is not always the case for higher miller indices. 
+The most commonly studied miller indices, such as fcc(111), produce a flat surface. This means the most favorable angle of adsorption will always be perpendicular to the surface. This is not always the case for higher miller indices. 
 
-Catkit.Gen defines the most favorable vector for adsorption as the one which is furthest from all neighboring surface atoms. This vector is important for the generation of sensible 3D structures from graph enumerations. This is particularly true for adsorbates with multiple atoms.
+CatGen defines the most favorable vector for adsorption as the one which is furthest from all neighboring surface atoms. This vector is important for the generation of sensible 3D structures from graph enumerations. This is particularly true for adsorbates with multiple atoms.
 
-#+CAPTION: Illustration of adsorption vectors (red dots) on a CuPd_{3} (2, 1, 1) surface.
-[[../../static/adsorption-vectors.png]]
-
-#+BEGIN_SRC python :results silent :exports code
+#+BEGIN_SRC python :results silent :exports none
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.surface import SlabGenerator
 from ase.build import bulk
@@ -328,10 +467,7 @@ gen = SlabGenerator(
     layers=10,
     vacuum=5)
 
-atoms = gen.get_slab(primitive=True)
-
-top, _ = gen.get_voronoi_surface_atoms(atoms, attach_graph=False)
-atoms.set_surface_atoms(top)
+atoms = gen.get_slab()
 sites = AdsorptionSites(atoms)
 
 coordinates = sites.get_coordinates()
@@ -344,16 +480,52 @@ for i, c in enumerate(coordinates):
 
 atoms.wrap()
 write(
-    '../../static/adsorption-vectors.pov',
-    atoms * (1, 2, 1),
+    '../static/adsorption-vectors.pov',
+    atoms * (2, 2, 1),
     show_unit_cell=2,
-    rotation='-90x, 90y, 20z')
+    rotation='90x, -40y, -160z',
+    run_povray=True
+)
+#+END_SRC
+
+#+CAPTION: Illustration of adsorption vectors (red dots) on a CuPd_{3} (211) surface.
+[[../static/adsorption-vectors.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.gen.adsorption import AdsorptionSites
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase import Atom
+import numpy as np
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(2, 1, 1),
+    layers=10,
+    vacuum=5)
+
+atoms = gen.get_slab()
+sites = AdsorptionSites(atoms)
+
+coordinates = sites.get_coordinates()
+vectors = sites.get_adsorption_vectors()
+
+heights = np.arange(0, 2, 0.25)
+for i, c in enumerate(coordinates):
+    for h in heights:
+        atoms += Atom('X', c + vectors[i] * h)
+
+atoms.wrap()
+atoms.edit()
 #+END_SRC
 
 *** Adsorption structure builder
-Creating good initial guesses for 3D structures can be tedious to perform by hand, even small molecules. The =Builder= module in the adsorption package seeks to help automate this task.
+Creating good initial guesses for 3D structures can be tedious to perform by hand, even for small molecules. The =Builder= module in the adsorption package seeks to help automate this task.
 
-The =Builder= module currently takes two Gratoms objects as input since graph information is required. 
+The =Builder= module currently takes Gratoms objects as input _only_ since graph information is required. 
 
 #+BEGIN_SRC python :results output org drawer :exports both
 from catkit.gen.surface import SlabGenerator
@@ -366,16 +538,12 @@ atoms[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     atoms,
-    miller_index=[1, 1, 1],
+    miller_index=(1, 1, 1),
     layers=4,
     fixed=2,
     vacuum=10)
 
 slab = gen.get_slab()
-
-# Use the slab generator to attach a graph in this step
-surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
-slab.set_surface_atoms(surface_sites)
 
 builder = Builder(slab)
 print(builder)
@@ -394,11 +562,8 @@ When a single atom of the molecule is considered bonded to the surface, the buil
 
 In this example, the use of =-1= as a tag on the adsorbate is used to indicate it is bonded to the slab.
 
-#+CAPTION: Builder for a CH_{3} on a unique top site of a CuPd_{3} (1, 1, 1) surface.
-[[../../static/CH3-ads.png]] [[../../static/CH3-ads-top.png]]
-
-#+BEGIN_SRC python :results silent :exports code
-from catkit.gen.molecules import get_topologies
+#+BEGIN_SRC python :results silent :exports none
+from catkit.build import molecule
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import Builder
 from ase.build import bulk
@@ -410,31 +575,62 @@ atoms[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     atoms,
-    miller_index=[1, 1, 1],
+    miller_index=(1, 1, 1),
     layers=4,
     vacuum=4)
 
 slab = gen.get_slab()
-surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
-slab.set_surface_atoms(surface_sites)
 
-adsorbate = get_topologies('CH3')[0]
+adsorbate = molecule('CH3')[0]
 adsorbate.set_tags([-1, 0, 0, 0])
 
 builder = Builder(slab)
-ads_slab = builder.add_adsorbate(adsorbate, index=1)
+ads_slab = builder.add_adsorbate(adsorbate, index=0)
 
-img_name = '../../static/CH3-ads.pov'
+img_name = '../static/CH3-ads.pov'
 write(
     img_name,
     ads_slab,
     show_unit_cell=2,
-    rotation='-90x')
+    rotation='-90x',
+    run_povray=True,
+)
 
 write(
     img_name.replace('.pov', '-top.pov'),
     ads_slab,
-    show_unit_cell=2)
+    show_unit_cell=2,
+    run_povray=True,
+)
+#+END_SRC
+
+#+CAPTION: Builder for a CH_{3} on a unique top site of a CuPd_{3} (111) surface.
+[[../static/CH3-ads.png]] [[../static/CH3-ads-top.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.build import molecule
+from catkit.gen.surface import SlabGenerator
+from catkit.gen.adsorption import Builder
+from ase.build import bulk
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=(1, 1, 1),
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+
+adsorbate = molecule('CH3')[0]
+adsorbate.set_tags([-1, 0, 0, 0])
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, index=0)
+
+ads_slab.edit()
 #+END_SRC
 
 **** Bidentate adsorption
@@ -442,53 +638,79 @@ The =Builder= class can also produce structures for species bonded in two locati
 
 Also, using setting the =index= key to =-1= will return a list of all the possible adsorbed structures.
 
-#+CAPTION: Builder for a C_{2}H_{3} on a unique adsorption edge of a CuPd_{3} (1, 1, 1) surface.
-[[../../static/CH2CH-ads.png]] [[../../static/CH2CH-ads-top.png]]
-
-#+BEGIN_SRC python  :results silent :exports both
-from catkit.gen.pathways import ReactionNetwork
+#+BEGIN_SRC python  :results silent :exports none
+from catkit.build import molecule
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import Builder
 from ase.build import bulk
 from ase.io import write
-import numpy as np
 
 atoms = bulk('Pd', 'fcc', a=4, cubic=True)
 atoms[3].symbol = 'Cu'
 
 gen = SlabGenerator(
     atoms,
-    miller_index=[1, 1, 1],
+    miller_index=(1, 1, 1),
     layers=4,
     vacuum=4)
 
 slab = gen.get_slab()
-surface_sites = gen.get_voronoi_surface_atoms(slab)[0]
-slab.set_surface_atoms(surface_sites)
-
-with ReactionNetwork(db_name='C2H6-example.db') as rn:
-    rn.molecule_search({'C': 2, 'H': 6})
-    molecules = rn.load_molecules()
-
-adsorbate = molecules[13]
+adsorbate = molecule('C2H3')[1]
 
 builder = Builder(slab)
-ads_slab = builder.add_adsorbate(adsorbate, bonds=[1, 3], index=-1)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=15)
 
-print('{} adsorption structures generated'.format(len(ads_slab)))
-
-img_name = '../../static/CH2CH-ads.pov'
+img_name = '../static/CH2CH-ads.pov'
 write(
     img_name,
-    ads_slab[14],
+    ads_slab,
     show_unit_cell=2,
-    rotation='-90x')
+    rotation='-90x',
+    run_povray=True,
+)
 
 write(
     img_name.replace('.pov', '-top.pov'),
-    ads_slab[14],
-    show_unit_cell=2)
+    ads_slab,
+    show_unit_cell=2,
+    run_povray=True,
+)
 #+END_SRC
+
+#+CAPTION: Builder for a C_{2}H_{3} on a unique adsorption edge of a CuPd_{3} (111) surface.
+[[../static/CH2CH-ads.png]] [[../static/CH2CH-ads-top.png]]
+
+#+BEGIN_SRC python  :results output org drawer :exports code
+from catkit.build import molecule
+from catkit.gen.surface import SlabGenerator
+from catkit.gen.adsorption import Builder
+from ase.build import bulk
+from ase.visualize import view
+
+atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+atoms[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    atoms,
+    miller_index=(1, 1, 1),
+    layers=4,
+    vacuum=4)
+
+slab = gen.get_slab()
+adsorbate = molecule('C2H3')[1]
+
+builder = Builder(slab)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=-1)
+
+print('{} adsorption structures generated'.format(len(ads_slab)))
+
+view(ads_slab)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+21 adsorption structures generated
+:END:
 
 ** Gas-phase:
 - [X] Various chemical species (C, H, and O currently tested)
@@ -503,11 +725,11 @@ write(
 *** Example usage:
 Below is an example script which generates some simple figures using [[https://networkx.github.io/documentation/networkx-1.10/index.html][NetworkX]] code for all molecules up to C_{2}H_{6}.
 
- [[../../static/molecule-1.png]] [[../../static/molecule-2.png]] [[../../static/molecule-3.png]] [[../../static/molecule-4.png]] 
-[[../../static/molecule-5.png]] [[../../static/molecule-6.png]] [[../../static/molecule-7.png]] [[../../static/molecule-8.png]]
-[[../../static/molecule-9.png]] [[../../static/molecule-10.png]] [[../../static/molecule-11.png]] [[../../static/molecule-12.png]]
-[[../../static/molecule-13.png]] [[../../static/molecule-14.png]] [[../../static/molecule-15.png]] [[../../static/molecule-16.png]]
-[[../../static/molecule-17.png]]
+ [[../static/molecule-1.png]] [[../static/molecule-2.png]] [[../static/molecule-3.png]] [[../static/molecule-4.png]] 
+[[../static/molecule-5.png]] [[../static/molecule-6.png]] [[../static/molecule-7.png]] [[../static/molecule-8.png]]
+[[../static/molecule-9.png]] [[../static/molecule-10.png]] [[../static/molecule-11.png]] [[../static/molecule-12.png]]
+[[../static/molecule-13.png]] [[../static/molecule-14.png]] [[../static/molecule-15.png]] [[../static/molecule-16.png]]
+[[../static/molecule-17.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports both
 from catkit.gen.pathways import ReactionNetwork
@@ -523,31 +745,12 @@ with ReactionNetwork(db_name=db_name) as rn:
         element_pool={'C': 2, 'H': 6},
         multiple_bond_search=False)
 
-    # Load the molecules
-    molecules = rn.load_molecules()
-
-    # Get 3D structure estimates (requires RDKit)
-    try:
-        from catkit.gen.api.rd_kit import plot_molecule, get_uff_coordinates
-
-        for i, molecule in molecules.items():
-            plot_molecule(
-                molecule,
-                file_name='../../static/molecule-{}.png'.format(i))
-
-            molecule = get_uff_coordinates(molecule, steps=50)
-            rn.save_3d_structure(molecule)
-
-        images = rn.load_3d_structures()
-    except(ImportError):
-       pass
-
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-Process completed in 23.1s
+Process completed in 0.0s
 :END:
 
 ** Reaction mechanisms:
@@ -560,7 +763,7 @@ Process completed in 23.1s
 Enumeration of possible elementary reaction steps for gas-phase C_{2}H_{6} species.
 
 #+CAPTION: Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.
-[[../../static/reaction-network.png]]
+[[../static/reaction-network.png]]
 
 Pathway exploration is currently integrated with gas-phase molecule search. See the gas-phase molecule search example for further details on molecule generations. Below, a reaction network is generated.
 
@@ -579,7 +782,7 @@ with ReactionNetwork(db_name=db_name) as rn:
         reconfiguration=False,
         substitution=False)
 
-    rn.plot_reaction_network(file_name='../../static/reaction-network.png')
+    rn.plot_reaction_network(file_name='../static/reaction-network.png')
 
 print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC

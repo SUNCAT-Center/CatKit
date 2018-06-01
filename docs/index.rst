@@ -18,4 +18,8 @@ Contents
 
 .. toctree::
 
-   modules
+    frontmatter/catkit
+    frontmatter/catgen
+    frontmatter/cathub
+    frontmatter/catflow
+    modules/catkit

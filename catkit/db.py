@@ -397,12 +397,12 @@ class FingerprintDB():
         return self
 
     def __exit__(self, type, value, tb):
-        """ Upon exiting the 'with' statement, __exit__ is called."""
+        """Upon exiting the 'with' statement, __exit__ is called."""
         self.con.commit()
         self.con.close()
 
     def create_table(self):
-        """ Creates the database table framework used in SQLite.
+        """Creates the database table framework used in SQLite.
         This includes 3 tables: images, parameters, and fingerprints.
 
         The images table currently stores ase_id information and
