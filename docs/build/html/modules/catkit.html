@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>catkit package &mdash; CatKit 0.4.4 documentation</title>
+  <title>Modules &mdash; CatKit 0.4.4 documentation</title>
   
 
   
@@ -30,7 +30,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="catkit.gen package" href="catkit.gen.html" />
-    <link rel="prev" title="CatKit: Catalysis Kit" href="../index.html" /> 
+    <link rel="prev" title="CatFlow: Catalysis Workflow" href="../frontmatter/catflow.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -87,7 +87,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../index.html">About</a></li>
 </ul>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">catkit package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="../frontmatter/catkit.html">CatKit: Catalysis Kit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontmatter/catgen.html">CatGen: Catalysis Generator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontmatter/cathub.html">CatHub: Catalysis-Hub.org</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../frontmatter/catflow.html">CatFlow: Catalysis Workflow</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Modules</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
@@ -95,12 +99,10 @@
 <li class="toctree-l3"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.build">catkit.build module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.db">catkit.db module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.gratoms">catkit.gratoms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.learn">catkit.learn module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-catkit">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -148,7 +150,7 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>catkit package</li>
+      <li>Modules</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -167,8 +169,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="catkit-package">
-<h1>catkit package<a class="headerlink" href="#catkit-package" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="modules">
+<h1>Modules<a class="headerlink" href="#modules" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
@@ -244,9 +246,6 @@
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="submodules">
-<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-catkit.build">
 <span id="catkit-build-module"></span><h2>catkit.build module<a class="headerlink" href="#module-catkit.build" title="Permalink to this headline">¶</a></h2>
@@ -1046,91 +1045,6 @@ arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/
 </dd></dl>
 
 </div>
-<div class="section" id="module-catkit">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit" title="Permalink to this headline">¶</a></h2>
-<p>Catalysis Kit.</p>
-<dl class="class">
-<dt id="catkit.Gratoms">
-<em class="property">class </em><code class="descclassname">catkit.</code><code class="descname">Gratoms</code><span class="sig-paren">(</span><em>symbols=None</em>, <em>positions=None</em>, <em>numbers=None</em>, <em>tags=None</em>, <em>momenta=None</em>, <em>masses=None</em>, <em>magmoms=None</em>, <em>charges=None</em>, <em>scaled_positions=None</em>, <em>cell=None</em>, <em>pbc=None</em>, <em>celldisp=None</em>, <em>constraint=None</em>, <em>calculator=None</em>, <em>info=None</em>, <em>edges=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ase.atoms.Atoms</span></code></p>
-<p>Graph based atoms object.</p>
-<p>An Integrated class for an ASE atoms object with a corresponding
-Networkx Graph.</p>
-<dl class="attribute">
-<dt id="catkit.Gratoms.adj">
-<code class="descname">adj</code><a class="headerlink" href="#catkit.Gratoms.adj" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="catkit.Gratoms.connectivity">
-<code class="descname">connectivity</code><a class="headerlink" href="#catkit.Gratoms.connectivity" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.copy">
-<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.copy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a copy.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="catkit.Gratoms.degree">
-<code class="descname">degree</code><a class="headerlink" href="#catkit.Gratoms.degree" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="catkit.Gratoms.edges">
-<code class="descname">edges</code><a class="headerlink" href="#catkit.Gratoms.edges" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.get_chemical_tags">
-<code class="descname">get_chemical_tags</code><span class="sig-paren">(</span><em>rank=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.get_chemical_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_chemical_tags" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate a hash descriptive of the chemical formula (rank 0)
-or include bonding (rank 1).</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.get_neighbor_symbols">
-<code class="descname">get_neighbor_symbols</code><span class="sig-paren">(</span><em>u</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.get_neighbor_symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_neighbor_symbols" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get chemical symbols for neighboring atoms of u.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.get_surface_atoms">
-<code class="descname">get_surface_atoms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.get_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_surface_atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return surface atoms.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.get_unsaturated_nodes">
-<code class="descname">get_unsaturated_nodes</code><span class="sig-paren">(</span><em>screen=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.get_unsaturated_nodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.get_unsaturated_nodes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="catkit.Gratoms.graph">
-<code class="descname">graph</code><a class="headerlink" href="#catkit.Gratoms.graph" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.is_isomorph">
-<code class="descname">is_isomorph</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.is_isomorph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.is_isomorph" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if isomorphic by bond count and atomic number.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="catkit.Gratoms.nodes">
-<code class="descname">nodes</code><a class="headerlink" href="#catkit.Gratoms.nodes" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="catkit.Gratoms.set_surface_atoms">
-<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.set_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assign surface atoms.</p>
-</dd></dl>
-
-</dd></dl>
-
-</div>
 </div>
 
 
@@ -1144,7 +1058,7 @@ or include bonding (rank 1).</p>
         <a href="catkit.gen.html" class="btn btn-neutral float-right" title="catkit.gen package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="../index.html" class="btn btn-neutral" title="CatKit: Catalysis Kit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../frontmatter/catflow.html" class="btn btn-neutral" title="CatFlow: Catalysis Workflow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1154,7 +1068,7 @@ or include bonding (rank 1).</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Fri, 01 Jun 2018 02:31:46.
+      Last updated on Fri, 01 Jun 2018 03:01:06.
 
     </p>
   </div>

@@ -1,5 +1,5 @@
-catkit package
-==============
+Modules
+=======
 
 Subpackages
 -----------
@@ -10,9 +10,6 @@ Subpackages
     catkit.pawprint
     catkit.flow
     catkit.hub
-
-Submodules
-----------
 
 catkit\.build module
 --------------------
@@ -42,15 +39,6 @@ catkit\.learn module
 --------------------
 
 .. automodule:: catkit.learn
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: catkit
     :members:
     :undoc-members:
     :show-inheritance:
