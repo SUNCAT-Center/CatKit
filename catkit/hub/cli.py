@@ -358,7 +358,7 @@ def connect(user):
     help="Regular expression that matches"
          " only those files that are included.",)
 @click.option(
-    '-j', '--json'
+    '-j', '--json',
     type=bool,
     is_flag=True,
     help="Store intermediate filetype as json"
