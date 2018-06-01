@@ -1,0 +1,940 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub package &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="catkit.hub.ase_tools package" href="catkit.hub.ase_tools.html" />
+    <link rel="prev" title="catkit.flow package" href="catkit.flow.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">catkit.hub package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.ase_connect">catkit.hub.ase_connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.cathubsqlite">catkit.hub.cathubsqlite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.cli">catkit.hub.cli module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.convert_traj">catkit.hub.convert_traj module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.create_user">catkit.hub.create_user module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.db2server">catkit.hub.db2server module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.folder2db">catkit.hub.folder2db module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.folder_check">catkit.hub.folder_check module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.folderreader">catkit.hub.folderreader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.maintain_server">catkit.hub.maintain_server module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.make_folders_template">catkit.hub.make_folders_template module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.organize">catkit.hub.organize module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.postgresql">catkit.hub.postgresql module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.psql_server_connect">catkit.hub.psql_server_connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.query">catkit.hub.query module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub.tools">catkit.hub.tools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.hub">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="catkit.html">catkit package</a> &raquo;</li>
+        
+      <li>catkit.hub package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/catkit.hub.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-hub-package">
+<h1>catkit.hub package<a class="headerlink" href="#catkit-hub-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="catkit.hub.ase_tools.html">catkit.hub.ase_tools package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="catkit.hub.ase_tools.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.hub.ase_tools.html#module-catkit.hub.ase_tools.gas_phase_references">catkit.hub.ase_tools.gas_phase_references module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.hub.ase_tools.html#module-catkit.hub.ase_tools">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.hub.ase_connect">
+<span id="catkit-hub-ase-connect-module"></span><h2>catkit.hub.ase_connect module<a class="headerlink" href="#module-catkit.hub.ase_connect" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.ase_connect.main">
+<code class="descclassname">catkit.hub.ase_connect.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_connect.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_connect.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.cathubsqlite">
+<span id="catkit-hub-cathubsqlite-module"></span><h2>catkit.hub.cathubsqlite module<a class="headerlink" href="#module-catkit.hub.cathubsqlite" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite">
+<em class="property">class </em><code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">CathubSQLite</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for managing SQLite3 database for reaction energies,
+publications and atomic structures. Builds on top of the ASE database for
+atomic strucutres <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/db/db.html">https://wiki.fysik.dtu.dk/ase/ase/db/db.html</a> with four
+additional tables:</p>
+<blockquote>
+<div><p>publication: publication info</p>
+<dl class="docutils">
+<dt>publication_system: one-to-many mapping between publication table and</dt>
+<dd>systems table in ASE database</dd>
+</dl>
+<p>reaction: reaction energies for surfaces</p>
+<dl class="docutils">
+<dt>reaction_system: mamy-to-many mapping between reaction table and</dt>
+<dd>systems table in ASE database</dd>
+</dl>
+</div></blockquote>
+<p>Connect to a database object:</p>
+<blockquote>
+<div>db = CathubSQLite(‘yourdbfile.db’)</div></blockquote>
+<p>Set up a connection for several manipulations:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>with db as CathubSQLite(‘yourdbfile.db’):</dt>
+<dd>Do your work…</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – name of database file</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.check">
+<code class="descname">check</code><span class="sig-paren">(</span><em>chemical_composition</em>, <em>reaction_energy</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if entry with same surface and energy is allready written
+to database file
+:param chemcial_composition:
+:type chemcial_composition: str
+:param reaction_energy:
+:type reaction_energy: str
+:param Returns id or None:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.check_publication">
+<code class="descname">check_publication</code><span class="sig-paren">(</span><em>pub_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.check_publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.check_publication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.check_publication_structure">
+<code class="descname">check_publication_structure</code><span class="sig-paren">(</span><em>pub_id</em>, <em>ase_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.check_publication_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.check_publication_structure" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.check_reaction_on_surface">
+<code class="descname">check_reaction_on_surface</code><span class="sig-paren">(</span><em>chemical_composition</em>, <em>reactants</em>, <em>products</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.check_reaction_on_surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.check_reaction_on_surface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if entry with same surface and reaction is allready written
+to database file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>chemcial_composition</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>reactants</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – </li>
+<li><strong>products</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – </li>
+<li><strong>id</strong><strong> or </strong><strong>None</strong> (<em>Returns</em>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.get_last_id">
+<code class="descname">get_last_id</code><span class="sig-paren">(</span><em>cur</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.get_last_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.get_last_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the id of the last written row in table</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>cur</strong> (<em>database connection</em><em>(</em><em>)</em><em>cursor</em><em>(</em><em>) </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – </li>
+<li><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – ‘reaction’, ‘publication’, ‘publication_system’, ‘reaction_system’</li>
+<li><strong>Returns</strong> (<a class="reference internal" href="catkit.html#catkit.db.Atom.id" title="catkit.db.Atom.id"><em>id</em></a>) – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>id</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an entire row of a table
+:param id: row integer
+:type id: int
+:param table: ‘reaction’, ‘publication’, ‘publication_system’, ‘reaction_system’
+:type table: str</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>id</em>, <em>values</em>, <em>key_names='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update reaction info for a selected row</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – row integer</li>
+<li><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – See write() method for details</li>
+<li><strong>key_names</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> or </em><em>'all'</em>) – list with name of columns to update. Should match the keys-value
+pairs in values.
+default is ‘all’</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>values</em>, <em>data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write reaction info to db file</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>values</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – </li>
+<li><strong>values dict can include</strong> (<em>The</em>) – </li>
+<li><strong>{'chemical_composition'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> (</em><em>chemical composition on empty slab</em><em>) </em><em>,</em>) – </li>
+<li><strong>'surface_composition'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> (</em><em>reduced chemical composition or</em>) – shortname),</li>
+<li><strong>'facet'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>'sites'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – adsorption sites of species.
+f.ex: {‘OH’: ‘ontop’, ‘O’: ‘hollow’}</li>
+<li><strong>'coverages'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – coverage of adsorbates relative to the unit cell
+f.ex. {‘OH’: 0.25, ‘O’: 0.5})</li>
+<li><strong>'products'</strong> (<em>'reactants'/</em>) – keys with name of chemical species folloved by phase (gas, <a href="#id1"><span class="problematic" id="id2">*</span></a>)
+values are the prefactor in the reaction.
+For reaction H2Ogas -&gt; 2Hstar + O star you would write:
+‘reactants’: {OHstar: 1, Hstar: 2}
+‘products’: {OHstar: 1, Hstar: 2}</li>
+<li><strong>'reaction_energy'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – </li>
+<li><strong>'activation_energy'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – </li>
+<li><strong>'dft_code'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>'dft_functional'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>'username'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>'pub_id'</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Should match the pub_id of the corresponding publications</li>
+<li><strong>}</strong> – </li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.cathubsqlite.CathubSQLite.write_publication">
+<code class="descname">write_publication</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite.write_publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite.write_publication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write publication info to db</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> (<em>dict with entries</em>) – {‘pub_id’: str (short name for publication),
+‘authors’: list of str ()
+‘journal’: str,
+‘volume’: str,
+‘number’: str,
+‘pages’: ‘str’
+‘year’: int,
+‘publisher’: str,
+‘doi’: str,
+‘tags’: list of str}</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.cathubsqlite.check_ase_ids">
+<code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">check_ase_ids</code><span class="sig-paren">(</span><em>values</em>, <em>ase_ids</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#check_ase_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.check_ase_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.cathubsqlite.get_key_value_list">
+<code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">get_key_value_list</code><span class="sig-paren">(</span><em>key_list</em>, <em>values</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#get_key_value_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.get_key_value_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.cathubsqlite.get_key_value_str">
+<code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">get_key_value_str</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#get_key_value_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.get_key_value_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.cathubsqlite.get_value_strlist">
+<code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">get_value_strlist</code><span class="sig-paren">(</span><em>value_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#get_value_strlist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.get_value_strlist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.cli">
+<span id="catkit-hub-cli-module"></span><h2>catkit.hub.cli module<a class="headerlink" href="#module-catkit.hub.cli" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.hub.convert_traj">
+<span id="catkit-hub-convert-traj-module"></span><h2>catkit.hub.convert_traj module<a class="headerlink" href="#module-catkit.hub.convert_traj" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.convert_traj.main">
+<code class="descclassname">catkit.hub.convert_traj.</code><code class="descname">main</code><span class="sig-paren">(</span><em>base</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/convert_traj.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.convert_traj.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.create_user">
+<span id="catkit-hub-create-user-module"></span><h2>catkit.hub.create_user module<a class="headerlink" href="#module-catkit.hub.create_user" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.create_user.main">
+<code class="descclassname">catkit.hub.create_user.</code><code class="descname">main</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/create_user.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.create_user.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.db2server">
+<span id="catkit-hub-db2server-module"></span><h2>catkit.hub.db2server module<a class="headerlink" href="#module-catkit.hub.db2server" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.db2server.main">
+<code class="descclassname">catkit.hub.db2server.</code><code class="descname">main</code><span class="sig-paren">(</span><em>dbfile</em>, <em>start_id=1</em>, <em>write_reaction=True</em>, <em>write_ase=True</em>, <em>write_publication=True</em>, <em>write_reaction_system=True</em>, <em>block_size=1000</em>, <em>start_block=0</em>, <em>db_user='catroot'</em>, <em>db_password=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/db2server.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.db2server.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.folder2db">
+<span id="catkit-hub-folder2db-module"></span><h2>catkit.hub.folder2db module<a class="headerlink" href="#module-catkit.hub.folder2db" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.folder2db.main">
+<code class="descclassname">catkit.hub.folder2db.</code><code class="descname">main</code><span class="sig-paren">(</span><em>folder_name</em>, <em>debug=False</em>, <em>skip=[]</em>, <em>goto_reaction=None</em>, <em>old=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folder2db.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folder2db.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.folder_check">
+<span id="catkit-hub-folder-check-module"></span><h2>catkit.hub.folder_check module<a class="headerlink" href="#module-catkit.hub.folder_check" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.folder_check.main">
+<code class="descclassname">catkit.hub.folder_check.</code><code class="descname">main</code><span class="sig-paren">(</span><em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folder_check.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folder_check.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.folderreader">
+<span id="catkit-hub-folderreader-module"></span><h2>catkit.hub.folderreader module<a class="headerlink" href="#module-catkit.hub.folderreader" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.hub.folderreader.FolderReader">
+<em class="property">class </em><code class="descclassname">catkit.hub.folderreader.</code><code class="descname">FolderReader</code><span class="sig-paren">(</span><em>folder_name</em>, <em>debug=False</em>, <em>strict=True</em>, <em>verbose=False</em>, <em>update=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for reading data from organized folders and writing to local
+CathubSQLite database. Folders should be arranged with
+make_folders_template and are read in the order:</p>
+<p>level:</p>
+<p>0    folder_name
+1    <a href="#id3"><span class="problematic" id="id4">|</span></a>– publication
+2        <a href="#id5"><span class="problematic" id="id6">|</span></a>– dft_code
+3            <a href="#id7"><span class="problematic" id="id8">|</span></a>– dft_functional
+4                <a href="#id9"><span class="problematic" id="id10">|</span></a>– gas
+4                <a href="#id11"><span class="problematic" id="id12">|</span></a>– metal1
+5                    <a href="#id13"><span class="problematic" id="id14">|</span></a>– facet
+6                        <a href="#id15"><span class="problematic" id="id16">|</span></a>– reaction</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>foldername</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – </li>
+<li><strong>debug</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – default is False. Choose True if the folderreader should  continue
+in spite of errors.</li>
+<li><strong>update</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Update data if allready present in database file. defalt is True</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>skip=[]</em>, <em>goto_metal=None</em>, <em>goto_reaction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get reactions from folders.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>skip</strong> (<em>list of str</em>) – list of folders not to read</li>
+<li><strong>goto_reaction</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Skip ahead to this metal</li>
+<li><strong>goto_reaction</strong> – Skip ahead to this reacion</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_bulk">
+<code class="descname">read_bulk</code><span class="sig-paren">(</span><em>root</em>, <em>files</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_bulk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_bulk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_energies">
+<code class="descname">read_energies</code><span class="sig-paren">(</span><em>root</em>, <em>files</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_energies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_gas">
+<code class="descname">read_gas</code><span class="sig-paren">(</span><em>root</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_gas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_gas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_pub">
+<code class="descname">read_pub</code><span class="sig-paren">(</span><em>root</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_pub"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_pub" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_reaction">
+<code class="descname">read_reaction</code><span class="sig-paren">(</span><em>root</em>, <em>files</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_reaction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.read_slab">
+<code class="descname">read_slab</code><span class="sig-paren">(</span><em>root</em>, <em>files</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.read_slab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.read_slab" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>skip=[]</em>, <em>goto_reaction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.folderreader.FolderReader.write_publication">
+<code class="descname">write_publication</code><span class="sig-paren">(</span><em>pub_data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader.write_publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader.write_publication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.folderreader.read_name_from_folder">
+<code class="descclassname">catkit.hub.folderreader.</code><code class="descname">read_name_from_folder</code><span class="sig-paren">(</span><em>root</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#read_name_from_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.read_name_from_folder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.maintain_server">
+<span id="catkit-hub-maintain-server-module"></span><h2>catkit.hub.maintain_server module<a class="headerlink" href="#module-catkit.hub.maintain_server" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.hub.maintain_server.MaintainPostgres">
+<em class="property">class </em><code class="descclassname">catkit.hub.maintain_server.</code><code class="descname">MaintainPostgres</code><span class="sig-paren">(</span><em>user='catroot'</em>, <em>password=None</em>, <em>stdin=&lt;_io.TextIOWrapper name='&lt;stdin&gt;' mode='r' encoding='UTF-8'&gt;</em>, <em>stdout=&lt;_io.TextIOWrapper name='&lt;stdout&gt;' mode='w' encoding='UTF-8'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/maintain_server.html#MaintainPostgres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.maintain_server.MaintainPostgres" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catkit.hub.postgresql.CathubPostgreSQL" title="catkit.hub.postgresql.CathubPostgreSQL"><code class="xref py py-class docutils literal"><span class="pre">catkit.hub.postgresql.CathubPostgreSQL</span></code></a></p>
+<dl class="method">
+<dt id="catkit.hub.maintain_server.MaintainPostgres.delete_lost_systems">
+<code class="descname">delete_lost_systems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/maintain_server.html#MaintainPostgres.delete_lost_systems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.maintain_server.MaintainPostgres.delete_lost_systems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.maintain_server.MaintainPostgres.fill_reaction_system">
+<code class="descname">fill_reaction_system</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/maintain_server.html#MaintainPostgres.fill_reaction_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.maintain_server.MaintainPostgres.fill_reaction_system" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.make_folders_template">
+<span id="catkit-hub-make-folders-template-module"></span><h2>catkit.hub.make_folders_template module<a class="headerlink" href="#module-catkit.hub.make_folders_template" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.make_folders_template.main">
+<code class="descclassname">catkit.hub.make_folders_template.</code><code class="descname">main</code><span class="sig-paren">(</span><em>title, authors, year, journal='', volume='', number='', pages='', publisher='', doi='', tags=[], DFT_code='Quantum ESPRESSO', DFT_functional='BEEF-vdW', reactions=[{'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'], 'products': ['OOHstar&#64;ontop']}], energy_corrections={}, bulk_compositions=['Pt', 'Ag'], crystal_structures=['fcc', 'hcp'], facets=['111'], custom_base=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/make_folders_template.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.make_folders_template.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Automatically generate an organized folder structure for a DFT
+calculation.</p>
+<p>Start by copying the script to a folder in your username
+and assign the right information to the arguments in the function.</p>
+<p>You can change the parameters and run the script several times if you,
+for example, are using different functionals or are doing different
+reactions on different surfaces.</p>
+<p>Remember to include the reaction that gives the adsorption energy of
+reaction intermediates, taking gas phase molecules as references
+(preferably H20, H2, CH4, CO, NH3).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Publication or working title if not yet published.</li>
+<li><strong>authors</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) – Author names, e.g. [‘Doe, John’, ‘Einstein, Albert’]</li>
+<li><strong>year</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Year of (submission?)</li>
+<li><strong>journal</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Publications journal name</li>
+<li><strong>volume</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Publications volume number</li>
+<li><strong>number</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Publication number</li>
+<li><strong>pages</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Publication page numbers</li>
+<li><strong>publisher</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Publisher name</li>
+<li><strong>doi</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – DOI of publication</li>
+<li><strong>tags</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>, </em><em>optional</em>) – User defined quire tags</li>
+<li><strong>DFT_code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – e.g. ‘Quantum ESPRESSO’</li>
+<li><strong>DFT_functional</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – Calculator functional used, e.g. ‘BEEF-vdW’</li>
+<li><strong>reactions</strong> (<em>list of dict</em><em>, </em><em>optional</em>) – <p>A new dictionary is required for each reaction, and should include two
+lists, ‘reactants’ and ‘products’. Remember to include a minus sign and
+prefactor in the name when relevant. If your reaction is not balanced,
+you will receive an error when running the script.</p>
+<p>Include the phase if mixing gas phase and surface phase.
+e.g. ‘star’ for empty site or adsorbed phase, ‘gas’ if in gas phase.</p>
+<p>Include the adsorption site if relevant.
+e.g. <a class="reference external" href="mailto:star&#37;&#52;&#48;top">star<span>&#64;</span>top</a> or <a class="reference external" href="mailto:star&#37;&#52;&#48;bridge">star<span>&#64;</span>bridge</a>.</p>
+<p>For example, we can write an entry for the adsorption of CH2:
+CH4(g) - H2(g) + * -&gt; CH2*</p>
+<p>as:
+{‘reactants’: [‘CH4gas’, ‘H2gas’, ‘star’],
+‘products’: [<a class="reference external" href="mailto:'CH2star&#37;&#52;&#48;bridge">‘CH2star<span>&#64;</span>bridge</a>’]}</p>
+<p>A complete entry could read:
+reactions = [
+{‘reactants’: [‘CH4gas’, ‘-H2gas’, ‘star’],
+‘products’: [<a class="reference external" href="mailto:'CH2star&#37;&#52;&#48;bridge">‘CH2star<span>&#64;</span>bridge</a>’]},
+{‘reactants’: [‘CH4gas’, ‘-0.5H2gas’, ‘star’],
+‘products’: [<a class="reference external" href="mailto:'CH3star&#37;&#52;&#48;top">‘CH3star<span>&#64;</span>top</a>’]}]</p>
+</li>
+<li><strong>energy_corrections</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a><em>, </em><em>optional</em>) – e.g. {‘H2gas’: 0.1}</li>
+<li><strong>bulk_compositions</strong> (<em>list of str</em><em>, </em><em>optional</em>) – e.g. [‘Pt’, ‘Ag’]</li>
+<li><strong>crystal_structures</strong> (<em>list of str</em><em>, </em><em>optional</em>) – e.g. [‘fcc’, ‘hcp’]</li>
+<li><strong>facets</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>, </em><em>optional</em>) – For complicated structures use term you would use in publication.
+e.g. [‘111’]</li>
+<li><strong>custom_base</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>, </em><em>optional</em>) – TODO</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.organize">
+<span id="catkit-hub-organize-module"></span><h2>catkit.hub.organize module<a class="headerlink" href="#module-catkit.hub.organize" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.organize.collect_structures">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">collect_structures</code><span class="sig-paren">(</span><em>foldername</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#collect_structures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.collect_structures" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.organize.create_folders">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">create_folders</code><span class="sig-paren">(</span><em>options</em>, <em>structures</em>, <em>root=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#create_folders"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.create_folders" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.organize.fuzzy_match">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">fuzzy_match</code><span class="sig-paren">(</span><em>structures</em>, <em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#fuzzy_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.fuzzy_match" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.organize.get_chemical_formula">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">get_chemical_formula</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#get_chemical_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.get_chemical_formula" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compatibility function, return mode=metal, when
+available, mode=hill, when not (ASE &lt;= 3.13)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.organize.main">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">main</code><span class="sig-paren">(</span><em>options</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.organize.symbols">
+<code class="descclassname">catkit.hub.organize.</code><code class="descname">symbols</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/organize.html#symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.organize.symbols" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.postgresql">
+<span id="catkit-hub-postgresql-module"></span><h2>catkit.hub.postgresql module<a class="headerlink" href="#module-catkit.hub.postgresql" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL">
+<em class="property">class </em><code class="descclassname">catkit.hub.postgresql.</code><code class="descname">CathubPostgreSQL</code><span class="sig-paren">(</span><em>user='catroot'</em>, <em>password=None</em>, <em>stdin=&lt;_io.TextIOWrapper name='&lt;stdin&gt;' mode='r' encoding='UTF-8'&gt;</em>, <em>stdout=&lt;_io.TextIOWrapper name='&lt;stdout&gt;' mode='w' encoding='UTF-8'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for setting up the catalysis hub reaction energy database
+on postgreSQL server.</p>
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.check">
+<code class="descname">check</code><span class="sig-paren">(</span><em>pub_id</em>, <em>chemical_composition</em>, <em>reactants</em>, <em>products</em>, <em>reaction_energy=None</em>, <em>strict=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.check" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.create_user">
+<code class="descname">create_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.create_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.create_user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>authorlist</em>, <em>year</em>, <em>doi=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.publication_status">
+<code class="descname">publication_status</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.publication_status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.publication_status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>id</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.remove_user">
+<code class="descname">remove_user</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.remove_user"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.remove_user" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.status">
+<code class="descname">status</code><span class="sig-paren">(</span><em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.status"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.status" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.transfer">
+<code class="descname">transfer</code><span class="sig-paren">(</span><em>filename_sqlite</em>, <em>start_id=1</em>, <em>write_ase=True</em>, <em>write_publication=True</em>, <em>write_reaction=True</em>, <em>write_reaction_system=True</em>, <em>block_size=1000</em>, <em>start_block=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.transfer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>id</em>, <em>values</em>, <em>key_names='all'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.update_publication">
+<code class="descname">update_publication</code><span class="sig-paren">(</span><em>pub_dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.update_publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.update_publication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>values</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.hub.postgresql.CathubPostgreSQL.write_publication">
+<code class="descname">write_publication</code><span class="sig-paren">(</span><em>pub_values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL.write_publication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL.write_publication" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.postgresql.get_key_value_str">
+<code class="descclassname">catkit.hub.postgresql.</code><code class="descname">get_key_value_str</code><span class="sig-paren">(</span><em>values</em>, <em>table='reaction'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#get_key_value_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.get_key_value_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.psql_server_connect">
+<span id="catkit-hub-psql-server-connect-module"></span><h2>catkit.hub.psql_server_connect module<a class="headerlink" href="#module-catkit.hub.psql_server_connect" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.psql_server_connect.main">
+<code class="descclassname">catkit.hub.psql_server_connect.</code><code class="descname">main</code><span class="sig-paren">(</span><em>user</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/psql_server_connect.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.psql_server_connect.main" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.query">
+<span id="catkit-hub-query-module"></span><h2>catkit.hub.query module<a class="headerlink" href="#module-catkit.hub.query" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.query.convert">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">convert</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.convert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.execute_graphQL">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">execute_graphQL</code><span class="sig-paren">(</span><em>query_string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#execute_graphQL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.execute_graphQL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.get_ase_db">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">get_ase_db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#get_ase_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.get_ase_db" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.get_atoms_by_id">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">get_atoms_by_id</code><span class="sig-paren">(</span><em>unique_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#get_atoms_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.get_atoms_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.get_atomsrow_by_id">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">get_atomsrow_by_id</code><span class="sig-paren">(</span><em>unique_id</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#get_atomsrow_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.get_atomsrow_by_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.get_publications">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">get_publications</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#get_publications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.get_publications" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.get_reactions">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">get_reactions</code><span class="sig-paren">(</span><em>n_results=20</em>, <em>write_db=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#get_reactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.get_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get reactions from server</p>
+<p>Give key value strings as arguments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.graphql_query">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">graphql_query</code><span class="sig-paren">(</span><em>table='reactions', subtables=[], columns=['chemicalComposition', 'reactants', 'products'], n_results=10, queries={}</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#graphql_query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.graphql_query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.map_column_names">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">map_column_names</code><span class="sig-paren">(</span><em>column</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#map_column_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.map_column_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.query.query">
+<code class="descclassname">catkit.hub.query.</code><code class="descname">query</code><span class="sig-paren">(</span><em>table='reactions', columns=['chemicalComposition', 'reactants', 'products'], subtables=[], n_results=10, queries={}, print_output=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/query.html#query"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.query.query" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.tools">
+<span id="catkit-hub-tools-module"></span><h2>catkit.hub.tools module<a class="headerlink" href="#module-catkit.hub.tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.tools.add_atoms">
+<code class="descclassname">catkit.hub.tools.</code><code class="descname">add_atoms</code><span class="sig-paren">(</span><em>atoms_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/tools.html#add_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.tools.add_atoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.tools.check_reaction">
+<code class="descclassname">catkit.hub.tools.</code><code class="descname">check_reaction</code><span class="sig-paren">(</span><em>reactants</em>, <em>products</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/tools.html#check_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.tools.check_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the stoichiometry and format of chemical reaction used for
+folder structure.
+list of reactants -&gt; list of products</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.tools.extract_atoms">
+<code class="descclassname">catkit.hub.tools.</code><code class="descname">extract_atoms</code><span class="sig-paren">(</span><em>molecule</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/tools.html#extract_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.tools.extract_atoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a string with all atoms in molecule</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.tools.get_bases">
+<code class="descclassname">catkit.hub.tools.</code><code class="descname">get_bases</code><span class="sig-paren">(</span><em>folder_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/tools.html#get_bases"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.tools.get_bases" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.tools.get_catbase">
+<code class="descclassname">catkit.hub.tools.</code><code class="descname">get_catbase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/tools.html#get_catbase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.tools.get_catbase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.hub" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catkit.hub.ase_tools.html" class="btn btn-neutral float-right" title="catkit.hub.ase_tools package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catkit.flow.html" class="btn btn-neutral" title="catkit.flow package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 01:18:25.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

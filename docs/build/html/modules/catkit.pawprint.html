@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.pawprint package &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="catkit.flow package" href="catkit.flow.html" />
+    <link rel="prev" title="catkit.gen.analysis package" href="catkit.gen.analysis.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">catkit.pawprint package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.pawprint.generator">catkit.pawprint.generator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.pawprint.operations">catkit.pawprint.operations module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.pawprint">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="catkit.html">catkit package</a> &raquo;</li>
+        
+      <li>catkit.pawprint package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/catkit.pawprint.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-pawprint-package">
+<h1>catkit.pawprint package<a class="headerlink" href="#catkit-pawprint-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.pawprint.generator">
+<span id="catkit-pawprint-generator-module"></span><h2>catkit.pawprint.generator module<a class="headerlink" href="#module-catkit.pawprint.generator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.pawprint.generator.Fingerprinter">
+<em class="property">class </em><code class="descclassname">catkit.pawprint.generator.</code><code class="descname">Fingerprinter</code><span class="sig-paren">(</span><em>images=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/generator.html#Fingerprinter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.generator.Fingerprinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Parent class for all fingerprint generators.</p>
+<dl class="method">
+<dt id="catkit.pawprint.generator.Fingerprinter.get_fp">
+<code class="descname">get_fp</code><span class="sig-paren">(</span><em>parameters</em>, <em>operation_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/generator.html#Fingerprinter.get_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.generator.Fingerprinter.get_fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fingerprints for a list of images of single atoms
+object for the given parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<em>list of str</em>) – Names of seeding parameters available in the parameters
+database.</li>
+<li><strong>operation_list</strong> (<em>list of functions</em>) – A list of operation functions to produce the fingerprints from.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fingerprints</strong> – Fingerprints for the images produced from the provided
+seed parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, m)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.pawprint.generator.get_connectivity">
+<code class="descclassname">catkit.pawprint.generator.</code><code class="descname">get_connectivity</code><span class="sig-paren">(</span><em>atoms</em>, <em>method=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/generator.html#get_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.generator.get_connectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an estimate of the connectivity matrix
+for a given atoms-object from CatGen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – Molecular structure with out without adsorbates.</li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> (</em><a class="reference external" href="https://docs.python.org/3.6/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a><em> or </em><em>'voronoi'</em><em>)</em>) – <p>Method for estimating the connectivity matrix:</p>
+<p>None - standard cutoff radius method.
+voronoi - best suited for bulk characterization.</p>
+</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>connectivity</strong> – Estimated connectivity matrix where n is the number
+of atoms in the atoms-object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, n)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.pawprint.operations">
+<span id="catkit-pawprint-operations-module"></span><h2>catkit.pawprint.operations module<a class="headerlink" href="#module-catkit.pawprint.operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.pawprint.operations.autocorrelation">
+<code class="descclassname">catkit.pawprint.operations.</code><code class="descname">autocorrelation</code><span class="sig-paren">(</span><em>atoms=None</em>, <em>atoms_parameters=None</em>, <em>connectivity=None</em>, <em>d=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/operations.html#autocorrelation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.operations.autocorrelation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autocorrelation convolution for systems without pbc.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.pawprint.operations.bonding_convolution">
+<code class="descclassname">catkit.pawprint.operations.</code><code class="descname">bonding_convolution</code><span class="sig-paren">(</span><em>atoms=None</em>, <em>atoms_parameters=None</em>, <em>connectivity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/operations.html#bonding_convolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.operations.bonding_convolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform convolution of metal atoms with bonded adsorbates.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.pawprint.operations.periodic_convolution">
+<code class="descclassname">catkit.pawprint.operations.</code><code class="descname">periodic_convolution</code><span class="sig-paren">(</span><em>atoms=None</em>, <em>atoms_parameters=None</em>, <em>connectivity=None</em>, <em>d=0</em>, <em>normalize=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/operations.html#periodic_convolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.operations.periodic_convolution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the square of each property with each atom. For distance 1 the
+covolutions returns the multiple of each property for all neighboring atom
+pairs.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.pawprint.operations.raw_properties">
+<code class="descclassname">catkit.pawprint.operations.</code><code class="descname">raw_properties</code><span class="sig-paren">(</span><em>atoms=None</em>, <em>atoms_parameters=None</em>, <em>connectivity=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/operations.html#raw_properties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.operations.raw_properties" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all atom properties without manipulation.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.pawprint">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.pawprint" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.pawprint.Fingerprinter">
+<em class="property">class </em><code class="descclassname">catkit.pawprint.</code><code class="descname">Fingerprinter</code><span class="sig-paren">(</span><em>images=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/generator.html#Fingerprinter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.Fingerprinter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Parent class for all fingerprint generators.</p>
+<dl class="method">
+<dt id="catkit.pawprint.Fingerprinter.get_fp">
+<code class="descname">get_fp</code><span class="sig-paren">(</span><em>parameters</em>, <em>operation_list</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/pawprint/generator.html#Fingerprinter.get_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.pawprint.Fingerprinter.get_fp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the fingerprints for a list of images of single atoms
+object for the given parameters.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>parameters</strong> (<em>list of str</em>) – Names of seeding parameters available in the parameters
+database.</li>
+<li><strong>operation_list</strong> (<em>list of functions</em>) – A list of operation functions to produce the fingerprints from.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>fingerprints</strong> – Fingerprints for the images produced from the provided
+seed parameters.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, m)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catkit.flow.html" class="btn btn-neutral float-right" title="catkit.flow package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catkit.gen.analysis.html" class="btn btn-neutral" title="catkit.gen.analysis package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 01:16:39.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

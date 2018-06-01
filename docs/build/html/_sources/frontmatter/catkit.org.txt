@@ -1,0 +1,350 @@
+#+Title: CatKit
+#+Author: Jacob Boes
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: \setlength{\parindent}{0em}
+
+* Graph-atoms (Gratoms) object
+The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
+
+** Graph information
+The =Gratoms= object primary function is to conveniently store and manage graph information.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit import Gratoms
+from catgen.molecules import get_topologies
+
+atoms0 = get_topologies('C4', saturate=True)[0]
+
+print(type(atoms0))
+print('\nAtomic numbers:\n{}\n'.format(atoms0.numbers))
+print('Connectivity matrix:\n{}'.format(atoms0.connectivity))
+
+atoms1 = atoms0.copy()
+del atoms1[0]
+
+print('\nAtomic numbers:\n{}\n'.format(atoms1.numbers))
+print('Connectivity matrix:\n{}'.format(atoms1.connectivity))
+print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
+
+atoms2 = atoms1 + Gratoms('C')
+
+print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
+print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
+
+atoms2.graph.add_edges_from([(0, 13), (1, 13), (2, 13), (3, 13)])
+
+print('\nAtomic numbers:\n{}\n'.format(atoms2.numbers))
+print('Connectivity matrix:\n{}'.format(atoms2.connectivity))
+
+print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms2)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+<class 'catkit.gratoms.Gratoms'>
+
+Atomic numbers:
+[6 6 6 6 1 1 1 1 1 1 1 1 1 1]
+
+Connectivity matrix:
+[[0 1 1 1 1 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 1 1 1 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 1 1 1 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 1 1 1]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 1 0 0 0 0 0 0 0 0 0 0]]
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0]]
+
+Are isomorphs: False
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 0]]
+
+Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]
+
+Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 1]
+ [0 0 0 0 0 0 0 1 1 1 0 0 0 1]
+ [0 0 0 0 0 0 0 0 0 0 1 1 1 1]
+ [0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+ [1 1 1 1 0 0 0 0 0 0 0 0 0 0]]
+
+Are isomorphs: True
+:END:
+
+* PawPrint
+The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in [[./pawprint/operations.py]].
+
+The complete list of seeding parameters which can be called from is available from the data dictionary produced from Mendeleev.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+import json
+
+with open('./data/properties.json', 'r') as f:
+    data = json.load(f)
+
+[print(i) for i in data.keys()]
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+atomic_number
+atomic_radius
+atomic_radius_rahm
+atomic_volume
+atomic_weight
+boiling_point
+c6
+c6_gb
+covalent_radius_bragg
+covalent_radius_cordero
+covalent_radius_pyykko
+covalent_radius_pyykko_double
+covalent_radius_pyykko_triple
+covalent_radius_slater
+dband_center_bulk
+dband_center_slab
+dband_kurtosis_bulk
+dband_kurtosis_slab
+dband_skewness_bulk
+dband_skewness_slab
+dband_width_bulk
+dband_width_slab
+density
+dipole_polarizability
+electron_affinity
+en_allen
+en_ghosh
+en_pauling
+evaporation_heat
+fusion_heat
+gas_basicity
+group_id
+heat_of_formation
+lattice_constant
+melting_point
+metallic_radius
+metallic_radius_c12
+period
+proton_affinity
+specific_heat
+thermal_conductivity
+vdw_radius
+vdw_radius_alvarez
+vdw_radius_batsanov
+vdw_radius_bondi
+vdw_radius_dreiding
+vdw_radius_mm3
+vdw_radius_rt
+vdw_radius_truhlar
+vdw_radius_uff
+:END:
+
+A list of atoms objects can also be passed to any of the generators.This will increase the dimensionality of the numpy array returned by 1 for each atoms object in the supplied list of images. Fingerprints produced in this way are returned in the same order as the list of objects provided.
+
+** Non-local fingerprint generation
+Currently, the fingerprint generator has operations for producing convolutions over all atoms in a provided list of atoms objects. There is only a single type of convolution which performs this type of operation currently:
+
+1. =periodic_convolution=
+Calculates the square of each atoms parameter in the unit cell.
+
+These functions can take additional keyword arguments as well, these are provided in the form of a dictionary as demonstrated in the following example.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import bulk
+
+bulk = bulk('Pd', cubic=True)
+bulk[3].symbol = 'Pt'
+
+slab = fcc111('Al', size=(2, 2, 3), a=3.8, vacuum=10.0)
+
+images = [bulk, slab]
+
+parameters = [
+    'atomic_number',
+    'atomic_radius',
+    'atomic_volume',
+    'atomic_weight',
+]
+
+operations = [
+    'periodic_convolution',
+    ['periodic_convolution', {'d': 1}]
+]
+
+fp = Fingerprinter(images)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[1.24320000e+04 7.56280000e+00 3.20440000e+02 7.20334163e+04
+  1.36896000e+05 9.07488000e+01 3.84480000e+03 7.70065336e+05]
+ [2.02800000e+03 2.45388000e+01 1.20000000e+03 8.73604104e+03
+  2.02800000e+04 2.45388000e+02 1.20000000e+04 8.73604104e+04]]
+:END:
+
+** Local fingerprint generation
+Localized fingerprints can also be generated. This is demonstrated for a catalytic structure of Palladium with a single Carbon adsorbate.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate
+
+atoms = fcc111('Pd', size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, 'C', 1, 'fcc')
+
+# -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)
+
+parameters = [
+    'atomic_number',
+    'atomic_radius',
+    'boiling_point',
+    'covalent_radius_cordero',
+    'evaporation_heat',
+    'fusion_heat',
+    'group_id',
+    'period',
+    'heat_of_formation',
+    'melting_point',
+    'metallic_radius',
+    'specific_heat',
+]
+
+operations = [
+    'bonding_convolution'
+]
+
+fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[2.76000000e+02 1.24670000e+00 1.74063000e+07 1.01470000e+00
+             nan            nan 1.40000000e+02 1.00000000e+01
+  2.69973242e+05 6.97150000e+06            nan 1.73484000e-01]]
+:END:
+
+The generators purpose is not to restrict which fingerprints can be generated, however, if no seed parameter is available for a particular chemical species, then an =Numpy= NaN value will be returned.
+
+** Writing personalized operations
+Currently, the default structure of and operation is as follows:
+
+#+BEGIN_EXAMPLE :exports both
+def periodic_convolution(
+        atoms,
+        atoms_parameters,
+        connectivity):
+#+END_EXAMPLE
+
+Where the =atoms=, =atoms_properties=, and =connectivity= properties are required. This is because these properties are passed to all operation functions currently implemented so that they do not need to be generated multiple times. This way change in future versions if it seems that these are better suited as global variables (This may makes the code overly difficult to follow).
+
+Here is an example of a simple operation which supplies the adsorbate connectivity.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate
+import numpy as np
+
+atoms = fcc111('Pd', size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, 'C', 1, 'fcc')
+
+# -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)
+
+parameters = [
+    'atomic_number',
+    'dband_center_slab',
+    'dband_width_slab',
+    'dband_skewness_slab',
+    'dband_kurtosis_slab'
+]
+
+def example_operation(
+        atoms,
+        atoms_parameters,
+        connectivity):
+    # This is a CatKit convention
+    bond_index = np.where(atoms.get_tags() == -1)[0]
+
+    return np.sum(connectivity[bond_index], axis=1)
+
+operations = [
+    'bonding_convolution',
+    example_operation
+]
+
+fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[ 2.76000000e+02 -1.57034029e+00  6.51684717e+00 -8.13678523e+01
+   3.65148674e+03  3.00000000e+00]]
+:END:
+

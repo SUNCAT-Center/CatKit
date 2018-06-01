@@ -82,7 +82,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">catkit package</a></li>
 </ul>
 
             
@@ -193,7 +193,7 @@
 <span class="s2">}&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="get_chemical_formula"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.get_chemical_formula">[docs]</a><span class="k">def</span> <span class="nf">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+<div class="viewcode-block" id="get_chemical_formula"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.get_chemical_formula">[docs]</a><span class="k">def</span> <span class="nf">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Compatibility function, return mode=metal, when</span>
 <span class="sd">    available, mode=hill, when not (ASE &lt;= 3.13)</span>
@@ -204,20 +204,13 @@
         <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="symbols"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.symbols">[docs]</a><span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+<div class="viewcode-block" id="symbols"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.symbols">[docs]</a><span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
     <span class="n">formula</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
     <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="read_ase"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.read_ase">[docs]</a><span class="k">def</span> <span class="nf">read_ase</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">names</span><span class="p">):</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Dirname </span><span class="si">{dirname}</span><span class="s2">: Names </span><span class="si">{names}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-        <span class="n">dirname</span><span class="o">=</span><span class="n">dirname</span><span class="p">,</span>
-        <span class="n">names</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
-    <span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="collect_structures"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.collect_structures">[docs]</a><span class="k">def</span> <span class="nf">collect_structures</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="collect_structures"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.collect_structures">[docs]</a><span class="k">def</span> <span class="nf">collect_structures</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">foldername</span><span class="p">)</span>
@@ -227,8 +220,9 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">posix_filename</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">posix_filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;publication.txt&#39;</span><span class="p">):</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
-                <span class="c1"># This variable does not appear to be used.</span>
-                <span class="n">PUBLICATION_TEMPLATE</span> <span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+                <span class="k">global</span> <span class="n">PUBLICATION_TEMPLATE</span>
+                <span class="n">PUBLICATION_TEMPLATE</span><span class="o">=</span> <span class="n">infile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="k">elif</span> <span class="n">Path</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">filetype</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">io</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">filetype</span><span class="p">(</span><span class="n">posix_filename</span><span class="p">)</span>
@@ -242,6 +236,11 @@
                         <span class="n">posix_filename</span><span class="p">)</span>
                     <span class="n">structures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: StopIteration </span><span class="si">{posix_filename}</span><span class="s2"> hit.&quot;</span>
+                          <span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                              <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
+                          <span class="p">))</span>
                 <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: File </span><span class="si">{posix_filename}</span><span class="s2"> looks incomplete&quot;</span>
                           <span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -252,11 +251,25 @@
                         <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
                         <span class="n">e</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
                     <span class="p">))</span>
+                <span class="k">except</span> <span class="ne">AssertionError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hit an assertion error with </span><span class="si">{posix_filename}</span><span class="s2">: </span><span class="si">{e}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
+                        <span class="n">e</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
+                        <span class="p">))</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Trouble reading </span><span class="si">{posix_filename}</span><span class="s2">: </span><span class="si">{e}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">posix_filename</span><span class="o">=</span><span class="n">posix_filename</span><span class="p">,</span>
+                        <span class="n">e</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
+                        <span class="p">))</span>
 
     <span class="k">return</span> <span class="n">structures</span></div>
 
 
-<div class="viewcode-block" id="fuzzy_match"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.fuzzy_match">[docs]</a><span class="k">def</span> <span class="nf">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+<div class="viewcode-block" id="fuzzy_match"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.fuzzy_match">[docs]</a><span class="k">def</span> <span class="nf">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+    <span class="c1"># filter out cell with ill-defined unit cells</span>
+    <span class="n">structures</span> <span class="o">=</span> <span class="p">[</span><span class="n">structure</span> <span class="k">for</span> <span class="n">structure</span> <span class="ow">in</span> <span class="n">structures</span>
+                  <span class="k">if</span> <span class="n">structure</span><span class="o">.</span><span class="n">number_of_lattice_vectors</span> <span class="o">==</span> <span class="mi">3</span>
+            <span class="p">]</span>
     <span class="c1"># sort by density</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span>
                         <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">x</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
@@ -294,7 +307,7 @@
         <span class="k">if</span> <span class="n">facet_match</span><span class="p">:</span>
             <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">facet_match</span><span class="o">.</span><span class="n">group</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
+            <span class="n">structure</span><span class="o">.</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;facet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">facet_name</span> <span class="ow">or</span> <span class="s1">&#39;facet&#39;</span>
 
         <span class="n">density</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">structure</span><span class="p">)</span> <span class="o">/</span> <span class="n">structure</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">options</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
@@ -566,14 +579,16 @@
     <span class="k">return</span> <span class="n">collected_structures</span></div>
 
 
-<div class="viewcode-block" id="create_folders"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.create_folders">[docs]</a><span class="k">def</span> <span class="nf">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="create_folders"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.create_folders">[docs]</a><span class="k">def</span> <span class="nf">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">structures</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
             <span class="n">Path</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-                        <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;publication.txt&#39;</span><span class="p">),</span>
+                <span class="c1"># Have to explicitly convert Path to str</span>
+                <span class="c1"># to work under python 3.4</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span>
+                        <span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s1">&#39;publication.txt&#39;</span><span class="p">)),</span>
                         <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">outfile</span><span class="p">:</span>
                     <span class="n">outfile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">PUBLICATION_TEMPLATE</span><span class="p">)</span>
             <span class="n">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="n">d</span><span class="p">)</span>
@@ -585,9 +600,9 @@
             <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.organize.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
-    <span class="n">pickle_file</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span>
-        <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.cache.pckl&#39;</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+    <span class="n">pickle_file</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span>
+        <span class="s1">&#39;/&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.cache.pckl&#39;</span>
 
     <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">Path</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">)</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">:</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">pickle_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">infile</span><span class="p">:</span>
@@ -613,7 +628,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 01:18:25.
 
     </p>
   </div>

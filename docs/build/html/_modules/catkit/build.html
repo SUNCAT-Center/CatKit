@@ -82,7 +82,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/catkit.html">catkit package</a></li>
 </ul>
 
             
@@ -155,15 +155,13 @@
 <span class="kn">from</span> <span class="nn">ase</span> <span class="k">import</span> <span class="n">Atoms</span>
 
 
-<div class="viewcode-block" id="surface"><a class="viewcode-back" href="../../catkit.html#catkit.build.surface">[docs]</a><span class="k">def</span> <span class="nf">surface</span><span class="p">(</span>
+<div class="viewcode-block" id="surface"><a class="viewcode-back" href="../../modules/catkit.html#catkit.build.surface">[docs]</a><span class="k">def</span> <span class="nf">surface</span><span class="p">(</span>
         <span class="n">elements</span><span class="p">,</span>
         <span class="n">size</span><span class="p">,</span>
         <span class="n">crystal</span><span class="o">=</span><span class="s1">&#39;fcc&#39;</span><span class="p">,</span>
-        <span class="n">index</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">miller</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
         <span class="n">fixed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">vacuum</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-        <span class="n">root</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">primitive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A helper function to return the surface associated with a</span>
 <span class="sd">    given set of input parameters to the general surface generator.</span>
@@ -177,17 +175,13 @@
 <span class="sd">        Number of time to expand the x, y, and z primitive cell.</span>
 <span class="sd">    crystal : str</span>
 <span class="sd">        The bulk crystal structure to pass to the ase bulk builder.</span>
-<span class="sd">    index : list (3,) or (4,)</span>
-<span class="sd">        The miller index to cleave the surface structure from.</span>
+<span class="sd">    miller : list (3,) or (4,)</span>
+<span class="sd">        The miller index to cleave the surface structure from. If 4 values</span>
+<span class="sd">        are used, </span>
 <span class="sd">    fixed : int</span>
 <span class="sd">        Number of layers to constrain.</span>
 <span class="sd">    vacuum : float</span>
 <span class="sd">        Angstroms of vacuum to add to the unit cell.</span>
-<span class="sd">    root : int</span>
-<span class="sd">        If not None, attempt to produce a root unit cell with</span>
-<span class="sd">        a primitive lattice length multiple this root.</span>
-<span class="sd">    primitive : bool</span>
-<span class="sd">        Perform an spglib reduction of the slabs unit cell.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -201,21 +195,25 @@
 
     <span class="n">gen</span> <span class="o">=</span> <span class="n">SlabGenerator</span><span class="p">(</span>
         <span class="n">atoms</span><span class="p">,</span>
-        <span class="n">miller_index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
-        <span class="n">layers</span><span class="o">=</span><span class="n">size</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+        <span class="n">miller_index</span><span class="o">=</span><span class="n">miller</span><span class="p">,</span>
+        <span class="n">layers</span><span class="o">=</span><span class="n">size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
         <span class="n">fixed</span><span class="o">=</span><span class="n">fixed</span><span class="p">,</span>
         <span class="n">vacuum</span><span class="o">=</span><span class="n">vacuum</span><span class="p">)</span>
 
-    <span class="n">slab</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_slab</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="n">root</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="n">primitive</span><span class="p">)</span>
-    <span class="n">surface_atoms</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_voronoi_surface_atoms</span><span class="p">(</span><span class="n">slab</span><span class="p">,</span> <span class="n">attach_graph</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">slab</span><span class="o">.</span><span class="n">set_surface_atoms</span><span class="p">(</span><span class="n">surface_atoms</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">size</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">size</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="n">slab</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_slab</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">slab</span></div>
 
 
-<div class="viewcode-block" id="molecule"><a class="viewcode-back" href="../../catkit.html#catkit.build.molecule">[docs]</a><span class="k">def</span> <span class="nf">molecule</span><span class="p">(</span>
+<div class="viewcode-block" id="molecule"><a class="viewcode-back" href="../../modules/catkit.html#catkit.build.molecule">[docs]</a><span class="k">def</span> <span class="nf">molecule</span><span class="p">(</span>
         <span class="n">species</span><span class="p">,</span>
         <span class="n">topology</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">adsorption</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">vacuum</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return gas-phase molecule structures based on species and</span>
 <span class="sd">    topology.</span>
@@ -226,6 +224,9 @@
 <span class="sd">        The chemical symbols to construct a molecule from.</span>
 <span class="sd">    topology : int, str, or slice</span>
 <span class="sd">        The indices for the distinct topology produced by the generator.</span>
+<span class="sd">    adsorption : bool</span>
+<span class="sd">        Construct the molecule as though it were adsorbed to a surface</span>
+<span class="sd">        parallel to the z-axis.</span>
 <span class="sd">    vacuum : float</span>
 <span class="sd">        Angstroms of vacuum to pad the molecule with.</span>
 
@@ -238,7 +239,7 @@
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">molecule_graphs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">_slice</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">parse_slice</span><span class="p">(</span><span class="n">topology</span><span class="p">)</span>
-        <span class="n">molecule_graphs</span> <span class="o">=</span> <span class="n">get_topologies</span><span class="p">(</span><span class="n">species</span><span class="p">)[</span><span class="n">_slice</span><span class="p">]</span>
+        <span class="n">molecule_graphs</span> <span class="o">=</span> <span class="n">molecule_graphs</span><span class="p">[</span><span class="n">_slice</span><span class="p">]</span>
 
     <span class="n">images</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">molecule_graphs</span><span class="p">:</span>
@@ -246,7 +247,7 @@
 
         <span class="n">root</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">branch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">branches</span><span class="p">):</span>
-            <span class="n">_branch_molecule</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">base_root</span><span class="o">=</span><span class="n">root</span><span class="p">)</span>
+            <span class="n">_branch_molecule</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">branch</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">adsorption</span><span class="p">)</span>
             <span class="n">root</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="k">if</span> <span class="n">vacuum</span><span class="p">:</span>
@@ -267,7 +268,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 01:18:25.
 
     </p>
   </div>

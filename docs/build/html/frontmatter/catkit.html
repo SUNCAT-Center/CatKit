@@ -1,0 +1,564 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>&lt;no title&gt; &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="catgen.html" />
+    <link rel="prev" title="CatKit: Catalysis Kit" href="../index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/catkit.html">catkit package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>&lt;no title&gt;</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/frontmatter/catkit.org.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <p>#+Title: CatKit
+#+Author: Jacob Boes
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: setlength{parindent}{0em}</p>
+<ul class="simple">
+<li>Graph-atoms (Gratoms) object</li>
+</ul>
+<p>The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.</p>
+<p>** Graph information
+The =Gratoms= object primary function is to conveniently store and manage graph information.</p>
+<p>#+BEGIN_SRC python :results output org drawer
+from catkit import Gratoms
+from catgen.molecules import get_topologies</p>
+<p>atoms0 = get_topologies(‘C4’, saturate=True)[0]</p>
+<p>print(type(atoms0))
+print(‘nAtomic numbers:n{}n’.format(atoms0.numbers))
+print(‘Connectivity matrix:n{}’.format(atoms0.connectivity))</p>
+<p>atoms1 = atoms0.copy()
+del atoms1[0]</p>
+<p>print(‘nAtomic numbers:n{}n’.format(atoms1.numbers))
+print(‘Connectivity matrix:n{}’.format(atoms1.connectivity))
+print(‘nAre isomorphs: {}’.format(atoms0.is_isomorph(atoms1)))</p>
+<p>atoms2 = atoms1 + Gratoms(‘C’)</p>
+<p>print(‘nAtomic numbers:n{}n’.format(atoms2.numbers))
+print(‘Connectivity matrix:n{}’.format(atoms2.connectivity))</p>
+<p>atoms2.graph.add_edges_from([(0, 13), (1, 13), (2, 13), (3, 13)])</p>
+<p>print(‘nAtomic numbers:n{}n’.format(atoms2.numbers))
+print(‘Connectivity matrix:n{}’.format(atoms2.connectivity))</p>
+<p>print(‘nAre isomorphs: {}’.format(atoms0.is_isomorph(atoms2)))
+#+END_SRC</p>
+<p>#+RESULTS:
+:RESULTS:
+&lt;class ‘catkit.gratoms.Gratoms’&gt;</p>
+<p>Atomic numbers:
+[6 6 6 6 1 1 1 1 1 1 1 1 1 1]</p>
+<p>Connectivity matrix:
+[[0 1 1 1 1 0 0 0 0 0 0 0 0 0]</p>
+<blockquote>
+<div>[1 0 0 0 0 1 1 1 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 1 1 1 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 1 1 1]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 1 0 0 0 0 0 0 0 0 0 0]]</div></blockquote>
+<p>Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1]</p>
+<p>Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0]</p>
+<blockquote>
+<div>[0 0 0 0 0 0 0 1 1 1 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 1 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0]]</div></blockquote>
+<p>Are isomorphs: False</p>
+<p>Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]</p>
+<p>Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 0]</p>
+<blockquote>
+<div>[0 0 0 0 0 0 0 1 1 1 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 1 1 1 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0]]</div></blockquote>
+<p>Atomic numbers:
+[6 6 6 1 1 1 1 1 1 1 1 1 1 6]</p>
+<p>Connectivity matrix:
+[[0 0 0 0 1 1 1 0 0 0 0 0 0 1]</p>
+<blockquote>
+<div>[0 0 0 0 0 0 0 1 1 1 0 0 0 1]
+[0 0 0 0 0 0 0 0 0 0 1 1 1 1]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 1]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[1 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 1 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 1 0 0 0 0 0 0 0 0 0 0 0]
+[1 1 1 1 0 0 0 0 0 0 0 0 0 0]]</div></blockquote>
+<p>Are isomorphs: True
+:END:</p>
+<ul class="simple">
+<li>PawPrint</li>
+</ul>
+<p>The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in [[./pawprint/operations.py]].</p>
+<p>The complete list of seeding parameters which can be called from is available from the data dictionary produced from Mendeleev.</p>
+<p>#+BEGIN_SRC python :results output org drawer :exports both
+import json</p>
+<dl class="docutils">
+<dt>with open(‘./data/properties.json’, ‘r’) as f:</dt>
+<dd>data = json.load(f)</dd>
+</dl>
+<p>[print(i) for i in data.keys()]
+#+END_SRC</p>
+<p>#+RESULTS:
+:RESULTS:
+atomic_number
+atomic_radius
+atomic_radius_rahm
+atomic_volume
+atomic_weight
+boiling_point
+c6
+c6_gb
+covalent_radius_bragg
+covalent_radius_cordero
+covalent_radius_pyykko
+covalent_radius_pyykko_double
+covalent_radius_pyykko_triple
+covalent_radius_slater
+dband_center_bulk
+dband_center_slab
+dband_kurtosis_bulk
+dband_kurtosis_slab
+dband_skewness_bulk
+dband_skewness_slab
+dband_width_bulk
+dband_width_slab
+density
+dipole_polarizability
+electron_affinity
+en_allen
+en_ghosh
+en_pauling
+evaporation_heat
+fusion_heat
+gas_basicity
+group_id
+heat_of_formation
+lattice_constant
+melting_point
+metallic_radius
+metallic_radius_c12
+period
+proton_affinity
+specific_heat
+thermal_conductivity
+vdw_radius
+vdw_radius_alvarez
+vdw_radius_batsanov
+vdw_radius_bondi
+vdw_radius_dreiding
+vdw_radius_mm3
+vdw_radius_rt
+vdw_radius_truhlar
+vdw_radius_uff
+:END:</p>
+<p>A list of atoms objects can also be passed to any of the generators.This will increase the dimensionality of the numpy array returned by 1 for each atoms object in the supplied list of images. Fingerprints produced in this way are returned in the same order as the list of objects provided.</p>
+<p>** Non-local fingerprint generation
+Currently, the fingerprint generator has operations for producing convolutions over all atoms in a provided list of atoms objects. There is only a single type of convolution which performs this type of operation currently:</p>
+<p>1. =periodic_convolution=
+Calculates the square of each atoms parameter in the unit cell.</p>
+<p>These functions can take additional keyword arguments as well, these are provided in the form of a dictionary as demonstrated in the following example.</p>
+<p>#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import bulk</p>
+<p>bulk = bulk(‘Pd’, cubic=True)
+bulk[3].symbol = ‘Pt’</p>
+<p>slab = fcc111(‘Al’, size=(2, 2, 3), a=3.8, vacuum=10.0)</p>
+<p>images = [bulk, slab]</p>
+<dl class="docutils">
+<dt>parameters = [</dt>
+<dd>‘atomic_number’,
+‘atomic_radius’,
+‘atomic_volume’,
+‘atomic_weight’,</dd>
+</dl>
+<p>]</p>
+<dl class="docutils">
+<dt>operations = [</dt>
+<dd>‘periodic_convolution’,
+[‘periodic_convolution’, {‘d’: 1}]</dd>
+</dl>
+<p>]</p>
+<p>fp = Fingerprinter(images)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC</p>
+<p>#+RESULTS:
+:RESULTS:
+[[1.24320000e+04 7.56280000e+00 3.20440000e+02 7.20334163e+04</p>
+<blockquote>
+<div><blockquote>
+<div>1.36896000e+05 9.07488000e+01 3.84480000e+03 7.70065336e+05]</div></blockquote>
+<dl class="docutils">
+<dt>[2.02800000e+03 2.45388000e+01 1.20000000e+03 8.73604104e+03</dt>
+<dd>2.02800000e+04 2.45388000e+02 1.20000000e+04 8.73604104e+04]]</dd>
+</dl>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">END:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p>** Local fingerprint generation
+Localized fingerprints can also be generated. This is demonstrated for a catalytic structure of Palladium with a single Carbon adsorbate.</p>
+<p>#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate</p>
+<p>atoms = fcc111(‘Pd’, size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, ‘C’, 1, ‘fcc’)</p>
+<p># -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)</p>
+<dl class="docutils">
+<dt>parameters = [</dt>
+<dd>‘atomic_number’,
+‘atomic_radius’,
+‘boiling_point’,
+‘covalent_radius_cordero’,
+‘evaporation_heat’,
+‘fusion_heat’,
+‘group_id’,
+‘period’,
+‘heat_of_formation’,
+‘melting_point’,
+‘metallic_radius’,
+‘specific_heat’,</dd>
+</dl>
+<p>]</p>
+<dl class="docutils">
+<dt>operations = [</dt>
+<dd>‘bonding_convolution’</dd>
+</dl>
+<p>]</p>
+<p>fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC</p>
+<p>#+RESULTS:
+:RESULTS:
+[[2.76000000e+02 1.24670000e+00 1.74063000e+07 1.01470000e+00</p>
+<blockquote>
+<div><blockquote>
+<div>nan            nan 1.40000000e+02 1.00000000e+01</div></blockquote>
+<p>2.69973242e+05 6.97150000e+06            nan 1.73484000e-01]]</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">END:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+<p>The generators purpose is not to restrict which fingerprints can be generated, however, if no seed parameter is available for a particular chemical species, then an =Numpy= NaN value will be returned.</p>
+<p>** Writing personalized operations
+Currently, the default structure of and operation is as follows:</p>
+<p>#+BEGIN_EXAMPLE :exports both
+def periodic_convolution(</p>
+<blockquote>
+<div>atoms,
+atoms_parameters,
+connectivity):</div></blockquote>
+<p>#+END_EXAMPLE</p>
+<p>Where the =atoms=, =atoms_properties=, and =connectivity= properties are required. This is because these properties are passed to all operation functions currently implemented so that they do not need to be generated multiple times. This way change in future versions if it seems that these are better suited as global variables (This may makes the code overly difficult to follow).</p>
+<p>Here is an example of a simple operation which supplies the adsorbate connectivity.</p>
+<p>#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate
+import numpy as np</p>
+<p>atoms = fcc111(‘Pd’, size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, ‘C’, 1, ‘fcc’)</p>
+<p># -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)</p>
+<dl class="docutils">
+<dt>parameters = [</dt>
+<dd>‘atomic_number’,
+‘dband_center_slab’,
+‘dband_width_slab’,
+‘dband_skewness_slab’,
+‘dband_kurtosis_slab’</dd>
+</dl>
+<p>]</p>
+<dl class="docutils">
+<dt>def example_operation(</dt>
+<dd><blockquote class="first">
+<div>atoms,
+atoms_parameters,
+connectivity):</div></blockquote>
+<p># This is a CatKit convention
+bond_index = np.where(atoms.get_tags() == -1)[0]</p>
+<p class="last">return np.sum(connectivity[bond_index], axis=1)</p>
+</dd>
+<dt>operations = [</dt>
+<dd>‘bonding_convolution’,
+example_operation</dd>
+</dl>
+<p>]</p>
+<p>fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+print(fingerprints)
+#+END_SRC</p>
+<p>#+RESULTS:
+:RESULTS:
+[[ 2.76000000e+02 -1.57034029e+00  6.51684717e+00 -8.13678523e+01</p>
+<blockquote>
+<div>3.65148674e+03  3.00000000e+00]]</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">END:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catgen.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="CatKit: Catalysis Kit" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 01:15:36.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

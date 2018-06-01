@@ -1,0 +1,271 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>&lt;no title&gt; &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="&lt;no title&gt;" href="catflow.html" />
+    <link rel="prev" title="&lt;no title&gt;" href="catgen.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules/catkit.html">catkit package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>&lt;no title&gt;</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/frontmatter/cathub.org.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <ul class="simple">
+<li>+Title:CatHub: Catalysis-Hub.org interface</li>
+<li>+Author:Kirsten T Winther, Max J Hoffmann</li>
+<li>+OPTIONS: toc:nil</li>
+</ul>
+<p>** Using the cathub command line interface</p>
+<p>Run =cathub=, like so</p>
+<ul class="simple">
+<li>=cathub –help=</li>
+</ul>
+<p>or with any of its sub-commands, like so</p>
+<ul class="simple">
+<li>=cathub make_folders_template –help=</li>
+</ul>
+<p>** Examples</p>
+<p>To create an .json input file</p>
+<ul class="simple">
+<li>=cathub make_folders_template project1.json –create-template=</li>
+</ul>
+<p>To create a folder structure from a .json input file</p>
+<ul class="simple">
+<li>=cathub make_folders_template project1.json=</li>
+</ul>
+<p>To convert a folder containing adsorption energy calculations into a
+a folder structure suitable for catalysis-hub.org submission</p>
+<blockquote>
+<div>(will not change existing files and create a new folder with suffix .organized)</div></blockquote>
+<ul class="simple">
+<li>=cathub organize &lt;folder-name&gt; –adsorbates O,OH,OOH=</li>
+</ul>
+<p>This is aimed for single-adsorbate reaction energies. Structure are matched
+base on unit cell and chemical formula. Consult for more options</p>
+<ul class="simple">
+<li>=cathub organize –help=</li>
+</ul>
+<p>Querying the Catalysis Hub database:</p>
+<ul class="simple">
+<li>=cathub reactions -q reactants=CO -q chemicalComposition=~Pt=</li>
+<li>=cathub publications -q title=~Evolution -q year=2017=</li>
+</ul>
+<p>Reading folders into sqlite3 db file:</p>
+<ul class="simple">
+<li>=cathub folder2db &lt;foldername&gt;=</li>
+</ul>
+<p>Sending the data to the Catalysis Hub server:</p>
+<ul class="simple">
+<li>=cathub db2server &lt;dbfile&gt;=</li>
+</ul>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catflow.html" class="btn btn-neutral float-right" title="&lt;no title&gt;" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catgen.html" class="btn btn-neutral" title="&lt;no title&gt;" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 01:15:36.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

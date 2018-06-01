@@ -1,0 +1,20 @@
+#+Title: CatFlow: Catalysis WorkFlow
+#+Author: Jacob Boes
+#+OPTIONS: toc:nil
+
+CatFlow is a staging ground for workflows which may be useful to a more general user base. Currently, these modules are specific in many ways to the [[http://suncat.stanford.edu/][SUNCAT]] groups facilities.
+
+TODO:
+- [ ] Example usages
+- [ ] Description of the underlying strategy.
+- [ ] Links to recourses setup for SUNCAT.
+- [ ] A workflow 
+
+* Dependencies
+This module is optional to the installation of CatKit and as such, the dependencies are not included in the main requirements file.
+
+If you'd like to use this module, the required dependences are:
+[[https://github.com/vossjo/ase-espresso][ASE-espresso]]
+[[https://msgpack.org/][msgpack]]
+
+Additionally, many of the standard scripts provided in the examples require integration with the [[https://github.com/materialsproject/fireworks][Fireworks]] workflow architecture. 

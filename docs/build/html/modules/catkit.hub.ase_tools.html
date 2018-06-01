@@ -1,0 +1,455 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.hub.ase_tools package &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="catkit.hub package" href="catkit.hub.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="catkit.html">catkit package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="catkit.gen.html">catkit.gen package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="catkit.hub.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.ase_connect">catkit.hub.ase_connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.cathubsqlite">catkit.hub.cathubsqlite module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.cli">catkit.hub.cli module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.convert_traj">catkit.hub.convert_traj module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.create_user">catkit.hub.create_user module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.db2server">catkit.hub.db2server module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.folder2db">catkit.hub.folder2db module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.folder_check">catkit.hub.folder_check module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.folderreader">catkit.hub.folderreader module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#catkit-hub-folderreader-old-module">catkit.hub.folderreader_old module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.maintain_server">catkit.hub.maintain_server module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.make_folders_template">catkit.hub.make_folders_template module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.organize">catkit.hub.organize module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.postgresql">catkit.hub.postgresql module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.psql_server_connect">catkit.hub.psql_server_connect module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.query">catkit.hub.query module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub.tools">catkit.hub.tools module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="catkit.hub.html#module-catkit.hub">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="catkit.html">catkit package</a> &raquo;</li>
+        
+          <li><a href="catkit.hub.html">catkit.hub package</a> &raquo;</li>
+        
+      <li>catkit.hub.ase_tools package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/catkit.hub.ase_tools.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-hub-ase-tools-package">
+<h1>catkit.hub.ase_tools package<a class="headerlink" href="#catkit-hub-ase-tools-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.hub.ase_tools.gas_phase_references">
+<span id="catkit-hub-ase-tools-gas-phase-references-module"></span><h2>catkit.hub.ase_tools.gas_phase_references module<a class="headerlink" href="#module-catkit.hub.ase_tools.gas_phase_references" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.ase_tools.gas_phase_references.construct_reference_system">
+<code class="descclassname">catkit.hub.ase_tools.gas_phase_references.</code><code class="descname">construct_reference_system</code><span class="sig-paren">(</span><em>symbols, candidates=['H2', 'H2O', 'NH3', 'CH4', 'CO', 'SH2', 'HCl', 'N2', 'O2']</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools/gas_phase_references.html#construct_reference_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.gas_phase_references.construct_reference_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a list of symbols and construct gas phase
+references system, when possible avoiding O2.
+Candidates can be rearranged, where earlier candidates
+get higher preference than later candidates</p>
+<p>assume symbols sorted by atomic number</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.gas_phase_references.get_atomic_stoichiometry">
+<code class="descclassname">catkit.hub.ase_tools.gas_phase_references.</code><code class="descname">get_atomic_stoichiometry</code><span class="sig-paren">(</span><em>references</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools/gas_phase_references.html#get_atomic_stoichiometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.gas_phase_references.get_atomic_stoichiometry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a list of references (tuples of (symbol, molecule))
+return stoichiometry matrix that connects atomic symbols
+to its molecular references.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.gas_phase_references.get_stoichiometry_factors">
+<code class="descclassname">catkit.hub.ase_tools.gas_phase_references.</code><code class="descname">get_stoichiometry_factors</code><span class="sig-paren">(</span><em>adsorbates</em>, <em>references</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools/gas_phase_references.html#get_stoichiometry_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.gas_phase_references.get_stoichiometry_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a list of adsorabtes and a corresponding reference
+system and return a list of dictionaries encoding the
+stoichiometry factors converting between adsorbates and
+reference molecules.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.gas_phase_references.molecules2symbols">
+<code class="descclassname">catkit.hub.ase_tools.gas_phase_references.</code><code class="descname">molecules2symbols</code><span class="sig-paren">(</span><em>molecules</em>, <em>add_hydrogen=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools/gas_phase_references.html#molecules2symbols"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.gas_phase_references.molecules2symbols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take a list of molecules and return just a list of atomic
+symbols, possibly adding hydrogen</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.hub.ase_tools">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.hub.ase_tools" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.hub.ase_tools.check_in_ase">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">check_in_ase</code><span class="sig-paren">(</span><em>filename</em>, <em>ase_db</em>, <em>energy=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#check_in_ase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.check_in_ase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if entry is allready in ASE db</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.check_traj">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">check_traj</code><span class="sig-paren">(</span><em>filename</em>, <em>strict=True</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#check_traj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.check_traj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.clear_prefactor">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">clear_prefactor</code><span class="sig-paren">(</span><em>molecule</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#clear_prefactor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.clear_prefactor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.clear_state">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">clear_state</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#clear_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.clear_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.debug_assert">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">debug_assert</code><span class="sig-paren">(</span><em>expression</em>, <em>message</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#debug_assert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.debug_assert" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_atomic_numbers">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_atomic_numbers</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_atomic_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_atomic_numbers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_atoms">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_atoms</code><span class="sig-paren">(</span><em>molecule</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_atoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_bulk_composition">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_bulk_composition</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_bulk_composition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_bulk_composition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_chemical_formula">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_chemical_formula</code><span class="sig-paren">(</span><em>filename</em>, <em>mode='metal'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_chemical_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_chemical_formula" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_energies">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_energies</code><span class="sig-paren">(</span><em>filenames</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_energies" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_energy">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_energy</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_energy_diff">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_energy_diff</code><span class="sig-paren">(</span><em>filename</em>, <em>filename_ref</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_energy_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_energy_diff" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_formula_from_numbers">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_formula_from_numbers</code><span class="sig-paren">(</span><em>numbers</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_formula_from_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_formula_from_numbers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_layers">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_layers</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_n_layers">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_n_layers</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_n_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_n_layers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_number_of_atoms">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_number_of_atoms</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_number_of_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_number_of_atoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_numbers_from_formula">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_numbers_from_formula</code><span class="sig-paren">(</span><em>formula</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_numbers_from_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_numbers_from_formula" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_pbc">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_pbc</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_pbc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_pbc" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_reaction_atoms">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_reaction_atoms</code><span class="sig-paren">(</span><em>reaction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_reaction_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_reaction_atoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_reaction_energy">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_reaction_energy</code><span class="sig-paren">(</span><em>traj_files</em>, <em>reaction</em>, <em>reaction_atoms</em>, <em>states</em>, <em>prefactors</em>, <em>prefactors_TS</em>, <em>energy_corrections</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_reaction_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_reaction_energy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_reaction_from_folder">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_reaction_from_folder</code><span class="sig-paren">(</span><em>folder_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_reaction_from_folder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_reaction_from_folder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_reference">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_reference</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_reference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_reference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_state">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_state</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_state" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_surface_composition">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_surface_composition</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_surface_composition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_surface_composition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.get_traj_str">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">get_traj_str</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#get_traj_str"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.get_traj_str" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.read_ase">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">read_ase</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#read_ase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.read_ase" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.tag_atoms">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">tag_atoms</code><span class="sig-paren">(</span><em>atoms</em>, <em>types=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#tag_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.tag_atoms" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.update_ase">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">update_ase</code><span class="sig-paren">(</span><em>db_file</em>, <em>identity</em>, <em>**key_value_pairs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#update_ase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.update_ase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to ASE db</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.hub.ase_tools.write_ase">
+<code class="descclassname">catkit.hub.ase_tools.</code><code class="descname">write_ase</code><span class="sig-paren">(</span><em>filename</em>, <em>db_file</em>, <em>user=None</em>, <em>data=None</em>, <em>**key_value_pairs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/ase_tools.html#write_ase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.ase_tools.write_ase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Connect to ASE db</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="catkit.hub.html" class="btn btn-neutral" title="catkit.hub package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 01:16:39.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

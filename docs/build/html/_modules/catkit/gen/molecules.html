@@ -82,7 +82,7 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">catkit package</a></li>
 </ul>
 
             
@@ -148,16 +148,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for catkit.gen.molecules</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
-<span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_atomic_numbers</span>
+<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_atomic_numbers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">defaults</span>
+<span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="n">radicals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">92</span><span class="p">)</span>
-<span class="n">radicals</span><span class="p">[[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
 
-
-<div class="viewcode-block" id="bin_hydrogen"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.molecules.bin_hydrogen">[docs]</a><span class="k">def</span> <span class="nf">bin_hydrogen</span><span class="p">(</span><span class="n">hydrogens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="bin_hydrogen"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.molecules.bin_hydrogen">[docs]</a><span class="k">def</span> <span class="nf">bin_hydrogen</span><span class="p">(</span><span class="n">hydrogens</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Recursive function for determining distributions of</span>
 <span class="sd">    hydrogens across bins</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -174,7 +172,7 @@
                     <span class="k">yield</span> <span class="n">j</span> <span class="o">+</span> <span class="n">k</span></div>
 
 
-<div class="viewcode-block" id="hydrogenate"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.molecules.hydrogenate">[docs]</a><span class="k">def</span> <span class="nf">hydrogenate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="hydrogenate"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.molecules.hydrogenate">[docs]</a><span class="k">def</span> <span class="nf">hydrogenate</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">bins</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add hydrogens to a gratoms object via provided bins&quot;&quot;&quot;</span>
     <span class="n">h_index</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
 
@@ -192,10 +190,21 @@
     <span class="k">return</span> <span class="n">atoms</span></div>
 
 
-<div class="viewcode-block" id="get_topologies"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.molecules.get_topologies">[docs]</a><span class="k">def</span> <span class="nf">get_topologies</span><span class="p">(</span><span class="n">chemistry</span><span class="p">,</span> <span class="n">saturate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="get_topologies"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.molecules.get_topologies">[docs]</a><span class="k">def</span> <span class="nf">get_topologies</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">saturate</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the possible topologies of a given chemical species</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    symbols : str</span>
+<span class="sd">        Atomic symbols to construct the topologies from.</span>
+<span class="sd">    saturate : bool</span>
+<span class="sd">        Saturate the molecule with hydrogen based on the</span>
+<span class="sd">        default.radicals set.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">num</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">chemistry</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">num</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">mcnt</span> <span class="o">=</span> <span class="n">cnt</span><span class="p">[</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">mnum</span> <span class="o">=</span> <span class="n">num</span><span class="p">[</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
 
@@ -205,7 +214,7 @@
         <span class="n">hcnt</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">mnum</span><span class="p">,</span> <span class="n">mcnt</span><span class="p">)</span>
-    <span class="n">max_degree</span> <span class="o">=</span> <span class="n">radicals</span><span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+    <span class="n">max_degree</span> <span class="o">=</span> <span class="n">defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;radicals&#39;</span><span class="p">)[</span><span class="n">elements</span><span class="p">]</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">mcnt</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
     <span class="n">hmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_degree</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">-</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
@@ -299,7 +308,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 01:18:25.
 
     </p>
   </div>
