@@ -358,6 +358,12 @@ def connect(user):
     help="Regular expression that matches"
          " only those files that are included.",)
 @click.option(
+    '-j', '--json'
+    type=bool,
+    is_flag=True,
+    help="Store intermediate filetype as json"
+    "instead of traj files")
+@click.option(
     '-m', '--max-energy',
     type=float,
     default=10.,

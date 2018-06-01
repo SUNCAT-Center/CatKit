@@ -440,6 +440,11 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
+    if options.json:
+        out_format = 'json'
+    else:
+        out_format = 'traj'
+
     for key in structures:
         if isinstance(structures[key], dict):
             d = Path(root).joinpath(key)
@@ -454,9 +459,9 @@ def create_folders(options, structures, root=''):
             create_folders(options, structures[key], root=d)
         else:
             ase.io.write(
-                str(Path(root).joinpath(key + '.traj')),
+                str(Path(root).joinpath(key + '.' + out_format)),
                 structures[key],
-                format='traj',
+                format=out_format,
             )
 
 
