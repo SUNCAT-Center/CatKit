@@ -1,5 +1,6 @@
 import unittest
 from catkit.flow.qeio import cd
+import shutil
 import os
 
 
@@ -8,7 +9,7 @@ class TestQEIO(unittest.TestCase):
 
     def tearDown(self):
         """Clear the temp file."""
-        os.unlink('temp')
+        shutil.rmtree('temp')
 
     def test_cd(self):
         """Test the cd context manager."""
