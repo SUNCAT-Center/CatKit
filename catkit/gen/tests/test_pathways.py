@@ -1,3 +1,4 @@
+import unittest
 from catkit.gen.pathways import ReactionNetwork
 import os
 

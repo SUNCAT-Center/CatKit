@@ -31,7 +31,7 @@ class SlabGenerator(object):
                  vacuum=None,
                  fixed=None,
                  fix_stoichiometry=False,
-                 attach_graph=False,
+                 attach_graph=True,
                  standardize_bulk=True,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
@@ -276,7 +276,6 @@ class SlabGenerator(object):
 
         # TODO: Graph generation needs to go here once handling of
         # unit cell repetitions is implemented.
-
         indices = np.argwhere(surf_atoms).flatten()
         zcoords = ibasis.get_scaled_positions()[:, 2] - 0.5
         surface_atoms = indices[zcoords[indices] > 0]

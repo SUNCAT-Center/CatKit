@@ -199,6 +199,7 @@ class Gratoms(Atoms):
 
         # Copy the graph, conserving correct indexing
         if self.nodes:
+            j = np.argsort(i)
             nodes = [[i, {'number': n}]
                      for i, n in enumerate(self.arrays['numbers'])]
             atoms.graph.add_nodes_from(nodes)
@@ -206,7 +207,7 @@ class Gratoms(Atoms):
             for u, v in self.graph.edges():
                 if u not in i or v not in i:
                     continue
-                atoms.graph.add_edge(i[u], i[v])
+                atoms.graph.add_edge(j[u], j[v])
 
         atoms.constraints = conadd
         return atoms

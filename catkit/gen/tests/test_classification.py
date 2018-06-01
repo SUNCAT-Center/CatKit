@@ -1,19 +1,20 @@
+import unittest
 from catkit.gen.analysis import Classifier
-from ase.io import read
-import pkg_resources
+from catkit.build import molecule
 
 
-def test_classifier():
-    data_path = pkg_resources.resource_filename(
-        'catkit', 'data/molecules.db')
-    atoms = read(data_path)
+class TestAnalysis(unittest.TestCase):
+    """Test features of the analysis module."""
 
-    # This needs to be made rigorous, but also to be converted to
-    # Gratoms automatically.
-    cl = Classifier(atoms)
-    ads_atoms = cl.id_adsorbate_atoms()
-    slab_atoms = cl.id_slab_atoms()
+    def test_classifier():
+        """Test identification of adsorbate atoms and slab atoms."""
+        atoms = molecule('C2H2')[0]
+
+        # This needs to be made rigorous.
+        cl = Classifier(atoms)
+        cl.id_adsorbate_atoms()
+        cl.id_slab_atoms()
 
 
-if __name__ == "__main__":
-    test_classifier()
+if __name__ == '__main__':
+    unittest.main()
