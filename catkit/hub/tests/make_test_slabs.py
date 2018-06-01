@@ -19,7 +19,7 @@ slab1.set_calculator(
             energy=500,
             )
         )
-ase.io.write('empty_slab_111.traj', slab1)
+ase.io.write(path + 'empty_slab_111.traj', slab1)
 ase.lattice.surface.add_adsorbate(slab1, ase.atoms.Atoms('O'), height=1.5)
 slab1.set_calculator(
         ase.calculators.singlepoint.SinglePointCalculator(

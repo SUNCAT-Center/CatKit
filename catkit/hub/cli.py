@@ -340,6 +340,7 @@ def connect(user):
 @click.option(
     '-f', '--facet-name',
     type=str,
+    default='facet',
     help="Manually specify a facet names.")
 @click.option(
     '-g', '--max-density-gas',
