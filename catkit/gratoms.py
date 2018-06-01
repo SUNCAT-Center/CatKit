@@ -166,7 +166,6 @@ class Gratoms(Atoms):
         other associated info as the original Atoms object. The
         indices of the constraints will be shuffled so that they match
         the indexing in the subset returned.
-
         """
 
         if isinstance(i, (int, np.int64)):
@@ -199,8 +198,8 @@ class Gratoms(Atoms):
 
         # Copy the graph, conserving correct indexing
         if self.nodes:
-            nodes = [[i, {'number': n}]
-                     for i, n in enumerate(self.arrays['numbers'])]
+            nodes = [[_, {'number': n}]
+                     for _, n in enumerate(self.arrays['numbers'])]
             atoms.graph.add_nodes_from(nodes)
 
             j = i.tolist()
