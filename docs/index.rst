@@ -23,8 +23,8 @@ Contents
 
 .. toctree::
 
-   frontmatter/catkit
-   frontmatter/catgen
-   frontmatter/cathub
-   frontmatter/catflow
+   CatKit <https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html>
+   CatGen <https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html>
+   CatHub <https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html>
+   CatFlow <https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html>
    modules/catkit

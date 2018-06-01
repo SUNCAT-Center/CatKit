@@ -1,0 +1,339 @@
+#+Title: CatKit
+#+Author: Jacob Boes
+#+SETUPFILE: ../theme-readtheorg.setup
+
+* Graph-atoms (Gratoms) object
+The =Gratoms= object is a child class of the ASE =Atoms= object class. Effectively, this means that it has all the same functionality as an =Atoms= object with some additional features as well.
+
+** Graph information
+The =Gratoms= object primary function is to conveniently store and manage graph information.
+
+#+BEGIN_SRC python :results output org drawer
+from catkit import Gratoms
+from catkit.build import molecule
+import numpy as np
+
+atoms0 = molecule('C4H10')[0]
+
+print(type(atoms0))
+print('\nAtomic numbers')
+numbers = atoms0.numbers
+
+print('#+attr_latex: :mode math :environment matrix')
+print('|' + '|'.join(numbers.astype(str)))
+
+print('\nConnectivity matrix:'.format())
+matrix = atoms0.connectivity
+table_matrix = np.array(matrix, dtype=str)
+
+print('#+attr_latex: :mode math :environment matrix')
+for row in table_matrix:
+    print('|' + '|'.join(row.astype(str)))
+
+atoms1 = atoms0.copy()
+del atoms1[0]
+
+print('\nAtomic numbers')
+numbers = atoms1.numbers
+
+print('#+attr_latex: :mode math :environment matrix')
+print('|' + '|'.join(numbers.astype(str)))
+
+print('\nConnectivity matrix:'.format())
+matrix = atoms1.connectivity
+table_matrix = np.array(matrix, dtype=str)
+
+print('#+attr_latex: :mode math :environment matrix')
+for row in table_matrix:
+    print('|' + '|'.join(row.astype(str)))
+
+print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+<class 'catkit.gratoms.Gratoms'>
+
+Atomic numbers
+#+attr_latex: :mode math :environment matrix
+| 6 | 6 | 6 | 6 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
+
+Connectivity matrix:
+#+attr_latex: :mode math :environment matrix
+| 0 | 1 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 | 1 |
+| 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| 0 | 0 | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+Atomic numbers
+#+attr_latex: :mode math :environment matrix
+|6|6|6|1|1|1|1|1|1|1|1|1|1
+
+Connectivity matrix:
+#+attr_latex: :mode math :environment matrix
+|0|0|0|0|1|1|1|0|0|0|0|0|0
+|0|0|0|0|0|0|0|1|1|1|0|0|0
+|0|0|0|0|0|0|0|0|0|0|1|1|1
+|0|0|0|0|0|0|0|0|0|0|0|0|0
+|1|0|0|0|0|0|0|0|0|0|0|0|0
+|1|0|0|0|0|0|0|0|0|0|0|0|0
+|1|0|0|0|0|0|0|0|0|0|0|0|0
+|0|1|0|0|0|0|0|0|0|0|0|0|0
+|0|1|0|0|0|0|0|0|0|0|0|0|0
+|0|1|0|0|0|0|0|0|0|0|0|0|0
+|0|0|1|0|0|0|0|0|0|0|0|0|0
+|0|0|1|0|0|0|0|0|0|0|0|0|0
+|0|0|1|0|0|0|0|0|0|0|0|0|0
+
+Are isomorphs: False
+:END:
+
+* PawPrint
+The fingerprint generator is designed to be a general purpose utility for returning manipulated parameters from a list of possible operations. The possible operations which are currently implemented cat be found in [[./pawprint/operations.py]].
+
+The complete list of seeding parameters which can be called from is available from the data dictionary produced from Mendeleev.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+import json
+
+with open('../../catkit/data/properties.json', 'r') as f:
+    data = json.load(f)
+
+print('|Keys| First 10 values')
+print('|-')
+for k, v in data.items():
+    print('|{}|{}'.format(k, ', '.join([str(round(_, 3)) for _ in v[1:11]])))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+| Keys                          | First 10 values                                                         |
+|-------------------------------+-------------------------------------------------------------------------|
+| atomic_number                 | 1, 2, 3, 4, 5, 6, 7, 8, 9, 10                                           |
+| atomic_radius                 | 0.79, nan, 1.55, 1.12, 0.98, 0.91, 0.92, nan, nan, nan                  |
+| atomic_radius_rahm            | 1.54, 1.34, 2.2, 2.19, 2.05, 1.9, 1.79, 1.71, 1.63, 1.56                |
+| atomic_volume                 | 14.1, 31.8, 13.1, 5.0, 4.6, 5.3, 17.3, 14.0, 17.1, 16.8                 |
+| atomic_weight                 | 1.008, 4.003, 6.94, 9.012, 10.81, 12.011, 14.007, 15.999, 18.998, 20.18 |
+| boiling_point                 | 20.28, 4.216, 1118.15, 3243.0, 3931.0, 5100.0, 77.4, 90.19, 85.01, 27.1 |
+| c6                            | 6.499, 1.42, 1392.0, 227.0, 99.5, 46.6, 24.2, 15.6, 9.52, 6.2           |
+| c6_gb                         | 6.51, 1.47, 1410.0, 214.0, 99.2, 47.9, 25.7, 16.7, 10.2, 6.91           |
+| covalent_radius_bragg         | nan, nan, 1.5, 1.15, nan, 0.77, 0.65, 0.65, 0.67, nan                   |
+| covalent_radius_cordero       | 0.31, 0.28, 1.28, 0.96, 0.84, 0.73, 0.71, 0.66, 0.57, 0.58              |
+| covalent_radius_pyykko        | 0.32, 0.46, 1.33, 1.02, 0.85, 0.75, 0.71, 0.63, 0.64, 0.67              |
+| covalent_radius_pyykko_double | nan, nan, 1.24, 0.9, 0.78, 0.67, 0.6, 0.57, 0.59, 0.96                  |
+| covalent_radius_pyykko_triple | nan, nan, nan, 0.85, 0.73, 0.6, 0.54, 0.53, 0.53, nan                   |
+| covalent_radius_slater        | 0.25, nan, 1.45, 1.05, 0.85, 0.7, 0.65, 0.6, 0.5, nan                   |
+| dband_center_bulk             | nan, nan, nan, nan, nan, nan, nan, nan, nan, nan                        |
+| dband_center_slab             | 1.0, nan, nan, nan, nan, 1.0, 1.0, 1.0, 1.0, nan                        |
+| dband_kurtosis_bulk           | nan, nan, nan, nan, nan, nan, nan, nan, nan, nan                        |
+| dband_kurtosis_slab           | 1.0, nan, nan, nan, nan, 1.0, 1.0, 1.0, 1.0, nan                        |
+| dband_skewness_bulk           | nan, nan, nan, nan, nan, nan, nan, nan, nan, nan                        |
+| dband_skewness_slab           | 1.0, nan, nan, nan, nan, 1.0, 1.0, 1.0, 1.0, nan                        |
+| dband_width_bulk              | nan, nan, nan, nan, nan, nan, nan, nan, nan, nan                        |
+| dband_width_slab              | 1.0, nan, nan, nan, nan, 1.0, 1.0, 1.0, 1.0, nan                        |
+| density                       | 0.071, 0.147, 0.534, 1.848, 2.34, 2.25, 0.808, 1.149, 1.108, 1.204      |
+| dipole_polarizability         | 4.507, 1.384, 164.0, 37.71, 20.53, 20.53, 7.6, 5.24, 3.7, 2.67          |
+| electron_affinity             | 0.754, -19.7, 0.618, -2.4, 0.28, 1.262, -1.4, 1.461, 3.401, nan         |
+| en_allen                      | 13.61, 24.59, 5.392, 9.323, 12.13, 15.05, 18.13, 21.36, 24.8, 28.31     |
+| en_ghosh                      | 0.264, 0.443, 0.105, 0.145, 0.185, 0.225, 0.265, 0.305, 0.344, 0.384    |
+| en_pauling                    | 2.2, nan, 0.98, 1.57, 2.04, 2.55, 3.04, 3.44, 3.98, nan                 |
+| evaporation_heat              | 0.904, 0.08, 148.0, 309.0, 504.5, nan, nan, nan, 6.54, 1.74             |
+| fusion_heat                   | 0.117, nan, 2.89, 12.21, 23.6, nan, nan, nan, 0.51, nan                 |
+| gas_basicity                  | nan, 148.5, nan, nan, nan, nan, 318.7, 459.6, 315.1, 174.4              |
+| group_id                      | 1, 18, 1, 2, 13, 14, 15, 16, 17, 18                                     |
+| heat_of_formation             | 217.998, nan, 159.3, 324.0, 565.0, 716.87, 472.44, 249.229, 79.335, nan |
+| lattice_constant              | 3.75, 3.57, 3.49, 2.29, 8.73, 3.57, 4.039, 6.83, nan, 4.43              |
+| melting_point                 | 14.01, 0.95, 553.69, 1551.0, 2573.0, 3820.0, 63.29, 54.8, 53.53, 48.0   |
+| metallic_radius               | nan, nan, 1.23, 0.89, 0.8, nan, nan, nan, nan, nan                      |
+| metallic_radius_c12           | 0.78, 1.22, 1.55, 1.12, 0.98, 0.86, 0.53, nan, nan, nan                 |
+| period                        | 1, 1, 2, 2, 2, 2, 2, 2, 2, 2                                            |
+| proton_affinity               | nan, 177.8, nan, nan, nan, nan, 342.2, 485.2, 340.1, 198.8              |
+| specific_heat                 | nan, 5.188, 3.489, 1.824, 1.025, 0.711, nan, nan, nan, 1.029            |
+| thermal_conductivity          | 0.181, 0.152, 84.8, 201.0, 27.4, 1.59, 0.026, 0.027, 0.028, nan         |
+| vdw_radius                    | 1.1, 1.4, 1.82, 1.53, 1.92, 1.7, 1.55, 1.52, 1.47, 1.54                 |
+| vdw_radius_alvarez            | 1.2, 1.43, 2.12, 1.98, 1.91, 1.77, 1.66, 1.5, 1.46, 1.58                |
+| vdw_radius_batsanov           | nan, nan, 2.2, 1.9, 1.8, 1.7, 1.6, 1.55, 1.5, nan                       |
+| vdw_radius_bondi              | 1.2, 1.4, 1.81, nan, nan, 1.7, 1.55, 1.52, 1.47, 1.54                   |
+| vdw_radius_dreiding           | 3.195, nan, nan, nan, 4.02, 3.898, 3.662, 3.405, 3.472, nan             |
+| vdw_radius_mm3                | 1.62, 1.53, 2.55, 2.23, 2.15, 2.04, 1.93, 1.82, 1.71, 1.6               |
+| vdw_radius_rt                 | 1.1, nan, nan, nan, nan, 1.77, 1.64, 1.58, 1.46, 1.81                   |
+| vdw_radius_truhlar            | nan, nan, nan, 1.53, 1.92, nan, nan, nan, nan, nan                      |
+| vdw_radius_uff                | 2.886, 2.362, 2.451, 2.745, 4.083, 3.851, 3.66, 3.5, 3.364, 3.243       |
+:END:
+
+A list of atoms objects can also be passed to any of the generators.This will increase the dimensionality of the numpy array returned by 1 for each atoms object in the supplied list of images. Fingerprints produced in this way are returned in the same order as the list of objects provided.
+
+** Non-local fingerprint generation
+Currently, the fingerprint generator has operations for producing convolutions over all atoms in a provided list of atoms objects. There is only a single type of convolution which performs this type of operation currently:
+
+1. =periodic_convolution=
+    Calculates the square of each atoms parameter in the unit cell.
+2. =bonding_convolution=
+    Calculates a convolution over indexed bonded atoms.
+
+These functions can take additional keyword arguments as well, these are provided in the form of a dictionary as demonstrated in the following example.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import bulk
+import numpy as np
+from catkit.gen import defaults
+defaults['covalent_radii'] += 0.15
+
+bulk = bulk('Pd', cubic=True)
+bulk[3].symbol = 'Pt'
+
+slab = fcc111('Al', size=(2, 2, 3), a=3.8, vacuum=10.0)
+
+images = [bulk, slab]
+
+parameters = [
+    'atomic_number',
+    'atomic_radius',
+    'atomic_volume',
+]
+
+operations = [
+    'periodic_convolution',
+    ['periodic_convolution', {'d': 1}]
+]
+
+fp = Fingerprinter(images)
+fingerprints = fp.get_fp(parameters, operations)
+
+print('#+attr_latex: :mode math :environment matrix')
+for fp in fingerprints:
+    fp_table = np.round(fp, 3)
+    print('|' + '|'.join(fp_table.astype(str)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_latex: :mode math :environment matrix
+| 12432.0 |  7.563 | 320.44 | 136896.0 |  90.749 |  3844.8 |
+|  2028.0 | 24.539 | 1200.0 |  20280.0 | 245.388 | 12000.0 |
+:END:
+
+** Local fingerprint generation
+Localized fingerprints can also be generated. This is demonstrated for a catalytic structure of Palladium with a single Carbon adsorbate.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate
+import numpy as np
+
+atoms = fcc111('Pd', size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, 'C', 1, 'fcc')
+
+# -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)
+
+parameters = [
+    'atomic_number',
+    'atomic_radius',
+    'boiling_point',
+    'covalent_radius_cordero',
+    'evaporation_heat',
+    'fusion_heat',
+    'group_id',
+    'period',
+]
+
+operations = [
+    'bonding_convolution'
+]
+
+fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+
+print('#+attr_latex: :mode math :environment matrix')
+fp_table = np.round(fingerprints[0], 3)
+print('|' + '|'.join(fp_table.astype(str)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_latex: :mode math :environment matrix
+| 276.0 | 1.247 | 17406300.0 | 1.015 | nan | nan | 140.0 | 10.0 |
+:END:
+
+The generators purpose is not to restrict which fingerprints can be generated, however, if no seed parameter is available for a particular chemical species, then an =Numpy= NaN value will be returned.
+
+** Writing personalized operations
+Currently, the default structure of and operation is as follows:
+
+#+BEGIN_EXAMPLE :exports both
+def periodic_convolution(
+        atoms,
+        atoms_parameters,
+        connectivity):
+#+END_EXAMPLE
+
+Where the =atoms=, =atoms_properties=, and =connectivity= properties are required. This is because these properties are passed to all operation functions currently implemented so that they do not need to be generated multiple times. This way change in future versions if it seems that these are better suited as global variables (This may makes the code overly difficult to follow).
+
+Here is an example of a simple operation which supplies the adsorbate connectivity.
+
+#+BEGIN_SRC python :results output org drawer :exports both
+from catkit.pawprint import Fingerprinter
+from ase.build import fcc111
+from ase.build import add_adsorbate
+import numpy as np
+
+atoms = fcc111('Pd', size=(2, 2, 3), vacuum=10.0)
+add_adsorbate(atoms, 'C', 1, 'fcc')
+
+# -1 is the tag convention to identify bonded atoms
+tags = atoms.get_tags()
+tags[-1] = -1
+atoms.set_tags(tags)
+
+parameters = [
+    'atomic_number',
+    'dband_center_slab',
+    'dband_width_slab',
+    'dband_skewness_slab',
+    'dband_kurtosis_slab'
+]
+
+def example_operation(
+        atoms,
+        atoms_parameters,
+        connectivity):
+    # This is a CatKit convention
+    bond_index = np.where(atoms.get_tags() == -1)[0]
+
+    return np.sum(connectivity[bond_index], axis=1)
+
+operations = [
+    'bonding_convolution',
+    example_operation
+]
+
+fp = Fingerprinter(atoms)
+fingerprints = fp.get_fp(parameters, operations)
+fp_table = np.round(fingerprints[0], 3)
+
+print('#+attr_latex: :mode math :environment matrix')
+print('|' + '|'.join(fp_table.astype(str)))
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+#+attr_latex: :mode math :environment matrix
+| 276.0 | -1.57 | 6.517 | -81.368 | 3651.487 | 3.0 |
+:END:
+
