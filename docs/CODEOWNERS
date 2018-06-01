@@ -8,10 +8,10 @@
 catkit/gen/           @jboes
 
 # CatFlow
-catkit/flow/          @jboes
+catkit/flow/          @jboes @maumnm @kirstenwinther
 
 # Pawprint
-catkit/pawprint/      @maumnm
+catkit/pawprint/      @maumnm @jboes
 
 # CatHub
 catkit/hub/           @kirstenwinther @mhoffman

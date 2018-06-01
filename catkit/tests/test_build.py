@@ -10,11 +10,12 @@ class TestBuild(unittest.TestCase):
     """Test functions in the build module."""
 
     def test_surface(self):
-        """Test the helper surface generator."""
+        """Test catkit.build.surface generator."""
         slab = surface('Pd', size=(2, 2, 4), vacuum=10)
 
         # Slab should have 16 Pd atoms
         assert(len(slab) == 16)
+        print(slab.connectivity)
 
         correct_connectivity = np.array([
             [0, 2, 2, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -23,16 +24,16 @@ class TestBuild(unittest.TestCase):
             [2, 2, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [0, 1, 1, 1, 0, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0],
             [1, 0, 1, 1, 2, 0, 2, 2, 1, 1, 0, 1, 0, 0, 0, 0],
-            [1, 1, 0, 1, 2, 2, 0, 2, 1, 0, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 0, 2, 2, 2, 0, 0, 1, 1, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1, 1, 0, 0, 2, 2, 2, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 1, 0, 1, 2, 0, 2, 2, 1, 1, 0, 1],
-            [0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 0, 2, 1, 0, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 0, 1, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 2, 0, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 0, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 0]])
+            [1, 1, 0, 1, 2, 2, 0, 2, 0, 1, 1, 1, 0, 0, 0, 0],
+            [1, 1, 1, 0, 2, 2, 2, 0, 1, 0, 1, 1, 0, 0, 0, 0],
+            [0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 2, 2, 1, 1, 0, 1],
+            [0, 0, 0, 0, 1, 1, 1, 0, 2, 0, 2, 2, 1, 1, 1, 0],
+            [0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 0, 2, 0, 1, 1, 1],
+            [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 1, 0, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 2, 2],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 0, 2, 2],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 2],
+            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 2, 0]])
         assert_array_equal(slab.connectivity, correct_connectivity)
 
         correct_surf_atoms = np.array([12, 13, 14, 15])
@@ -42,8 +43,11 @@ class TestBuild(unittest.TestCase):
         atoms = bulk('Pd', cubic=True)
         slab = surface(atoms, size=(2, 2, 4), vacuum=10)
 
+        # Test orthogonalization search
+        slab = surface(atoms, size=(1, 4), vacuum=10)
+
     def test_molecule(self):
-        """Test the helper molecule generator."""
+        """Test catkit.build.molecule generator."""
         images = molecule('H')
         assert(len(images) == 1)
 

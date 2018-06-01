@@ -82,7 +82,14 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">Modules</a></li>
 </ul>
 
             
@@ -157,13 +164,11 @@
 <span class="kn">from</span> <span class="nn">numpy.linalg</span> <span class="k">import</span> <span class="n">norm</span><span class="p">,</span> <span class="n">solve</span>
 <span class="kn">import</span> <span class="nn">networkx.algorithms.isomorphism</span> <span class="k">as</span> <span class="nn">iso</span>
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
-<span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">spglib</span>
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">re</span>
 
 
-<div class="viewcode-block" id="trilaterate"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.trilaterate">[docs]</a><span class="k">def</span> <span class="nf">trilaterate</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
+<div class="viewcode-block" id="trilaterate"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.trilaterate">[docs]</a><span class="k">def</span> <span class="nf">trilaterate</span><span class="p">(</span><span class="n">centers</span><span class="p">,</span> <span class="n">r</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Find the intersection of two or three spheres. In the case</span>
 <span class="sd">    of two sphere intersection, the z-coordinate is assumed to be</span>
 <span class="sd">    an intersection of a plane whose normal is aligned with the</span>
@@ -219,27 +224,7 @@
     <span class="k">return</span> <span class="n">intersection</span></div>
 
 
-<div class="viewcode-block" id="cd"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.cd">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span> <span class="nf">cd</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Does path management: if the path doesn&#39;t exists, create it</span>
-<span class="sd">    otherwise, move into it until the indentation is broken.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    path : str</span>
-<span class="sd">        Directory path to create and change into.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">yield</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="rmean"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.rmean">[docs]</a><span class="k">def</span> <span class="nf">rmean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+<div class="viewcode-block" id="rmean"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.rmean">[docs]</a><span class="k">def</span> <span class="nf">rmean</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the running mean of array x for N instances.</span>
 
 <span class="sd">    Parameters</span>
@@ -249,8 +234,8 @@
 <span class="sd">    N : int</span>
 <span class="sd">        Number of values to take an average with.</span>
 
-<span class="sd">    Returns:</span>
-<span class="sd">    --------</span>
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
 <span class="sd">    rmean : ndarray (n + 1,)</span>
 <span class="sd">        Mean value of the running average.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -264,7 +249,7 @@
     <span class="k">return</span> <span class="n">mean</span></div>
 
 
-<div class="viewcode-block" id="expand_cell"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.expand_cell">[docs]</a><span class="k">def</span> <span class="nf">expand_cell</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
+<div class="viewcode-block" id="expand_cell"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.expand_cell">[docs]</a><span class="k">def</span> <span class="nf">expand_cell</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">6</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return Cartesian coordinates atoms within a supercell</span>
 <span class="sd">    which contains spheres of specified cutoff radius around</span>
 <span class="sd">    all atom positions.</span>
@@ -308,7 +293,7 @@
     <span class="k">return</span> <span class="n">index</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">offsets</span></div>
 
 
-<div class="viewcode-block" id="get_voronoi_neighbors"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_voronoi_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_voronoi_neighbors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
+<div class="viewcode-block" id="get_voronoi_neighbors"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_voronoi_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_voronoi_neighbors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the connectivity matrix from the Voronoi</span>
 <span class="sd">    method. Multi-bonding occurs through periodic boundary conditions.</span>
 
@@ -352,7 +337,7 @@
     <span class="k">return</span> <span class="n">connectivity</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_cutoff_neighbors"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_cutoff_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_cutoff_neighbors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="get_cutoff_neighbors"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_cutoff_neighbors">[docs]</a><span class="k">def</span> <span class="nf">get_cutoff_neighbors</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the connectivity matrix from a simple radial cutoff.</span>
 <span class="sd">    Multi-bonding occurs through periodic boundary conditions.</span>
 
@@ -398,7 +383,7 @@
     <span class="k">return</span> <span class="n">connectivity</span></div>
 
 
-<div class="viewcode-block" id="get_primitive_cell"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_primitive_cell">[docs]</a><span class="k">def</span> <span class="nf">get_primitive_cell</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="get_spglib_cell"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_spglib_cell">[docs]</a><span class="k">def</span> <span class="nf">get_spglib_cell</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">idealize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib primitive cell finder:</span>
 <span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
 
@@ -406,6 +391,10 @@
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Atoms object to search for a primitive unit cell.</span>
+<span class="sd">    primitive : bool</span>
+<span class="sd">        Reduce the atoms object into a primitive form.</span>
+<span class="sd">    idealize : bool</span>
+<span class="sd">        Convert the cell into the spglib standardized form.</span>
 <span class="sd">    tol : float</span>
 <span class="sd">        Tolerance for floating point rounding errors.</span>
 
@@ -419,10 +408,11 @@
     <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
 
     <span class="n">cell</span> <span class="o">=</span> <span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
-    <span class="n">cell</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">find_primitive</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">standardize_cell</span><span class="p">(</span>
+        <span class="n">cell</span><span class="p">,</span> <span class="n">to_primitive</span><span class="o">=</span><span class="n">primitive</span><span class="p">,</span> <span class="n">no_idealize</span><span class="o">=~</span><span class="n">idealize</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">atoms</span>
 
     <span class="n">_lattice</span><span class="p">,</span> <span class="n">_positions</span><span class="p">,</span> <span class="n">_numbers</span> <span class="o">=</span> <span class="n">cell</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">_numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">_lattice</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span>
@@ -431,7 +421,7 @@
     <span class="k">return</span> <span class="n">atoms</span></div>
 
 
-<div class="viewcode-block" id="get_symmetry"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_symmetry">[docs]</a><span class="k">def</span> <span class="nf">get_symmetry</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+<div class="viewcode-block" id="get_symmetry"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_symmetry">[docs]</a><span class="k">def</span> <span class="nf">get_symmetry</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib symmetry finder:</span>
 <span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
 
@@ -453,10 +443,13 @@
 
     <span class="n">cell</span> <span class="o">=</span> <span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span></div>
+    <span class="n">symmetry</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span> <span class="o">=</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">],</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;translations&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span></div>
 
 
-<div class="viewcode-block" id="get_unique_coordinates"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_unique_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_unique_coordinates</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+<div class="viewcode-block" id="get_unique_coordinates"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_unique_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_unique_coordinates</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return unique coordinate values of a given atoms object</span>
 <span class="sd">    for a specified axis.</span>
 
@@ -464,25 +457,20 @@
 <span class="sd">    ----------</span>
 <span class="sd">    atoms : object</span>
 <span class="sd">        Atoms object to search for unique values along.</span>
-<span class="sd">    axis : int</span>
-<span class="sd">        Value of 0, 1, or 2 associated with x, y, and z coordinates.</span>
-<span class="sd">    direct : bool</span>
-<span class="sd">        Whether to use direct coordinates or Cartesian.</span>
+<span class="sd">    axis : int (0, 1, or 2)</span>
+<span class="sd">        Look for unique values along the x, y, or z axis.</span>
 <span class="sd">    tag : bool</span>
-<span class="sd">        Assign ase-like tags to each layer of the slab.</span>
+<span class="sd">        Assign ASE-like tags to each layer of the slab.</span>
 <span class="sd">    tol : float</span>
 <span class="sd">        The tolerance to search for unique values within.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    values : ndarray (n,)</span>
-<span class="sd">        Array of unique values.</span>
+<span class="sd">        Array of unique positions in fractional coordinates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">direct</span><span class="p">:</span>
-        <span class="n">positions</span> <span class="o">=</span> <span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">()</span> <span class="o">+</span> <span class="n">tol</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
-        <span class="n">positions</span> <span class="o">-=</span> <span class="n">tol</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">positions</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">()</span> <span class="o">+</span> <span class="n">tol</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
+    <span class="n">positions</span> <span class="o">-=</span> <span class="n">tol</span>
 
     <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">axis</span><span class="p">]]</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">axis</span><span class="p">]:</span>
@@ -500,7 +488,7 @@
     <span class="k">return</span> <span class="n">values</span></div>
 
 
-<div class="viewcode-block" id="plane_normal"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.plane_normal">[docs]</a><span class="k">def</span> <span class="nf">plane_normal</span><span class="p">(</span><span class="n">xyz</span><span class="p">):</span>
+<div class="viewcode-block" id="plane_normal"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.plane_normal">[docs]</a><span class="k">def</span> <span class="nf">plane_normal</span><span class="p">(</span><span class="n">xyz</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the surface normal vector to a plane of best fit.</span>
 
 <span class="sd">    Parameters</span>
@@ -522,7 +510,7 @@
     <span class="k">return</span> <span class="n">vec</span></div>
 
 
-<div class="viewcode-block" id="connectivity_to_edges"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.connectivity_to_edges">[docs]</a><span class="k">def</span> <span class="nf">connectivity_to_edges</span><span class="p">(</span><span class="n">connectivity</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="connectivity_to_edges"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.connectivity_to_edges">[docs]</a><span class="k">def</span> <span class="nf">connectivity_to_edges</span><span class="p">(</span><span class="n">connectivity</span><span class="p">,</span> <span class="n">indices</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert a Numpy connectivity matrix into a list of</span>
 <span class="sd">    NetworkX compatible edges</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -538,7 +526,7 @@
     <span class="k">return</span> <span class="n">edges</span></div>
 
 
-<div class="viewcode-block" id="isomorphic_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.isomorphic_molecules">[docs]</a><span class="k">def</span> <span class="nf">isomorphic_molecules</span><span class="p">(</span><span class="n">graph0</span><span class="p">,</span> <span class="n">graph1</span><span class="p">):</span>
+<div class="viewcode-block" id="isomorphic_molecules"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.isomorphic_molecules">[docs]</a><span class="k">def</span> <span class="nf">isomorphic_molecules</span><span class="p">(</span><span class="n">graph0</span><span class="p">,</span> <span class="n">graph1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check whether two molecule graphs are isomorphic.&quot;&quot;&quot;</span>
     <span class="n">em</span> <span class="o">=</span> <span class="n">iso</span><span class="o">.</span><span class="n">numerical_edge_match</span><span class="p">(</span><span class="s1">&#39;bonds&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="n">nm</span> <span class="o">=</span> <span class="n">iso</span><span class="o">.</span><span class="n">numerical_node_match</span><span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -548,9 +536,8 @@
     <span class="k">return</span> <span class="n">isomorphic</span></div>
 
 
-<div class="viewcode-block" id="to_gratoms"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.to_gratoms">[docs]</a><span class="k">def</span> <span class="nf">to_gratoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+<div class="viewcode-block" id="to_gratoms"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.to_gratoms">[docs]</a><span class="k">def</span> <span class="nf">to_gratoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert and atom object to a gratoms object.&quot;&quot;&quot;</span>
-
     <span class="n">gratoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span>
         <span class="n">numbers</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span>
         <span class="n">positions</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span>
@@ -563,7 +550,7 @@
     <span class="k">return</span> <span class="n">gratoms</span></div>
 
 
-<div class="viewcode-block" id="get_atomic_numbers"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_numbers</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">return_count</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="get_atomic_numbers"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_numbers</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">return_count</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the atomic numbers associated with a chemical formula.</span>
 
 <span class="sd">    Parameters</span>
@@ -604,7 +591,7 @@
     <span class="k">return</span> <span class="n">numbers</span></div>
 
 
-<div class="viewcode-block" id="get_reference_energies"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_reference_energies">[docs]</a><span class="k">def</span> <span class="nf">get_reference_energies</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
+<div class="viewcode-block" id="get_reference_energies"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_reference_energies">[docs]</a><span class="k">def</span> <span class="nf">get_reference_energies</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get reference energies for the elements in a set of molecules.</span>
 
 <span class="sd">    Parameters</span>
@@ -646,7 +633,7 @@
     <span class="k">return</span> <span class="n">elements</span><span class="p">,</span> <span class="n">references</span></div>
 
 
-<div class="viewcode-block" id="get_unique_xy"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.get_unique_xy">[docs]</a><span class="k">def</span> <span class="nf">get_unique_xy</span><span class="p">(</span><span class="n">xyz_coords</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
+<div class="viewcode-block" id="get_unique_xy"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.get_unique_xy">[docs]</a><span class="k">def</span> <span class="nf">get_unique_xy</span><span class="p">(</span><span class="n">xyz_coords</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return the unique coordinates of an atoms object</span>
 <span class="sd">    for the requrested atoms indices. Z-coordinates are projected</span>
 <span class="sd">    to maximum z-coordinate by default.</span>
@@ -679,10 +666,8 @@
     <span class="k">return</span> <span class="n">xyz_coords</span></div>
 
 
-<div class="viewcode-block" id="parse_slice"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.utils.parse_slice">[docs]</a><span class="k">def</span> <span class="nf">parse_slice</span><span class="p">(</span><span class="n">slice_name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a correctly parsed slice from input of</span>
-<span class="sd">    varying types.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="parse_slice"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.utils.parse_slice">[docs]</a><span class="k">def</span> <span class="nf">parse_slice</span><span class="p">(</span><span class="n">slice_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a correctly parsed slice from input of varying types.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slice_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">slice</span><span class="p">)):</span>
         <span class="n">_slice</span> <span class="o">=</span> <span class="n">slice_name</span>
 
@@ -718,7 +703,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

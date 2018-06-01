@@ -82,7 +82,14 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">Modules</a></li>
 </ul>
 
             
@@ -157,7 +164,7 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 
-<div class="viewcode-block" id="ReactionNetwork"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork">[docs]</a><span class="k">class</span> <span class="nc">ReactionNetwork</span><span class="p">():</span>
+<div class="viewcode-block" id="ReactionNetwork"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork">[docs]</a><span class="k">class</span> <span class="nc">ReactionNetwork</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; A class for accessing a temporary SQLite database. This</span>
 <span class="sd">    function works as a context manager and should be used as follows:</span>
 
@@ -225,7 +232,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-<div class="viewcode-block" id="ReactionNetwork.create_table"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.create_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.create_table"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.create_table">[docs]</a>    <span class="k">def</span> <span class="nf">create_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create the SQLite database table framework.&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;CREATE TABLE IF NOT EXISTS molecules(</span>
@@ -289,7 +296,7 @@
 <span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid)</span>
 <span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.molecule_search"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.molecule_search">[docs]</a>    <span class="k">def</span> <span class="nf">molecule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="ReactionNetwork.molecule_search"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.molecule_search">[docs]</a>    <span class="k">def</span> <span class="nf">molecule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                         <span class="n">element_pool</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
                         <span class="n">load_molecules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">multiple_bond_search</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -463,7 +470,7 @@
 
         <span class="k">return</span> <span class="n">new_molecules</span><span class="p">,</span> <span class="n">molecules</span>
 
-<div class="viewcode-block" id="ReactionNetwork.path_search"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.path_search">[docs]</a>    <span class="k">def</span> <span class="nf">path_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reconfiguration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">substitution</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.path_search"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.path_search">[docs]</a>    <span class="k">def</span> <span class="nf">path_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reconfiguration</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">substitution</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Search for reaction mechanisms from a pre-populated database</span>
 <span class="sd">        of molecules. By default, only single bond addition pathways are</span>
 <span class="sd">        enumerated (Also called elementary steps).</span>
@@ -698,7 +705,7 @@
 
         <span class="k">return</span> <span class="n">new_pathways</span>
 
-<div class="viewcode-block" id="ReactionNetwork.save_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">save_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.save_molecules"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">save_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated molecules to the ReactionNetwork database.</span>
 
 <span class="sd">        Parameters</span>
@@ -738,7 +745,7 @@
 <span class="sd">                            VALUES(?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
                             <span class="p">(</span><span class="n">molecule_pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">number</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">valence</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.save_pathways"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">save_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.save_pathways"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">save_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
 
@@ -769,7 +776,7 @@
             <span class="k">except</span> <span class="p">(</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">):</span>
                 <span class="k">pass</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.load_molecules"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">load_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.load_molecules"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">load_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Load 2D molecule graphs from the database.</span>
 
 <span class="sd">        Parameters</span>
@@ -850,7 +857,7 @@
 
         <span class="k">return</span> <span class="n">molecules</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.load_pathways"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">load_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.load_pathways"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">load_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
 
@@ -899,7 +906,7 @@
 
         <span class="k">return</span> <span class="n">pathways</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.save_3d_structure"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_3d_structure">[docs]</a>    <span class="k">def</span> <span class="nf">save_3d_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gratoms</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.save_3d_structure"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_3d_structure">[docs]</a>    <span class="k">def</span> <span class="nf">save_3d_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gratoms</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save Cartesian coordinates into the ReactionNetwork database.</span>
 
 <span class="sd">        Parameters</span>
@@ -946,7 +953,7 @@
 <span class="s2">                (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)</span>
 <span class="s2">                VALUES(?, ?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">symbol</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.load_3d_structures"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_3d_structures">[docs]</a>    <span class="k">def</span> <span class="nf">load_3d_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.load_3d_structures"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_3d_structures">[docs]</a>    <span class="k">def</span> <span class="nf">load_3d_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return Gratoms objects from the ReactionNetwork database.</span>
 
 <span class="sd">        Parameters</span>
@@ -1012,7 +1019,7 @@
 
             <span class="k">return</span> <span class="n">gratoms</span></div>
 
-<div class="viewcode-block" id="ReactionNetwork.plot_reaction_network"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.pathways.ReactionNetwork.plot_reaction_network">[docs]</a>    <span class="k">def</span> <span class="nf">plot_reaction_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="ReactionNetwork.plot_reaction_network"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.plot_reaction_network">[docs]</a>    <span class="k">def</span> <span class="nf">plot_reaction_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot the reaction network present in the database.&quot;&quot;&quot;</span>
 
         <span class="n">pathways</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1060,7 +1067,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

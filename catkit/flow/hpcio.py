@@ -2,11 +2,9 @@ import os
 
 
 def get_server():
-    """ A function for determining which server the job is currently running on.
-
+    """A function for determining which server the job is currently running on.
     This is meant to be run on a calculation node.
     """
-
     evars = os.environ
 
     # Try collecting server name from LSB or SLURM environment
@@ -21,19 +19,17 @@ def get_server():
     server = evars.get('CLUSTER')
     if not server:
         raise ValueError(
-            'Server could not be identified with user, LSB, or SLURM environment vars')
+            'Server could not be identified with user, '
+            'LSB, or SLURM environment vars')
 
     return server, local
 
 
-def get_nnodes(server=None):
-    """ Get the number of nodes being used in this environment.
-
-    This is meant to be run on a calculation node.
+def get_nnodes():
+    """Get the number of nodes being used in this environment. This is meant
+    to be run on a calculation node.
     """
-
-    if not server:
-        server, local = get_server()
+    server, local = get_server()
 
     evars = os.environ
 

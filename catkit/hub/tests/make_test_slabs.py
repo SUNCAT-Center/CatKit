@@ -19,7 +19,7 @@ slab1.set_calculator(
             energy=500,
             )
         )
-ase.io.write('empty_slab_111.traj', slab1)
+ase.io.write(path + 'empty_slab_111.traj', slab1)
 ase.lattice.surface.add_adsorbate(slab1, ase.atoms.Atoms('O'), height=1.5)
 slab1.set_calculator(
         ase.calculators.singlepoint.SinglePointCalculator(
@@ -28,6 +28,12 @@ slab1.set_calculator(
             )
         )
 ase.io.write(path + 'empty_slab_111_ads.traj', slab1)
+
+with open(path + 'OUTCAR', 'w') as outfile:
+    outfile.write('This is a non-sensical test file to test some fallback options.\n')
+
+# Create a bulk structure for testing
+ase.io.write(path + 'Pt_bulk.traj', ase.build.bulk('Pt'))
 
 mol = ase.atoms.Atoms('O',
         cell=[
