@@ -1,10 +1,8 @@
-from catkit import Gratoms
 from .utils import get_atomic_numbers
+from . import defaults
+from catkit import Gratoms
 from itertools import combinations
 import numpy as np
-
-radicals = np.ones(92)
-radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
 
 
 def bin_hydrogen(hydrogens=1, bins=1):
@@ -42,10 +40,21 @@ def hydrogenate(atoms, bins, copy=True):
     return atoms
 
 
-def get_topologies(chemistry, saturate=False):
+def get_topologies(symbols, saturate=False):
     """Return the possible topologies of a given chemical species
+
+    Parameters
+    ----------
+    symbols : str
+        Atomic symbols to construct the topologies from.
+    saturate : bool
+        Saturate the molecule with hydrogen based on the
+        default.radicals set.
+
+    Returns
+    -------
     """
-    num, cnt = get_atomic_numbers(chemistry, True)
+    num, cnt = get_atomic_numbers(symbols, True)
     mcnt = cnt[num != 1]
     mnum = num[num != 1]
 
@@ -55,7 +64,7 @@ def get_topologies(chemistry, saturate=False):
         hcnt = 0
 
     elements = np.repeat(mnum, mcnt)
-    max_degree = radicals[elements]
+    max_degree = defaults.get('radicals')[elements]
     n = mcnt.sum()
 
     hmax = int(max_degree.sum() - (n - 1) * 2)
