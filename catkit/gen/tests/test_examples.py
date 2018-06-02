@@ -36,7 +36,7 @@ class TestGenDocs(unittest.TestCase):
             slab = gen.get_slab(iterm=i)
             assert (len(slab) == 18)
 
-        atoms = bulk('Pd', 'hcp', a=3, cubic=True)
+        atoms = bulk('Pd', 'hcp', a=3.0, cubic=True)
 
         gen = SlabGenerator(
             atoms, miller_index=(1, 1, 0), layers=6, fixed=2, vacuum=4)
@@ -45,12 +45,12 @@ class TestGenDocs(unittest.TestCase):
         con_matrix = atoms.connectivity
 
         test_con_matrix = np.array([
-            [0, 2, 2, 2, 0, 1, 0, 0, 0, 0, 0, 0],
-            [2, 0, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0],
+            [0, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0], 
+            [2, 0, 2, 2, 0, 1, 0, 0, 0, 0, 0, 0],
             [2, 2, 0, 2, 2, 2, 1, 0, 0, 0, 0, 0],
             [2, 2, 2, 0, 2, 2, 0, 1, 0, 0, 0, 0],
-            [0, 1, 2, 2, 0, 2, 2, 2, 1, 0, 0, 0],
-            [1, 0, 2, 2, 2, 0, 2, 2, 0, 1, 0, 0],
+            [1, 0, 2, 2, 0, 2, 2, 2, 1, 0, 0, 0],
+            [0, 1, 2, 2, 2, 0, 2, 2, 0, 1, 0, 0],
             [0, 0, 1, 0, 2, 2, 0, 2, 2, 2, 1, 0],
             [0, 0, 0, 1, 2, 2, 2, 0, 2, 2, 0, 1],
             [0, 0, 0, 0, 1, 0, 2, 2, 0, 2, 2, 2],
