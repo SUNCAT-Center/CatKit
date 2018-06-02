@@ -388,6 +388,8 @@ def connect(user):
     '-t', '--traj-format',
     type=bool,
     is_flag=True,
+    default=False,
+    show_default=True,
     help="Store intermediate filetype as traj"
     "instead of json files")
 @click.option(
