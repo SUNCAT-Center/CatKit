@@ -440,7 +440,7 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
-    if options.traj:
+    if options.traj_format:
         out_format = 'traj'
     else:
         out_format = 'json'
@@ -466,6 +466,8 @@ def create_folders(options, structures, root=''):
 
 
 def main(options):
+    print(options)
+    exit()
     pickle_file = options.foldername.strip().rstrip(
         '/').strip('.').rstrip('/') + '.cache.pckl'
 

@@ -385,7 +385,7 @@ def connect(user):
     help="Specify the maximum density (#atoms/A^3) "
     " at which the structure are considered slabs and not bulk")
 @click.option(
-    '-t', '--traj',
+    '-t', '--traj-format',
     type=bool,
     is_flag=True,
     help="Store intermediate filetype as traj"
