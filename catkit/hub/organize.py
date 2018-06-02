@@ -440,10 +440,7 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
-    if options.traj_format:
-        out_format = 'traj'
-    else:
-        out_format = 'json'
+    out_format = 'json'
 
     for key in structures:
         if isinstance(structures[key], dict):
