@@ -466,8 +466,6 @@ def create_folders(options, structures, root=''):
 
 
 def main(options):
-    print(options)
-    exit()
     pickle_file = options.foldername.strip().rstrip(
         '/').strip('.').rstrip('/') + '.cache.pckl'
 
