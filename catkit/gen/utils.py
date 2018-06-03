@@ -362,10 +362,10 @@ def connectivity_to_edges(connectivity, indices=None):
 
     edges = []
     for i, c in enumerate(connectivity):
-        lower_diagonal = c[:i]
+        lower_diagonal = c[:i + 1]
+
         for j, v in enumerate(lower_diagonal):
             edges += [(indices[i], indices[j], 1)] * int(v)
-
     return edges
 
 

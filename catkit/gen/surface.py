@@ -260,7 +260,6 @@ class SlabGenerator(object):
 
         minimum_repetitions = np.ceil(self.layers / len(bulk_layers))
         ibasis *= (1, 1, int(minimum_repetitions))
-
         exbasis = ibasis * (1, 1, 2)
         connectivity = utils.get_voronoi_neighbors(exbasis)
 

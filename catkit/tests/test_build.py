@@ -15,26 +15,12 @@ class TestBuild(unittest.TestCase):
 
         # Slab should have 16 Pd atoms
         assert(len(slab) == 16)
-        print(slab.connectivity)
+        connectivity_sum = slab.connectivity.sum(axis=0)
 
-        correct_connectivity = np.array([
-            [0, 2, 2, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [2, 0, 2, 2, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [2, 2, 0, 2, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-            [2, 2, 2, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 1, 1, 1, 0, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0],
-            [1, 0, 1, 1, 2, 0, 2, 2, 1, 1, 0, 1, 0, 0, 0, 0],
-            [1, 1, 0, 1, 2, 2, 0, 2, 0, 1, 1, 1, 0, 0, 0, 0],
-            [1, 1, 1, 0, 2, 2, 2, 0, 1, 0, 1, 1, 0, 0, 0, 0],
-            [0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 2, 2, 1, 1, 0, 1],
-            [0, 0, 0, 0, 1, 1, 1, 0, 2, 0, 2, 2, 1, 1, 1, 0],
-            [0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 0, 2, 0, 1, 1, 1],
-            [0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 2, 0, 1, 0, 1, 1],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 2, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 2, 0, 2, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 2, 2, 0, 2],
-            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 2, 2, 2, 0]])
-        assert_array_equal(slab.connectivity, correct_connectivity)
+        correct_connectivity_sum = np.array(
+            [9, 9, 9, 9, 12, 12, 12, 12, 12, 12, 12, 12, 9, 9, 9, 9])
+
+        assert_array_equal(connectivity_sum, correct_connectivity_sum)
 
         correct_surf_atoms = np.array([12, 13, 14, 15])
         assert_array_equal(slab.get_surface_atoms(), correct_surf_atoms)
