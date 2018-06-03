@@ -88,6 +88,7 @@ def test_file_organization_module_collect_only():
         ('python {path}/make_test_slabs.py'.format(path=path)).split())
     catkit.hub.organize.collect_structures(options.foldername, options)
 
+
 if __name__ == '__main__':
     test_file_organization()
     test_file_organization_module()
