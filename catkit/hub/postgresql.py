@@ -518,7 +518,7 @@ class CathubPostgreSQL:
                 .format(key_str)
 
             execute_values(cur=cur, sql=insert_command,
-                           argslist=publication_system_values)
+                           argslist=publication_system_values, page_size=1000)
             con.commit()
             self.stdout.write('  Completed transfer of publications\n')
 
@@ -527,13 +527,13 @@ class CathubPostgreSQL:
 
         if write_reaction:
             self.stdout.write('Transfering reactions')
-            reaction_values = []
-            reaction_system_values = []
             n_react = db.get_last_id(cur_lite)
 
             n_blocks = int(n_react / block_size) + 1
             t_av = 0
             for block_id in range(start_block, n_blocks):
+                reaction_values = []
+                reaction_system_values = []
                 Ncat0 = Ncat
                 Ncatstruc0 = Ncatstruc
 
@@ -595,12 +595,14 @@ class CathubPostgreSQL:
                 q = '({})'.format(q.replace('?', '%s'))
 
                 insert_command = """INSERT INTO reaction
-                ({0}) VALUES %s ON CONFLICT DO NOTHING RETURNING ID;""".format(key_str)
+                ({0}) VALUES %s RETURNING ID;""".format(key_str)
 
                 execute_values(cur=cur, sql=insert_command, argslist=reaction_values,
-                               template=q)
+                               template=q, page_size=block_size)
 
                 ids = cur.fetchall()
+
+                print(ids, reaction_system_values)
 
                 for reacsys in reaction_system_values:
                     reacsys[3] = ids[reacsys[3]][0]  # set real id
@@ -610,7 +612,7 @@ class CathubPostgreSQL:
                 ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str2)
 
                 execute_values(cur=cur, sql=insert_command,
-                               argslist=reaction_system_values)
+                               argslist=reaction_system_values, page_size=block_size)
                 con.commit()
 
                 t2 = time.time()
@@ -710,12 +712,12 @@ def get_key_value_str(values, table='reaction'):
         # print("\n\n\nDIR TYPE {v}".format(**locals()))
         # print(dir(v))
         # print(type(v))
-        # if isinstance(v, text):
-        # v = v.encode('utf8','ignore')
-        # print("ISINSTANCE TEXT {v}".format(**locals()))
-        # elif hasattr(v, 'encode'):
-        # v = v.encode('utf8','ignore')
-        # print("HASATTR ENCODE {v}".format(**locals()))
+        if isinstance(v, text):
+            v = v.encode('utf8','ignore')
+            #print("ISINSTANCE TEXT {v}".format(**locals()))
+        elif hasattr(v, 'encode'):
+            v = v.encode('utf8','ignore')
+            #print("HASATTR ENCODE {v}".format(**locals()))
 
         if v is None or v == '':
             value_str += ", {0}".format('NULL')
@@ -742,5 +744,11 @@ def get_key_value_list(values, table='reaction'):
         start_index = -1
     value_list = []
     for v in values[start_index + 1:]:
+        if isinstance(v, text):
+            v = v.encode('utf8','ignore')
+            #print("ISINSTANCE TEXT {v}".format(**locals()))
+        elif hasattr(v, 'encode'):
+            v = v.encode('utf8','ignore')
+            #print("HASATTR ENCODE {v}".format(**locals()))
         value_list += [v]
     return key_str[table], value_list
