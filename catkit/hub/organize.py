@@ -94,7 +94,7 @@ def collect_structures(foldername, options):
                         print("Did not add {posix_filename} since it has no energy"
                               .format(
                                   posix_filename=posix_filename,
-                                  ))
+                              ))
                     print(structure)
                 except StopIteration:
                     print("Warning: StopIteration {posix_filename} hit."
@@ -314,10 +314,23 @@ def fuzzy_match(structures, options):
                         for i, j in references:
                             atomic_references[i] = j
 
+                        adsorbates = []
+                        if additions:
+                            adsorbates.append(additions)
+                        if subtractions:
+                            adsorbates.append(subtractions)
+                        if options.verbose:
+                            print("    ADDITIONS " + str(additions))
+                            print("    SUBTRACTIONS " + str(subtractions))
+                            print("    ADSORBATES " + str(adsorbates))
+                            print("    REFERENCES " + str(references))
                         stoichiometry_factors =  \
                             gas_phase_references.get_stoichiometry_factors(
-                                additions + subtractions, references,
+                                adsorbates, references,
                             )
+                        if options.verbose:
+                            print("    STOICH FACTORS " +
+                                  str(stoichiometry_factors) + "\n\n")
 
                         formula = '* ->'
                         adsorbate = get_chemical_formula(
@@ -333,23 +346,14 @@ def fuzzy_match(structures, options):
 
                         gas_phase_corrections = {}
 
-                        for addition in additions:
-                            stoich_factors = stoichiometry_factors[addition]
+                        for adsorbate in adsorbates:
+                            stoich_factors = stoichiometry_factors[adsorbate]
                             for ref in stoich_factors:
                                 dE -= stoich_factors[ref] * \
                                     reference_energy[ref]
                                 gas_phase_corrections[ref] = \
                                     gas_phase_corrections.get(
                                         ref, 0) - stoich_factors[ref]
-
-                        for subtraction in subtractions:
-                            stoich_factors = stoichiometry_factors[subtraction]
-                            for ref in stoich_factors:
-                                dE += stoich_factors[ref] * \
-                                    reference_energy[ref]
-                                gas_phase_corrections[ref] = \
-                                    gas_phase_corrections.get(
-                                        ref, 0) + stoich_factors[ref]
 
                         for molecule, factor in gas_phase_corrections.items():
                             if factor != 0:
