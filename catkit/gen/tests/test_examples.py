@@ -1,4 +1,5 @@
 import unittest
+from catkit.build import surface
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.pathways import ReactionNetwork
@@ -36,31 +37,23 @@ class TestGenDocs(unittest.TestCase):
             slab = gen.get_slab(iterm=i)
             assert (len(slab) == 18)
 
-        atoms = bulk('Pd', 'hcp', a=3, cubic=True)
-
-        gen = SlabGenerator(
-            atoms, miller_index=(1, 1, 0), layers=6, fixed=2, vacuum=4)
-
-        atoms = gen.get_slab()
+        atoms = surface('Pd', size=(3, 3), miller=(1, 1, 1), vacuum=4)
         con_matrix = atoms.connectivity
 
         test_con_matrix = np.array([
-            [0, 2, 2, 2, 0, 1, 0, 0, 0, 0, 0, 0],
-            [2, 0, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0],
-            [2, 2, 0, 2, 2, 2, 1, 0, 0, 0, 0, 0],
-            [2, 2, 2, 0, 2, 2, 0, 1, 0, 0, 0, 0],
-            [0, 1, 2, 2, 0, 2, 2, 2, 1, 0, 0, 0],
-            [1, 0, 2, 2, 2, 0, 2, 2, 0, 1, 0, 0],
-            [0, 0, 1, 0, 2, 2, 0, 2, 2, 2, 1, 0],
-            [0, 0, 0, 1, 2, 2, 2, 0, 2, 2, 0, 1],
-            [0, 0, 0, 0, 1, 0, 2, 2, 0, 2, 2, 2],
-            [0, 0, 0, 0, 0, 1, 2, 2, 2, 0, 2, 2],
-            [0, 0, 0, 0, 0, 0, 1, 0, 2, 2, 0, 2],
-            [0, 0, 0, 0, 0, 0, 0, 1, 2, 2, 2, 0]])
+            [0, 3, 3, 1, 1, 1, 0, 0, 0],
+            [3, 0, 3, 1, 1, 1, 0, 0, 0],
+            [3, 3, 0, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 0, 3, 3, 1, 1, 1],
+            [1, 1, 1, 3, 0, 3, 1, 1, 1],
+            [1, 1, 1, 3, 3, 0, 1, 1, 1],
+            [0, 0, 0, 1, 1, 1, 0, 3, 3],
+            [0, 0, 0, 1, 1, 1, 3, 0, 3],
+            [0, 0, 0, 1, 1, 1, 3, 3, 0]])
 
         np.testing.assert_allclose(con_matrix, test_con_matrix)
 
-        test_surf_atoms = np.array([8, 9, 10, 11])
+        test_surf_atoms = np.array([6, 7, 8])
         np.testing.assert_allclose(atoms.get_surface_atoms(), test_surf_atoms)
 
         atoms = bulk('Pd', 'fcc', a=5, cubic=True)

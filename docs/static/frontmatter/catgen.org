@@ -118,52 +118,16 @@ slab.edit()
 *** Slab graph and surface atoms:
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-#+BEGIN_SRC python  :results silent :exports none
-from catkit.gen.surface import SlabGenerator
-from ase.build import bulk
-from ase.io import write
-from ase import Atom
-
-bulk = bulk('Pd', 'hcp', a=3, cubic=True)
-
-gen = SlabGenerator(
-    bulk,
-    miller_index=(1, 1, 0),
-    layers=6,
-    vacuum=4)
-
-atoms = gen.get_slab()
-
-for i in atoms.get_surface_atoms():
-    atoms[i].symbol = 'Au'
-
-write(
-    '../Pd-surface-atoms.pov',
-    atoms,
-    show_unit_cell=2,
-    rotation='-90x',
-    run_povray=True,
-)
-#+END_SRC
-
 #+CAPTION: Slab of hcp Pd with (110) miller index. Top surface atoms have been changed to Au. 
 [[../Pd-surface-atoms.png]]
 
-#+BEGIN_SRC python  :results output org drawer :exports both
-from catkit.gen.surface import SlabGenerator
-from ase.build import bulk
+#+BEGIN_SRC python :results output org drawer :exports code
+from catkit.build import surface
 from ase.io import write
-from ase import Atom
 
-bulk = bulk('Pd', 'hcp', a=3, cubic=True)
+# Size is 3 layers and 3 times the unit area of the primitve cell
+atoms = surface('Pd', size=(3, 3), miller=(1, 1, 1), vacuum=4)
 
-gen = SlabGenerator(
-    bulk,
-    miller_index=(1, 1, 0),
-    layers=6,
-    vacuum=4)
-
-atoms = gen.get_slab()
 print(atoms.connectivity)
 
 for i in atoms.get_surface_atoms():
@@ -172,26 +136,78 @@ for i in atoms.get_surface_atoms():
 atoms.edit()
 #+END_SRC
 
+#+BEGIN_SRC python :results output org drawer :exports results
+from catkit.build import surface
+from ase.io import write
+import numpy as np
+
+# Size is 3 layers and 3 times the unit area of the primitve cell
+atoms = surface('Pd', size=(3, 3), miller=(1, 1, 1), vacuum=4)
+
+for i in atoms.get_surface_atoms():
+    atoms[i].symbol = 'Au'
+
+table_matrix = np.array(atoms.connectivity, dtype=str)
+
+print('#+attr_latex: :mode math :environment matrix')
+for row in table_matrix:
+    print('|' + '|'.join(row.astype(str)))
+
+write(
+    '../Pd-surface-atoms.pov',
+    atoms,
+    show_unit_cell=2,
+    rotation='-70x',
+    run_povray=True,
+)
+#+END_SRC
+
 #+RESULTS:
 :RESULTS:
-[[0 2 2 2 0 1 0 0 0 0 0 0]
- [2 0 2 2 1 0 0 0 0 0 0 0]
- [2 2 0 2 2 2 1 0 0 0 0 0]
- [2 2 2 0 2 2 0 1 0 0 0 0]
- [0 1 2 2 0 2 2 2 1 0 0 0]
- [1 0 2 2 2 0 2 2 0 1 0 0]
- [0 0 1 0 2 2 0 2 2 2 1 0]
- [0 0 0 1 2 2 2 0 2 2 0 1]
- [0 0 0 0 1 0 2 2 0 2 2 2]
- [0 0 0 0 0 1 2 2 2 0 2 2]
- [0 0 0 0 0 0 1 0 2 2 0 2]
- [0 0 0 0 0 0 0 1 2 2 2 0]]
+#+attr_latex: :mode math :environment matrix
+| 0 | 3 | 3 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 3 | 0 | 3 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 3 | 3 | 0 | 1 | 1 | 1 | 0 | 0 | 0 |
+| 1 | 1 | 1 | 0 | 3 | 3 | 1 | 1 | 1 |
+| 1 | 1 | 1 | 3 | 0 | 3 | 1 | 1 | 1 |
+| 1 | 1 | 1 | 3 | 3 | 0 | 1 | 1 | 1 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 0 | 3 | 3 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 3 | 0 | 3 |
+| 0 | 0 | 0 | 1 | 1 | 1 | 3 | 3 | 0 |
 :END:
 
 CatGen automatically attaches the connectivity matrix into a NetworkX graph and stores it in the Gratoms object for future use.
 
 *** Simple site enumeration:
 With a generated slab, we can also produce the unique adsorption sites which would be present on a given surface.
+
+#+CAPTION: Symmetry unique sites of CuPd_{3} (111). Green denote 3-fold hollows, white are bridge, and red are top sites.
+[[../CuPd3_111-sites.png]]
+
+#+BEGIN_SRC python :results silent :exports code
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase import Atom
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(1, 1, 1),
+    layers=3,
+    vacuum=10)
+
+atoms = gen.get_slab()
+coordinates, connectivity = gen.adsorption_sites(atoms)
+
+atm = {1: 'X', 2: 'He', 3: 'F'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
+
+atoms.edit()
+#+END_SRC
 
 #+BEGIN_SRC python :results silent :exports none
 from catkit.gen.surface import SlabGenerator
@@ -222,34 +238,6 @@ write(
     show_unit_cell=2,
     run_povray=True,
 )
-#+END_SRC
-
-#+CAPTION: Symmetry unique sites of CuPd_{3} (111). Green denote 3-fold hollows, white are bridge, and red are top sites.
-[[../CuPd3_111-sites.png]]
-
-#+BEGIN_SRC python :results silent :exports code
-from catkit.gen.surface import SlabGenerator
-from ase.build import bulk
-from ase import Atom
-
-bulk = bulk('Pd', 'fcc', a=5, cubic=True)
-bulk[3].symbol = 'Cu'
-
-gen = SlabGenerator(
-    bulk,
-    miller_index=(1, 1, 1),
-    layers=3,
-    vacuum=10)
-
-atoms = gen.get_slab()
-coordinates, connectivity = gen.adsorption_sites(atoms)
-
-atm = {1: 'X', 2: 'He', 3: 'F'}
-for i, c in enumerate(coordinates):
-    typ = connectivity[i]
-    atoms += Atom(atm[typ], c + [0, 0, 2])
-
-atoms.edit()
 #+END_SRC
 
 ** Adsorption module
@@ -321,41 +309,6 @@ The =AdsorptionSite= class also produces an expanded unit cell which is useful f
 
 All possible adsorption sites of of CuPd_{3} (321). Site identifications are the same as above with the addition of blue which shows 4-fold hollow sites.
 
-#+BEGIN_SRC python :results silent :exports none
-from catkit.gen.adsorption import AdsorptionSites
-from catkit.gen.surface import SlabGenerator
-from ase.build import bulk
-from ase.io import write
-from ase import Atom
-
-bulk = bulk('Pd', 'fcc', a=5, cubic=True)
-bulk[3].symbol = 'Cu'
-
-gen = SlabGenerator(
-    bulk,
-    miller_index=(3, 2, 1),
-    layers=13,
-    vacuum=5)
-
-atoms = gen.get_slab(size=1)
-
-sites = AdsorptionSites(atoms)
-coordinates = sites.get_coordinates()
-connectivity = sites.get_connectivity()
-
-atm = {1: 'X', 2: 'He', 3: 'F', 4: 'N'}
-for i, c in enumerate(coordinates):
-    typ = connectivity[i]
-    atoms += Atom(atm[typ], c + [0, 0, 2])
-
-write(
-    '../CuPd3_321-sites.pov',
-    atoms,
-    show_unit_cell=2,
-    run_povray=True,
-)
-#+END_SRC
-
 #+CAPTION: Unique adsorption site enumeration for fcc(321) alloy.
 [[../CuPd3_321-sites.png]]
 
@@ -407,35 +360,120 @@ for i, c in enumerate(coordinates):
 atoms.edit()
 #+END_SRC
 
+#+BEGIN_SRC python :results output org drawer :exports results
+from catkit.gen.adsorption import AdsorptionSites
+from catkit.gen.surface import SlabGenerator
+from ase.build import bulk
+from ase.io import write
+from ase import Atom
+import numpy as np
+
+bulk = bulk('Pd', 'fcc', a=5, cubic=True)
+bulk[3].symbol = 'Cu'
+
+gen = SlabGenerator(
+    bulk,
+    miller_index=(3, 2, 1),
+    layers=13,
+    vacuum=5)
+
+atoms = gen.get_slab(size=1)
+
+sites = AdsorptionSites(atoms)
+
+coordinates = sites.get_coordinates()
+table_matrix = np.array(np.round(coordinates[::5], 3), dtype=str)
+
+print('Coordinates:')
+print('#+attr_latex: :mode math :environment matrix')
+print('|x|y|z')
+for row in table_matrix:
+    print('|' + '|'.join(row))
+
+connectivity = sites.get_connectivity()
+table_matrix = np.array(np.round(connectivity[::5], 3), dtype=str)
+
+print('\nConnectivity:')
+print('#+attr_latex: :mode math :environment matrix')
+print('|' + '|'.join(table_matrix))
+
+# The indices of adjacent surface atoms
+topology = sites.get_topology()
+table_matrix = topology[::5]
+
+print('\nTopology:')
+print('#+attr_latex: :mode math :environment matrix')
+for row in table_matrix:
+    print('|' + str(list(row)) + '|')
+
+periodic = sites.get_periodic_sites()
+table_matrix = np.array(periodic[::5], dtype=str)
+
+print('\nSites by periodicity:')
+print('|' + '|'.join(table_matrix))
+
+symmetric = sites.get_symmetric_sites()
+table_matrix = np.array(symmetric[::5], dtype=str)
+
+print('\nSites by symmetry:')
+print('|' + '|'.join(table_matrix))
+
+
+atm = {1: 'X', 2: 'He', 3: 'F', 4: 'N'}
+for i, c in enumerate(coordinates):
+    typ = connectivity[i]
+    atoms += Atom(atm[typ], c + [0, 0, 2])
+
+write(
+    '../CuPd3_321-sites.pov',
+    atoms,
+    show_unit_cell=2,
+    run_povray=True,
+)
+#+END_SRC
+
 #+RESULTS:
 :RESULTS:
 Coordinates:
- [[-9.69352122e-16  2.98807152e+00  1.03452248e+01]
- [ 2.23606798e+00  5.97614305e-01  1.16815310e+01]
- [ 5.59016994e-01  6.12554662e+00  1.26837607e+01]
- [ 8.94427191e+00  6.87256450e+00  1.16815310e+01]
- [ 1.11803399e+00  7.76898596e+00  1.23496842e+01]
- [ 2.79508497e+00  5.22912517e+00  1.20156076e+01]
- [ 5.03115295e+00  4.33270371e+00  1.13474545e+01]
- [ 7.26722093e+00  1.94224649e+00  1.26837607e+01]
- [ 6.33552594e+00  6.67335974e+00  1.10133779e+01]
- [ 1.86338998e+00  2.49005960e+00  1.10133779e+01]
- [ 8.57159391e+00  4.28290252e+00  1.23496842e+01]
- [ 7.82623792e+00  5.97614305e-01  1.16815310e+01]] 
+#+attr_latex: :mode math :environment matrix
+|     x |     y |      z |
+|-------+-------+--------|
+| 2.236 | 0.598 | 11.682 |
+| 0.559 | 6.126 | 12.684 |
+| 8.944 | 6.873 | 11.682 |
+| 1.118 | 7.769 |  12.35 |
+| 2.795 | 5.229 | 12.016 |
+| 5.031 | 4.333 | 11.347 |
+| 7.267 | 1.942 | 12.684 |
+| 6.336 | 6.673 | 11.013 |
+| 1.863 |  2.49 | 11.013 |
+| 8.572 | 4.283 |  12.35 |
+| 7.826 | 0.598 | 11.682 |
 
 Connectivity:
- [1 1 2 2 2 2 2 2 3 3 3 4] 
+#+attr_latex: :mode math :environment matrix
+| 1 | 1 | 2 | 2 | 2 | 2 | 2 | 2 | 3 | 3 | 3 | 4 |
 
 Topology:
- [array([16]) array([21]) array([23, 25]) array([18, 23]) array([25, 21])
- array([19, 25]) array([19, 20]) array([22, 24]) array([20, 18, 17])
- array([21, 19, 16]) array([20, 24, 23]) array([17, 24, 18, 22])] 
+#+attr_latex: :mode math :environment matrix
+| [16]             |
+| [21]             |
+| [23, 25]         |
+| [18, 23]         |
+| [25, 21]         |
+| [19, 25]         |
+| [19, 20]         |
+| [22, 24]         |
+| [20, 18, 17]     |
+| [21, 19, 16]     |
+| [20, 24, 23]     |
+| [17, 24, 18, 22] |
 
 Sites by periodicity:
- [ 40  45 203 242 250 282 287 294 389 409 415 451] 
+|40|45|203|242|250|282|287|294|389|409|415|451
 
 Sites by symmetry:
- [ 40  45 203 242 250 282 287 294 389 409 415 451]
+|40|45|203|242|250|282|287|294|389|409|415|451
 :END:
 
 When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
@@ -482,7 +520,7 @@ write(
     '../adsorption-vectors.pov',
     atoms * (2, 2, 1),
     show_unit_cell=2,
-    rotation='90x, -40y, -160z',
+    rotation='90x, -39y, -160z',
     run_povray=True
 )
 #+END_SRC
@@ -526,7 +564,7 @@ Creating good initial guesses for 3D structures can be tedious to perform by han
 
 The =Builder= module currently takes Gratoms objects as input _only_ since graph information is required. 
 
-#+BEGIN_SRC python :results output org drawer :exports both
+#+BEGIN_SRC python :exports both
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import Builder
 from ase.build import bulk
@@ -549,12 +587,10 @@ print(builder)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-Adsorption builder for Cu4Pd12 slab.
-unique adsorption sites: 9
-site connectivity: [1 1 2 2 2 3 3 3 3]
-unique adsorption edges: 21
-:END:
+: Adsorption builder for Cu4Pd12 slab.
+: unique adsorption sites: 9
+: site connectivity: [1 1 2 2 2 3 3 3 3]
+: unique adsorption edges: 21
 
 **** Monodentate adsorption
 When a single atom of the molecule is considered bonded to the surface, the builder attempts to arrange non-bonded atoms in an intelligent fashion.
@@ -730,7 +766,7 @@ Below is an example script which generates some simple figures using [[https://n
 [[../molecule-13.png]] [[../molecule-14.png]] [[../molecule-15.png]] [[../molecule-16.png]]
 [[../molecule-17.png]]
 
-#+BEGIN_SRC python :results output org drawer :exports both
+#+BEGIN_SRC python
 from catkit.gen.pathways import ReactionNetwork
 import time
 
@@ -748,9 +784,7 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-Process completed in 0.0s
-:END:
+: Process completed in 0.0s
 
 ** Reaction mechanisms:
 - [X] Addition and Reduction reactions (R1 + R2 <--> P1)
@@ -766,7 +800,7 @@ Enumeration of possible elementary reaction steps for gas-phase C_{2}H_{6} speci
 
 Pathway exploration is currently integrated with gas-phase molecule search. See the gas-phase molecule search example for further details on molecule generations. Below, a reaction network is generated.
 
-#+BEGIN_SRC python :results output org drawer :exports both
+#+BEGIN_SRC python
 from catkit.gen.pathways import ReactionNetwork
 import time
 
@@ -787,13 +821,11 @@ print('Process completed in {:.1f}s'.format(time.time() - start))
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
-Process completed in 0.3s
-:END:
+: Process completed in 0.3s
 
 Once the reaction network has been produce, we can illustrate the potential pathways using the following code.
 
-#+BEGIN_SRC python :results output org drawer :exports both
+#+BEGIN_SRC python :results output org drawer 
 from catkit.gen.pathways import ReactionNetwork
 import numpy as np
 import networkx as nx
@@ -804,7 +836,7 @@ with ReactionNetwork(db_name='C2H6-example.db') as rn:
     pathways = rn.load_pathways()
 
 names = np.empty(len(molecules) + 1, dtype='a5')
-names[0] = ''
+
 for k, v in molecules.items():
     atn = nx.get_node_attributes(v.graph, 'number')
 
@@ -812,66 +844,46 @@ for k, v in molecules.items():
     hill = formula_hill(list(atn.values()))
     names[k] = hill
 
+print('|Reactants|Products|')
+print('|-')
 for path in pathways:
-    print('|{} + {} --> {} + {}|'.format(*names[path]))
+    print('|{} + {} | {} |'.format(
+        names[path][0].decode("utf-8"),
+        names[path][1].decode("utf-8"),
+        names[path][3].decode("utf-8")))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-| b'H' + b'H' --> b'' + b'H2'       |
-| b'H' + b'H' --> b'' + b'H2'       |
-| b'H' + b'C' --> b'' + b'CH'       |
-| b'H' + b'C' --> b'' + b'CH'       |
-| b'H' + b'CH' --> b'' + b'CH2'     |
-| b'H' + b'CH' --> b'' + b'CH2'     |
-| b'H' + b'C2' --> b'' + b'C2H'     |
-| b'H' + b'C2' --> b'' + b'C2H'     |
-| b'H' + b'CH2' --> b'' + b'CH3'    |
-| b'H' + b'CH2' --> b'' + b'CH3'    |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
-| b'H' + b'C2H' --> b'' + b'C2H2'   |
-| b'H' + b'CH3' --> b'' + b'CH4'    |
-| b'H' + b'CH3' --> b'' + b'CH4'    |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H2' --> b'' + b'C2H3'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H3' --> b'' + b'C2H4'  |
-| b'H' + b'C2H4' --> b'' + b'C2H5'  |
-| b'H' + b'C2H4' --> b'' + b'C2H5'  |
-| b'H' + b'C2H4' --> b'' + b'C2H5'  |
-| b'H' + b'C2H4' --> b'' + b'C2H5'  |
-| b'H' + b'C2H5' --> b'' + b'C2H6'  |
-| b'H' + b'C2H5' --> b'' + b'C2H6'  |
-| b'C' + b'C' --> b'' + b'C2'       |
-| b'C' + b'C' --> b'' + b'C2'       |
-| b'C' + b'CH' --> b'' + b'C2H'     |
-| b'C' + b'CH' --> b'' + b'C2H'     |
-| b'C' + b'CH2' --> b'' + b'C2H2'   |
-| b'C' + b'CH2' --> b'' + b'C2H2'   |
-| b'C' + b'CH3' --> b'' + b'C2H3'   |
-| b'C' + b'CH3' --> b'' + b'C2H3'   |
-| b'CH' + b'CH' --> b'' + b'C2H2'   |
-| b'CH' + b'CH' --> b'' + b'C2H2'   |
-| b'CH' + b'CH2' --> b'' + b'C2H3'  |
-| b'CH' + b'CH2' --> b'' + b'C2H3'  |
-| b'CH' + b'CH3' --> b'' + b'C2H4'  |
-| b'CH' + b'CH3' --> b'' + b'C2H4'  |
-| b'CH2' + b'CH2' --> b'' + b'C2H4' |
-| b'CH2' + b'CH2' --> b'' + b'C2H4' |
-| b'CH2' + b'CH3' --> b'' + b'C2H5' |
-| b'CH2' + b'CH3' --> b'' + b'C2H5' |
-| b'CH3' + b'CH3' --> b'' + b'C2H6' |
-| b'CH3' + b'CH3' --> b'' + b'C2H6' |
+| Reactants | Products |
+|-----------+----------|
+| H + H     | H2       |
+| H + C     | CH       |
+| H + CH    | CH2      |
+| H + C2    | C2H      |
+| H + CH2   | CH3      |
+| H + C2H   | C2H2     |
+| H + C2H   | C2H2     |
+| H + CH3   | CH4      |
+| H + C2H2  | C2H3     |
+| H + C2H2  | C2H3     |
+| H + C2H2  | C2H3     |
+| H + C2H3  | C2H4     |
+| H + C2H3  | C2H4     |
+| H + C2H3  | C2H4     |
+| H + C2H4  | C2H5     |
+| H + C2H4  | C2H5     |
+| H + C2H5  | C2H6     |
+| C + C     | C2       |
+| C + CH    | C2H      |
+| C + CH2   | C2H2     |
+| C + CH3   | C2H3     |
+| CH + CH   | C2H2     |
+| CH + CH2  | C2H3     |
+| CH + CH3  | C2H4     |
+| CH2 + CH2 | C2H4     |
+| CH2 + CH3 | C2H5     |
+| CH3 + CH3 | C2H6     |
 :END:
 
 ** Reaction routes
@@ -886,7 +898,7 @@ For a given set of elementary mechanisms, there is frequently many types of chem
 
 In this example, we choose the number of independent species.
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python
 from catkit.gen.route import get_response_reactions
 import numpy as np
 
@@ -918,7 +930,7 @@ print(species)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
+#+begin_example
 Overall reaction routes:
 [[ 0  0  0  0  0  0  2 -1 -1  0  0  0]
  [ 0  0  0  0  0  0  0  1  0  2 -2  0]
@@ -938,7 +950,7 @@ Terminal species:
  [ 5  6  8  9 11]
  [ 5  6  8 10 11]
  [ 5  6  9 10 11]]
-:END:
+#+end_example
 
 The terminal species matrix will always contain =s + 1= entries, where =s= is the number of elements in the chemistry. This does not necessarily mean that the overall reaction produced will include all =s + 1= species.
 
@@ -947,7 +959,7 @@ Currently, only Happel-Sellers reaction routes can be enumerated cite:fishtik-20
 
 Below we take another example from to produce a linearly independent set of reaction routes cite:fishtik-2004-react-route-graph-2.
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python
 from catkit.gen.route import get_response_reactions
 from catkit.gen.route import get_heppel_sellers
 import numpy as np
@@ -1002,7 +1014,7 @@ print(np.dot(sigma, nu))
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
+#+begin_example
 Linearly independent set of reaction routes:
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0]
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0]
@@ -1020,7 +1032,7 @@ Overall reaction routes:
  [ 0  0  0  0  0  0  0  0  0  0  0  0]
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]]
-:END:
+#+end_example
 
 Note that all of the linearly independent reaction routes return the same overall reaction except for one. This is because some routes will return a trivial solution. Routes which return the correct overall chemistry are known as full routes (FR) and those which return trivial solutions are called empty routes (ER).
 
@@ -1029,7 +1041,7 @@ Computationally, collecting an arbitrary set of linearly independent reaction ro
 
 However, it is still often desirable for some applications to have a full listing of both full and empty reaction routes. This can be achieved more efficiently when beginning with a linearly independent set of reaction routes cite:fishtik-2002-ubi-qep.
 
-#+BEGIN_SRC python :results output org drawer
+#+BEGIN_SRC python
 from catkit.gen.route import get_response_reactions
 from catkit.gen.route import get_reaction_routes
 from catkit.gen.route import get_heppel_sellers
@@ -1084,7 +1096,7 @@ print(ER)
 #+END_SRC
 
 #+RESULTS:
-:RESULTS:
+#+begin_example
 17 Full reaction routes:
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0]
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0]
@@ -1117,4 +1129,4 @@ print(ER)
  [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1]
  [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1]
  [ 0  0  0  0  0  1  1 -1  0  0 -1  0 -1]]
-:END:
+#+end_example
