@@ -43,7 +43,50 @@ def test_file_organization_module():
 
     })
 
+    subprocess.call(
+        ('python {path}/make_test_slabs.py'.format(path=path)).split())
     catkit.hub.organize.main(options)
+
+
+def test_file_organization_module_non_keep():
+    options = Struct(**{
+        'adsorbates': 'O,H2',
+        'foldername': '{path}/unorganized'.format(path=path),
+        'verbose': True,
+        'include_pattern': '.',
+        'exclude_pattern': '%%$^#$',
+        'facet_name': '111',
+        'max_density_gas': 0.002,
+        'max_density_slab': 0.06,
+        'exclude_reference': '',
+        'max_energy': 10,
+        'keep_all_energies': False,
+
+    })
+
+    subprocess.call(
+        ('python {path}/make_test_slabs.py'.format(path=path)).split())
+    catkit.hub.organize.main(options)
+
+def test_file_organization_module_collect_only():
+    options = Struct(**{
+        'adsorbates': 'O,H2',
+        'foldername': '{path}/unorganized'.format(path=path),
+        'verbose': True,
+        'include_pattern': '.',
+        'exclude_pattern': '%%$^#$',
+        'facet_name': '111',
+        'max_density_gas': 0.002,
+        'max_density_slab': 0.06,
+        'exclude_reference': '',
+        'max_energy': 10,
+        'keep_all_energies': False,
+
+    })
+
+    subprocess.call(
+        ('python {path}/make_test_slabs.py'.format(path=path)).split())
+    catkit.hub.organize.collect_structures(options.foldername, options)
 
 
 if __name__ == '__main__':
