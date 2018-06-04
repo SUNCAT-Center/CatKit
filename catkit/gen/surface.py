@@ -277,11 +277,14 @@ class SlabGenerator(object):
 
         # TODO: Graph generation needs to go here once handling of
         # unit cell repetitions is implemented.
+        scaled_zpositions = ibasis.get_scaled_positions()[:, 2] + self.tol
+        scaled_zpositions = np.round(scaled_zpositions % 1 + self.tol, 4)
+
         indices = np.argwhere(surf_atoms).flatten()
-        com = ibasis.get_center_of_mass(scaled=True)[-1]
-        zcoords = ibasis.get_scaled_positions()[:, 2] - com
+        zcoords = scaled_zpositions - np.mean(scaled_zpositions)
         top = indices[zcoords[indices] >= 0]
         bottom = indices[zcoords[indices] < 0]
+
         ibasis.set_surface_atoms(top=top, bottom=bottom)
 
         utils.get_unique_coordinates(

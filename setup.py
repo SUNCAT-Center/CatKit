@@ -8,7 +8,7 @@ with open('readme.org', 'r') as f:
 
 setuptools.setup(
     name="CatKit",
-    version="0.4.4",
+    version="0.5.0",
     url="https://github.com/SUNCAT-Center/CatKit",
 
     author="Jacob Boes",
