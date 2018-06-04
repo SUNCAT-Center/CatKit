@@ -15,12 +15,12 @@ class TestBuild(unittest.TestCase):
 
         # Slab should have 16 Pd atoms
         assert(len(slab) == 16)
-        connectivity_sum = slab.connectivity.sum(axis=0)
+        degree = slab.degree
 
-        correct_connectivity_sum = np.array(
+        test_degree = np.array(
             [9, 9, 9, 9, 12, 12, 12, 12, 12, 12, 12, 12, 9, 9, 9, 9])
 
-        assert_array_equal(connectivity_sum, correct_connectivity_sum)
+        assert_array_equal(degree, test_degree)
 
         correct_surf_atoms = np.array([12, 13, 14, 15])
         assert_array_equal(slab.get_surface_atoms(), correct_surf_atoms)

@@ -30,9 +30,9 @@ def surface(
         The bulk crystal structure to pass to the ase bulk builder.
     miller : list (3,) or (4,)
         The miller index to cleave the surface structure from. If 4 values
-        are used, Miller-Bravais indices are assumed.
+        are used, assume Miller-Bravis convention.
     termination : int
-        Index of a unique termination for the slab.
+        The index assocated with a specific slab termination.
     fixed : int
         Number of layers to constrain.
     vacuum : float

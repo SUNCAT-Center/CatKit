@@ -87,13 +87,16 @@ class Gratoms(Atoms):
 
     def get_surface_atoms(self):
         """Return surface atoms."""
-        surf_atoms = np.where(self.get_array('surface_atoms'))[0]
+        surf_atoms = np.where(self.get_array('surface_atoms') > 0)[0]
         return surf_atoms
 
-    def set_surface_atoms(self, surface_atoms):
+    def set_surface_atoms(self, top, bottom=None):
         """Assign surface atoms."""
         n = np.zeros(len(self))
-        n[surface_atoms] = 1
+        if bottom is not None:
+            n[bottom] = -1
+        # Overwrites bottom indexing
+        n[top] = 1
         self.set_array('surface_atoms', n)
 
     def get_neighbor_symbols(self, u):
