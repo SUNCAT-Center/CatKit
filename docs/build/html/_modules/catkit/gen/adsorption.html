@@ -82,7 +82,14 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">Modules</a></li>
 </ul>
 
             
@@ -161,7 +168,7 @@
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 
 
-<div class="viewcode-block" id="AdsorptionSites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites">[docs]</a><span class="k">class</span> <span class="nc">AdsorptionSites</span><span class="p">():</span>
+<div class="viewcode-block" id="AdsorptionSites"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites">[docs]</a><span class="k">class</span> <span class="nc">AdsorptionSites</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Adsorption site object.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">slab</span><span class="p">,</span> <span class="n">surface_atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
@@ -224,7 +231,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">screen</span> <span class="o">=</span> <span class="n">screen</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_symmetric_sites</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="AdsorptionSites.get_connectivity"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_connectivity">[docs]</a>    <span class="k">def</span> <span class="nf">get_connectivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_connectivity"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_connectivity">[docs]</a>    <span class="k">def</span> <span class="nf">get_connectivity</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the number of connections associated with each site.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
             <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
@@ -233,7 +240,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.get_coordinates"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_coordinates"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_coordinates">[docs]</a>    <span class="k">def</span> <span class="nf">get_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the 3D coordinates associated with each site.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
             <span class="n">sel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_symmetric_sites</span><span class="p">()</span>
@@ -242,7 +249,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.get_topology"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_topology">[docs]</a>    <span class="k">def</span> <span class="nf">get_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_topology"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_topology">[docs]</a>    <span class="k">def</span> <span class="nf">get_topology</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the indices of adjacent surface atoms.&quot;&quot;&quot;</span>
         <span class="n">topology</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">top</span><span class="p">]</span> <span class="k">for</span> <span class="n">top</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">r1_topology</span><span class="p">]</span>
         <span class="n">topology</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topology</span><span class="p">)</span>
@@ -364,7 +371,7 @@
 
         <span class="k">return</span> <span class="n">sites</span>
 
-<div class="viewcode-block" id="AdsorptionSites.get_periodic_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_periodic_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_periodic_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_periodic_sites"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_periodic_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_periodic_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return an index of the coordinates which are unique by</span>
 <span class="sd">        periodic boundary conditions.</span>
 
@@ -393,7 +400,7 @@
 
         <span class="k">return</span> <span class="n">periodic_match</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.get_symmetric_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_symmetric_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetric_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_symmetric_sites"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_symmetric_sites">[docs]</a>    <span class="k">def</span> <span class="nf">get_symmetric_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Determine the symmetrically unique adsorption sites</span>
 <span class="sd">        from a list of fractional coordinates.</span>
 
@@ -412,9 +419,9 @@
         <span class="n">symmetry_match</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symmetric_sites</span>
 
         <span class="k">if</span> <span class="n">symmetry_match</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">symmetry</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
-            <span class="n">rotations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">],</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-            <span class="n">translations</span> <span class="o">=</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;translations&#39;</span><span class="p">]</span>
+            <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tol</span><span class="p">)</span>
+            <span class="n">rotations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">swapaxes</span><span class="p">(</span><span class="n">rotations</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
             <span class="n">affine</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
             <span class="n">points</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">frac_coords</span>
@@ -444,7 +451,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">symmetry_match</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.get_adsorption_vectors"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_adsorption_vectors"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_vectors">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_vectors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">screen</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the vectors representing the furthest distance from</span>
 <span class="sd">        the neighboring atoms.</span>
 
@@ -469,7 +476,7 @@
 
         <span class="k">return</span> <span class="n">vectors</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.get_adsorption_edges"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.get_adsorption_edges"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.get_adsorption_edges">[docs]</a>    <span class="k">def</span> <span class="nf">get_adsorption_edges</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symmetric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">periodic</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the edges of adsorption sties defined as all regions</span>
 <span class="sd">        with adjacent vertices.</span>
 
@@ -536,13 +543,13 @@
 
         <span class="k">return</span> <span class="n">edges</span></div>
 
-<div class="viewcode-block" id="AdsorptionSites.plot"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">savefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="AdsorptionSites.plot"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.AdsorptionSites.plot">[docs]</a>    <span class="k">def</span> <span class="nf">plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">savefile</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a visualization of the sites.&quot;&quot;&quot;</span>
         <span class="n">top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="n">other</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectivity</span> <span class="o">!=</span> <span class="mi">1</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="n">Delaunay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">][</span><span class="n">top</span><span class="p">])</span>
 
-        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mf">3.5</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">3.5</span> <span class="o">*</span> <span class="mi">2</span><span class="p">),</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_axes</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
 
         <span class="n">ax</span><span class="o">.</span><span class="n">triplot</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">dt</span><span class="o">.</span><span class="n">points</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">dt</span><span class="o">.</span><span class="n">simplices</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
@@ -552,12 +559,12 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s1">&#39;off&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">savefile</span><span class="p">:</span>
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefile</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">savefile</span><span class="p">,</span> <span class="n">transparent</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
 
 
-<div class="viewcode-block" id="Builder"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder">[docs]</a><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">AdsorptionSites</span><span class="p">):</span>
+<div class="viewcode-block" id="Builder"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.Builder">[docs]</a><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">AdsorptionSites</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initial module for creation of 3D slab structures with</span>
 <span class="sd">    attached adsorbates.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -574,7 +581,7 @@
 
         <span class="k">return</span> <span class="n">string</span>
 
-<div class="viewcode-block" id="Builder.add_adsorbates"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbates">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbates</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+<div class="viewcode-block" id="Builder.add_adsorbates"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbates">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbates</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
         <span class="n">slab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ads</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">adsorbates</span><span class="p">):</span>
@@ -589,7 +596,7 @@
 
         <span class="k">return</span> <span class="n">slab</span></div>
 
-<div class="viewcode-block" id="Builder.add_adsorbate"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbate">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Builder.add_adsorbate"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.Builder.add_adsorbate">[docs]</a>    <span class="k">def</span> <span class="nf">add_adsorbate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">adsorbate</span><span class="p">,</span> <span class="n">bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Add and adsorbate to a slab.</span>
 
 <span class="sd">        Parameters</span>
@@ -679,7 +686,7 @@
         <span class="n">branches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_successors</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="p">,</span> <span class="n">bond</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">branches</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">uvec0</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
             <span class="n">uvec1</span> <span class="o">=</span> <span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">norm</span><span class="p">(</span><span class="n">slab</span><span class="o">.</span><span class="n">cell</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">uvec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec0</span><span class="p">,</span> <span class="n">uvec1</span><span class="p">)</span>
@@ -731,7 +738,7 @@
         <span class="c1"># Temporarily break adsorbate</span>
         <span class="n">atoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="o">*</span><span class="n">bonds</span><span class="p">)</span>
 
-        <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">vectors</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_adsorption_vectors</span><span class="p">(</span><span class="n">screen</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">uvec1</span> <span class="o">=</span> <span class="n">vectors</span><span class="p">[</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_index</span><span class="p">]]</span>
         <span class="n">uvec2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cross</span><span class="p">(</span><span class="n">uvec1</span><span class="p">,</span> <span class="n">uvec0</span><span class="p">)</span>
         <span class="n">uvec2</span> <span class="o">/=</span> <span class="o">-</span><span class="n">norm</span><span class="p">(</span><span class="n">uvec2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)[:,</span> <span class="kc">None</span><span class="p">]</span>
@@ -839,7 +846,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Too many bonded atoms to position correctly.&#39;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Builder.ex_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.Builder.ex_sites">[docs]</a>    <span class="k">def</span> <span class="nf">ex_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Builder.ex_sites"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.Builder.ex_sites">[docs]</a>    <span class="k">def</span> <span class="nf">ex_sites</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get site indices inside or outside of a cutoff radii from a</span>
 <span class="sd">        provided periodic site index. If two sites are provided, an</span>
 <span class="sd">        option to return the mutually inclusive points is also available.</span>
@@ -881,7 +888,7 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">per</span><span class="p">[</span><span class="n">neighbors</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span></div></div>
 
 
-<div class="viewcode-block" id="get_adsorption_sites"><a class="viewcode-back" href="../../../catkit.gen.html#catkit.gen.adsorption.get_adsorption_sites">[docs]</a><span class="k">def</span> <span class="nf">get_adsorption_sites</span><span class="p">(</span><span class="n">slab</span><span class="p">,</span>
+<div class="viewcode-block" id="get_adsorption_sites"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.adsorption.get_adsorption_sites">[docs]</a><span class="k">def</span> <span class="nf">get_adsorption_sites</span><span class="p">(</span><span class="n">slab</span><span class="p">,</span>
                          <span class="n">surface_atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                          <span class="n">symmetry_reduced</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                          <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
@@ -943,7 +950,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

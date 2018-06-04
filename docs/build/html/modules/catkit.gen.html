@@ -1,0 +1,1369 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen package &mdash; CatKit 0.4.4 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="catkit.gen.analysis package" href="catkit.gen.analysis.html" />
+    <link rel="prev" title="Modules" href="catkit.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">About</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="catkit.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="catkit.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">catkit.gen package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.adsorption">catkit.gen.adsorption module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.geometry">catkit.gen.geometry module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.molecules">catkit.gen.molecules module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.pathways">catkit.gen.pathways module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.route">catkit.gen.route module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.surface">catkit.gen.surface module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen.utils">catkit.gen.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-catkit.gen">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.pawprint.html">catkit.pawprint package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.flow.html">catkit.flow package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="catkit.hub.html">catkit.hub package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="catkit.html">Modules</a> &raquo;</li>
+        
+      <li>catkit.gen package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/modules/catkit.gen.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="catkit-gen-package">
+<h1>catkit.gen package<a class="headerlink" href="#catkit-gen-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="catkit.gen.analysis.html">catkit.gen.analysis package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.classifier">catkit.gen.analysis.classifier module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.matching">catkit.gen.analysis.matching module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis.reconfiguration">catkit.gen.analysis.reconfiguration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.gen.analysis.html#module-catkit.gen.analysis">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-catkit.gen.adsorption">
+<span id="catkit-gen-adsorption-module"></span><h2>catkit.gen.adsorption module<a class="headerlink" href="#module-catkit.gen.adsorption" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.gen.adsorption.AdsorptionSites">
+<em class="property">class </em><code class="descclassname">catkit.gen.adsorption.</code><code class="descname">AdsorptionSites</code><span class="sig-paren">(</span><em>slab</em>, <em>surface_atoms=None</em>, <em>r=8</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Adsorption site object.</p>
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_adsorption_edges">
+<code class="descname">get_adsorption_edges</code><span class="sig-paren">(</span><em>symmetric=True</em>, <em>periodic=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_adsorption_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_adsorption_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the edges of adsorption sties defined as all regions
+with adjacent vertices.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>symmetric</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return only the symmetrically reduced edges.</li>
+<li><strong>periodic</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return edges which are unique via periodicity.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>edges</strong> – All edges crossing ridge or vertices indexed by the expanded
+unit slab.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, 2)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_adsorption_vectors">
+<code class="descname">get_adsorption_vectors</code><span class="sig-paren">(</span><em>unique=True</em>, <em>screen=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_adsorption_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_adsorption_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the vectors representing the furthest distance from
+the neighboring atoms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>vectors</strong> – Adsorption vectors for surface sites.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">ndarray (n, 3)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_connectivity">
+<code class="descname">get_connectivity</code><span class="sig-paren">(</span><em>unique=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_connectivity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_connectivity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the number of connections associated with each site.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_coordinates">
+<code class="descname">get_coordinates</code><span class="sig-paren">(</span><em>unique=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the 3D coordinates associated with each site.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_periodic_sites">
+<code class="descname">get_periodic_sites</code><span class="sig-paren">(</span><em>screen=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_periodic_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_periodic_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an index of the coordinates which are unique by
+periodic boundary conditions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>screen</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return only sites inside the unit cell.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>periodic_match</strong> – Indices of the coordinates which are identical by
+periodic boundary conditions.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray (n,)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_symmetric_sites">
+<code class="descname">get_symmetric_sites</code><span class="sig-paren">(</span><em>unique=True</em>, <em>screen=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_symmetric_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_symmetric_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the symmetrically unique adsorption sites
+from a list of fractional coordinates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>unique</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return only the unique symmetrically reduced sites.</li>
+<li><strong>screen</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return only sites inside the unit cell.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sites</strong> – Dictionary of sites containing index of site</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict of lists</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.get_topology">
+<code class="descname">get_topology</code><span class="sig-paren">(</span><em>unique=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.get_topology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.get_topology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the indices of adjacent surface atoms.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.AdsorptionSites.plot">
+<code class="descname">plot</code><span class="sig-paren">(</span><em>savefile=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#AdsorptionSites.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.AdsorptionSites.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a visualization of the sites.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="catkit.gen.adsorption.Builder">
+<em class="property">class </em><code class="descclassname">catkit.gen.adsorption.</code><code class="descname">Builder</code><span class="sig-paren">(</span><em>slab</em>, <em>surface_atoms=None</em>, <em>r=8</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#Builder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.Builder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#catkit.gen.adsorption.AdsorptionSites" title="catkit.gen.adsorption.AdsorptionSites"><code class="xref py py-class docutils literal"><span class="pre">catkit.gen.adsorption.AdsorptionSites</span></code></a></p>
+<p>Initial module for creation of 3D slab structures with
+attached adsorbates.</p>
+<dl class="method">
+<dt id="catkit.gen.adsorption.Builder.add_adsorbate">
+<code class="descname">add_adsorbate</code><span class="sig-paren">(</span><em>adsorbate</em>, <em>bonds=None</em>, <em>index=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#Builder.add_adsorbate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.Builder.add_adsorbate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add and adsorbate to a slab.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>adsorbate</strong> (<em>gratoms object</em>) – Molecule to connect to the surface.</li>
+<li><strong>bonds</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><em>list of 2 int</em>) – Index of adsorbate atoms to be bonded.</li>
+<li><strong>index</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Index of the site or edge to use as the adsorption position. A
+value of -1 will return all possible structures.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slabs</strong> – Slab(s) with adsorbate attached.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">gratoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.Builder.add_adsorbates">
+<code class="descname">add_adsorbates</code><span class="sig-paren">(</span><em>adsorbates</em>, <em>indices</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#Builder.add_adsorbates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.Builder.add_adsorbates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.adsorption.Builder.ex_sites">
+<code class="descname">ex_sites</code><span class="sig-paren">(</span><em>index</em>, <em>select='inner'</em>, <em>cutoff=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#Builder.ex_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.Builder.ex_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get site indices inside or outside of a cutoff radii from a
+provided periodic site index. If two sites are provided, an
+option to return the mutually inclusive points is also available.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.adsorption.get_adsorption_sites">
+<code class="descclassname">catkit.gen.adsorption.</code><code class="descname">get_adsorption_sites</code><span class="sig-paren">(</span><em>slab</em>, <em>surface_atoms=None</em>, <em>symmetry_reduced=True</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/adsorption.html#get_adsorption_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.adsorption.get_adsorption_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the adsorption sites of a slab as defined by surface
+symmetries of the surface atoms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>slab</strong> (<em>atoms object</em>) – The slab to find adsorption sites for. Must have surface
+atoms defined.</li>
+<li><strong>surface_atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>n</em><em>,</em><em>)</em>) – List of the surface atom indices.</li>
+<li><strong>symmetry_reduced</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the symmetrically unique sites only.</li>
+<li><strong>adsorption_vectors</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the adsorption vectors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>coordinates</strong> (<em>ndarray (n, 3)</em>) – Cartesian coordinates of activate sites.</li>
+<li><strong>connectivity</strong> (<em>ndarray (n,)</em>) – Number of bonds formed for a given adsorbate.</li>
+<li><strong>symmetry_index</strong> (<em>ndarray(n,)</em>) – Arbitrary indices of symmetric sites.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.geometry">
+<span id="catkit-gen-geometry-module"></span><h2>catkit.gen.geometry module<a class="headerlink" href="#module-catkit.gen.geometry" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.geometry.matching_sites">
+<code class="descclassname">catkit.gen.geometry.</code><code class="descname">matching_sites</code><span class="sig-paren">(</span><em>position</em>, <em>comparators</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/geometry.html#matching_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.geometry.matching_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the indices of all points in a comparator list that are
+equal to a given position (with a tolerance), taking into
+account periodic boundary conditions (adaptation from Pymatgen).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>)</em>) – Fractional coordinate to compare to list.</li>
+<li><strong>comparators</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>, </em><em>n</em><em>)</em>) – Fractional coordinates to compare against.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Absolute tolerance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>match</strong> – Indices of matches.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a> (n,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.molecules">
+<span id="catkit-gen-molecules-module"></span><h2>catkit.gen.molecules module<a class="headerlink" href="#module-catkit.gen.molecules" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.molecules.bin_hydrogen">
+<code class="descclassname">catkit.gen.molecules.</code><code class="descname">bin_hydrogen</code><span class="sig-paren">(</span><em>hydrogens=1</em>, <em>bins=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/molecules.html#bin_hydrogen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.molecules.bin_hydrogen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Recursive function for determining distributions of
+hydrogens across bins</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.molecules.get_topologies">
+<code class="descclassname">catkit.gen.molecules.</code><code class="descname">get_topologies</code><span class="sig-paren">(</span><em>symbols</em>, <em>saturate=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/molecules.html#get_topologies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.molecules.get_topologies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the possible topologies of a given chemical species</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>symbols</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Atomic symbols to construct the topologies from.</li>
+<li><strong>saturate</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Saturate the molecule with hydrogen based on the
+default.radicals set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.molecules.hydrogenate">
+<code class="descclassname">catkit.gen.molecules.</code><code class="descname">hydrogenate</code><span class="sig-paren">(</span><em>atoms</em>, <em>bins</em>, <em>copy=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/molecules.html#hydrogenate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.molecules.hydrogenate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add hydrogens to a gratoms object via provided bins</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.pathways">
+<span id="catkit-gen-pathways-module"></span><h2>catkit.gen.pathways module<a class="headerlink" href="#module-catkit.gen.pathways" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.gen.pathways.ReactionNetwork">
+<em class="property">class </em><code class="descclassname">catkit.gen.pathways.</code><code class="descname">ReactionNetwork</code><span class="sig-paren">(</span><em>db_name='reaction-network.db'</em>, <em>base_valence=None</em>, <em>nbond_limits=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>A class for accessing a temporary SQLite database. This
+function works as a context manager and should be used as follows:</p>
+<dl class="docutils">
+<dt>with ReactionNetwork() as rn:</dt>
+<dd>(Perform operation here)</dd>
+</dl>
+<p>This syntax will automatically construct the temporary database,
+or access an existing one. Upon exiting the indentation, the
+changes to the database will be automatically committed.</p>
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.create_table">
+<code class="descname">create_table</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.create_table"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.create_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the SQLite database table framework.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.load_3d_structures">
+<code class="descname">load_3d_structures</code><span class="sig-paren">(</span><em>ids=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.load_3d_structures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.load_3d_structures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Gratoms objects from the ReactionNetwork database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ids</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><em>list of int</em>) – Identifier of the molecule in the database. If None, return all
+structure.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>images</strong> – All Gratoms objects in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.load_molecules">
+<code class="descname">load_molecules</code><span class="sig-paren">(</span><em>ids=None</em>, <em>binned=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.load_molecules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.load_molecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load 2D molecule graphs from the database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>binned</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the molecules in sub-dictionaries of their
+corresponding composition and bonding tags.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>molecules</strong> – All molecules present in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.load_pathways">
+<code class="descname">load_pathways</code><span class="sig-paren">(</span><em>broken_bonds=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.load_pathways"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.load_pathways" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save enumerated pathways the ReactionNetwork database.
+More than two reactants or two products is not supported.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>broken_bonds</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the index information of which bond was broken.
+Only supported for elementary steps.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>pathways</strong> – All pathways present in the database.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.molecule_search">
+<code class="descname">molecule_search</code><span class="sig-paren">(</span><em>element_pool={'C': 2</em>, <em>'H': 6}</em>, <em>load_molecules=True</em>, <em>multiple_bond_search=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.molecule_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.molecule_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the enumeration of molecules which can be produced from
+the specified atoms.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>element_pool</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Atomic symbols keys paired with the maximum number of that atom.</li>
+<li><strong>load_molecules</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Load any existing molecules from the database.</li>
+<li><strong>multiple_bond_search</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Allow atoms to form bonds with other atoms in the molecule.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.path_search">
+<code class="descname">path_search</code><span class="sig-paren">(</span><em>reconfiguration=True</em>, <em>substitution=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.path_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.path_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for reaction mechanisms from a pre-populated database
+of molecules. By default, only single bond addition pathways are
+enumerated (Also called elementary steps).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>reconfiguration</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Search for reconfiguration paths. Reconfiguration paths are
+all those where only the bond order is changed. R1 –&gt; P1.</li>
+<li><strong>substitution</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Search for substitution paths. Substitution paths are all
+those where one bond is broken and one bond is formed
+simultaneously. R1 + R2 –&gt; P1 + P2.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.plot_reaction_network">
+<code class="descname">plot_reaction_network</code><span class="sig-paren">(</span><em>file_name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.plot_reaction_network"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.plot_reaction_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plot the reaction network present in the database.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.save_3d_structure">
+<code class="descname">save_3d_structure</code><span class="sig-paren">(</span><em>gratoms</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.save_3d_structure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.save_3d_structure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save Cartesian coordinates into the ReactionNetwork database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>gratoms</strong> (<em>Atoms object</em>) – Structure containing Cartesian coordinates to be saved.</li>
+<li><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Allow the database to overwrite a matching index.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.save_molecules">
+<code class="descname">save_molecules</code><span class="sig-paren">(</span><em>molecules</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.save_molecules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.save_molecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save enumerated molecules to the ReactionNetwork database.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>molecules</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – Molecules to be saved to the database.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.pathways.ReactionNetwork.save_pathways">
+<code class="descname">save_pathways</code><span class="sig-paren">(</span><em>pathways</em>, <em>broken_bonds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/pathways.html#ReactionNetwork.save_pathways"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.pathways.ReactionNetwork.save_pathways" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save enumerated pathways the ReactionNetwork database.
+More than two reactants or two products is not supported.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>pathways</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) – Sorted pathways in the form [R1, R2, P1, P2].</li>
+<li><strong>broken_bonds</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a>) – Comma separated strings of index associated with the
+two atoms whos bond is broken. List order must match
+pathways.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.route">
+<span id="catkit-gen-route-module"></span><h2>catkit.gen.route module<a class="headerlink" href="#module-catkit.gen.route" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.route.get_heppel_sellers">
+<code class="descclassname">catkit.gen.route.</code><code class="descname">get_heppel_sellers</code><span class="sig-paren">(</span><em>nu</em>, <em>terminal</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/route.html#get_heppel_sellers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.route.get_heppel_sellers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of linearly independent reaction routes
+as described by Heppel-Sellers reaction route enumeration.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nu</strong> (<em>ndarray</em><em> (</em><em>n</em><em>, </em><em>m</em><em>)</em>) – The stoichiometric matrix of n species and m mechanisms.</li>
+<li><strong>terminal</strong> (<em>ndarray</em><em> (</em><em>j</em><em>,</em><em>)</em>) – Indices of the m species to be considered as terminal</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>sigma</strong> – Linearly independent set of Heppel-Sellers reaction routes.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (m, k)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.route.get_reaction_routes">
+<code class="descclassname">catkit.gen.route.</code><code class="descname">get_reaction_routes</code><span class="sig-paren">(</span><em>nu</em>, <em>sigma</em>, <em>empty_routes=True</em>, <em>independent_only=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/route.html#get_reaction_routes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.route.get_reaction_routes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of reaction routes. Returns all full
+reaction routes by default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>nu</strong> (<em>ndarray</em><em> (</em><em>n</em><em>, </em><em>m</em><em>)</em>) – The stoichiometric matrix of n species and m mechanisms.</li>
+<li><strong>sigma</strong> (<em>ndarray</em><em> (</em><em>m</em><em>, </em><em>j</em><em>)</em>) – A linearly independent set of reaction routes.</li>
+<li><strong>empty_routes</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the empty routes along with the full routes.</li>
+<li><strong>independent_only</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return only a linearly independent set of full reaction routes.
+Can take less time.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>FR</strong> (<em>ndarray (m, k)</em>) – Enumerated full reaction routes.</li>
+<li><strong>ER</strong> (<em>ndarray (m, l)</em>) – Enumerated empty reaction routes.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.route.get_response_reactions">
+<code class="descclassname">catkit.gen.route.</code><code class="descname">get_response_reactions</code><span class="sig-paren">(</span><em>epsilon</em>, <em>selection=None</em>, <em>species=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/route.html#get_response_reactions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.route.get_response_reactions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of possible response reaction routes for a given
+chemical formula array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>epsilon</strong> (<em>ndarray</em><em> (</em><em>n</em><em>, </em><em>m</em><em>)</em>) – Chemical formula array of n elements by m molecular species.</li>
+<li><strong>selection</strong> (<em>ndarray</em><em> (</em><em>j</em><em>,</em><em>)</em>) – Indices of the m species to be considered as terminal</li>
+<li><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the indices of the chemical species used.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>RER</strong> (<em>ndarray (m, k)</em>) – Possible response reaction routes.</li>
+<li><strong>index</strong> (<em>ndarray (j, k)</em>) – Indices of the k terminal species use to produce the
+l response reactions.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.route.list_gcd">
+<code class="descclassname">catkit.gen.route.</code><code class="descname">list_gcd</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/route.html#list_gcd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.route.list_gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the greatest common denominator of values in a list.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.surface">
+<span id="catkit-gen-surface-module"></span><h2>catkit.gen.surface module<a class="headerlink" href="#module-catkit.gen.surface" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="catkit.gen.surface.SlabGenerator">
+<em class="property">class </em><code class="descclassname">catkit.gen.surface.</code><code class="descname">SlabGenerator</code><span class="sig-paren">(</span><em>bulk</em>, <em>miller_index</em>, <em>layers</em>, <em>vacuum=None</em>, <em>fixed=None</em>, <em>fix_stoichiometry=False</em>, <em>attach_graph=True</em>, <em>standardize_bulk=True</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class for generation of slab unit cells from bulk unit cells.</p>
+<p>Many surface operations rely upon / are made easier through the
+bulk basis cell they are created from. The SlabGenerator class
+is designed to house these operations.</p>
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.adsorption_sites">
+<code class="descname">adsorption_sites</code><span class="sig-paren">(</span><em>slab</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.adsorption_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.adsorption_sites" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper function to return the adsorption sites of the provided slab.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>slab</strong> (<em>atoms object</em>) – The slab to find adsorption sites for. Assumes you are using
+the same basis.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><ul class="simple">
+<li><strong>coordinates</strong> (<em>ndarray (n,)</em>) – Coordinates of the adsorption sites</li>
+<li><strong>connectivity</strong> (<em>ndarray (n,)</em>) – Connectivity of the adsorption sites</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.align_crystal">
+<code class="descname">align_crystal</code><span class="sig-paren">(</span><em>bulk</em>, <em>miller_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.align_crystal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.align_crystal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a standardized unit cell from bulk unit cell. This
+standardization rotates the a and b basis vectors to be parallel
+to the Miller index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bulk</strong> (<em>Atoms object</em>) – Bulk system to be standardized.</li>
+<li><strong>miller_index</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>)</em>) – Miller indices to align with the basis vectors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>new_bulk</strong> – Standardized bulk unit cell.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Gratoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.get_slab">
+<code class="descname">get_slab</code><span class="sig-paren">(</span><em>size=(1</em>, <em>1)</em>, <em>iterm=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a slab from the bulk structure. This function is meant
+specifically selection of an individual termination or enumeration
+through surfaces of various size.</p>
+<p>This function will orthogonalize the c basis vector and align it
+with the z-axis which breaks bulk symmetry along the z-axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a><em> (</em><em>2</em><em>,</em><em>)</em>) – Repeat the x and y lattice vectors by the indicated
+dimensions</li>
+<li><strong>iterm</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – A termination index in reference to the list of possible
+terminations.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slab</strong> – The modified basis slab produced based on the layer specifications
+given.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Atoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.get_slab_basis">
+<code class="descname">get_slab_basis</code><span class="sig-paren">(</span><em>iterm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab_basis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of all terminations which have been properly shifted
+and with an appropriate number of layers added. This function is mainly
+for performance, to prevent looping over other operations which are not
+related the size of the slab.</p>
+<p>Only produces the terminations requested.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>iterm</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Index of the slab termination to return.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>ibasis</strong> – Prepared, ith basis.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">Gratoms object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.get_unique_terminations">
+<code class="descname">get_unique_terminations</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_unique_terminations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_unique_terminations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine the fractional coordinate shift that will result in
+a unique surface termination. This is not required if bulk
+standardization has been performed, since all available z shifts will
+result in a unique termination for a primitive cell.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>unique_shift</strong> – Fractional coordinate shifts which will result in unique
+terminations.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3.6/library/array.html#module-array" title="(in Python v3.6)">array</a> (n,)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.set_size">
+<code class="descname">set_size</code><span class="sig-paren">(</span><em>slab</em>, <em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.set_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.set_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the size of a slab based one of three methods.</p>
+<p>1. An integer value performs a search of valid matrix operations
+to perform on the ab-basis vectors to return a set which with
+a minimal sum of distances and an angle closes to 90 degrees.</p>
+<p>2. A list-like of length 2 will multiply the existing basis
+vectors by that amount.</p>
+<p>3. A list of two list-likes of length 2 will be interpreted
+as matrix notation to multiply the ab-basis vectors by.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>slab</strong> (<em>Atoms object</em>) – Slab to be made into the requested size.</li>
+<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>2</em><em>,</em><em>) or </em><em>(</em><em>2</em><em>, </em><em>2</em><em>)</em>) – Size of the unit cell to create as described above.</li>
+<li><strong>Returns</strong> – </li>
+<li><strong>--------</strong> – </li>
+<li><strong>supercell</strong> (<em>Gratoms object</em>) – Supercell of the requested size.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.ext_gcd">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">ext_gcd</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#ext_gcd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.ext_gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extension of greatest common divisor.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.get_normal_vectors">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">get_normal_vectors</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#get_normal_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.get_normal_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the normal vectors to a atoms unit cell.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.list_gcd">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">list_gcd</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#list_gcd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.list_gcd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the greatest common divisor of a list of values.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.transform_ab">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">transform_ab</code><span class="sig-paren">(</span><em>slab</em>, <em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#transform_ab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.transform_ab" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform the slab basis vectors parallel to the z-plane
+by matrix notation. This can result in changing the slabs
+cell size. This can also result in very unusual slab dimensions,
+use with caution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>slab</strong> (<em>Atoms object</em>) – The slab to be transformed.</li>
+<li><strong>matrix</strong> (<em>array_like</em><em> (</em><em>2</em><em>, </em><em>2</em><em>)</em>) – The matrix notation transformation of the a and b
+basis vectors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slab</strong> – Slab after transformation.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Atoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen.utils">
+<span id="catkit-gen-utils-module"></span><h2>catkit.gen.utils module<a class="headerlink" href="#module-catkit.gen.utils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.gen.utils.connectivity_to_edges">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">connectivity_to_edges</code><span class="sig-paren">(</span><em>connectivity</em>, <em>indices=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#connectivity_to_edges"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.connectivity_to_edges" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a Numpy connectivity matrix into a list of
+NetworkX compatible edges</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.expand_cell">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">expand_cell</code><span class="sig-paren">(</span><em>atoms</em>, <em>r=6</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#expand_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.expand_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Cartesian coordinates atoms within a supercell
+which contains spheres of specified cutoff radius around
+all atom positions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<em>atoms object</em>) – Atoms object with the periodic boundary conditions and
+unit cell information to use.</li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Radius of the spheres to expand around each atom.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>index</strong> (<em>ndarray of int</em>) – Indices associated with the original unit cell positions.</li>
+<li><strong>coords</strong> (<em>ndarray of (3,) array</em>) – Cartesian coordinates associated with positions in the
+super-cell.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_atomic_numbers">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_atomic_numbers</code><span class="sig-paren">(</span><em>formula</em>, <em>return_count=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_atomic_numbers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_atomic_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the atomic numbers associated with a chemical formula.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>formula</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – A chemical formula to parse into atomic numbers.</li>
+<li><strong>return_count</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Return the count of each element in the formula.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>numbers</strong> (<em>ndarray (n,)</em>) – Element numbers in associated species.</li>
+<li><strong>counts</strong> (<em>ndarray (n,)</em>) – Count of each element in a species.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_cutoff_neighbors">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_cutoff_neighbors</code><span class="sig-paren">(</span><em>atoms</em>, <em>cutoff=None</em>, <em>atol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_cutoff_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_cutoff_neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the connectivity matrix from a simple radial cutoff.
+Multi-bonding occurs through periodic boundary conditions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<em>atoms object</em>) – Atoms object with the periodic boundary conditions and
+unit cell information to use.</li>
+<li><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Cutoff radius to use when determining neighbors.</li>
+<li><strong>atol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Absolute tolerance to use when computing distances.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>connectivity</strong> – Number of edges formed between atoms in a system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, n)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_reference_energies">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_reference_energies</code><span class="sig-paren">(</span><em>species</em>, <em>energies</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_reference_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_reference_energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get reference energies for the elements in a set of molecules.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>species</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>n</em><em>,</em><em>)</em>) – Chemical formulas for each molecular species.</li>
+<li><strong>energies</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>n</em><em>,</em><em>)</em>) – Total energies associated with each species.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><ul class="simple">
+<li><strong>elements</strong> (<em>ndarray (n,)</em>) – Atomic elements associated with all species.</li>
+<li><strong>references</strong> (<em>ndarray (n,)</em>) – Reference energies associated with each element.</li>
+</ul>
+</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_spglib_cell">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_spglib_cell</code><span class="sig-paren">(</span><em>atoms</em>, <em>primitive=False</em>, <em>idealize=True</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_spglib_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_spglib_cell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atoms object interface with spglib primitive cell finder:
+<a class="reference external" href="https://atztogo.github.io/spglib/python-spglib.html#python-spglib">https://atztogo.github.io/spglib/python-spglib.html#python-spglib</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – Atoms object to search for a primitive unit cell.</li>
+<li><strong>primitive</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Reduce the atoms object into a primitive form.</li>
+<li><strong>idealize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Convert the cell into the spglib standardized form.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Tolerance for floating point rounding errors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>primitive cell</strong> – The primitive unit cell returned by spglib if one is found.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)">object</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_symmetry">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_symmetry</code><span class="sig-paren">(</span><em>atoms</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_symmetry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_symmetry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Atoms object interface with spglib symmetry finder:
+<a class="reference external" href="https://atztogo.github.io/spglib/python-spglib.html#python-spglib">https://atztogo.github.io/spglib/python-spglib.html#python-spglib</a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – Atoms object to search for symmetric structures of.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Tolerance for floating point rounding errors.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>symmetry operations</strong> – Symmetry operations from spglib.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, n)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_unique_coordinates">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_unique_coordinates</code><span class="sig-paren">(</span><em>atoms</em>, <em>axis=2</em>, <em>tag=False</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_unique_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_unique_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return unique coordinate values of a given atoms object
+for a specified axis.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – Atoms object to search for unique values along.</li>
+<li><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> (</em><em>0</em><em>, </em><em>1</em><em>, or </em><em>2</em><em>)</em>) – Look for unique values along the x, y, or z axis.</li>
+<li><strong>tag</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – Assign ASE-like tags to each layer of the slab.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – The tolerance to search for unique values within.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>values</strong> – Array of unique positions in fractional coordinates.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_unique_xy">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_unique_xy</code><span class="sig-paren">(</span><em>xyz_coords</em>, <em>cutoff=0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_unique_xy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_unique_xy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the unique coordinates of an atoms object
+for the requrested atoms indices. Z-coordinates are projected
+to maximum z-coordinate by default.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xyz_coords</strong> (<em>ndarray</em><em> (</em><em>n</em><em>, </em><em>3</em><em>)</em>) – Cartesian coordinates to identify unique xy positions from.</li>
+<li><strong>cutoff</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Distance in Angstrons to consider xy-coordinate unique within.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>xy_pos</strong> – Unique xy coordinates projected onto a maximal z coordinate.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (m, 3)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.get_voronoi_neighbors">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_voronoi_neighbors</code><span class="sig-paren">(</span><em>atoms</em>, <em>r=8</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_voronoi_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_voronoi_neighbors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the connectivity matrix from the Voronoi
+method. Multi-bonding occurs through periodic boundary conditions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>atoms</strong> (<em>atoms object</em>) – Atoms object with the periodic boundary conditions and
+unit cell information to use.</li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Radius of the spheres to expand around each atom.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>connectivity</strong> – Number of edges formed between atoms in a system.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n, n)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.isomorphic_molecules">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">isomorphic_molecules</code><span class="sig-paren">(</span><em>graph0</em>, <em>graph1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#isomorphic_molecules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.isomorphic_molecules" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check whether two molecule graphs are isomorphic.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.parse_slice">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">parse_slice</code><span class="sig-paren">(</span><em>slice_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#parse_slice"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.parse_slice" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a correctly parsed slice from input of varying types.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.plane_normal">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">plane_normal</code><span class="sig-paren">(</span><em>xyz</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#plane_normal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.plane_normal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the surface normal vector to a plane of best fit.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>xyz</strong> (<em>ndarray</em><em> (</em><em>n</em><em>, </em><em>3</em><em>)</em>) – 3D points to fit plane to.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>vec</strong> – Unit vector normal to the plane of best fit.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray (1, 3)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.rmean">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">rmean</code><span class="sig-paren">(</span><em>x</em>, <em>N=5</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#rmean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.rmean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate the running mean of array x for N instances.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> or </em><em>ndarray</em><em> (</em><em>n</em><em>,</em><em>)</em>) – Array of values to have a average taken from.</li>
+<li><strong>N</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of values to take an average with.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rmean</strong> – Mean value of the running average.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (n + 1,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.to_gratoms">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">to_gratoms</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#to_gratoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.to_gratoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert and atom object to a gratoms object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.utils.trilaterate">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">trilaterate</code><span class="sig-paren">(</span><em>centers</em>, <em>r</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#trilaterate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.trilaterate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Find the intersection of two or three spheres. In the case
+of two sphere intersection, the z-coordinate is assumed to be
+an intersection of a plane whose normal is aligned with the
+points and perpendicular to the positive z coordinate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>centers</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> or </em><em>ndarray</em><em> (</em><em>n</em><em>,</em><em>)</em>) – Array of values to have a average taken from.</li>
+<li><strong>r</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of values to take an average with.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>intersection</strong> – The point where all spheres/planes intersect.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">ndarray (3,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.gen">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-catkit.gen" title="Permalink to this headline">¶</a></h2>
+<p>Catalysis Generator.</p>
+<dl class="class">
+<dt id="catkit.gen.Defaults">
+<em class="property">class </em><code class="descclassname">catkit.gen.</code><code class="descname">Defaults</code><a class="reference internal" href="../_modules/catkit/gen.html#Defaults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.Defaults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/collections.abc.html#collections.abc.MutableMapping" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">collections.abc.MutableMapping</span></code></a>, <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a></p>
+<p>No frills default dictionary class.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="catkit.gen.analysis.html" class="btn btn-neutral float-right" title="catkit.gen.analysis package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="catkit.html" class="btn btn-neutral" title="Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'0.4.4',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

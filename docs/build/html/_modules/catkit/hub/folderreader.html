@@ -82,7 +82,14 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">Modules</a></li>
 </ul>
 
             
@@ -149,13 +156,41 @@
 <span></span><span class="kn">from</span> <span class="nn">.cathubsqlite</span> <span class="k">import</span> <span class="n">CathubSQLite</span>
 <span class="kn">from</span> <span class="nn">.tools</span> <span class="k">import</span> <span class="n">get_bases</span>
 <span class="kn">from</span> <span class="nn">.import</span> <span class="n">ase_tools</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">date</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">json</span>
 
 
-<div class="viewcode-block" id="FolderReader"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader">[docs]</a><span class="k">class</span> <span class="nc">FolderReader</span><span class="p">:</span>
+<div class="viewcode-block" id="FolderReader"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader">[docs]</a><span class="k">class</span> <span class="nc">FolderReader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for reading data from organized folders and writing to local</span>
+<span class="sd">    CathubSQLite database. Folders should be arranged with</span>
+<span class="sd">    make_folders_template and are read in the order:</span>
+
+<span class="sd">    level:</span>
+
+<span class="sd">    0    folder_name</span>
+<span class="sd">    1    |-- publication</span>
+<span class="sd">    2        |-- dft_code</span>
+<span class="sd">    3            |-- dft_functional</span>
+<span class="sd">    4                |-- gas</span>
+<span class="sd">    4                |-- metal1</span>
+<span class="sd">    5                    |-- facet</span>
+<span class="sd">    6                        |-- reaction</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    foldername: str</span>
+<span class="sd">    debug: bool</span>
+<span class="sd">        default is False. Choose True if the folderreader should  continue</span>
+<span class="sd">        in spite of errors.</span>
+<span class="sd">    update: bool</span>
+<span class="sd">        Update data if allready present in database file. defalt is True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">folder_name</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                  <span class="n">update</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">debug</span> <span class="o">=</span> <span class="n">debug</span>
@@ -175,19 +210,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reaction_level</span> <span class="o">=</span> <span class="mi">6</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">final_level</span> <span class="o">=</span> <span class="mi">6</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">user_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">winther/user_specific/</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">catbase</span><span class="p">,</span>
-                                                            <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<div class="viewcode-block" id="FolderReader.read"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_metal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get reactions from folders.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        skip: list of str</span>
+<span class="sd">            list of folders not to read</span>
+<span class="sd">        goto_reaction: str</span>
+<span class="sd">            Skip ahead to this metal</span>
+<span class="sd">        goto_reaction:</span>
+<span class="sd">            Skip ahead to this reacion</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">omit_folders</span> <span class="o">=</span> <span class="p">[]</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">coverages</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">user_file</span><span class="p">):</span>
-            <span class="n">user_spec</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">user_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">user_spec</span><span class="p">)</span>
-
-<div class="viewcode-block" id="FolderReader.read"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">skip_f</span> <span class="ow">in</span> <span class="n">skip</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">omit_folders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">skip_f</span><span class="p">)</span>
@@ -203,38 +240,43 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">read_pub</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">DFT_level</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">DFT_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">DFT_code</span> <span class="o">=</span> <span class="n">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">XC_level</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">DFT_functional</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">DFT_functional</span> <span class="o">=</span> <span class="n">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">read_gas</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;/gas/&#39;</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">reference_level</span><span class="p">:</span>
                 <span class="k">if</span> <span class="s1">&#39;gas&#39;</span> <span class="ow">in</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
                     <span class="k">continue</span>
 
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">read_bulk</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">goto_metal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">goto_metal</span><span class="p">:</span>
+                        <span class="n">goto_metal</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># don&#39;t read any sub_dirs</span>
+                        <span class="k">continue</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">read_bulk</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">slab_level</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">read_slab</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_level</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">goto_reaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">found_reaction</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">goto_reaction</span><span class="p">:</span>
-                        <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">goto_reaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">goto_reaction</span><span class="p">:</span>
+                        <span class="n">goto_reaction</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">found_reaction</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">dirs</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># don&#39;t read any sub_dirs</span>
+                        <span class="k">continue</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">read_reaction</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_level</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">read_final</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">read_energies</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span></div>
 
-<div class="viewcode-block" id="FolderReader.write"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.write"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">key_values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="n">goto_reaction</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
                 <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">check</span><span class="p">(</span>
@@ -249,35 +291,21 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Already in reaction db with row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="FolderReader.write_publication"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_data</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.write_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_data</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
             <span class="n">pid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">check_publication</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">pid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Written to publications db row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Already in reaction db with row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">pid</span></div>
 
-<div class="viewcode-block" id="FolderReader.update_sqlite"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.update_sqlite">[docs]</a>    <span class="k">def</span> <span class="nf">update_sqlite</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">key_names</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">key_values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="n">goto_reaction</span><span class="p">):</span>
-            <span class="k">with</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
-                <span class="nb">id</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">check</span><span class="p">(</span><span class="n">key_values</span><span class="p">[</span><span class="s1">&#39;reaction_energy&#39;</span><span class="p">])</span>
-                <span class="k">if</span> <span class="nb">id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">db</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">key_values</span><span class="p">,</span> <span class="n">key_names</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="FolderReader.read_name_from_folder"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_name_from_folder">[docs]</a>    <span class="k">def</span> <span class="nf">read_name_from_folder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
-        <span class="n">folder_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">folder_name</span></div>
-
-<div class="viewcode-block" id="FolderReader.read_pub"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_pub">[docs]</a>    <span class="k">def</span> <span class="nf">read_pub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.read_pub"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_pub">[docs]</a>    <span class="k">def</span> <span class="nf">read_pub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="n">pub_folder</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">publication_keys</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">pub_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;/publication.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">))</span>
             <span class="k">if</span> <span class="s1">&#39;url&#39;</span> <span class="ow">in</span> <span class="n">pub_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">del</span> <span class="n">pub_data</span><span class="p">[</span><span class="s1">&#39;url&#39;</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">pub_data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="n">pub_data</span><span class="p">[</span><span class="s1">&#39;authors&#39;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="n">pub_data</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span>
@@ -300,15 +328,14 @@
                         <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
                         <span class="k">pass</span>
-               <span class="c1"># publication_keys.update({&#39;publication_&#39; + key: value})</span>
 
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span>
                 <span class="s1">&#39;ERROR: insufficient publication info </span><span class="si">{e}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
                     <span class="o">**</span><span class="nb">locals</span><span class="p">()))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">doi</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">pub_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="p">,</span>
-                        <span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">authors</span><span class="p">,</span>
+            <span class="n">pub_data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="s1">&#39;journal&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="s1">&#39;volume&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
@@ -318,7 +345,6 @@
                         <span class="s1">&#39;doi&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
                         <span class="s1">&#39;tags&#39;</span><span class="p">:</span> <span class="kc">None</span>
                         <span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">reference</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">energy_corrections</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span>
@@ -333,7 +359,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">authors</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">]</span>
             <span class="n">pub_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;authors&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">authors</span><span class="p">})</span>
         <span class="k">if</span> <span class="n">pub_data</span><span class="p">[</span><span class="s1">&#39;year&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="mi">2018</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="n">date</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">year</span>
             <span class="n">pub_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">year</span><span class="p">})</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">authors</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> \
@@ -345,12 +371,46 @@
         <span class="n">pub_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;pub_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span><span class="p">})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FolderReader.read_gas"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_gas">[docs]</a>    <span class="k">def</span> <span class="nf">read_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.read_gas"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_gas">[docs]</a>    <span class="k">def</span> <span class="nf">read_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">)]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-                         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.traj&#39;</span><span class="p">)]</span></div>
+        <span class="n">traj_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+                      <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.traj&#39;</span><span class="p">)]</span>
 
-<div class="viewcode-block" id="FolderReader.read_bulk"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_bulk">[docs]</a>    <span class="k">def</span> <span class="nf">read_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="n">traj_files</span><span class="p">:</span>
+            <span class="n">ase_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_traj</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="n">chemical_composition</span> <span class="o">=</span> \
+                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span>
+                    <span class="n">traj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)))</span>
+            <span class="n">chemical_composition_hill</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span>
+                <span class="n">traj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span>
+            <span class="n">energy</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_energies</span><span class="p">([</span><span class="n">traj</span><span class="p">])</span>
+            <span class="n">key_value_pairs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">chemical_composition_hill</span><span class="p">,</span>
+                               <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="s1">&#39;gas&#39;</span><span class="p">,</span>
+                               <span class="s1">&#39;epot&#39;</span><span class="p">:</span> <span class="n">energy</span><span class="p">}</span>
+
+            <span class="nb">id</span><span class="p">,</span> <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_in_ase</span><span class="p">(</span>
+                <span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ase_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">write_ase</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span>
+                                             <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                                             <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
+                <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span>
+                                     <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">chemical_composition</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">chemical_composition</span><span class="p">:</span> <span class="n">traj</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="FolderReader.read_bulk"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_bulk">[docs]</a>    <span class="k">def</span> <span class="nf">read_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">metal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
 
@@ -383,12 +443,13 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;bulk&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span></div>
 
-<div class="viewcode-block" id="FolderReader.read_slab"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_slab">[docs]</a>    <span class="k">def</span> <span class="nf">read_slab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.read_slab"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_slab">[docs]</a>    <span class="k">def</span> <span class="nf">read_slab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">facet</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_facet</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facet</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">empty_traj</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.traj&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;empty&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+            <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.traj&#39;</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="s1">&#39;empty&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
         <span class="n">ase_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_traj</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">empty_traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
@@ -411,7 +472,7 @@
             <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;star&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span></div>
 
-<div class="viewcode-block" id="FolderReader.read_reaction"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">read_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
+<div class="viewcode-block" id="FolderReader.read_reaction"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">read_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
         <span class="n">folder_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_reaction_from_folder</span><span class="p">(</span>
@@ -424,7 +485,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefactors</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefactors_TS</span><span class="p">,</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">states</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_reaction_atoms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">)</span>
 
-        <span class="c1"># Create empty dictionaries</span>
+        <span class="sd">&quot;&quot;&quot;Create empty dictionaries&quot;&quot;&quot;</span>
         <span class="n">r_empty</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">]))]</span>
         <span class="n">p_empty</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="p">[</span><span class="s1">&#39;products&#39;</span><span class="p">]))]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reactants&#39;</span><span class="p">:</span> <span class="n">r_empty</span><span class="p">[:],</span>
@@ -432,55 +493,20 @@
 
         <span class="n">key_value_pairs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="k">for</span> <span class="n">traj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span><span class="p">:</span>
-            <span class="n">ase_id</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="sd">&quot;&quot;&quot; Match reaction gas species with their traj file &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">mollist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mollist</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gas&#39;</span><span class="p">:</span>
+                    <span class="k">assert</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span><span class="p">[</span><span class="n">molecule</span><span class="p">]</span>
+                    <span class="n">species</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_prefactor</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+                    <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_state</span><span class="p">(</span><span class="n">species</span><span class="p">)})</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">species</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="p">[</span><span class="n">molecule</span><span class="p">]})</span></div>
 
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_traj</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                <span class="k">return</span>
-            <span class="n">chemical_composition</span> <span class="o">=</span> \
-                <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span>
-                    <span class="n">traj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)))</span>
-            <span class="n">chemical_composition_hill</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span>
-                <span class="n">traj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="FolderReader.read_energies"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_energies">[docs]</a>    <span class="k">def</span> <span class="nf">read_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
 
-            <span class="n">energy</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_energies</span><span class="p">([</span><span class="n">traj</span><span class="p">])</span>
-            <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">chemical_composition_hill</span><span class="p">,</span>
-                                    <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="s1">&#39;gas&#39;</span><span class="p">,</span>
-                                    <span class="s1">&#39;epot&#39;</span><span class="p">:</span> <span class="n">energy</span><span class="p">})</span>
-
-            <span class="nb">id</span><span class="p">,</span> <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_in_ase</span><span class="p">(</span>
-                <span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span>  <span class="c1"># self.ase_db)</span>
-
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">mollist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mollist</span><span class="p">):</span>
-                    <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="n">chemical_composition</span> \
-                            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gas&#39;</span><span class="p">:</span>
-                        <span class="c1"># Should only be found once?</span>
-                        <span class="k">assert</span> <span class="n">found</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">,</span> \
-                            <span class="n">root</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">chemical_composition</span>
-                        <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">traj</span>
-
-                        <span class="n">species</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_prefactor</span><span class="p">(</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-                        <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                            <span class="p">{</span><span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_state</span><span class="p">(</span><span class="n">species</span><span class="p">)})</span>
-                        <span class="k">if</span> <span class="n">ase_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                            <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">write_ase</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span>
-                                                         <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
-                                                         <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
-                        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
-                            <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span>
-                                                 <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">species</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span></div>
-
-            <span class="c1"># if found is False:</span>
-            <span class="c1">#    print(&#39;{} file is not part of reaction, include as reference&#39;\</span>
-            <span class="c1">#        .format(f))</span>
-            <span class="c1">#    self.ase_ids.update({chemical_composition_hill + &#39;gas&#39;: ase_id})</span>
-
-<div class="viewcode-block" id="FolderReader.read_final"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.folderreader.FolderReader.read_final">[docs]</a>    <span class="k">def</span> <span class="nf">read_final</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="s1">&#39;TS&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="p">[</span><span class="s1">&#39;TS&#39;</span><span class="p">]</span>
@@ -512,33 +538,17 @@
                 <span class="n">ts_i</span> <span class="o">=</span> <span class="n">i</span>
 
             <span class="n">traj</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_traj</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-                <span class="n">breakloop</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">break</span>
+                <span class="k">return</span>
+
             <span class="n">chemical_composition_slabs</span> <span class="o">=</span> \
                 <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chemical_composition_slabs</span><span class="p">,</span>
                           <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">))</span>
             <span class="n">n_atoms</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">n_atoms</span><span class="p">,</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_number_of_atoms</span><span class="p">(</span><span class="n">traj</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">breakloop</span><span class="p">:</span>
-            <span class="k">return</span>
-
         <span class="n">traj_empty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">empty_traj</span>
-
         <span class="n">empty_atn</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">)</span>
-
-        <span class="c1"># Identify TS</span>
-        <span class="c1"># if ts_i is not None:</span>
-        <span class="c1">#    traj_TS = root + &#39;/&#39; + traj_slabs[ts_i]</span>
-        <span class="c1">#    self.traj_files.update({&#39;TS&#39;: [traj_TS]})</span>
-        <span class="c1">#    self.prefactors.update({&#39;TS&#39;: [1]})</span>
-        <span class="c1">#    TS_id = {get_chemical_formula(traj_TS): ase_id}</span>
-
-        <span class="c1"># elif ts_i is None and len(traj_slabs) &gt; len(reaction) + 1:</span>
-        <span class="c1">#raise AssertionError(&#39;which one is the transition state???&#39;)</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#    TS_id = None</span>
-        <span class="c1">#    activation_energy = None</span>
 
         <span class="n">prefactor_scale</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefactors</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key1</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">prefactor_scale</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -546,11 +556,14 @@
 
         <span class="n">key_value_pairs</span> <span class="o">=</span> <span class="p">{}</span>
 
-        <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">),</span>
-                                <span class="c1">#&#39;site&#39;: self.sites,</span>
+        <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span>
+                                <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">),</span>
+                                <span class="c1"># &#39;site&#39;: self.sites,</span>
                                 <span class="s1">&#39;facet&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_facet</span><span class="p">,</span>
                                 <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_n_layers</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">),</span>
                                 <span class="s1">&#39;state&#39;</span><span class="p">:</span> <span class="s1">&#39;star&#39;</span><span class="p">})</span>
+
+        <span class="sd">&quot;&quot;&quot; Write empty slab to ASE&quot;&quot;&quot;</span>
         <span class="n">ase_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="nb">id</span><span class="p">,</span> <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_in_ase</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">mollist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -566,15 +579,31 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;star&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
 
+        <span class="sd">&quot;&quot;&quot; Handle other slabs&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">traj_slabs</span><span class="p">):</span>
             <span class="n">traj</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
+            <span class="n">atns</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">atns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> \
+               <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Only molecular species in traj file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traj</span><span class="p">))</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Get supercell size relative to empty slab</span>
+            <span class="n">supercell_factor</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># different supercells</span>
+                <span class="n">supercell_factor</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">res_slab_atn</span><span class="p">)</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">)</span>
+
+            <span class="c1"># Atomic numbers of adsorbate</span>
+            <span class="n">ads_atn</span> <span class="o">=</span> <span class="n">atns</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">atn</span> <span class="ow">in</span> <span class="n">empty_atn</span> <span class="o">*</span> <span class="n">supercell_factor</span><span class="p">:</span>
+                <span class="n">ads_atn</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">atn</span><span class="p">)</span>
+            <span class="n">ads_atn</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">ads_atn</span><span class="p">)</span>
+
             <span class="n">ase_id</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="nb">id</span><span class="p">,</span> <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_in_ase</span><span class="p">(</span><span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span>
-            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;epot&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_energies</span><span class="p">([</span><span class="n">traj</span><span class="p">])})</span>
 
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">ts_i</span><span class="p">:</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">ts_i</span><span class="p">:</span>  <span class="c1"># transition state</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">traj</span><span class="p">]})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">prefactors</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
                 <span class="n">prefactor_scale</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TS&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
@@ -587,8 +616,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TSstar&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">tsempty_i</span><span class="p">:</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">tsempty_i</span><span class="p">:</span>  <span class="c1"># empty slab for transition state</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TSempty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">traj</span><span class="p">]})</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">prefactors</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TSempty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
                 <span class="n">prefactor_scale</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TSempty&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">]})</span>
@@ -601,73 +629,43 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;TSemptystar&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
                 <span class="k">continue</span>
 
-            <span class="n">res_atn</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">traj</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">res_atn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Only molecular species in traj file: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">traj</span><span class="p">))</span>
-                <span class="k">continue</span>
-
-            <span class="k">for</span> <span class="n">atn</span> <span class="ow">in</span> <span class="n">empty_atn</span><span class="p">:</span>
-                <span class="n">res_atn</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">atn</span><span class="p">)</span>
-
-            <span class="n">res_atn</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res_atn</span><span class="p">)</span>  <span class="c1"># residual atomic numbers</span>
-
-            <span class="n">supercell_factor</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">n_ads</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">mollist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction_atoms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
-                    <span class="k">continue</span>
+                    <span class="k">break</span>
                 <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">molecule</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mollist</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
-                        <span class="k">continue</span>
+                        <span class="k">break</span>
                     <span class="n">molecule_atn</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_numbers_from_formula</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
-                        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
-                            <span class="k">continue</span>
-                        <span class="n">mol_atn</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">molecule_atn</span> <span class="o">*</span> <span class="n">k</span><span class="p">)</span>
-                        <span class="k">if</span> <span class="n">res_atn</span> <span class="o">==</span> <span class="n">mol_atn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;star&#39;</span><span class="p">:</span>
-                            <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">res_atn</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">):</span>
-                            <span class="n">res_slab_atn</span> <span class="o">=</span> <span class="n">res_atn</span><span class="p">[:]</span>
-                            <span class="k">for</span> <span class="n">atn</span> <span class="ow">in</span> <span class="n">mol_atn</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="n">atn</span> <span class="ow">in</span> <span class="n">res_slab_atn</span><span class="p">:</span>
-                                    <span class="n">res_slab_atn</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">atn</span><span class="p">)</span>
-                            <span class="k">try</span><span class="p">:</span>
-                                <span class="n">supercell_factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-                                    <span class="nb">len</span><span class="p">(</span><span class="n">res_slab_atn</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">empty_atn</span><span class="p">))</span>
-                                <span class="k">if</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">empty_atn</span> <span class="o">*</span> <span class="n">supercell_factor</span><span class="p">)</span> \
-                                        <span class="o">==</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">res_slab_atn</span><span class="p">):</span>
-                                    <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
-                                <span class="k">continue</span>
-
-                        <span class="k">if</span> <span class="n">found</span><span class="p">:</span>
-                            <span class="n">n_ads</span> <span class="o">=</span> <span class="n">k</span>
+                    <span class="k">for</span> <span class="n">n_ads</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">):</span>
+                        <span class="n">mol_atn</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">molecule_atn</span> <span class="o">*</span> <span class="n">n_ads</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">ads_atn</span> <span class="o">==</span> <span class="n">mol_atn</span> <span class="ow">and</span> \
+                           <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;star&#39;</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">traj_files</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">traj</span>
-
                             <span class="n">species</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_prefactor</span><span class="p">(</span>
                                 <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">n</span><span class="p">])</span>
-
                             <span class="nb">id</span><span class="p">,</span> <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">check_in_ase</span><span class="p">(</span>
                                 <span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span>
-                            <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;species&#39;</span><span class="p">:</span>
-                                                    <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_state</span><span class="p">(</span><span class="n">species</span><span class="p">),</span>
-                                                    <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="n">n_ads</span><span class="p">,</span>
-                                                    <span class="s1">&#39;site&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">species</span><span class="p">]}</span>
-                                                   <span class="p">)</span>
+                            <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s1">&#39;species&#39;</span><span class="p">:</span>
+                                 <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_state</span><span class="p">(</span>
+                                     <span class="n">species</span><span class="p">),</span>
+                                 <span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="n">n_ads</span><span class="p">,</span>
+                                 <span class="s1">&#39;site&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">sites</span><span class="p">[</span><span class="n">species</span><span class="p">]})</span>
                             <span class="k">if</span> <span class="n">ase_id</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                                 <span class="n">ase_id</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">write_ase</span><span class="p">(</span>
-                                    <span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
+                                    <span class="n">traj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span>
+                                    <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
                             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
                                 <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">species</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
+                            <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
 
             <span class="k">if</span> <span class="n">n_ads</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">key1</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">prefactor_scale</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">mol_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
-                        <span class="c1">#prefactor_scale_ads[key1][mol_i] = n_ads</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">states</span><span class="p">[</span><span class="n">key1</span><span class="p">][</span><span class="n">mol_i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;gas&#39;</span><span class="p">:</span>
                             <span class="n">prefactor_scale</span><span class="p">[</span><span class="n">key1</span><span class="p">][</span><span class="n">mol_i</span><span class="p">]</span> <span class="o">=</span> <span class="n">n_ads</span>
 
@@ -675,12 +673,7 @@
                 <span class="k">for</span> <span class="n">key2</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">prefactor_scale</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="k">for</span> <span class="n">mol_i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
                         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">[</span><span class="n">key2</span><span class="p">][</span><span class="n">mol_i</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;star&#39;</span><span class="p">:</span>
-                            <span class="n">prefactor_scale</span><span class="p">[</span><span class="n">key2</span><span class="p">][</span><span class="n">mol_i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">supercell_factor</span> <span class="o">+</span> <span class="mi">1</span>
-
-        <span class="c1"># Transition state has higher energy</span>
-
-        <span class="c1"># if len(np.unique(chemical_compositions)) &gt; len(chemical_compositions):</span>
-        <span class="c1">#    for chemical_composition in chemical_compositions:</span>
+                            <span class="n">prefactor_scale</span><span class="p">[</span><span class="n">key2</span><span class="p">][</span><span class="n">mol_i</span><span class="p">]</span> <span class="o">*=</span> <span class="n">supercell_factor</span>
 
         <span class="n">surface_composition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metal</span>
         <span class="n">chemical_composition</span> <span class="o">=</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">traj_empty</span><span class="p">)</span>
@@ -693,15 +686,6 @@
 
         <span class="n">reaction_energy</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">activation_energy</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="c1"># if &#39;H2gas&#39; in self.ase_ids.keys():</span>
-        <span class="c1">#    self.energy_corrections.update({&#39;H2gas&#39;: 0.1})</span>
-        <span class="c1"># if &#39;CH3CHOgas&#39; in self.ase_ids.keys():</span>
-        <span class="c1">#    self.energy_corrections.update({&#39;CH3CHOgas&#39;: 0.15})</span>
-
-        <span class="c1"># if self.ase_ids.get(&#39;TSemptystar&#39;) == self.ase_ids.get(&#39;star&#39;):</span>
-        <span class="c1">#    del self.ase_ids[&#39;TSemptystar&#39;]</span>
-
         <span class="k">try</span><span class="p">:</span>
             <span class="n">reaction_energy</span><span class="p">,</span> <span class="n">activation_energy</span> <span class="o">=</span> \
                 <span class="n">ase_tools</span><span class="o">.</span><span class="n">get_reaction_energy</span><span class="p">(</span>
@@ -713,22 +697,22 @@
 
         <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: reaction energy failed for files in: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
-                <span class="c1">#flag = True</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;ERROR: reaction energy failed for files in: </span><span class="si">{}</span><span class="s1">&#39;</span>
+                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                     <span class="s1">&#39;Reaction energy failed for files in: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
 
         <span class="n">expr</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span> <span class="o">&lt;</span> <span class="n">reaction_energy</span> <span class="o">&lt;</span> <span class="mi">10</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">debug_assert</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span>
-                                      <span class="s1">&#39;reaction energy is wrong: </span><span class="si">{}</span><span class="s1"> eV: </span><span class="si">{}</span><span class="s1">&#39;</span>
-                                      <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reaction_energy</span><span class="p">,</span> <span class="n">root</span><span class="p">),</span>
-                                      <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">):</span>
-
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">debug_assert</span><span class="p">(</span>
+                <span class="n">expr</span><span class="p">,</span> <span class="s1">&#39;reaction energy is wrong: </span><span class="si">{}</span><span class="s1"> eV: </span><span class="si">{}</span><span class="s1">&#39;</span>
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">reaction_energy</span><span class="p">,</span> <span class="n">root</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">debug</span><span class="p">):</span>
             <span class="k">return</span>
 
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">activation_energy</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">reaction_energy</span> <span class="o">&lt;</span> <span class="n">activation_energy</span> <span class="o">&lt;</span> <span class="mi">5</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">activation_energy</span> <span class="ow">is</span> <span class="kc">None</span> \
+               <span class="ow">or</span> <span class="n">reaction_energy</span> <span class="o">&lt;</span> <span class="n">activation_energy</span> <span class="o">&lt;</span> <span class="mi">5</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">debug_assert</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span>
                                       <span class="s1">&#39;activation energy is wrong: </span><span class="si">{}</span><span class="s1"> eV: </span><span class="si">{}</span><span class="s1">&#39;</span>
                                       <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">activation_energy</span><span class="p">,</span> <span class="n">root</span><span class="p">),</span>
@@ -761,6 +745,11 @@
             <span class="s1">&#39;ase_ids&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="p">,</span>
             <span class="s1">&#39;energy_corrections&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_corrections</span><span class="p">,</span>
             <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="read_name_from_folder"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.read_name_from_folder">[docs]</a><span class="k">def</span> <span class="nf">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="n">folder_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">folder_name</span></div>
 </pre></div>
 
            </div>
@@ -774,7 +763,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

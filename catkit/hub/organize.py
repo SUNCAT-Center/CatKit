@@ -90,7 +90,7 @@ def collect_structures(foldername, options):
                         structure.get_potential_energy()
                         # ensure that the structure has an energy
                         structures.append(structure)
-                    except:
+                    except RuntimeError:
                         print("Did not add {posix_filename} since it has no energy"
                               .format(
                                   posix_filename=posix_filename,

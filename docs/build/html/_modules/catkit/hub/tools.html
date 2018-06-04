@@ -82,7 +82,14 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">catkit</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/catkit.html">Modules</a></li>
 </ul>
 
             
@@ -149,7 +156,7 @@
 <span></span><span class="kn">import</span> <span class="nn">os</span>
 
 
-<div class="viewcode-block" id="extract_atoms"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.tools.extract_atoms">[docs]</a><span class="k">def</span> <span class="nf">extract_atoms</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
+<div class="viewcode-block" id="extract_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.tools.extract_atoms">[docs]</a><span class="k">def</span> <span class="nf">extract_atoms</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return a string with all atoms in molecule&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">molecule</span>
@@ -193,7 +200,7 @@
     <span class="k">return</span> <span class="n">sign</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="add_atoms"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.tools.add_atoms">[docs]</a><span class="k">def</span> <span class="nf">add_atoms</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
+<div class="viewcode-block" id="add_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.tools.add_atoms">[docs]</a><span class="k">def</span> <span class="nf">add_atoms</span><span class="p">(</span><span class="n">atoms_list</span><span class="p">):</span>
     <span class="n">add</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="n">sub</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">for</span> <span class="n">atoms</span> <span class="ow">in</span> <span class="n">atoms_list</span><span class="p">:</span>
@@ -206,7 +213,7 @@
     <span class="k">return</span> <span class="n">add</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="check_reaction"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.tools.check_reaction">[docs]</a><span class="k">def</span> <span class="nf">check_reaction</span><span class="p">(</span><span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">):</span>
+<div class="viewcode-block" id="check_reaction"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.tools.check_reaction">[docs]</a><span class="k">def</span> <span class="nf">check_reaction</span><span class="p">(</span><span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check the stoichiometry and format of chemical reaction used for</span>
 <span class="sd">    folder structure.</span>
 <span class="sd">    list of reactants -&gt; list of products</span>
@@ -238,7 +245,7 @@
     <span class="k">assert</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">reactants</span><span class="p">))</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">products</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="get_catbase"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.tools.get_catbase">[docs]</a><span class="k">def</span> <span class="nf">get_catbase</span><span class="p">():</span>
+<div class="viewcode-block" id="get_catbase"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.tools.get_catbase">[docs]</a><span class="k">def</span> <span class="nf">get_catbase</span><span class="p">():</span>
     <span class="k">if</span> <span class="s1">&#39;SHERLOCK&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
         <span class="n">sherlock</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;SHERLOCK&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">sherlock</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
@@ -252,7 +259,7 @@
     <span class="k">return</span> <span class="n">catbase</span></div>
 
 
-<div class="viewcode-block" id="get_bases"><a class="viewcode-back" href="../../../catkit.hub.html#catkit.hub.tools.get_bases">[docs]</a><span class="k">def</span> <span class="nf">get_bases</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
+<div class="viewcode-block" id="get_bases"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.tools.get_bases">[docs]</a><span class="k">def</span> <span class="nf">get_bases</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
     <span class="n">catbase</span> <span class="o">=</span> <span class="n">get_catbase</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;USER&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;winther&#39;</span><span class="p">:</span>
@@ -277,7 +284,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Tue, 22 May 2018 21:32:52.
+      Last updated on Fri, 01 Jun 2018 05:26:08.
 
     </p>
   </div>

@@ -7,9 +7,8 @@ import numpy as np
 from numpy.linalg import norm, solve
 import networkx.algorithms.isomorphism as iso
 import networkx as nx
-import contextlib
+import warnings
 import spglib
-import os
 import re
 
 
@@ -69,26 +68,6 @@ def trilaterate(centers, r):
     return intersection
 
 
-@contextlib.contextmanager
-def cd(path):
-    """Does path management: if the path doesn't exists, create it
-    otherwise, move into it until the indentation is broken.
-
-    Parameters
-    ----------
-    path : str
-        Directory path to create and change into.
-    """
-    cwd = os.getcwd()
-    try:
-        if not os.path.exists(path):
-            os.makedirs(path)
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(cwd)
-
-
 def rmean(x, N=5):
     """Calculate the running mean of array x for N instances.
 
@@ -99,8 +78,8 @@ def rmean(x, N=5):
     N : int
         Number of values to take an average with.
 
-    Returns:
-    --------
+    Returns
+    -------
     rmean : ndarray (n + 1,)
         Mean value of the running average.
     """
@@ -140,15 +119,13 @@ def expand_cell(atoms, r=6):
     nmax = float(r) * recp_len + 0.01
 
     pbc = atoms.get_pbc()
-    low = np.floor(-nmax * pbc)
+    low = np.floor(-np.abs(nmax) * pbc)
     high = np.ceil(np.abs(nmax) * pbc + 1)
 
     offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
 
     ncell = np.prod(offsets.shape[:-1])
-
     cart = np.dot(offsets, atoms.cell)
-
     coords = atoms.positions[None, None, None, :, :] + cart[:, :, :, None, :]
 
     index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
@@ -158,7 +135,7 @@ def expand_cell(atoms, r=6):
     return index, coords, offsets
 
 
-def get_voronoi_neighbors(atoms, r=8):
+def get_voronoi_neighbors(atoms, r=4):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
@@ -176,16 +153,23 @@ def get_voronoi_neighbors(atoms, r=8):
         Number of edges formed between atoms in a system.
     """
     index, coords, offsets = expand_cell(atoms, r)
-    L = int(len(offsets) / 2)
-    oind = np.arange(L * len(atoms), (L + 1) * len(atoms))
 
-    voronoi = Voronoi(coords)
+    L = int(len(offsets) / 2)
+    origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
+
+    voronoi = Voronoi(coords, qhull_options='QbB Qc Qs')
     points = voronoi.ridge_points
 
     connectivity = np.zeros((len(atoms), len(atoms)))
-    for i, n in enumerate(oind):
+    for i, n in enumerate(origional_indices):
         p = points[np.where(points == n)[0]]
         edges = np.sort(index[p])
+
+        if not edges.size:
+            warnings.warn(
+                ("scipy.spatial.Voronoi returned an atom which has "
+                 "no neighbors. This may result in incorrect connectivity."))
+            continue
 
         unique_edge, edge_counts = np.unique(
             edges,
@@ -248,7 +232,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     return connectivity
 
 
-def get_primitive_cell(atoms, tol=1e-8):
+def get_spglib_cell(atoms, primitive=False, idealize=True, tol=1e-8):
     """Atoms object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
@@ -256,6 +240,10 @@ def get_primitive_cell(atoms, tol=1e-8):
     ----------
     atoms : object
         Atoms object to search for a primitive unit cell.
+    primitive : bool
+        Reduce the atoms object into a primitive form.
+    idealize : bool
+        Convert the cell into the spglib standardized form.
     tol : float
         Tolerance for floating point rounding errors.
 
@@ -269,10 +257,11 @@ def get_primitive_cell(atoms, tol=1e-8):
     numbers = atoms.get_atomic_numbers()
 
     cell = (lattice, positions, numbers)
-    cell = spglib.find_primitive(cell, symprec=tol)
+    cell = spglib.standardize_cell(
+        cell, to_primitive=primitive, no_idealize=~idealize, symprec=tol)
 
     if cell is None:
-        return None
+        return atoms
 
     _lattice, _positions, _numbers = cell
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
@@ -303,10 +292,13 @@ def get_symmetry(atoms, tol=1e-8):
 
     cell = (lattice, positions, numbers)
 
-    return spglib.get_symmetry(cell, symprec=tol)
+    symmetry = spglib.get_symmetry(cell, symprec=tol)
+    rotations, translations = symmetry['rotations'], symmetry['translations']
+
+    return rotations, translations
 
 
-def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-5):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
@@ -314,25 +306,20 @@ def get_unique_coordinates(atoms, axis=2, direct=True, tag=False, tol=1e-5):
     ----------
     atoms : object
         Atoms object to search for unique values along.
-    axis : int
-        Value of 0, 1, or 2 associated with x, y, and z coordinates.
-    direct : bool
-        Whether to use direct coordinates or Cartesian.
+    axis : int (0, 1, or 2)
+        Look for unique values along the x, y, or z axis.
     tag : bool
-        Assign ase-like tags to each layer of the slab.
+        Assign ASE-like tags to each layer of the slab.
     tol : float
         The tolerance to search for unique values within.
 
     Returns
     -------
     values : ndarray (n,)
-        Array of unique values.
+        Array of unique positions in fractional coordinates.
     """
-    if direct:
-        positions = (atoms.get_scaled_positions() + tol) % 1
-        positions -= tol
-    else:
-        positions = atoms.positions
+    positions = (atoms.get_scaled_positions() + tol) % 1
+    positions -= tol
 
     values = [positions[0][axis]]
     for d in positions[1:, axis]:
@@ -381,10 +368,10 @@ def connectivity_to_edges(connectivity, indices=None):
 
     edges = []
     for i, c in enumerate(connectivity):
-        lower_diagonal = c[:i]
+        lower_diagonal = c[:i + 1]
+
         for j, v in enumerate(lower_diagonal):
             edges += [(indices[i], indices[j], 1)] * int(v)
-
     return edges
 
 
@@ -400,7 +387,6 @@ def isomorphic_molecules(graph0, graph1):
 
 def to_gratoms(atoms):
     """Convert and atom object to a gratoms object."""
-
     gratoms = Gratoms(
         numbers=atoms.numbers,
         positions=atoms.positions,
@@ -530,9 +516,7 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
 
 
 def parse_slice(slice_name):
-    """Return a correctly parsed slice from input of
-    varying types.
-    """
+    """Return a correctly parsed slice from input of varying types."""
     if isinstance(slice_name, (slice)):
         _slice = slice_name
 
