@@ -37,11 +37,11 @@ PUBLICATION_TEMPLATE = """{
     "journal": "",
     "volume": "",
     "number": "",
-     "pages": "",
-     "year": "",
-     "publisher": "",
-     "doi": "",
-     "tags": []
+    "pages": "",
+    "year": "",
+    "publisher": "",
+    "doi": "",
+    "tags": []
 }"""
 
 
@@ -262,6 +262,9 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
+                if options.verbose:
+                    print(surf1)
+                    print(surf2)
 
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
@@ -275,18 +278,36 @@ def fuzzy_match(structures, options):
                     for tag, i1, i2, j1, j2 in opcodes:
                         if tag == 'insert':
                             additions += f2[j1:j2]
+                        elif tag == 'replace':
+                            additions += f2[j1:j2]
                         elif tag == 'delete':
                             subtractions += f2[j1:j2]
                         elif tag == 'equal':
                             equal += f1[i1:i2]
-                    subtractions = ''.join(
-                        sorted(
-                            ase.atoms.string2symbols(
-                                subtractions)))
-                    additions = ''.join(
-                        sorted(
+
+                    if options.verbose:
+                        print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
+                        print("    ADDITIONS " + str(additions))
+                        print("    SUBTRACTIONS " + str(subtractions))
+
+                    try:
+                        subtractions = ''.join(
+                            sorted(
                                 ase.atoms.string2symbols(
-                                    additions)))
+                                    subtractions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {subtractions}"
+                                  .format(subtractions=subtractions))
+                    try:
+                        additions = ''.join(
+                            sorted(
+                                    ase.atoms.string2symbols(
+                                        additions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {additions}"
+                                  .format(additions=additions))
 
                     equal_formula = get_chemical_formula(
                         ase.atoms.Atoms(equal))
@@ -319,11 +340,13 @@ def fuzzy_match(structures, options):
                             adsorbates.append(additions)
                         if subtractions:
                             adsorbates.append(subtractions)
+
                         if options.verbose:
                             print("    ADDITIONS " + str(additions))
                             print("    SUBTRACTIONS " + str(subtractions))
                             print("    ADSORBATES " + str(adsorbates))
                             print("    REFERENCES " + str(references))
+
                         stoichiometry_factors =  \
                             gas_phase_references.get_stoichiometry_factors(
                                 adsorbates, references,
