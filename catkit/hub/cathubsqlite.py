@@ -1,6 +1,7 @@
 from ase.db.sqlite import SQLite3Database
 import sqlite3
 import json
+from past.utils import PY2
 
 
 init_commands = [
@@ -470,28 +471,6 @@ def check_ase_ids(values, ase_ids):
     return
 
 
-def get_key_value_str(values):
-    key_str = """chemical_composition, surface_composition, facet, sites,
-    reactants,products, reaction_energy, activation_energy, dft_code,
-    dft_functional, publication, doi, year, ase_ids, user"""
-    value_str = "'{}'".format(values[1])
-    for v in values[2:]:
-        try:
-            # Unicode in python2 - must be a better way of handling this.
-            if isinstance(v, unicode):
-                v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
-        if isinstance(v, str) or isinstance(v, dict):
-            value_str += ", '{}'".format(v)
-        elif v is None or v == '':
-            value_str += ", {}".format('NULL')
-        else:
-            value_str += ", {}".format(v)
-
-    return key_str, value_str
-
-
 def get_key_value_list(key_list, values, table='reaction'):
     total_keys = {'reaction': ['chemical_composition', 'surface_composition',
                                'facet', 'sites', 'coverages', 'reactants',
@@ -502,7 +481,7 @@ def get_key_value_list(key_list, values, table='reaction'):
                                   'volume', 'number', 'pages', 'year',
                                   'publisher', 'doi', 'tags'],
                   'reaction_system': ['name', 'energy_correction',
-                                      'ase_id', 'reaction_id'],
+                                      'ase_id', 'id'],
                   'publication_system': ['ase_id, pub_id']}
     total_key_list = total_keys[table]
 
@@ -519,12 +498,9 @@ def get_key_value_list(key_list, values, table='reaction'):
 def get_value_strlist(value_list):
     value_strlist = []
     for v in value_list:
-        try:
-            # Unicode in python2 - must be a better way of handling this.
+        if PY2:  # python 2
             if isinstance(v, unicode):
                 v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
         if isinstance(v, dict):
             v = json.dumps(v)
             value_strlist.append("'{}'".format(v))
