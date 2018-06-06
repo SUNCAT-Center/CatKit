@@ -99,10 +99,12 @@ class SlabGenerator(object):
             bulk = utils.get_spglib_cell(bulk, primitive=True)
             pnorm = get_normal_vectors(bulk)
 
-            miller_index = np.dot(
-                miller_index, np.dot(norm, np.linalg.inv(pnorm)))
-            miller_index = np.round(miller_index)
-            miller_index = (miller_index / list_gcd(miller_index)).astype(int)
+            if not np.allclose(norm, pnorm):
+                miller_index = np.dot(
+                    miller_index, np.dot(norm, np.linalg.pinv(pnorm)))
+                miller_index = np.round(miller_index)
+                miller_index = (miller_index /
+                                list_gcd(miller_index)).astype(int)
 
             self._bulk = self.align_crystal(bulk, miller_index)
 
@@ -201,23 +203,29 @@ class SlabGenerator(object):
         if self.unique_terminations is not None:
             return self.unique_terminations
 
-        rotations, translations = utils.get_symmetry(self._bulk, tol=self.tol)
-
-        # Find all symmetries which are rotations about the z-axis
-        zsym = np.abs(rotations)
-        zsym[:, 2, 2] -= 1
-        zsym = zsym[:, [0, 1, 2, 2, 2], [2, 2, 2, 0, 1]]
-        zsym = np.argwhere(zsym.sum(axis=1) == 0)
-
-        itol = self.tol ** -1
-        ztranslations = np.floor(translations[zsym, -1] * itol) / itol
-        z_symmetry = np.unique(ztranslations)
-
         zcoords = utils.get_unique_coordinates(self._bulk, tol=self.tol)
-        zdiff = np.cumsum(np.diff(zcoords))
-        zdiff = np.floor(zdiff * itol) / itol
-        unique_shift = np.argwhere(zdiff < z_symmetry[1]) + 1
-        unique_shift = np.append(0, zcoords[unique_shift])
+
+        if len(zcoords) > 1:
+            itol = self.tol ** -1
+            zdiff = np.cumsum(np.diff(zcoords))
+            zdiff = np.floor(zdiff * itol) / itol
+
+            rotations, translations = utils.get_symmetry(
+                self._bulk, tol=self.tol)
+
+            # Find all symmetries which are rotations about the z-axis
+            zsym = np.abs(rotations)
+            zsym[:, 2, 2] -= 1
+            zsym = zsym[:, [0, 1, 2, 2, 2], [2, 2, 2, 0, 1]]
+            zsym = np.argwhere(zsym.sum(axis=1) == 0)
+
+            ztranslations = np.floor(translations[zsym, -1] * itol) / itol
+            z_symmetry = np.unique(ztranslations)
+
+            unique_shift = np.argwhere(zdiff < z_symmetry[1]) + 1
+            unique_shift = np.append(0, zcoords[unique_shift])
+        else:
+            unique_shift = zcoords
 
         self.unique_terminations = unique_shift
         self.slab_basis = [None] * len(unique_shift)

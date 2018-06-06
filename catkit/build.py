@@ -49,11 +49,16 @@ def surface(
         atoms = bulk(elements, crystal, cubic=True, **kwargs)
 
     gen = SlabGenerator(
-        atoms,
+        bulk=atoms,
         miller_index=miller,
         layers=size[-1],
+        vacuum=vacuum,
         fixed=fixed,
-        vacuum=vacuum)
+        fix_stoichiometry=kwargs.get('fix_stoichiometry', False),
+        attach_graph=kwargs.get('attach_graph', True),
+        standardize_bulk=kwargs.get('standardize_bulk', True),
+        tol=kwargs.get('tol', 1e-8)
+    )
 
     if len(size) == 2:
         size = size[0]
