@@ -3,7 +3,7 @@ import setuptools
 with open('requirements.txt', 'r') as f:
     requirements = f.readlines()
     git_requirements = [f for f in requirements if 'git' in f]
-    requirements = []#f for f in requirements if 'git' not in f]
+    requirements = [f for f in requirements if 'git' not in f]
 
 with open('readme.org', 'r') as f:
     readme = f.read()
