@@ -47,11 +47,11 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
 @click.option('--write-publication', default=True, type=bool)
 @click.option('--block-size', default=1000, type=int)
 @click.option('--start-block', default=0, type=int)
-@click.option('--db-user', default='upload', type=str)
-@click.option('--db-password', type=str)
+@click.option('--user', default='upload', type=str)
+@click.option('--password', type=str)
 def db2server(dbfile, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, db_user,
-              db_password):
+              write_reaction_system, block_size, start_block, user,
+              password):
     """Transfer data from local database to Catalysis Hub server"""
 
     _db2server.main(dbfile, write_reaction=write_reaction,
@@ -60,8 +60,8 @@ def db2server(dbfile, write_reaction, write_ase, write_publication,
                     write_reaction_system=write_reaction_system,
                     block_size=block_size,
                     start_block=start_block,
-                    db_user=db_user,
-                    db_password=db_password)
+                    user=user,
+                    password=password)
 
 
 reaction_columns = [
