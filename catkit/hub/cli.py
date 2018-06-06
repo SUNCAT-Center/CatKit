@@ -4,6 +4,8 @@ from . import psql_server_connect
 from . import folder2db as _folder2db
 from . import db2server as _db2server
 from . import organize as _organize
+from . import folderreader
+from .cathubsqlite import CathubSQLite
 from ase.atoms import string2symbols
 import os
 import json
@@ -15,6 +17,14 @@ import collections
 @click.group()
 def cli():
     pass
+
+
+@cli.command()
+@click.argument('dbfile')
+def show_reactions(dbfile):
+    """Extract and print reactions from sqlite3 (.db) file"""
+    db = CathubSQLite(dbfile)
+    db.print_summary()
 
 
 @cli.command()

@@ -1,7 +1,9 @@
+import sys
 from ase.db.sqlite import SQLite3Database
 import sqlite3
 import json
 from past.utils import PY2
+from tabulate import tabulate
 
 
 init_commands = [
@@ -85,13 +87,15 @@ class CathubSQLite:
         name of database file
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
 
         assert filename.endswith('.db'), 'filename should have .db extension'
         self.filename = filename
         self.initialized = False
         self.default = 'NULL'
         self.connection = None
+        self.stdin = stdin
+        self.stdout = stdout
 
     def _connect(self):
         return sqlite3.connect(self.filename, timeout=600)
@@ -453,6 +457,30 @@ class CathubSQLite:
             id = None
         return id
 
+    def print_summary(self):
+        self.stdout.write('------------------------------------------------\n')
+        self.stdout.write('Reaction Summary: \n')
+        self.stdout.write('------------------------------------------------\n')
+
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+        cur.execute("""
+        SELECT
+        surface_composition, reactants, products, reaction_energy,
+        activation_energy, sites
+        FROM
+        reaction;""")
+        rows = cur.fetchall()
+        table = []
+        for row in rows:
+            equation = get_equation(json.loads(row[1]), json.loads(row[2]))
+            table += [[row[0], equation, row[3], row[4], row[5]]]
+
+        headers = ['Surface Composition', 'Equation', 'Reaction Energy',
+                   'Activation Energy', 'Sites']
+        self.stdout.write(tabulate(table, headers) + '\n')
+
 
 def check_ase_ids(values, ase_ids):
     ase_values = ase_ids.values()
@@ -512,3 +540,31 @@ def get_value_strlist(value_list):
             value_strlist.append("{}".format(v))
 
     return value_strlist
+
+
+def get_equation(reactants, products):
+    equation = ''
+    arrow = 0
+    for column in (reactants, products):
+        if arrow == 1:
+            equation += ' -> '
+        arrow += 1
+        i = 0
+        for key in sorted(column, key=len, reverse=True):
+            prefactor = column[key]
+            if 'gas' in key:
+                key = key.replace('gas', '(g)')
+            if 'star' in key:
+                key = key.replace('star', '*')
+            if not i == 0:
+                if prefactor > 0:
+                    equation += ' + '
+                else:
+                    equation += ' - '
+                    prefactor *= -1
+            if prefactor == 1:
+                prefactor = ''
+
+            equation += str(prefactor) + key
+            i += 1
+    return equation
