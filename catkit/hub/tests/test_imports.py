@@ -46,6 +46,16 @@ class CommandLineTestCase(unittest.TestCase):
         runner = CliRunner()
         runner.invoke(folder2db, ['aayush/'])
 
+    def test_cli_db2server(self):
+        from catkit.hub.postgresql import CathubPostgreSQL
+        from catkit.hub.cli import db2server
+        db = CathubPostgreSQL(user='postgres')
+        con = db._connect()
+        db._initialize(con)
+        db.truncate_schema()
+        runner = CliRunner()
+        runner.invoke(db2server, ['--user=postgres', 'aayush/MontoyaThe2015.db'])
 
+        
 if __name__ == '__main__':
     unittest.main()
