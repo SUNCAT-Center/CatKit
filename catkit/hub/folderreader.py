@@ -134,19 +134,22 @@ class FolderReader:
                     key_values['reaction_energy'])
                 if id is None:
                     id = db.write(key_values)
-                    self.stdout.write('Written to reaction db row id = {}'.format(id))
+                    self.stdout.write('Written to reaction db row id = {}\n'.format(id))
                 elif self.update:
                     db.update(id, key_values)
-                    self.stdout.write('Updated reaction db row id = {}'.format(id))
+                    self.stdout.write('Updated reaction db row id = {}\n'.format(id))
                 else:
-                    self.stdout.write('Already in reaction db with row id = {}'.format(id))
+                    self.stdout.write('Already in reaction db with row id = {}\n'.format(id))
+
+        with CathubSQLite(self.cathub_db) as db:
+            db.print_summary()
 
     def write_publication(self, pub_data):
         with CathubSQLite(self.cathub_db) as db:
             pid = db.check_publication(self.pub_id)
             if pid is None:
                 pid = db.write_publication(pub_data)
-                self.stdout.write('Written to publications db row id = {}'.format(pid))
+                self.stdout.write('Written to publications db row id = {}\n'.format(pid))
         return pid
 
     def read_pub(self, root):
@@ -161,13 +164,13 @@ class FolderReader:
             self.year = pub_data['year']
             if 'doi' not in pub_data:
                 pub_data.update({'doi': None})
-                self.stdout.write('ERROR: No doi')
+                self.stdout.write('ERROR: No doi\n')
                 self.doi = None
             else:
                 self.doi = pub_data['doi']
             if 'tags' not in pub_data:
                 pub_data.update({'tags': None})
-                self.stdout.write('ERROR: No tags')
+                self.stdout.write('ERROR: No tags\n')
                 self.tags = None
 
             for key, value in pub_data.items():
@@ -181,7 +184,7 @@ class FolderReader:
 
         except Exception as e:
             self.stdout.write(
-                'ERROR: insufficient publication info {e}'.format(
+                'ERROR: insufficient publication info {e}\n'.format(
                     **locals()))
             self.doi = None
             pub_data = {'title': None,
@@ -264,9 +267,9 @@ class FolderReader:
 
         self.metal, self.crystal = root.split('/')[-1].split('_')
 
-        self.stdout.write('------------------------------------------------------')
-        self.stdout.write('                    Surface:  {}'.format(self.metal))
-        self.stdout.write('------------------------------------------------------')
+        self.stdout.write('------------------------------------------------------\n')
+        self.stdout.write('                    Surface:  {}\n'.format(self.metal))
+        self.stdout.write('------------------------------------------------------\n')
 
         self.ase_ids = {}
         traj_bulk = ['{}/{}'.format(root, f)
@@ -328,7 +331,7 @@ class FolderReader:
         self.reaction, self.sites = ase_tools.get_reaction_from_folder(
             folder_name)  # reaction dict
 
-        self.stdout.write('----------- REACTION:  {} --> {} --------------'
+        self.stdout.write('----------- REACTION:  {} --> {} --------------\n'
               .format('+'.join(self.reaction['reactants']),
                       '+'.join(self.reaction['products'])))
 
@@ -373,7 +376,7 @@ class FolderReader:
             try:
                 assert len(traj_slabs) > 0
             except BaseException:
-                self.stdout.write('Need at least one file in {}!'.format(root))
+                self.stdout.write('Need at least one file in {}!\n'.format(root))
                 return
 
         n_atoms = np.array([])
@@ -435,7 +438,7 @@ class FolderReader:
             atns = ase_tools.get_atomic_numbers(traj)
             if not (np.array(atns) > 8).any() and \
                (np.array(empty_atn) > 8).any():
-                self.stdout.write("Only molecular species in traj file: {}".format(traj))
+                self.stdout.write("Only molecular species in traj file: {}\n".format(traj))
                 continue
 
             # Get supercell size relative to empty slab
@@ -547,7 +550,7 @@ class FolderReader:
 
         except BaseException:
             if self.debug:
-                self.stdout.write('ERROR: reaction energy failed for files in: {}'
+                self.stdout.write('ERROR: reaction energy failed for files in: {}\n'
                       .format(root))
             else:
                 raise RuntimeError(
