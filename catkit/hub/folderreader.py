@@ -127,8 +127,8 @@ class FolderReader:
                     yield self.key_value_pairs_reaction
 
     def write(self, skip=[], goto_reaction=None):
-        for key_values in self.read(skip=skip, goto_reaction=goto_reaction):
-            with CathubSQLite(self.cathub_db) as db:
+        with CathubSQLite(self.cathub_db) as db:
+            for key_values in self.read(skip=skip, goto_reaction=goto_reaction):
                 id = db.check(
                     key_values['chemical_composition'],
                     key_values['reaction_energy'])
@@ -139,9 +139,7 @@ class FolderReader:
                     db.update(id, key_values)
                     self.stdout.write('Updated reaction db row id = {}\n'.format(id))
                 else:
-                    self.stdout.write('Already in reaction db with row id = {}\n'.format(id))
-
-        with CathubSQLite(self.cathub_db) as db:
+                    self.stdout.write('Already in reaction db with row id = {}\n'.format(id))       
             db.print_summary()
 
     def write_publication(self, pub_data):
