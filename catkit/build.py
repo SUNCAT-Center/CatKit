@@ -12,6 +12,7 @@ def surface(
         size,
         crystal='fcc',
         miller=(1, 1, 1),
+        termination=0,
         fixed=0,
         vacuum=10,
         **kwargs):
@@ -29,7 +30,9 @@ def surface(
         The bulk crystal structure to pass to the ase bulk builder.
     miller : list (3,) or (4,)
         The miller index to cleave the surface structure from. If 4 values
-        are used, 
+        are used, assume Miller-Bravis convention.
+    termination : int
+        The index assocated with a specific slab termination.
     fixed : int
         Number of layers to constrain.
     vacuum : float
@@ -57,9 +60,15 @@ def surface(
     elif len(size) == 3:
         size = size[:2]
 
-    slab = gen.get_slab(size=size)
+    slab = gen.get_slab(size=size, iterm=termination)
 
     return slab
+
+
+def add_adsorbate(atoms):
+    """Add an adsorbate to a surface."""
+
+    return atoms
 
 
 def molecule(

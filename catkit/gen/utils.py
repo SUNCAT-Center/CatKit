@@ -7,6 +7,7 @@ import numpy as np
 from numpy.linalg import norm, solve
 import networkx.algorithms.isomorphism as iso
 import networkx as nx
+import warnings
 import spglib
 import re
 
@@ -118,15 +119,13 @@ def expand_cell(atoms, r=6):
     nmax = float(r) * recp_len + 0.01
 
     pbc = atoms.get_pbc()
-    low = np.floor(-nmax * pbc)
+    low = np.floor(-np.abs(nmax) * pbc)
     high = np.ceil(np.abs(nmax) * pbc + 1)
 
     offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
 
     ncell = np.prod(offsets.shape[:-1])
-
     cart = np.dot(offsets, atoms.cell)
-
     coords = atoms.positions[None, None, None, :, :] + cart[:, :, :, None, :]
 
     index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
@@ -136,7 +135,7 @@ def expand_cell(atoms, r=6):
     return index, coords, offsets
 
 
-def get_voronoi_neighbors(atoms, r=8):
+def get_voronoi_neighbors(atoms, r=4):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
@@ -154,16 +153,23 @@ def get_voronoi_neighbors(atoms, r=8):
         Number of edges formed between atoms in a system.
     """
     index, coords, offsets = expand_cell(atoms, r)
-    L = int(len(offsets) / 2)
-    oind = np.arange(L * len(atoms), (L + 1) * len(atoms))
 
-    voronoi = Voronoi(coords)
+    L = int(len(offsets) / 2)
+    origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
+
+    voronoi = Voronoi(coords, qhull_options='QbB Qc Qs')
     points = voronoi.ridge_points
 
     connectivity = np.zeros((len(atoms), len(atoms)))
-    for i, n in enumerate(oind):
+    for i, n in enumerate(origional_indices):
         p = points[np.where(points == n)[0]]
         edges = np.sort(index[p])
+
+        if not edges.size:
+            warnings.warn(
+                ("scipy.spatial.Voronoi returned an atom which has "
+                 "no neighbors. This may result in incorrect connectivity."))
+            continue
 
         unique_edge, edge_counts = np.unique(
             edges,
@@ -362,10 +368,10 @@ def connectivity_to_edges(connectivity, indices=None):
 
     edges = []
     for i, c in enumerate(connectivity):
-        lower_diagonal = c[:i]
+        lower_diagonal = c[:i + 1]
+
         for j, v in enumerate(lower_diagonal):
             edges += [(indices[i], indices[j], 1)] * int(v)
-
     return edges
 
 

@@ -101,6 +101,7 @@ class SlabGenerator(object):
 
             miller_index = np.dot(
                 miller_index, np.dot(norm, np.linalg.inv(pnorm)))
+            miller_index = np.round(miller_index)
             miller_index = (miller_index / list_gcd(miller_index)).astype(int)
 
             self._bulk = self.align_crystal(bulk, miller_index)
@@ -260,8 +261,8 @@ class SlabGenerator(object):
 
         minimum_repetitions = np.ceil(self.layers / len(bulk_layers))
         ibasis *= (1, 1, int(minimum_repetitions))
-
         exbasis = ibasis * (1, 1, 2)
+
         connectivity = utils.get_voronoi_neighbors(exbasis)
 
         n = len(ibasis)
@@ -276,10 +277,15 @@ class SlabGenerator(object):
 
         # TODO: Graph generation needs to go here once handling of
         # unit cell repetitions is implemented.
+        scaled_zpositions = ibasis.get_scaled_positions()[:, 2] + self.tol
+        scaled_zpositions = np.round(scaled_zpositions % 1 + self.tol, 4)
+
         indices = np.argwhere(surf_atoms).flatten()
-        zcoords = ibasis.get_scaled_positions()[:, 2] - 0.5
-        surface_atoms = indices[zcoords[indices] > 0]
-        ibasis.set_surface_atoms(surface_atoms)
+        zcoords = scaled_zpositions - np.mean(scaled_zpositions)
+        top = indices[zcoords[indices] >= 0]
+        bottom = indices[zcoords[indices] < 0]
+
+        ibasis.set_surface_atoms(top=top, bottom=bottom)
 
         utils.get_unique_coordinates(
             ibasis, tag=True, tol=self.tol)
@@ -333,19 +339,20 @@ class SlabGenerator(object):
         slab.cell[2] = [0, 0, slab.cell[2][2]]
         slab.set_pbc([1, 1, 0])
 
-        translation = slab[0].position.copy()
+        tl = np.min(slab.get_surface_atoms())
+        translation = slab[tl].position.copy()
         translation[2] = 0
         slab.translate(-translation)
         slab.wrap()
+
+        roundoff = np.isclose(slab.cell, 0)
+        slab.cell[roundoff] = 0
 
         ind = np.lexsort(
             (slab.positions[:, 0],
              slab.positions[:, 1],
              slab.positions[:, 2]))
         slab = slab[ind]
-
-        roundoff = np.isclose(slab.cell, 0)
-        slab.cell[roundoff] = 0
 
         if self.fixed:
             tags = slab.get_tags()
@@ -409,7 +416,7 @@ class SlabGenerator(object):
 
         if isinstance(size, int):
             a = max(int(size / 2), 1) + size % 2
-            T = np.mgrid[-a:a + 1, 0:a + 1].reshape(2, -1).T
+            T = np.mgrid[-a:a + 1, -a:a + 1].reshape(2, -1).T
 
             metrics = []
             for i, M in enumerate(product(T, repeat=2)):
@@ -454,7 +461,7 @@ class SlabGenerator(object):
         return supercell
 
 
-def transform_ab(slab, matrix):
+def transform_ab(slab, matrix, tol=1e-5):
     """Transform the slab basis vectors parallel to the z-plane
     by matrix notation. This can result in changing the slabs
     cell size. This can also result in very unusual slab dimensions,
@@ -467,6 +474,8 @@ def transform_ab(slab, matrix):
     matrix : array_like (2, 2)
         The matrix notation transformation of the a and b
         basis vectors.
+    tol : float
+        Float point precision tolerance.
 
     Returns
     -------
@@ -475,8 +484,21 @@ def transform_ab(slab, matrix):
     """
     M = np.eye(3)
     M[:2, :2] = np.array(matrix).T
-
     newcell = np.dot(M, slab.cell)
+    u, v = newcell[:2]
+    nu, nv = norm(u), norm(v)
+
+    # Ensure the longest axis is x without z-rotation.
+    if nv > nu:
+        matrix[:, [0, 1]] = matrix[:, [1, 0]]
+        u *= -1
+
+    if u[0] < 0 and v[1] > 0:
+        matrix[[0, 1]] = matrix[[1, 0]]
+
+    M[:2, :2] = np.array(matrix).T
+    newcell = np.dot(M, slab.cell)
+
     scorners_newcell = np.array([
         [0, 0], [0, 0],
         [0, 1], [1, 1]])
@@ -502,14 +524,8 @@ def transform_ab(slab, matrix):
     repeated = np.where(periodic_match != original_index)
     del slab[repeated]
 
-    # Align the longest remaining basis vector with x
-    vdist = norm(slab.cell[:2], axis=1)
-    r = np.argmax(vdist)
-    slab.rotate(slab.cell[r], 'x', rotate_cell=True)
-
-    if r == 1:
-        slab.cell[0] *= -1
-        slab.cell[[0, 1]] = slab.cell[[1, 0]]
+    # Align the longest basis vector with x
+    slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
     if slab.cell[1][1] < 0:
         slab.cell[1] *= -1

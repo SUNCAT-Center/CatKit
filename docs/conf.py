@@ -31,7 +31,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_static_path = ['static']
 html_last_updated_fmt = '%a, %d %b %Y %H:%M:%S'
 
-version = '0.4'
-release = '0.4.4'
+version = '0.5'
+release = '0.5.0'
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.6', None)}
