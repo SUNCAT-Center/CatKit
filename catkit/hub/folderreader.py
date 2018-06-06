@@ -156,7 +156,8 @@ class FolderReader:
         pub_folder = root.split('/')[-1]
         publication_keys = {}
         try:
-            pub_data = json.load(open(root + '/publication.txt', 'r'))
+            with open(root + '/publication.txt', 'r') as f:
+                pub_data = json.load(f)
             if 'url' in pub_data.keys():
                 del pub_data['url']
             self.title = pub_data['title']
@@ -200,8 +201,8 @@ class FolderReader:
                         }
 
         try:
-            self.energy_corrections = json.load(
-                open(root + '/energy_corrections.txt', 'r'))
+            with open(root + '/energy_corrections.txt', 'r') as f:
+                self.energy_corrections = json.load(f)
         except BaseException:
             self.energy_corrections = {}
 
