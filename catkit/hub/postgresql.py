@@ -7,13 +7,9 @@ from psycopg2.extras import execute_values
 import ase.db
 from ase.db.postgresql import PostgreSQLDatabase
 from pwgen import pwgen
+from past.utils import PY2
 
 from .cathubsqlite import CathubSQLite
-
-try:
-    from builtins import str as text
-except BaseException:
-    text = str
 
 init_commands = [
     """CREATE TABLE publication (
@@ -125,14 +121,22 @@ class CathubPostgreSQL:
         self.initialized = False
         self.connection = None
         self.id = None
+        self.server = 'catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com'
+        self.database = 'catalysishub'
+
         if user == 'catroot' or user == 'catvisitor':
             self.schema = 'public'
+            if password is None:
+                password = os.environ['DB_PASSWORD']
+
+        elif user == 'postgres':  # For testing on travis
+            self.schema = 'public'
+            self.server = 'localhost'
+            self.database = 'travis_ci_test'
+            self.password = ''
         else:
             self.schema = user
         self.user = user
-        self.server = 'catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com'
-        if password is None:
-            password = os.environ['DB_PASSWORD']
         self.password = password
         self.stdin = stdin
         self.stdout = stdout
@@ -142,7 +146,9 @@ class CathubPostgreSQL:
                                user=self.user,
                                password=self.password,
                                port=5432,
-                               database='catalysishub')
+                               database=self.database)
+        self.server_name = "postgres://{0}:{1}@{2}:5432/{3}".format(
+            self.user, self.password, self.server, self.database)
 
         return con
 
@@ -166,7 +172,7 @@ class CathubPostgreSQL:
 
         self.stdout.write("_initialize start\n")
 
-        set_schema = 'ALTER ROLE {0} SET search_path TO {0};'\
+        set_schema = 'ALTER ROLE {0} SET search_path TO {1};'\
                      .format(self.user, self.schema)
         cur.execute(set_schema)
         con.commit()
@@ -292,7 +298,9 @@ class CathubPostgreSQL:
         if row is not None:  # len(row) > 0:
             id = row  # [0]
         else:
-            key_str, value_str = get_key_value_str(pub_values, 'publication')
+            key_str = get_key_str('publication', start_index=1)
+            value_str = get_value_str(pub_values, start_index=1)
+
             insert_command = """INSERT INTO publication ({0}) VALUES
             ({1}) RETURNING id;""".format(key_str, value_str)
 
@@ -310,7 +318,8 @@ class CathubPostgreSQL:
         self._initialize(con)
         cur = con.cursor()
 
-        key_str, value_str = get_key_value_str(values, table)
+        key_str = get_key_str(table, start_index=1)
+        value_str = get_value_str(values, start_index=1)
 
         insert_command = 'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING id;'\
             .format(table, key_str, value_str)
@@ -328,7 +337,8 @@ class CathubPostgreSQL:
         self._initialize(con)
         cur = con.cursor()
 
-        key_str, value_str = get_key_value_str(values)
+        key_str = get_key_str(start_index=1)
+        value_str = get_value_str(values, start_index=1)
 
         update_command = 'UPDATE reaction SET ({0}) = ({1}) WHERE id = {2};'\
             .format(key_str, value_str, id)
@@ -394,9 +404,9 @@ class CathubPostgreSQL:
         return count
 
     def truncate_schema(self):
-        """ Delete all data in schema. Only for test use!"""
+        """ Will delete all data in schema. Only for test use!"""
 
-        assert not self.schema == 'public'
+        assert self.server == 'localhost'
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -440,11 +450,7 @@ class CathubPostgreSQL:
         self.stdout.write('Finished initialization\n')
         cur = con.cursor()
         self.stdout.write('Got a cursor\n')
-        self.stdout.write('Building server_name\n')
-        server_name = "postgres://{0}:{1}@{2}:5432/catalysishub".format(
-            self.user, self.password, self.server)
-
-        self.stdout.write('Connecting to {server_name}\n'.format(**locals()))
+        self.stdout.write('Connecting to {0}\n'.format(self.server_name))
 
         nrows = 0
         if write_ase:
@@ -464,7 +470,7 @@ class CathubPostgreSQL:
 
                 rows = list(db.select('{}<id<{}'.format(b0, b1)))
 
-                with ase.db.connect(server_name, type='postgresql') as db2:
+                with ase.db.connect(self.server_name, type='postgresql') as db2:
                     db2.write(rows)
 
                 nrows += len(rows)
@@ -508,8 +514,8 @@ class CathubPostgreSQL:
             for row in rows:
                 Npubstruc += 1
                 values = list(row)
-                key_str, value_list = get_key_value_list(
-                    values, table='publication_system')
+                key_str = get_key_str(table='publication_system')
+                value_list = get_value_list(values)
 
                 publication_system_values += [tuple(value_list)]
 
@@ -527,6 +533,9 @@ class CathubPostgreSQL:
 
         if write_reaction:
             self.stdout.write('Transfering reactions')
+            cur.execute('SELECT max(id) from reaction;')
+            ID = cur.fetchone()[0] or 0
+
             n_react = db.get_last_id(cur_lite)
 
             n_blocks = int(n_react / block_size) + 1
@@ -544,7 +553,6 @@ class CathubPostgreSQL:
                 if block_id + 1 == n_blocks:
                     b1 = n_react + 1
 
-                temp_id = 0
                 for id_lite in range(b0, b1):
                     row = db.read(id_lite)
                     if len(row) == 0:
@@ -561,16 +569,15 @@ class CathubPostgreSQL:
                             'Updated reaction db with row id = {}\n'.format(id))
                         update_rs = True
                     else:
+                        ID += 1
                         Ncat += 1
-                        key_str, value_list =\
-                            get_key_value_list(values)
-                        value_list[0] = 'DEFAULT'
+                        value_list = get_value_list(values)
+                        value_list[0] = ID  # set new ID
                         reaction_values += [tuple(value_list)]
-
-                        cur_lite.execute("SELECT * from reaction_system where id={};"
-                                         .format(id_lite))
-                        rows = cur_lite.fetchall()
                         if write_reaction_system:
+                            cur_lite.execute("SELECT * from reaction_system where id={};"
+                                             .format(id_lite))
+                            rows = cur_lite.fetchall()
                             if update_rs:
                                 cur.execute("""Delete from reaction_system
                                 where id={0}""".format(id))
@@ -579,40 +586,26 @@ class CathubPostgreSQL:
                                 values = list(row)
                                 if len(values) == 3:
                                     values.insert(1, None)
+                                value_list = get_value_list(values)
+                                value_list[3] = ID
+                                reaction_system_values += [tuple(value_list)]
 
-                                values[3] = temp_id
-
-                                key_str2, value_list = \
-                                    get_key_value_list(
-                                        values, table='reaction_system')
-
-                            reaction_system_values += [value_list]
-                    temp_id += 1
-
-                #set_schema = 'SET search_path = {0};'.format(self.schema)
-                # cur.execute(set_schema)
-                q = 'DEFAULT' + ', ' + ', '.join('?' * 13)
+                q = ', '.join('?' * 14)
                 q = '({})'.format(q.replace('?', '%s'))
 
+                key_str = get_key_str()
                 insert_command = """INSERT INTO reaction
-                ({0}) VALUES %s RETURNING ID;""".format(key_str)
+                ({0}) VALUES %s;""".format(key_str)
 
                 execute_values(cur=cur, sql=insert_command, argslist=reaction_values,
                                template=q, page_size=block_size)
 
-                ids = cur.fetchall()
-
-                print(ids, reaction_system_values)
-
-                for reacsys in reaction_system_values:
-                    reacsys[3] = ids[reacsys[3]][0]  # set real id
-                    reacsys = tuple(reacsys)
-
+                key_str = get_key_str('reaction_system')
                 insert_command = """INSERT INTO reaction_system
-                ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str2)
+                ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str)
 
                 execute_values(cur=cur, sql=insert_command,
-                               argslist=reaction_system_values, page_size=block_size)
+                               argslist=reaction_system_values, page_size=1000)
                 con.commit()
 
                 t2 = time.time()
@@ -695,60 +688,46 @@ class CathubPostgreSQL:
         return pubs
 
 
-def get_key_value_str(values, table='reaction'):
-    key_str = {'reaction': """chemical_composition, surface_composition,
-    facet, sites, coverages, reactants, products, reaction_energy,
-    activation_energy, dft_code, dft_functional, username, pub_id""",
-               'publication': """pub_id, title, authors, journal,
-               volume, number, pages, year, publisher, doi, tags""",
-               'reaction_system': """name, energy_correction, ase_id, id""",
-               'publication_system': """ase_id, pub_id"""}
+def get_key_list(table='reaction', start_index=0):
+    key_list = {'reaction': ['id', 'chemical_composition', 'surface_composition',
+                             'facet', 'sites', 'coverages', 'reactants',
+                             'products', 'reaction_energy',
+                             'activation_energy', 'dft_code',
+                             'dft_functional', 'username', 'pub_id'],
+                'publication': ['id', 'pub_id', 'title', 'authors', 'journal',
+                                'volume', 'number', 'pages', 'year',
+                                'publisher', 'doi', 'tags'],
+                'reaction_system': ['name', 'energy_correction',
+                                    'ase_id', 'id'],
+                'publication_system': ['ase_id, pub_id']}
 
-    start_index = 1
-    if table == 'publication_system' or table == 'reaction_system':
-        start_index = 0
-    value_str = "'{0}'".format(values[start_index])
-    for v in values[start_index + 1:]:
-        # print("\n\n\nDIR TYPE {v}".format(**locals()))
-        # print(dir(v))
-        # print(type(v))
-        if isinstance(v, text):
-            v = v.encode('utf8','ignore')
-            #print("ISINSTANCE TEXT {v}".format(**locals()))
-        elif hasattr(v, 'encode'):
-            v = v.encode('utf8','ignore')
-            #print("HASATTR ENCODE {v}".format(**locals()))
+    return key_list[table][start_index:]
 
+
+def get_key_str(table='reaction', start_index=0):
+    key_str = """, """.join(get_key_list(table, start_index))
+
+    return key_str
+
+
+def get_value_list(values, start_index=0):
+    value_list = []
+    for v in values:
+        if PY2:  # python 2
+            if isinstance(v, unicode):
+                v = v.encode('utf8', 'ignore')
+        value_list += [v]
+    return value_list[start_index:]
+
+
+def get_value_str(values, start_index=0):
+    values = get_value_list(values, start_index)
+    value_str = "'{0}'".format(values[0])
+    for v in values[1:]:
         if v is None or v == '':
             value_str += ", {0}".format('NULL')
         elif isinstance(v, str):
             value_str += ", '{0}'".format(v)
         else:
             value_str += ", {0}".format(v)
-        # print(value_str)
-
-    return key_str[table], value_str
-
-
-def get_key_value_list(values, table='reaction'):
-    key_str = {'reaction': """id, chemical_composition, surface_composition,
-    facet, sites, coverages, reactants, products, reaction_energy,
-    activation_energy, dft_code, dft_functional, username, pub_id""",
-               'publication': """pub_id, title, authors, journal,
-               volume, number, pages, year, publisher, doi, tags""",
-               'reaction_system': """name, energy_correction, ase_id, id""",
-               'publication_system': """ase_id, pub_id"""}
-
-    start_index = 0
-    if table == 'publication_system' or table == 'reaction_system':
-        start_index = -1
-    value_list = []
-    for v in values[start_index + 1:]:
-        if isinstance(v, text):
-            v = v.encode('utf8','ignore')
-            #print("ISINSTANCE TEXT {v}".format(**locals()))
-        elif hasattr(v, 'encode'):
-            v = v.encode('utf8','ignore')
-            #print("HASATTR ENCODE {v}".format(**locals()))
-        value_list += [v]
-    return key_str[table], value_list
+    return value_str
