@@ -128,8 +128,7 @@ class FolderReader:
 
     def write(self, skip=[], goto_reaction=None):
         for key_values in self.read(skip=skip, goto_reaction=goto_reaction):
-            db_file = self.cathub_db
-            with CathubSQLite(db_file) as db:
+            with CathubSQLite(self.cathub_db) as db:
                 id = db.check(
                     key_values['chemical_composition'],
                     key_values['reaction_energy'])
@@ -141,7 +140,10 @@ class FolderReader:
                     self.stdout.write('Updated reaction db row id = {}\n'.format(id))
                 else:
                     self.stdout.write('Already in reaction db with row id = {}\n'.format(id))
-        with CathubSQLite(db_file) as db:
+        self.get_summary()
+
+    def get_summary(self):
+        with CathubSQLite(self.cathub_db) as db:
             db.print_summary()
 
     def write_publication(self, pub_data):
