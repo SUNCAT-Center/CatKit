@@ -37,8 +37,7 @@ def show_reactions(dbfile):
     or a string with names of more folders seperated by ', '""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
-@click.option('--old', default=False)
-def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
+def folder2db(folder_name, debug, skip_folders, goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
     folder_name = folder_name.strip('/')
     skip = []
@@ -46,7 +45,7 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
         for sk in s.split(','):
             skip.append(sk)
     _folder2db.main(folder_name, debug,
-                    skip, goto_reaction, old)
+                    skip, goto_reaction)
 
 
 @cli.command()
