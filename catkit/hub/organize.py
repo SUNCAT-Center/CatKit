@@ -37,11 +37,11 @@ PUBLICATION_TEMPLATE = """{
     "journal": "",
     "volume": "",
     "number": "",
-     "pages": "",
-     "year": "",
-     "publisher": "",
-     "doi": "",
-     "tags": []
+    "pages": "",
+    "year": "",
+    "publisher": "",
+    "doi": "",
+    "tags": []
 }"""
 
 
@@ -110,17 +110,17 @@ def collect_structures(foldername, options):
                     print("Error with {posix_filename}: {e}".format(
                         posix_filename=posix_filename,
                         e=e,
-                        ))
+                    ))
                 except AssertionError as e:
                     print("Hit an assertion error with {posix_filename}: {e}".format(
                         posix_filename=posix_filename,
                         e=e,
-                        ))
+                    ))
                 except ValueError as e:
                     print("Trouble reading {posix_filename}: {e}".format(
                         posix_filename=posix_filename,
                         e=e,
-                        ))
+                    ))
 
     return structures
 
@@ -131,9 +131,6 @@ def fuzzy_match(structures, options):
                   if structure.number_of_lattice_vectors == 3
                   ]
     # sort by density
-    structures = [structure for structure in structures
-                  if structure.number_of_lattice_vectors == 3
-            ]
     structures = sorted(structures,
                         key=lambda x: len(x) / x.get_volume()
                         )
@@ -177,7 +174,7 @@ def fuzzy_match(structures, options):
             print("  {density:10.3f} {filename}".format(
                 density=density,
                 filename=structure.info['filename'],
-                ))
+            ))
         if density < options.max_density_gas:
             structure.info['state'] = 'molecule'
             molecules.append(structure)
@@ -222,7 +219,7 @@ def fuzzy_match(structures, options):
     if options.verbose:
         print("\n\nCANDIDATES {gas_phase_candidates}".format(
             gas_phase_candidates=gas_phase_candidates,
-            ))
+        ))
 
     volume_groups = {}
     tolerance = 1e-5
@@ -249,7 +246,7 @@ def fuzzy_match(structures, options):
         if options.verbose:
             print("\nInspect volume {volume}\n".format(
                 volume=volume,
-                ))
+            ))
         surfaces = volume_groups[volume]
         N = len(surfaces)
         if N > 1:
@@ -265,6 +262,9 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
+                if options.verbose:
+                    print(surf1)
+                    print(surf2)
 
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
@@ -278,18 +278,36 @@ def fuzzy_match(structures, options):
                     for tag, i1, i2, j1, j2 in opcodes:
                         if tag == 'insert':
                             additions += f2[j1:j2]
+                        elif tag == 'replace':
+                            additions += f2[j1:j2]
                         elif tag == 'delete':
                             subtractions += f2[j1:j2]
                         elif tag == 'equal':
                             equal += f1[i1:i2]
-                    subtractions = ''.join(
-                        sorted(
-                            ase.atoms.string2symbols(
-                                subtractions)))
-                    additions = ''.join(
-                        sorted(
+
+                    if options.verbose:
+                        print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
+                        print("    ADDITIONS " + str(additions))
+                        print("    SUBTRACTIONS " + str(subtractions))
+
+                    try:
+                        subtractions = ''.join(
+                            sorted(
                                 ase.atoms.string2symbols(
-                                    additions)))
+                                    subtractions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {subtractions}"
+                                  .format(subtractions=subtractions))
+                    try:
+                        additions = ''.join(
+                            sorted(
+                                    ase.atoms.string2symbols(
+                                        additions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {additions}"
+                                  .format(additions=additions))
 
                     equal_formula = get_chemical_formula(
                         ase.atoms.Atoms(equal))
@@ -298,10 +316,10 @@ def fuzzy_match(structures, options):
                     # and either one (or both) are in user specifid
                     # adsorbates
                     if (additions or subtractions) \
-                            and (not additions
-                                 or additions in options.adsorbates) \
-                            and (not subtractions
-                                 or subtractions in options.adsorbates):
+                            and (not additions or
+                                 additions in options.adsorbates) \
+                            and (not subtractions or
+                                 subtractions in options.adsorbates):
 
                         dE = surf2.get_potential_energy() \
                             - surf1.get_potential_energy()
@@ -322,11 +340,13 @@ def fuzzy_match(structures, options):
                             adsorbates.append(additions)
                         if subtractions:
                             adsorbates.append(subtractions)
+
                         if options.verbose:
                             print("    ADDITIONS " + str(additions))
                             print("    SUBTRACTIONS " + str(subtractions))
                             print("    ADSORBATES " + str(adsorbates))
                             print("    REFERENCES " + str(references))
+
                         stoichiometry_factors =  \
                             gas_phase_references.get_stoichiometry_factors(
                                 adsorbates, references,
@@ -450,7 +470,7 @@ def create_folders(options, structures, root=''):
     out_format = 'json'
 
     for key in structures:
-        if type(structures[key]) == dict:
+        if isinstance(structures[key], dict):
             d = Path(root).joinpath(key)
             Path(d).mkdir(parents=True, exist_ok=True)
             if Path(root).parent.as_posix() == '.':
@@ -470,8 +490,8 @@ def create_folders(options, structures, root=''):
 
 
 def main(options):
-    pickle_file = options.foldername.strip().strip(
-        '/').strip('.').strip('/') + '.cache.pckl'
+    pickle_file = options.foldername.strip().rstrip(
+        '/').strip('.').rstrip('/') + '.cache.pckl'
 
     if Path(pickle_file).exists() and Path(pickle_file).stat().st_size:
         with open(pickle_file, 'rb') as infile:
