@@ -1,10 +1,10 @@
+import sys
+from ase.db.sqlite import SQLite3Database
 import sqlite3
 import json
+from past.utils import PY2
+from tabulate import tabulate
 
-import ase
-from ase.db.sqlite import SQLite3Database
-
-import numpy as np
 
 init_commands = [
     """ CREATE TABLE publication (
@@ -57,23 +57,57 @@ init_commands = [
 
 
 class CathubSQLite:
-    def __init__(self, filename):
+    """Class for managing SQLite3 database for reaction energies,
+    publications and atomic structures. Builds on top of the ASE database for
+    atomic strucutres https://wiki.fysik.dtu.dk/ase/ase/db/db.html with four
+    additional tables:
+
+       publication: publication info
+
+       publication_system: one-to-many mapping between publication table and
+           systems table in ASE database
+
+       reaction: reaction energies for surfaces
+
+       reaction_system: mamy-to-many mapping between reaction table and
+           systems table in ASE database
+
+    Connect to a database object:
+
+        db = CathubSQLite('yourdbfile.db')
+
+    Set up a connection for several manipulations:
+
+        with db as CathubSQLite('yourdbfile.db'):
+            Do your work...
+
+    Parameters
+    ----------
+    filename : str
+        name of database file
+    """
+
+    def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
+
+        assert filename.endswith('.db'), 'filename should have .db extension'
         self.filename = filename
         self.initialized = False
-        self.default = 'NULL'  # used for autoincrement id
+        self.default = 'NULL'
         self.connection = None
-        self.id = None
-        self.pid = None
+        self.stdin = stdin
+        self.stdout = stdout
 
     def _connect(self):
         return sqlite3.connect(self.filename, timeout=600)
 
     def __enter__(self):
+        """Set connection upon entry using with statement"""
         assert self.connection is None
         self.connection = self._connect()
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
+        """Commit changes upon exit"""
         if exc_type is None:
             self.connection.commit()
         else:
@@ -82,35 +116,37 @@ class CathubSQLite:
         self.connection = None
 
     def _initialize(self, con):
+        """Set up tables in SQL"""
         if self.initialized:
             return
-        SQLite3Database()._initialize(con)
 
-        self._metadata = {}
+        SQLite3Database()._initialize(con)  # ASE db initialization
 
         cur = con.execute(
             'SELECT COUNT(*) FROM sqlite_master WHERE name="reaction"')
 
-        if cur.fetchone()[0] == 0:
+        if cur.fetchone()[0] == 0:  # no reaction table
             for init_command in init_commands:
-                con.execute(init_command)
-            self.id = 1
-            self.pid = 1
+                con.execute(init_command)  # Create tables
             con.commit()
-
-        if self.id is None:
-            self.id = self.get_last_id(cur) + 1
-            self.pid = self.get_last_pub_id(cur) + 1
 
         self.initialized = True
 
     def read(self, id, table='reaction'):
+        """ Return an entire row of a table
+        Parameters
+        ---------
+
+        id: int
+            row integer
+        table: str
+            'reaction', 'publication', 'publication_system', 'reaction_system'
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        cur.execute('SELECT * FROM \n {} \n WHERE \n {}.id={}'.format(table,
-                                                                      table,
-                                                                      id))
+        cur.execute('SELECT * FROM \n {} \n WHERE \n {}.id={}'.format(
+            table, table, id))
         row = cur.fetchall()
 
         if len(row) == 14:  # Old schema
@@ -119,13 +155,28 @@ class CathubSQLite:
         return row
 
     def write_publication(self, values):
+        """
+        Write publication info to db
+
+        Parameters
+        ----------
+        values: dict with entries
+            {'pub_id': str (short name for publication),
+            'authors': list of str ()
+            'journal': str,
+            'volume': str,
+            'number': str,
+            'pages': 'str'
+            'year': int,
+            'publisher': str,
+            'doi': str,
+            'tags': list of str}
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        pid = self.pid
 
-        values = (pid,
-                  values['pub_id'],
+        values = (values['pub_id'],
                   values['title'],
                   json.dumps(values['authors']),
                   values['journal'],
@@ -137,46 +188,61 @@ class CathubSQLite:
                   values['doi'],
                   json.dumps(values['tags']))
 
-        q = ', '.join('?' * len(values))
+        q = self.default + ',' + ', '.join('?' * len(values))
         cur.execute('INSERT OR IGNORE INTO publication VALUES ({})'.format(q),
                     values)
-        self.pid = pid + 1
+
+        pid = self.get_last_id(cur, table='publication')
 
         return pid
 
-    def check_ase_ids(self, values, ase_ids):
-        ase_values = ase_ids.values()
-        assert len(set(ase_values)) == len(ase_values), 'Duplicate ASE ids!'
-
-        reaction_species = set(list(values['reactants'].keys()) +
-                               list(values['products'].keys()))
-
-        n_split = 0
-        for spec in ase_ids.keys():
-            if '_' in spec:
-                n_split += 1
-
-        assert len(reaction_species) <= len(ase_values) + n_split, \
-            'ASE ids missing!'
-        return
-
     def write(self, values, data=None):
+        """
+        Write reaction info to db file
+
+        Parameters
+        ----------
+        values: dict
+
+        The values dict can include:
+        {'chemical_composition': str (chemical composition on empty slab) ,
+        'surface_composition': str (reduced chemical composition or
+                                         shortname),
+        'facet': str
+        'sites': dict
+            adsorption sites of species.
+            f.ex: {'OH': 'ontop', 'O': 'hollow'}
+        'coverages': dict
+            coverage of adsorbates relative to the unit cell
+            f.ex. {'OH': 0.25, 'O': 0.5})
+        'reactants'/ 'products': dict
+            keys with name of chemical species folloved by phase (gas, *)
+            values are the prefactor in the reaction.
+            For reaction H2Ogas -> 2Hstar + O star you would write:
+            'reactants': {OHstar: 1, Hstar: 2}
+            'products': {OHstar: 1, Hstar: 2}
+        'reaction_energy': float
+        'activation_energy': float
+        'dft_code': str
+        'dft_functional': str
+        'username': str
+        'pub_id': str
+            Should match the pub_id of the corresponding publications
+        }
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-
-        id = self.id
 
         pub_id = values['pub_id']
         ase_ids = values['ase_ids']
         energy_corrections = values['energy_corrections']
 
         if ase_ids is not None:
-            self.check_ase_ids(values, ase_ids)
+            check_ase_ids(values, ase_ids)
         else:
             ase_ids = {}
-        values = (id,
-                  values['chemical_composition'],
+        values = (values['chemical_composition'],
                   values['surface_composition'],
                   values['facet'],
                   json.dumps(values['sites']),
@@ -191,11 +257,15 @@ class CathubSQLite:
                   values['pub_id']
                   )
 
-        q = ', '.join('?' * len(values))
+        """ Write to reaction table"""
+        q = self.default + ',' + ', '.join('?' * len(values))
         cur.execute('INSERT INTO reaction VALUES ({})'.format(q),
                     values)
+        id = self.get_last_id(cur)
+
         reaction_structure_values = []
 
+        """ Write to publication_system and reaction_system tables"""
         for name, ase_id in ase_ids.items():
             if name in energy_corrections:
                 energy_correction = energy_corrections[name]
@@ -214,11 +284,23 @@ class CathubSQLite:
             con.commit()
             con.close()
 
-        self.id = id + 1
-
         return id
 
     def update(self, id, values, key_names='all'):
+        """
+        Update reaction info for a selected row
+
+        Parameters
+        ----------
+        id: int
+            row integer
+        values: dict
+            See write() method for details
+        key_names: list or 'all'
+            list with name of columns to update. Should match the keys-value
+            pairs in values.
+            default is 'all'
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -228,7 +310,7 @@ class CathubSQLite:
         energy_corrections = values['energy_corrections']
 
         if ase_ids is not None:
-            self.check_ase_ids(values, ase_ids)
+            check_ase_ids(values, ase_ids)
         else:
             ase_ids = {}
 
@@ -264,8 +346,20 @@ class CathubSQLite:
             con.close()
         return id
 
-    def get_last_id(self, cur):
-        cur.execute('SELECT seq FROM sqlite_sequence WHERE name="reaction"')
+    def get_last_id(self, cur, table='reaction'):
+        """
+        Get the id of the last written row in table
+
+        Parameters
+        ----------
+        cur: database connection().cursor() object
+        table: str
+            'reaction', 'publication', 'publication_system', 'reaction_system'
+
+        Returns: id
+        """
+        cur.execute("SELECT seq FROM sqlite_sequence WHERE name='{0}'"
+                    .format(table))
         result = cur.fetchone()
         if result is not None:
             id = result[0]
@@ -273,16 +367,17 @@ class CathubSQLite:
             id = 0
         return id
 
-    def get_last_pub_id(self, cur):
-        cur.execute('SELECT seq FROM sqlite_sequence WHERE name="publication"')
-        result = cur.fetchone()
-        if result is not None:
-            pid = result[0]
-        else:
-            pid = 0
-        return pid
-
     def check(self, chemical_composition, reaction_energy):
+        """
+        Check if entry with same surface and energy is allready written
+        to database file
+        Parameters
+        ----------
+        chemcial_composition: str
+        reaction_energy: str
+
+        Returns id or None
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -300,6 +395,18 @@ class CathubSQLite:
 
     def check_reaction_on_surface(self, chemical_composition, reactants,
                                   products):
+        """
+        Check if entry with same surface and reaction is allready written
+        to database file
+
+        Parameters
+        ----------
+        chemcial_composition: str
+        reactants: dict
+        products: dict
+
+        Returns id or None
+        """
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -350,30 +457,49 @@ class CathubSQLite:
             id = None
         return id
 
+    def print_summary(self):
+        self.stdout.write('------------------------------------------------\n')
+        self.stdout.write('Reaction Summary: \n')
+        self.stdout.write('------------------------------------------------\n')
 
-def get_key_value_str(values):
-    key_str = """chemical_composition, surface_composition, facet, sites,
-    reactants,products, reaction_energy, activation_energy, dft_code,
-    dft_functional, publication, doi, year, ase_ids, user"""
-    value_str = "'{}'".format(values[1])
-    for v in values[2:]:
-        try:    # Unicode in python2 - must be a better way of handling this.
-            if isinstance(v, unicode):
-                v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
-        if isinstance(v, str) or isinstance(v, dict):
-            value_str += ", '{}'".format(v)
-        elif v is None or v == '':
-            value_str += ", {}".format('NULL')
-        else:
-            value_str += ", {}".format(v)
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+        cur.execute("""
+        SELECT
+        surface_composition, reactants, products, reaction_energy,
+        activation_energy, sites
+        FROM
+        reaction;""")
+        rows = cur.fetchall()
+        table = []
+        for row in rows:
+            equation = get_equation(json.loads(row[1]), json.loads(row[2]))
+            table += [[row[0], equation, row[3], row[4], row[5]]]
 
-    return key_str, value_str
+        headers = ['Surface Composition', 'Equation', 'Reaction Energy',
+                   'Activation Energy', 'Sites']
+        self.stdout.write(tabulate(table, headers) + '\n')
+
+
+def check_ase_ids(values, ase_ids):
+    ase_values = ase_ids.values()
+    assert len(set(ase_values)) == len(ase_values), 'Duplicate ASE ids!'
+
+    reaction_species = set(list(values['reactants'].keys()) +
+                           list(values['products'].keys()))
+
+    n_split = 0
+    for spec in ase_ids.keys():
+        if '_' in spec:
+            n_split += 1
+
+    assert len(reaction_species) <= len(ase_values) + n_split, \
+        'ASE ids missing!'
+    return
 
 
 def get_key_value_list(key_list, values, table='reaction'):
-
     total_keys = {'reaction': ['chemical_composition', 'surface_composition',
                                'facet', 'sites', 'coverages', 'reactants',
                                'products', 'reaction_energy',
@@ -383,7 +509,7 @@ def get_key_value_list(key_list, values, table='reaction'):
                                   'volume', 'number', 'pages', 'year',
                                   'publisher', 'doi', 'tags'],
                   'reaction_system': ['name', 'energy_correction',
-                                      'ase_id', 'reaction_id'],
+                                      'ase_id', 'id'],
                   'publication_system': ['ase_id, pub_id']}
     total_key_list = total_keys[table]
 
@@ -400,11 +526,9 @@ def get_key_value_list(key_list, values, table='reaction'):
 def get_value_strlist(value_list):
     value_strlist = []
     for v in value_list:
-        try:  # Unicode in python2 - must be a better way of handling this.
+        if PY2:  # python 2
             if isinstance(v, unicode):
                 v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
         if isinstance(v, dict):
             v = json.dumps(v)
             value_strlist.append("'{}'".format(v))
@@ -416,3 +540,31 @@ def get_value_strlist(value_list):
             value_strlist.append("{}".format(v))
 
     return value_strlist
+
+
+def get_equation(reactants, products):
+    equation = ''
+    arrow = 0
+    for column in (reactants, products):
+        if arrow == 1:
+            equation += ' -> '
+        arrow += 1
+        i = 0
+        for key in sorted(column, key=len, reverse=True):
+            prefactor = column[key]
+            if 'gas' in key:
+                key = key.replace('gas', '(g)')
+            if 'star' in key:
+                key = key.replace('star', '*')
+            if not i == 0:
+                if prefactor > 0:
+                    equation += ' + '
+                else:
+                    equation += ' - '
+                    prefactor *= -1
+            if prefactor == 1:
+                prefactor = ''
+
+            equation += str(prefactor) + key
+            i += 1
+    return equation

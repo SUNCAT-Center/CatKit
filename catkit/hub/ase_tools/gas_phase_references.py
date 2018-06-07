@@ -1,15 +1,14 @@
 import ase.atoms
 import ase.data
 import numpy as np
-from numpy import array
+import optparse
+import pprint
 
 
 def molecules2symbols(molecules, add_hydrogen=True):
-    """
-    Take a list of molecules and return just a list of atomic
+    """Take a list of molecules and return just a list of atomic
     symbols, possibly adding hydrogen
     """
-
     symbols = sorted(
         list(set(
             ase.atoms.string2symbols(''.join(
@@ -38,14 +37,13 @@ def construct_reference_system(
         'HCl',
         'N2',
         'O2']):
-    """
-    Take a list of symbols and construct gas phase
+    """Take a list of symbols and construct gas phase
     references system, when possible avoiding O2.
     Candidates can be rearranged, where earlier candidates
     get higher preference than later candidates
-    """
 
-    # assume symbols sorted by atomic number
+    assume symbols sorted by atomic number
+    """
     references = {}
     added_symbols = []
     for symbol in symbols:
@@ -67,12 +65,10 @@ def construct_reference_system(
 
 
 def get_atomic_stoichiometry(references):
-    """
-    Given a list of references (tuples of (symbol, molecule))
+    """Given a list of references (tuples of (symbol, molecule))
     return stoichiometry matrix that connects atomic symbols
     to its molecular references.
     """
-
     n = len(references)
     stoichiometry = np.ndarray((n, n), float)
     stoichiometry[:] = 0.
@@ -101,13 +97,11 @@ def get_atomic_stoichiometry(references):
 
 
 def get_stoichiometry_factors(adsorbates, references):
-    """
-    Take a list of adsorabtes and a corresponding reference
+    """Take a list of adsorabtes and a corresponding reference
     system and return a list of dictionaries encoding the
     stoichiometry factors converting between adsorbates and
     reference molecules.
     """
-
     stoichiometry = get_atomic_stoichiometry(references)
     stoichiometry_factors = {}
     for adsorbate in adsorbates:
@@ -323,9 +317,6 @@ if __name__ == '__main__':
                          'O2': {'H2': -2.0, 'H2O': 2.0}},
                      'symbols': ['H', 'C', 'N', 'O', 'Cl']}]
 
-    import pprint
-
-    import optparse
     parser = optparse.OptionParser()
     parser.add_option('-v', '--verbose', dest='verbose',
                       action='store_true', default=False)

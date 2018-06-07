@@ -1,0 +1,18 @@
+# List of people reponsible for the maintainence
+# of particular sections of code
+
+# General code managers
+*                     @jboes
+
+# CatGen
+catkit/gen/           @jboes
+
+# CatFlow
+catkit/flow/          @jboes @maumnm @kirstenwinther
+
+# Pawprint
+catkit/pawprint/      @maumnm @jboes
+
+# CatHub
+catkit/hub/           @kirstenwinther @mhoffman
+

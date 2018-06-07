@@ -1,12 +1,8 @@
-import os
 from sys import argv
+from catkit.hub.folderreader import FolderReader
 
 
-def main(folder_name, debug=False, skip=[], goto_reaction=None, old=False):
-    if old:
-        from catkit.hub.folderreader_old import FolderReader
-    else:
-        from catkit.hub.folderreader import FolderReader
+def main(folder_name, debug=False, skip=[], goto_reaction=None):
     FR = FolderReader(folder_name=folder_name, debug=debug)
     FR.write(skip=skip, goto_reaction=goto_reaction)
 

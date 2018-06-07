@@ -42,16 +42,30 @@ Alternatively, a version with the most recent commits can be install through git
 git clone https://github.com/SUNCAT-Center/CatKit.git catkit
 #+END_SRC
 
-Then, add =~/catkit= to your =PYTHONPATH= by adding the following line to your =~/.bashrc= file.
+Then, add =~/catkit/bin= and =~/catkit= to your =PATH= and =PYTHONPATH= environment variables by adding the following line to your =~/.bashrc= file.
 
 #+BEGIN_SRC sh
 export PYTHONPATH=~/catkit:$PYTHONPATH
+export PATH=~/catkit/bin:PATH
+#+END_SRC
+
+And install the package:
+#+BEGIN_SRC sh
+cd catkit/
+python setup.py install
 #+END_SRC
 
 Or, one can use pip to install from the master branch directly:
 
 #+BEGIN_SRC sh
 pip install --upgrade git+https://github.com/SUNCAT-Center/CatKit.git catkit
+#+END_SRC
+
+To properly install the =cathub= command line interface, you will also need to run the =setup.py=. This can be done by performing a pip installation as developer in the catkit directory.
+
+#+BEGIN_SRC sh
+cd ~/cakit
+pip install -e .
 #+END_SRC
 
 * CatGen: Catalysis Generator
@@ -68,13 +82,7 @@ It also has functionality for enumeration of other systems relevant to the field
 - [X] Reaction mechanisms
 - [X] Reaction routes
 
-For additional details regarding how the generator operates, including example usage, see the [[./docs/catkit/gen/gen.org][CatGen documentatio
-* CatFlow: Catalysis Workflow
-CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
-
-Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io/fireworks/][Fireworks]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[http://suncat.stanford.edu/][SUNCAT]] group as Stanford.
-
-For additional detail see the [[./docs/catkit/flow/flow.org][CatFlow documentation]].
+For additional details regarding how the generator operates, including example usage, see the [[https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html][CatGen documentation]].
 
 * CatHub: Catalysis-Hub.org
 CatHub provides an interface to the reaction energy database on [[http://www.catalysis-hub.org][Catalysis-Hub.org]].
@@ -85,7 +93,14 @@ Run `cathub`:
 
 - cathub --help
 
-See the [[./docs/catkit/hub/hub.org][CatHub documentation]] for details on how to use the cli.
+See the [[https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html][CatHub documentation]] for details on how to use the cli.
+
+* CatFlow: Catalysis Workflow
+CatFlow is currently a staging ground for Workflow code and techniques. These functions are meant to be used in conjunction with the other modules inside CatKit to help automate these tasks.
+
+Currently, CatFlow's functionality utilizes [[https://materialsproject.github.io/fireworks/][Fireworks]] and many of the functions are also specifically tailored to work on the high-performance computers which are available to the [[http://suncat.stanford.edu/][SUNCAT]] group as Stanford.
+
+For additional detail see the [[https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html][CatFlow documentation]].
 
 * Dependencies
 CatKit attempts to make use of basic functionalities implemented by existing softwares when possible to extend its capabilities.

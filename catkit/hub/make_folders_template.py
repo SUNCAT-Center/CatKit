@@ -1,97 +1,115 @@
 #!/usr/bin/python
-
+from .tools import check_reaction
 import os
-import sys
 import json
-
-import catkit.hub.ase_tools
-from catkit.hub.tools import extract_atoms, check_reaction
 
 username = os.environ['USER']
 
 
 # ---------publication info------------
 def main(
-        title='Fancy title',  # work title if not yet published
-        authors=['Doe, John', 'Einstein, Albert'],  # name required
+        title,
+        authors,
+        year,
         journal='',
         volume='',
         number='',
         pages='',
-        year='2017',  # year required
         publisher='',
         doi='',
         tags=[],
-        DFT_code='Quantum ESPRESSO',  # for example 'Quantum ESPRESSO'
-        DFT_functional='BEEF-vdW',  # For example 'BEEF-vdW'
-        #  ---------reaction info-----------
+        DFT_code='Quantum ESPRESSO',
+        DFT_functional='BEEF-vdW',
         reactions=[
             {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
-             'products': ['OOHstar@ontop']},
-            # {'reactants': ['CCH3'], 'products': ['C', 'CH3']},
-            # {'reactants': ['CH3star'], 'products': ['CH3gas', 'star']}
-        ],
-        energy_corrections={},  # For example: {'H2gas': 0.1},
+             'products': ['OOHstar@ontop']}],
+        energy_corrections={},
         bulk_compositions=['Pt', 'Ag'],
         crystal_structures=['fcc', 'hcp'],
         facets=['111'],
         custom_base=None):
-    """
-    Dear all
+    """Automatically generate an organized folder structure for a DFT
+    calculation.
 
-    Use this script to make the right structure for your folders.
-    Folders will be created automatically when you run the script with python.
-    Start by copying the script to a folder in your username,
-    and assign the right information to the arguments in the function above.
+    Start by copying the script to a folder in your username
+    and assign the right information to the arguments in the function.
 
     You can change the parameters and run the script several times if you,
     for example, are using different functionals or are doing different
     reactions on different surfaces.
 
-    Include the phase if necessary:
-
-    'star' for empty site or adsorbed phase. Only necessary to put 'star' if
-    gas phase species are also involved.
-    'gas' if in gas phase
-
-    Include the adsorption site if relevant:
-    In case of adsorbed species, include the site after 'star' as f.ex
-    star@top, star@bridge.
-
-    Remember to include the reactions that gives the adsorption energy of
+    Remember to include the reaction that gives the adsorption energy of
     reaction intermediates, taking gas phase molecules as references
     (preferably H20, H2, CH4, CO, NH3).
 
-    For example, we can write the adsorption of CH2 as:
-          CH4(g) - H2(g) + * -> CH2*
+    Parameters
+    ----------
+    title : str
+        Publication or working title if not yet published.
+    authors : list
+        Author names, e.g. ['Doe, John', 'Einstein, Albert']
+    year : str
+        Year of (submission?)
+    journal : str
+        Publications journal name
+    volume : str, optional
+        Publications volume number
+    number : str, optional
+        Publication number
+    pages : str, optional
+        Publication page numbers
+    publisher : str, optional
+        Publisher name
+    doi : str, optional
+        DOI of publication
+    tags : list, optional
+        User defined quire tags
+    DFT_code : str, optional
+        e.g. 'Quantum ESPRESSO'
+    DFT_functional : str, optional
+        Calculator functional used, e.g. 'BEEF-vdW'
+    reactions : list of dict, optional
+        A new dictionary is required for each reaction, and should include two
+        lists, 'reactants' and 'products'. Remember to include a minus sign and
+        prefactor in the name when relevant. If your reaction is not balanced,
+        you will receive an error when running the script.
 
-    Here you would have to write ['CH4gas', 'H2gas', 'star'] as 'reactants'
-    entry.
+        Include the phase if mixing gas phase and surface phase.
+        e.g. 'star' for empty site or adsorbed phase, 'gas' if in gas phase.
 
-    The reaction argument is a list of dictionaries. See examples:
+        Include the adsorption site if relevant.
+        e.g. star@top or star@bridge.
 
-    reactions = [
+        For example, we can write an entry for the adsorption of CH2:
+        CH4(g) - H2(g) + * -> CH2*
+
+        as:
+        {'reactants': ['CH4gas', 'H2gas', 'star'],
+        'products': ['CH2star@bridge']}
+
+        A complete entry could read:
+        reactions = [
         {'reactants': ['CH4gas', '-H2gas', 'star'],
-         'products': ['CH2star@bridge']},
+        'products': ['CH2star@bridge']},
         {'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-         'products': ['CH3star@top']}
-        ]
+        'products': ['CH3star@top']}]
 
-    A new dictionary is required for each reaction, and should include two
-    lists, 'reactants' and 'products'. Remember to include a minus sign and
-    prefactor in the name when relevant. If your reaction is not balanced,
-    you will receive an error when running the script.
-
-    # ---------------surface info---------------------
-
-    facets # If complicated structure: use term you would use in publication
+    energy_corrections : dict, optional
+        e.g. {'H2gas': 0.1}
+    bulk_compositions  : list of str, optional
+        e.g. ['Pt', 'Ag']
+    crystal_structures : list of str, optional
+        e.g. ['fcc', 'hcp']
+    facets : list, optional
+        For complicated structures use term you would use in publication.
+        e.g. ['111']
+    custom_base : str, optional
+        TODO
     """
-
     for reaction in reactions:
         check_reaction(reaction['reactants'], reaction['products'])
 
     # Set up directories
-
     if custom_base is not None:
         base = custom_base + '/'
     else:
@@ -123,11 +141,13 @@ def main(
                         }
 
     pub_txt = publication_base + 'publication.txt'
-    json.dump(publication_dict, open(pub_txt, 'w'))
+    with open(pub_txt, 'w') as f:
+        json.dump(publication_dict, f)
 
     if not len(energy_corrections.keys()) == 0:
         energy_txt = publication_base + 'energy_corrections.txt'
-        json.dump(energy_corrections, open(energy_txt, 'wb'))
+        with open(energy_txt, 'wb') as f:
+            json.dump(energy_corrections)
 
     def create(path):
         if not os.path.exists(path):

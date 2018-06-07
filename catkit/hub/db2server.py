@@ -1,19 +1,19 @@
-from sys import argv, stdout, stdin
-from catkit.hub.postgresql import CathubPostgreSQL
+from .postgresql import CathubPostgreSQL
+from sys import argv, stdout
 
 
-def main(dbfile, start_id=1, write_reaction=True, write_ase=True,
+def main(dbfile, write_reaction=True, write_ase=True,
          write_publication=True, write_reaction_system=True,
          block_size=1000, start_block=0,
-         db_user='catroot',
-         db_password=None,
+         user='catroot',
+         password=None,
          ):
 
     stdout.write('Starting db2server\n')
 
-    db = CathubPostgreSQL(user=db_user, password=db_password)
+    db = CathubPostgreSQL(user=user, password=password)
     stdout.write('Established SQL Server connection.\n')
-    db.transfer(dbfile, start_id=start_id, write_reaction=write_reaction,
+    db.transfer(dbfile, write_reaction=write_reaction,
                 write_ase=write_ase,
                 write_publication=write_publication,
                 write_reaction_system=write_reaction_system,

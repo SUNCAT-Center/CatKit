@@ -1,8 +1,6 @@
 #!/usr/bin/python
-
 import os
 import sys
-import json
 
 if 'SHERLOCK' in os.environ:  # Sherlock 1 or 2
     sherlock = os.environ['SHERLOCK']

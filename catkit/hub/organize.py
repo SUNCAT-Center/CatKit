@@ -1,11 +1,7 @@
 #!/usr/bin/env python
 
-
 # builtin imports
-import difflib
-import optparse
 import pickle
-import pprint
 import re
 
 # A lot of functions from os.path
@@ -31,7 +27,7 @@ import numpy as np
 
 
 # local imports
-from catkit.hub.ase_tools import gas_phase_references
+from .ase_tools import gas_phase_references
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
@@ -66,13 +62,6 @@ def symbols(atoms):
     return ''.join(symbols)
 
 
-def read_ase(structures, dirname, names):
-    print("Dirname {dirname}: Names {names}".format(
-        dirname=dirname,
-        names=names,
-    ))
-
-
 def collect_structures(foldername, options):
     structures = []
     if options.verbose:
@@ -83,6 +72,8 @@ def collect_structures(foldername, options):
             print(i, posix_filename)
         if posix_filename.endswith('publication.txt'):
             with open(posix_filename) as infile:
+
+                global PUBLICATION_TEMPLATE
                 PUBLICATION_TEMPLATE = infile.read()
         elif Path(posix_filename).is_file():
             try:
@@ -95,7 +86,15 @@ def collect_structures(foldername, options):
                     structure.info['filename'] = posix_filename
                     structure.info['filetype'] = ase.io.formats.filetype(
                         posix_filename)
-                    structures.append(structure)
+                    try:
+                        structure.get_potential_energy()
+                        # ensure that the structure has an energy
+                        structures.append(structure)
+                    except RuntimeError:
+                        print("Did not add {posix_filename} since it has no energy"
+                              .format(
+                                  posix_filename=posix_filename,
+                              ))
                     print(structure)
                 except StopIteration:
                     print("Warning: StopIteration {posix_filename} hit."
@@ -127,6 +126,10 @@ def collect_structures(foldername, options):
 
 
 def fuzzy_match(structures, options):
+    # filter out cell with ill-defined unit cells
+    structures = [structure for structure in structures
+                  if structure.number_of_lattice_vectors == 3
+                  ]
     # sort by density
     structures = [structure for structure in structures
                   if structure.number_of_lattice_vectors == 3
@@ -314,10 +317,23 @@ def fuzzy_match(structures, options):
                         for i, j in references:
                             atomic_references[i] = j
 
+                        adsorbates = []
+                        if additions:
+                            adsorbates.append(additions)
+                        if subtractions:
+                            adsorbates.append(subtractions)
+                        if options.verbose:
+                            print("    ADDITIONS " + str(additions))
+                            print("    SUBTRACTIONS " + str(subtractions))
+                            print("    ADSORBATES " + str(adsorbates))
+                            print("    REFERENCES " + str(references))
                         stoichiometry_factors =  \
                             gas_phase_references.get_stoichiometry_factors(
-                                additions + subtractions, references,
+                                adsorbates, references,
                             )
+                        if options.verbose:
+                            print("    STOICH FACTORS " +
+                                  str(stoichiometry_factors) + "\n\n")
 
                         formula = '* ->'
                         adsorbate = get_chemical_formula(
@@ -333,23 +349,14 @@ def fuzzy_match(structures, options):
 
                         gas_phase_corrections = {}
 
-                        for addition in additions:
-                            stoich_factors = stoichiometry_factors[addition]
+                        for adsorbate in adsorbates:
+                            stoich_factors = stoichiometry_factors[adsorbate]
                             for ref in stoich_factors:
                                 dE -= stoich_factors[ref] * \
                                     reference_energy[ref]
                                 gas_phase_corrections[ref] = \
                                     gas_phase_corrections.get(
                                         ref, 0) - stoich_factors[ref]
-
-                        for subtraction in subtractions:
-                            stoich_factors = stoichiometry_factors[subtraction]
-                            for ref in stoich_factors:
-                                dE += stoich_factors[ref] * \
-                                    reference_energy[ref]
-                                gas_phase_corrections[ref] = \
-                                    gas_phase_corrections.get(
-                                        ref, 0) + stoich_factors[ref]
 
                         for molecule, factor in gas_phase_corrections.items():
                             if factor != 0:
@@ -440,11 +447,15 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
+    out_format = 'json'
+
     for key in structures:
         if type(structures[key]) == dict:
             d = Path(root).joinpath(key)
             Path(d).mkdir(parents=True, exist_ok=True)
             if Path(root).parent.as_posix() == '.':
+                # Have to explicitly convert Path to str
+                # to work under python 3.4
                 with open(str(
                         Path(root).joinpath('publication.txt')),
                         'w') as outfile:
@@ -452,9 +463,9 @@ def create_folders(options, structures, root=''):
             create_folders(options, structures[key], root=d)
         else:
             ase.io.write(
-                str(Path(root).joinpath(key + '.traj')),
+                str(Path(root).joinpath(key + '.' + out_format)),
                 structures[key],
-                format='traj',
+                format=out_format,
             )
 
 

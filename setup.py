@@ -2,13 +2,15 @@ import setuptools
 
 with open('requirements.txt', 'r') as f:
     requirements = f.readlines()
+    git_requirements = [f for f in requirements if 'git' in f]
+    requirements = [f for f in requirements if 'git' not in f]
 
 with open('readme.org', 'r') as f:
     readme = f.read()
 
 setuptools.setup(
     name="CatKit",
-    version="0.4.4",
+    version="0.5.0",
     url="https://github.com/SUNCAT-Center/CatKit",
 
     author="Jacob Boes",
@@ -22,7 +24,6 @@ setuptools.setup(
         'catkit',
         'catkit.pawprint',
         'catkit.gen',
-        'catkit.gen.api',
         'catkit.flow',
         'catkit.hub',
         'catkit.hub.ase_tools'
@@ -34,6 +35,7 @@ setuptools.setup(
       ''',
     install_requires=requirements,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
+    dependency_links=git_requirements,
 
     classifiers=[
         'Development Status :: 4 - Beta',

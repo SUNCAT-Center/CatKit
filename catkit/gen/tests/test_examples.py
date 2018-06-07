@@ -1,175 +1,151 @@
+import unittest
+from catkit.build import surface
 from catkit.gen.surface import SlabGenerator
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.pathways import ReactionNetwork
-from catkit.gen.api.rd_kit import plot_molecule
-from catkit.gen.api.rd_kit import get_uff_coordinates
 from ase.utils import formula_hill
 from ase.build import bulk
 import networkx as nx
 import numpy as np
+from glob import glob
 import os
 
 
-def test_surface_examples():
-    atoms = bulk('Pd', 'fcc', a=4, cubic=True)
-    atoms[3].symbol = 'Cu'
+class TestGenDocs(unittest.TestCase):
+    """Test the examples in the documentation."""
 
-    gen = SlabGenerator(
-        atoms, miller_index=(2, 1, 1), layers=9, fixed=5, vacuum=4)
+    def tearDown(self):
+        """Remove any lingering files"""
+        for f in glob('*.db'):
+            os.unlink(f)
 
-    terminations = gen.get_unique_terminations()
-    assert (len(terminations) == 2)
+        for f in glob('*.png'):
+            os.unlink(f)
 
-    for i, t in enumerate(terminations):
-        slab = gen.get_slab(iterm=i)
-        assert (len(slab) == 18)
+    def test_surface_examples(self):
+        """Test surface construction examples."""
+        atoms = bulk('Pd', 'fcc', a=4, cubic=True)
+        atoms[3].symbol = 'Cu'
 
-    atoms = bulk('Pd', 'hcp', a=3, cubic=True)
+        gen = SlabGenerator(
+            atoms, miller_index=(2, 1, 1), layers=9, fixed=5, vacuum=4)
 
-    gen = SlabGenerator(
-        atoms, miller_index=(1, 1, 0), layers=6, fixed=2, vacuum=4)
+        terminations = gen.get_unique_terminations()
+        assert (len(terminations) == 2)
 
-    atoms = gen.get_slab()
-    con_matrix = gen.get_graph_from_bulk(atoms, attach=True)
+        for i, t in enumerate(terminations):
+            slab = gen.get_slab(iterm=i)
+            assert (len(slab) == 18)
 
-    test_con_matrix = np.array(
-        [[0.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-          0.0], [2.0, 0.0, 2.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-         [2.0, 2.0, 0.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-          0.0], [2.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0],
-         [1.0, 0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 2.0, 1.0, 0.0, 0.0,
-          0.0], [0.0, 1.0, 2.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0, 1.0, 0.0, 0.0], [
-              0.0, 0.0, 1.0, 0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 2.0, 1.0, 0.0
-        ], [0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 0.0, 2.0, 2.0, 0.0, 1.0], [
-              0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 2.0, 0.0, 2.0, 2.0, 2.0
-        ], [0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 0.0, 2.0, 2.0], [
-              0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 2.0, 2.0, 0.0, 2.0
-        ], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 0.0]])
+        atoms = surface('Pd', size=(3, 3), miller=(1, 1, 1), vacuum=4)
+        con_matrix = atoms.connectivity
 
-    np.testing.assert_allclose(con_matrix, test_con_matrix)
+        test_con_matrix = np.array([
+            [0, 3, 3, 1, 1, 1, 0, 0, 0],
+            [3, 0, 3, 1, 1, 1, 0, 0, 0],
+            [3, 3, 0, 1, 1, 1, 0, 0, 0],
+            [1, 1, 1, 0, 3, 3, 1, 1, 1],
+            [1, 1, 1, 3, 0, 3, 1, 1, 1],
+            [1, 1, 1, 3, 3, 0, 1, 1, 1],
+            [0, 0, 0, 1, 1, 1, 0, 3, 3],
+            [0, 0, 0, 1, 1, 1, 3, 0, 3],
+            [0, 0, 0, 1, 1, 1, 3, 3, 0]])
 
-    # We can identify both top and bottom sites.
-    top, bottom = gen.get_voronoi_surface_atoms(atoms)
-    atoms.set_surface_atoms(top)
+        np.testing.assert_allclose(con_matrix, test_con_matrix)
 
-    test_surf_atoms = np.array([8, 9, 10, 11])
-    np.testing.assert_allclose(top, test_surf_atoms)
+        test_surf_atoms = np.array([6, 7, 8])
+        np.testing.assert_allclose(atoms.get_surface_atoms(), test_surf_atoms)
 
-    atoms = bulk('Pd', 'fcc', a=5, cubic=True)
-    atoms[3].symbol = 'Cu'
+        atoms = bulk('Pd', 'fcc', a=5, cubic=True)
+        atoms[3].symbol = 'Cu'
 
-    gen = SlabGenerator(
-        atoms, miller_index=(1, 1, 1), layers=3, fixed=2, vacuum=10)
+        gen = SlabGenerator(
+            atoms, miller_index=(1, 1, 1), layers=3, fixed=2, vacuum=10)
 
-    atoms = gen.get_slab(primitive=True)
-    coordinates, connectivity = gen.adsorption_sites(atoms)
+        atoms = gen.get_slab()
+        coordinates, connectivity = gen.adsorption_sites(atoms)
 
-    test_connectivity = np.array([1, 1, 2, 2, 2, 3, 3, 3, 3])
-    np.testing.assert_allclose(connectivity, test_connectivity)
+        test_connectivity = np.array([1, 1, 2, 2, 2, 3, 3, 3, 3])
+        np.testing.assert_allclose(connectivity, test_connectivity)
 
+    def test_adsorption_examples(self):
+        """Test adsorption structure examples."""
+        atoms = bulk('Pd', 'fcc', a=5, cubic=True)
+        atoms[3].symbol = 'Cu'
 
-def test_adsorption_examples():
-    atoms = bulk('Pd', 'fcc', a=5, cubic=True)
-    atoms[3].symbol = 'Cu'
+        gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layers=3, vacuum=4)
 
-    gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layers=3, vacuum=4)
+        atoms = gen.get_slab()
 
-    atoms = gen.get_slab(primitive=True)
-    atoms.set_surface_atoms([8, 9, 10, 11])
+        sites = AdsorptionSites(atoms)
+        sites.plot('./Pd3Cu-adsorption-sites.png')
 
-    sites = AdsorptionSites(atoms)
-    sites.plot('./Pd3Cu-adsorption-sites.png')
+        atoms = bulk('Pd', 'fcc', a=5, cubic=True)
+        atoms[3].symbol = 'Cu'
 
-    atoms = bulk('Pd', 'fcc', a=5, cubic=True)
-    atoms[3].symbol = 'Cu'
+        gen = SlabGenerator(atoms, miller_index=(3, 2, 1), layers=13, vacuum=5)
 
-    gen = SlabGenerator(atoms, miller_index=(3, 2, 1), layers=13, vacuum=5)
+        atoms = gen.get_slab()
+        sites = AdsorptionSites(atoms)
 
-    atoms = gen.get_slab(primitive=True)
+        coordinates = sites.get_coordinates()
+        assert (len(coordinates) == 56)
+        connectivity = sites.get_connectivity()
+        test_connectivity = np.array([
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4])
+        np.testing.assert_allclose(connectivity, test_connectivity)
 
-    top, _ = gen.get_voronoi_surface_atoms(atoms)
-    atoms.set_surface_atoms(top)
-    sites = AdsorptionSites(atoms)
+        topology = sites.get_topology()
+        assert (len(topology) == 56)
 
-    coordinates = sites.get_coordinates()
-    assert (len(coordinates) == 56)
-    connectivity = sites.get_connectivity()
-    test_connectivity = np.array([
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-        2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-        3, 3, 3, 3, 3, 3, 4, 4
-    ])
-    np.testing.assert_allclose(connectivity, test_connectivity)
+        periodic = sites.get_periodic_sites()
+        symmetric = sites.get_symmetric_sites()
+        np.testing.assert_allclose(symmetric, periodic)
 
-    topology = sites.get_topology()
-    assert (len(topology) == 56)
+        atoms = bulk('Pd', 'fcc', a=5, cubic=True)
+        atoms[3].symbol = 'Cu'
 
-    periodic = sites.get_periodic_sites()
-    symmetric = sites.get_symmetric_sites()
-    print(periodic)
-    np.testing.assert_allclose(symmetric, periodic)
+        gen = SlabGenerator(atoms, miller_index=(2, 1, 1), layers=10, vacuum=5)
 
-    atoms = bulk('Pd', 'fcc', a=5, cubic=True)
-    atoms[3].symbol = 'Cu'
+        atoms = gen.get_slab()
+        sites = AdsorptionSites(atoms)
 
-    gen = SlabGenerator(atoms, miller_index=(2, 1, 1), layers=10, vacuum=5)
+        coordinates = sites.get_coordinates()
+        vectors = sites.get_adsorption_vectors(unique=False)
+        assert (len(vectors) == 32)
 
-    atoms = gen.get_slab(primitive=True)
+    def test_gas_phase_example(self):
+        """Test the gas phase enumerator examples."""
+        db_name = 'C2H6-example.db'
+        with ReactionNetwork(db_name=db_name) as rn:
 
-    top, _ = gen.get_voronoi_surface_atoms(atoms, attach_graph=False)
-    atoms.set_surface_atoms(top)
-    sites = AdsorptionSites(atoms)
+            rn.molecule_search(
+                element_pool={
+                    'C': 2,
+                    'H': 6
+                }, multiple_bond_search=False)
+            molecules = rn.load_molecules()
 
-    coordinates = sites.get_coordinates()
-    vectors = sites.get_adsorption_vectors(unique=False)
-    assert (len(vectors) == 32)
+            assert (len(molecules) == 17)
 
+            rn.path_search(reconfiguration=False, substitution=False)
+            pathways = rn.load_pathways()
 
-def test_gas_phase_example():
-    db_name = 'C2H6-example.db'
-    with ReactionNetwork(db_name=db_name) as rn:
+            assert (len(pathways) == 27)
 
-        rn.molecule_search(
-            element_pool={
-                'C': 2,
-                'H': 6
-            }, multiple_bond_search=False)
-        molecules = rn.load_molecules()
+        names = np.empty(len(molecules) + 1, dtype='a5')
+        names[0] = ''
+        for k, v in molecules.items():
+            atn = nx.get_node_attributes(v.graph, 'number')
 
-        assert (len(molecules) == 17)
+            hill = formula_hill(list(atn.values()))
+            names[k] = hill
 
-        for i, molecule in molecules.items():
-            plot_molecule(
-                molecule, file_name='./molecule-{}.png'.format(i))
-
-            molecule = get_uff_coordinates(molecule, steps=50)
-            rn.save_3d_structure(molecule)
-
-        images = rn.load_3d_structures()
-
-        assert (len(images) == 17)
-
-        rn.path_search(reconfiguration=False, substitution=False)
-        rn.plot_reaction_network(file_name='./reaction-network.png')
-        pathways = rn.load_pathways()
-
-        assert (len(pathways) == 27)
-
-    names = np.empty(len(molecules) + 1, dtype='a5')
-    names[0] = ''
-    for k, v in molecules.items():
-        atn = nx.get_node_attributes(v.graph, 'number')
-
-        hill = formula_hill(list(atn.values()))
-        names[k] = hill
-
-    for path in pathways:
-        print('|{} + {} --> {} + {}|'.format(*names[path]))
-
-    os.unlink(db_name)
+        for path in pathways:
+            print('|{} + {} --> {} + {}|'.format(*names[path]))
 
 
-if __name__ == "__main__":
-    test_surface_examples()
-    test_adsorption_examples()
-    test_gas_phase_example()
+if __name__ == '__main__':
+    unittest.main()
