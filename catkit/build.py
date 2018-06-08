@@ -54,7 +54,7 @@ def surface(
         layers=size[-1],
         vacuum=vacuum,
         fixed=fixed,
-        fix_stoichiometry=kwargs.get('fix_stoichiometry', False),
+        layer_type=kwargs.get('layer_type', 'trim'),
         attach_graph=kwargs.get('attach_graph', True),
         standardize_bulk=kwargs.get('standardize_bulk', True),
         tol=kwargs.get('tol', 1e-8)
