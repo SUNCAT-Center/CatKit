@@ -66,8 +66,6 @@ class SlabGenerator(object):
             exact number of unique z-coordinates. Useful for precision control.
             'stoich' : Constraints any slab generated to have the same
             stoichiometric ratio as the provided bulk.
-            'planes' : Return a slab thickness in units of miller planes
-            thickness. Useful for consistent slab sizes across varying metals.
         attach_graph : bool
             Attach the connectivity graph generated from the bulk structure.
             This is only necessary for fingerprinting and setting it to False
@@ -113,12 +111,7 @@ class SlabGenerator(object):
                 miller_index = (miller_index /
                                 list_gcd(miller_index)).astype(int)
 
-            self.pmiller_index = miller_index
             self._bulk = self.align_crystal(bulk, miller_index)
-
-            z_planes = utils.get_unique_coordinates(self._bulk, tol=self.tol)
-            self.unique_terminations = z_planes
-            self.slab_basis = [None] * len(z_planes)
         else:
             self._bulk = self.align_crystal(bulk, miller_index)
 
@@ -268,30 +261,19 @@ class SlabGenerator(object):
             return ibasis
 
         _basis = self._bulk.copy()
-        zshift = terminations[iterm]
         ibasis = _basis.copy()
-        scaled_positions = ibasis.get_scaled_positions()
-        scaled_positions[:, 2] -= zshift - self.tol
-        ibasis.set_scaled_positions(scaled_positions)
-        ibasis.wrap(pbc=True)
+        if iterm > 0:
+            zshift = terminations[iterm]
+            scaled_positions = ibasis.get_scaled_positions()
+            scaled_positions[:, 2] -= zshift - self.tol
+            ibasis.set_scaled_positions(scaled_positions)
+            ibasis.wrap(pbc=True)
 
-        if self.standardized:
-            bulk_layers = self.unique_terminations
-        else:
-            bulk_layers = utils.get_unique_coordinates(_basis, tol=self.tol)
+        bulk_layers = utils.get_unique_coordinates(_basis, tol=self.tol)
 
         if self.layer_type == 'angs':
             height = np.abs(self._bulk.cell[2][2])
             minimum_repetitions = np.ceil(self.layers / height)
-        elif self.layer_type == 'planes':
-            inverse = np.linalg.inv(self._bulk.cell).T
-            inverse_normal = np.dot(inverse, self.pmiller_index)
-            inverse_normal /= np.linalg.norm(inverse_normal)
-
-            norm = np.linalg.norm(self._bulk.cell, axis=1)
-            dist = np.abs(np.dot(inverse_normal, self._bulk.cell) / norm)
-            layers = self.pmiller_index[np.argmax(dist)]
-            minimum_repetitions = np.ceil(self.layers / layers)
         else:
             minimum_repetitions = np.ceil(self.layers / len(bulk_layers))
 
@@ -494,6 +476,68 @@ class SlabGenerator(object):
 
         return supercell
 
+    def make_symmetric(self, slab):
+        """Returns a symmetric slab. Note, this will trim the slab potentially
+        resulting in loss of stoichiometry.
+        """
+        inversion_symmetric = utils.get_point_group(slab)[1]
+
+        # Trim the cell until it is symmetric
+        while not inversion_symmetric:
+            tags = slab.get_tags()
+            bottom_layer = np.max(tags)
+            del slab[tags == bottom_layer]
+
+            if len(slab) <= len(self.bulk):
+                warnings.warn('Too many sites removed, please use a larger '
+                              'slab size.')
+
+        return slab
+
+    def get_unique_indices(self, max_index):
+        """Returns an array of miller indices which are likely to produce
+        unique surface terminations based on a provided bulk structure.
+
+        Parameters
+        ----------
+        max_index : int
+            Maximum number that will be considered for a given surface.
+
+        Returns
+        -------
+        unique_millers : ndarray (n, 3)
+            Symmetrically distinct miller indices for a given bulk.
+        """
+        unique_index = generate_indices(2)
+
+        rotations, translations = utils.get_symmetry(self._bulk)
+        rotations = np.swapaxes(rotations, 1, 2)
+
+        operations = []
+        for i, rot in enumerate(rotations):
+            A = np.eye(4)
+            A[:3, :3] = rot
+            A[-1, :3] = translations[i]
+            operations += [A]
+
+        unique_millers = []
+
+        def analyzed(affine_point):
+            for aff in operations:
+                operation = np.dot(aff, affine_point)[:3]
+                if len(geometry.matching_sites(operation, unique_millers)) > 0:
+                    return True
+
+        for miller in unique_index:
+            affine_point = np.insert(miller, 3, 1)
+
+            if not analyzed(affine_point):
+                unique_millers += [miller]
+
+        unique_millers = np.array(unique_millers)
+
+        return unique_millers
+
 
 def transform_ab(slab, matrix, tol=1e-5):
     """Transform the slab basis vectors parallel to the z-plane
@@ -599,3 +643,29 @@ def get_normal_vectors(atoms):
     normal_vectors = np.cross(rotation1, rotation2, axis=0)
 
     return normal_vectors
+
+
+def generate_indices(max_index):
+    """Return an array of miller indices enumerated up to values
+    plus or minus some maximum. Filters out lists with greatest
+    common divisors greater than one. Only positive values need to
+    be considered for the first index.
+
+    Parameters
+    ----------
+    max_index : int
+        Maximum number that will be considered for a given surface.
+
+    Returns
+    -------
+    unique_index : ndarray (n, 3)
+        Unique miller indices
+    """
+    grid = np.mgrid[max_index:-1:-1,
+                    max_index:-max_index-1:-1,
+                    max_index:-max_index-1:-1]
+    index = grid.reshape(3, -1)
+    gcd = list_gcd(index)
+    unique_index = index.T[np.where(gcd == 1)]
+
+    return unique_index

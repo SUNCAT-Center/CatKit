@@ -25,8 +25,7 @@ def matching_sites(position, comparators, tol=1e-8):
     if len(comparators) == 0:
         return []
 
-    fdist = comparators - position
-    fdist -= np.round(fdist)
+    fdist = comparators - position[None, :]
     match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
 
     return match
