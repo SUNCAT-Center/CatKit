@@ -118,7 +118,7 @@ slab.edit()
 *** Slab graph and surface atoms:
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
 
-#+CAPTION: Slab of hcp Pd with (110) miller index. Top surface atoms have been changed to Au. 
+#+CAPTION: Slab of Pd with fcc(111) miller index. Top surface atoms have been changed to Au. 
 [[../Pd-surface-atoms.png]]
 
 #+BEGIN_SRC python :results output org drawer :exports code
@@ -1079,7 +1079,6 @@ epsilon = np.array([
     [ 1, 0, 2],  # CO2
     [ 0, 2, 0],  # H2
 ])
-
 
 # Indices of the species considered terminal
 terminal = [8, 9, 10, 11]
