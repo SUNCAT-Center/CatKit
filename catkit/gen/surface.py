@@ -534,7 +534,8 @@ def get_unique_indices(bulk, max_index):
     def analyzed(affine_point):
         for aff in operations:
             operation = np.dot(aff, affine_point)[:3]
-            if len(geometry.matching_sites(operation, unique_millers)) > 0:
+            if len(geometry.matching_coordinates(
+                    operation, unique_millers)) > 0:
                 return True
 
     for miller in unique_index:
