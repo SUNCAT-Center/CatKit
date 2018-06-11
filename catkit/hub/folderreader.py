@@ -268,7 +268,7 @@ class FolderReader:
 
     def read_bulk(self, root, files):
 
-        self.metal, self.crystal = root.split('/')[-1].split('_')
+        self.metal, self.crystal = root.split('/')[-1].split('_', 1)
 
         self.stdout.write('------------------------------------------------------\n')
         self.stdout.write('                    Surface:  {}\n'.format(self.metal))
