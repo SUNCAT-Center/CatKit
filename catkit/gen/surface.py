@@ -66,6 +66,8 @@ class SlabGenerator(object):
             exact number of unique z-coordinates. Useful for precision control.
             'stoich' : Constraints any slab generated to have the same
             stoichiometric ratio as the provided bulk.
+            'sym' : Return a slab which is inversion symmetric. i.e. The
+            same on both sides.
         attach_graph : bool
             Attach the connectivity graph generated from the bulk structure.
             This is only necessary for fingerprinting and setting it to False
@@ -186,6 +188,7 @@ class SlabGenerator(object):
         for i in range(1, 3):
             if new_bulk.cell[i][i] < 0:
                 new_bulk.cell[i] *= -1
+        new_bulk.wrap()
 
         return new_bulk
 
@@ -271,7 +274,7 @@ class SlabGenerator(object):
 
         bulk_layers = utils.get_unique_coordinates(_basis, tol=self.tol)
 
-        if self.layer_type == 'angs':
+        if self.layer_type != 'trim':
             height = np.abs(self._bulk.cell[2][2])
             minimum_repetitions = np.ceil(self.layers / height)
         else:
@@ -335,6 +338,9 @@ class SlabGenerator(object):
         """
         slab = self.get_slab_basis(iterm).copy()
 
+        if self.vacuum:
+            slab.center(vacuum=self.vacuum, axis=2)
+
         # Trim the bottom of the cell, bulk symmetry will be lost
         if self.layer_type == 'trim':
             zlayers = utils.get_unique_coordinates(slab, tol=self.tol)
@@ -347,6 +353,8 @@ class SlabGenerator(object):
 
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
+        if self.layer_type == 'sym':
+            slab = self.make_symmetric(slab)
 
         slab = self.set_size(slab, size)
 
@@ -374,9 +382,6 @@ class SlabGenerator(object):
             tags = slab.get_tags()
             constraints = FixAtoms(mask=tags > (tags.max() - self.fixed))
             slab.set_constraint(constraints)
-
-        if self.vacuum:
-            slab.center(vacuum=self.vacuum, axis=2)
 
         self.slab = slab
 
@@ -488,55 +493,59 @@ class SlabGenerator(object):
             bottom_layer = np.max(tags)
             del slab[tags == bottom_layer]
 
-            if len(slab) <= len(self.bulk):
+            inversion_symmetric = utils.get_point_group(slab)[1]
+
+            if len(slab) <= len(self._bulk):
                 warnings.warn('Too many sites removed, please use a larger '
                               'slab size.')
+                break
 
         return slab
 
-    def get_unique_indices(self, max_index):
-        """Returns an array of miller indices which are likely to produce
-        unique surface terminations based on a provided bulk structure.
 
-        Parameters
-        ----------
-        max_index : int
-            Maximum number that will be considered for a given surface.
+def get_unique_indices(bulk, max_index):
+    """Returns an array of miller indices which are likely to produce
+    unique surface terminations based on a provided bulk structure.
 
-        Returns
-        -------
-        unique_millers : ndarray (n, 3)
-            Symmetrically distinct miller indices for a given bulk.
-        """
-        unique_index = generate_indices(2)
+    Parameters
+    ----------
+    max_index : int
+        Maximum number that will be considered for a given surface.
 
-        rotations, translations = utils.get_symmetry(self._bulk)
-        rotations = np.swapaxes(rotations, 1, 2)
+    Returns
+    -------
+    unique_millers : ndarray (n, 3)
+        Symmetrically distinct miller indices for a given bulk.
+    """
+    unique_index = generate_indices(max_index)
 
-        operations = []
-        for i, rot in enumerate(rotations):
-            A = np.eye(4)
-            A[:3, :3] = rot
-            A[-1, :3] = translations[i]
-            operations += [A]
+    rotations, translations = utils.get_symmetry(bulk)
+    rotations = np.swapaxes(rotations, 1, 2)
 
-        unique_millers = []
+    operations = []
+    for i, rot in enumerate(rotations):
+        A = np.eye(4)
+        A[:3, :3] = rot
+        A[-1, :3] = translations[i]
+        operations += [A]
 
-        def analyzed(affine_point):
-            for aff in operations:
-                operation = np.dot(aff, affine_point)[:3]
-                if len(geometry.matching_sites(operation, unique_millers)) > 0:
-                    return True
+    unique_millers = []
 
-        for miller in unique_index:
-            affine_point = np.insert(miller, 3, 1)
+    def analyzed(affine_point):
+        for aff in operations:
+            operation = np.dot(aff, affine_point)[:3]
+            if len(geometry.matching_sites(operation, unique_millers)) > 0:
+                return True
 
-            if not analyzed(affine_point):
-                unique_millers += [miller]
+    for miller in unique_index:
+        affine_point = np.insert(miller, 3, 1)
 
-        unique_millers = np.array(unique_millers)
+        if not analyzed(affine_point):
+            unique_millers += [miller]
 
-        return unique_millers
+    unique_millers = np.array(unique_millers)
+
+    return unique_millers
 
 
 def transform_ab(slab, matrix, tol=1e-5):

@@ -293,6 +293,7 @@ def get_symmetry(atoms, tol=1e-8):
     cell = (lattice, positions, numbers)
 
     symmetry = spglib.get_symmetry(cell, symprec=tol)
+
     rotations, translations = symmetry['rotations'], symmetry['translations']
 
     return rotations, translations
@@ -301,7 +302,6 @@ def get_symmetry(atoms, tol=1e-8):
 def get_point_group(atoms, tol=1e-8):
     """Return the point group operations of a systems."""
     rotations, translations = get_symmetry(atoms, tol=tol)
-
     point_group = spglib.get_pointgroup(rotations)[0].strip()
 
     laue = ['-1', '2/m', 'mmm', '4/m', '4/mmm',
