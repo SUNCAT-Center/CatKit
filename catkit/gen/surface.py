@@ -58,7 +58,7 @@ class SlabGenerator(object):
             Angstroms of vacuum to apply to the slab.
         fixed : int
             Number of slab layers to constrain.
-        layer_type : str ('trim', 'stoich', 'planes')
+        layer_type : 'angs', 'trim', 'stoich', or 'sym'
             Determines how to perform slab layering.
 
             'angs': Layers denotes the thickness of the slab in Angstroms.

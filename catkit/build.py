@@ -32,7 +32,7 @@ def surface(
         The miller index to cleave the surface structure from. If 4 values
         are used, assume Miller-Bravis convention.
     termination : int
-        The index assocated with a specific slab termination.
+        The index associated with a specific slab termination.
     fixed : int
         Number of layers to constrain.
     vacuum : float
@@ -40,7 +40,7 @@ def surface(
 
     Returns
     -------
-    slab : object
+    slab : Gratoms object
         Return a slab generated from the specified bulk structure.
     """
     if isinstance(elements, Atoms):
