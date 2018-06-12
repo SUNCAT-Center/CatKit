@@ -324,7 +324,7 @@ class SlabGenerator(object):
 
         Parameters
         ----------
-        size : int, list-like (2,) or (2, 2)
+        size : int, array_like (2,) or (2, 2)
             Size of the unit cell to create as described in :meth:`set_size`.
         iterm : int
             A termination index in reference to the list of possible
@@ -332,7 +332,7 @@ class SlabGenerator(object):
 
         Returns
         -------
-        slab : Atoms object
+        slab : Gratoms object
             The modified basis slab produced based on the layer specifications
             given.
         """
@@ -413,13 +413,13 @@ class SlabGenerator(object):
 
         1. An integer value performs a search of valid matrix operations
         to perform on the ab-basis vectors to return a set which with
-        a minimal sum of distances and an angle closes to 90 degrees.
+        a minimal sum of distances and an angle closest to 90 degrees.
 
-        2. A list-like of length 2 will multiply the existing basis
+        2. An array_like of length 2 will multiply the existing basis
         vectors by that amount.
 
-        3. A list of two list-likes of length 2 will be interpreted
-        as matrix notation to multiply the ab-basis vectors by.
+        3. An array of shape (2, 2) will be interpreted as matrix
+        notation to multiply the ab-basis vectors by.
 
         Parameters
         ----------

@@ -172,7 +172,7 @@ def attach_results(f, atoms, write_file=True):
     energy = float(line.split()[-2]) * Ry
 
     # Correct for non-zero temperature smearing
-    for i in range(20):
+    for i in range(80):
 
         line = f.readline()
         if '     smearing contrib.' in line:
