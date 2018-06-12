@@ -8,6 +8,8 @@ def matching_sites(position, comparators, tol=1e-8):
     equal to a given position (with a tolerance), taking into
     account periodic boundary conditions (adaptation from Pymatgen).
 
+    This will only accept a fractional coordinate scheme.
+
     Parameters
     ----------
     position : list (3,)
@@ -31,6 +33,36 @@ def matching_sites(position, comparators, tol=1e-8):
 
     return match
 
+
+def matching_coordinates(position, comparators, tol=1e-8):
+    """Get the indices of all points in a comparator list that are
+    equal to a given position (with a tolerance), taking into
+    account periodic boundary conditions (adaptation from Pymatgen).
+
+    This will only accept a Cartesian coordinate scheme.
+    TODO: merge this with matching_sites.
+
+    Parameters
+    ----------
+    position : list (3,)
+        Fractional coordinate to compare to list.
+    comparators : list (3, n)
+        Fractional coordinates to compare against.
+    tol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    match : list (n,)
+        Indices of matches.
+    """
+    if len(comparators) == 0:
+        return []
+
+    fdist = comparators - position[None, :]
+    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+
+    return match
 
 def _get_basis_vectors(coordinates):
     if len(coordinates) == 3:

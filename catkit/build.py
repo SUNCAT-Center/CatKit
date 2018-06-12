@@ -32,7 +32,7 @@ def surface(
         The miller index to cleave the surface structure from. If 4 values
         are used, assume Miller-Bravis convention.
     termination : int
-        The index assocated with a specific slab termination.
+        The index associated with a specific slab termination.
     fixed : int
         Number of layers to constrain.
     vacuum : float
@@ -40,7 +40,7 @@ def surface(
 
     Returns
     -------
-    slab : object
+    slab : Gratoms object
         Return a slab generated from the specified bulk structure.
     """
     if isinstance(elements, Atoms):
@@ -49,11 +49,16 @@ def surface(
         atoms = bulk(elements, crystal, cubic=True, **kwargs)
 
     gen = SlabGenerator(
-        atoms,
+        bulk=atoms,
         miller_index=miller,
         layers=size[-1],
+        vacuum=vacuum,
         fixed=fixed,
-        vacuum=vacuum)
+        layer_type=kwargs.get('layer_type', 'trim'),
+        attach_graph=kwargs.get('attach_graph', True),
+        standardize_bulk=kwargs.get('standardize_bulk', True),
+        tol=kwargs.get('tol', 1e-8)
+    )
 
     if len(size) == 2:
         size = size[0]
