@@ -7,7 +7,7 @@ import json
 
 
 def array_to_list(data):
-    """ A function to covert all arrays in a structure of
+    """A function to covert all arrays in a structure of
     embeded dictionaries and lists into lists themselves.
     """
     if isinstance(data, list):
@@ -32,8 +32,7 @@ def array_to_list(data):
 
 
 def encode_to_atoms(encode, out_file='input.traj'):
-    """ Dump the encoding to a local traj file."""
-
+    """Dump the encoding to a local traj file."""
     # First, decode the trajectory
     data = json.loads(encode, encoding='utf-8')
 
@@ -45,8 +44,9 @@ def encode_to_atoms(encode, out_file='input.traj'):
         pbc=data['pbc'])
     atoms.info = data['calculator_parameters']
     atoms.set_constraint([dict2constraint(_) for _ in data['constraints']])
-    if data.get('initial_magmoms') is not None:
-        atoms.set_initial_magnetic_moments(data['initial_magmoms'])
+    initial_magmoms = data.get('initial_magmoms')
+    if initial_magmoms is not None:
+        atoms.set_initial_magnetic_moments(initial_magmoms)
 
     # Attach the calculator
     calc = SPC(
@@ -117,7 +117,7 @@ def atoms_to_encode(images):
             cell = atoms.get_cell()
             update_cell = cell
 
-            # Add the parameters which do not change across the trajectory
+            # Add the parameters which do not change
             data['numbers'] = images[0].get_atomic_numbers().tolist()
             data['pbc'] = images[0].get_pbc().tolist()
             data['constraints'] = constraints
