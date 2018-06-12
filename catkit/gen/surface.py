@@ -304,7 +304,6 @@ class SlabGenerator(object):
         zcoords = scaled_zpositions - np.mean(scaled_zpositions)
         top = indices[zcoords[indices] >= 0]
         bottom = indices[zcoords[indices] < 0]
-
         ibasis.set_surface_atoms(top=top, bottom=bottom)
 
         utils.get_unique_coordinates(
@@ -338,9 +337,6 @@ class SlabGenerator(object):
         """
         slab = self.get_slab_basis(iterm).copy()
 
-        if self.vacuum:
-            slab.center(vacuum=self.vacuum, axis=2)
-
         # Trim the bottom of the cell, bulk symmetry will be lost
         if self.layer_type == 'trim':
             zlayers = utils.get_unique_coordinates(slab, tol=self.tol)
@@ -353,8 +349,6 @@ class SlabGenerator(object):
 
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
-        if self.layer_type == 'sym':
-            slab = self.make_symmetric(slab)
 
         slab = self.set_size(slab, size)
 
@@ -368,6 +362,12 @@ class SlabGenerator(object):
         translation[2] = 0
         slab.translate(-translation)
         slab.wrap()
+
+        if self.vacuum:
+            slab.center(vacuum=self.vacuum, axis=2)
+
+        if self.layer_type == 'sym':
+            slab = self.make_symmetric(slab)
 
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
