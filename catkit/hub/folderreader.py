@@ -61,6 +61,17 @@ class FolderReader:
         self.stdin = stdin
         self.stdout = stdout
 
+        self.cathub_db = None
+        self.coverages = None
+        self.omit_folders = []
+        self.doi = None
+        self.title = None
+        self.authors = None
+        self.year = None
+        self.tags = None
+        self.pub_id = None
+
+
     def read(self, skip=[], goto_metal=None, goto_reaction=None):
         """
         Get reactions from folders.
@@ -74,8 +85,6 @@ class FolderReader:
         goto_reaction:
             Skip ahead to this reacion
         """
-        self.omit_folders = []
-        self.coverages = None
         if len(skip) > 0:
             for skip_f in skip:
                 self.omit_folders.append(skip_f)
@@ -173,13 +182,11 @@ class FolderReader:
             if 'doi' not in pub_data:
                 pub_data.update({'doi': None})
                 self.stdout.write('ERROR: No doi\n')
-                self.doi = None
             else:
                 self.doi = pub_data['doi']
             if 'tags' not in pub_data:
                 pub_data.update({'tags': None})
                 self.stdout.write('ERROR: No tags\n')
-                self.tags = None
 
             for key, value in pub_data.items():
                 if isinstance(value, list):
@@ -194,7 +201,6 @@ class FolderReader:
             self.stdout.write(
                 'ERROR: insufficient publication info {e}\n'.format(
                     **locals()))
-            self.doi = None
             pub_data = {'title': None,
                         'authors': None,
                         'journal': None,
@@ -230,7 +236,7 @@ class FolderReader:
         self.cathub_db = '{}{}.db'.format(self.data_base, self.pub_id)
 
         pub_data.update({'pub_id': self.pub_id})
-        self.pid = self.write_publication(pub_data)
+        pid = self.write_publication(pub_data)
 
     def read_gas(self, root):
         gas_structures = collect_structures(root)
