@@ -5,7 +5,6 @@ from catkit.hub.folderreader import FolderReader
 
 def main(folder_name, debug=False, skip=[], goto_reaction=None):
     folder_name = folder_name.rstrip('/')
-    folder_name = os.path.basename(folder_name)
     FR = FolderReader(folder_name=folder_name, debug=debug)
     FR.write(skip=skip, goto_reaction=goto_reaction)
 

@@ -89,6 +89,10 @@ class FolderReader:
             for skip_f in skip:
                 self.omit_folders.append(skip_f)
 
+        """ If publication level is input"""
+        if os.path.isfile(self.data_base + '/publication.txt'):
+            self.user_base_level -= 1
+
         found_reaction = False
         for root, dirs, files in os.walk(self.user_base):
             for omit_folder in self.omit_folders:  # user specified omit_folder
@@ -100,18 +104,18 @@ class FolderReader:
                 self.read_pub(root)
 
             if level == self.DFT_level:
-                self.DFT_code = read_name_from_folder(root)
+                self.DFT_code = os.path.basename(root)
 
             if level == self.XC_level:
-                self.DFT_functional = read_name_from_folder(root)
+                self.DFT_functional = os.path.basename(root)
                 self.read_gas(root + '/gas/')
 
             if level == self.reference_level:
-                if 'gas' in root.split("/")[-1]:
+                if 'gas' in os.path.basename(root):
                     continue
 
                 if goto_metal is not None:
-                    if root.split("/")[-1] == goto_metal:
+                    if os.path.basename(root) == goto_metal:
                         goto_metal = None
                     else:
                         dirs[:] = []  # don't read any sub_dirs
@@ -123,7 +127,7 @@ class FolderReader:
 
             if level == self.reaction_level:
                 if goto_reaction is not None:
-                    if root.split("/")[-1] == goto_reaction:
+                    if os.path.basename(root) == goto_reaction:
                         goto_reaction = None
                     else:
                         dirs[:] = []  # don't read any sub_dirs
@@ -153,6 +157,9 @@ class FolderReader:
                 else:
                     self.stdout.write(
                         'Already in reaction db with row id = {}\n'.format(id))
+        assert self.cathub_db is not None, \
+            'Wrong folder! No reactions found in {base}'\
+            .format(base=self.user_base)
         self.get_summary()
 
     def get_summary(self):
@@ -169,7 +176,7 @@ class FolderReader:
         return pid
 
     def read_pub(self, root):
-        pub_folder = root.split('/')[-1]
+        pub_folder = os.path.basename(root)
         publication_keys = {}
         try:
             with open(root + '/publication.txt', 'r') as f:
@@ -220,7 +227,7 @@ class FolderReader:
             self.energy_corrections = {}
 
         if pub_data['title'] is None:
-            self.title = root.split('/')[-1]
+            self.title = os.path.basename(root)
             pub_data.update({'title': self.title})
         if pub_data['authors'] is None:
             self.authors = [self.user]
@@ -272,8 +279,11 @@ class FolderReader:
             self.gas.update({chemical_composition: gas})
 
     def read_bulk(self, root):
-
-        self.metal, self.crystal = root.split('/')[-1].split('_', 1)
+        basename = os.path.basename(root)
+        assert '_' in basename, \
+            """Wrong folderstructure! Folder should be of format
+            <metal>_<crystalstructure>"""
+        self.metal, self.crystal = basename.split('_', 1)
 
         self.stdout.write(
             '------------------------------------------------------\n')
@@ -351,7 +361,7 @@ class FolderReader:
         self.ase_ids.update({'star': ase_id})
 
     def read_reaction(self, root):
-        folder_name = root.split('/')[-1]
+        folder_name = os.path.basename(root)
 
         self.reaction, self.sites = ase_tools.get_reaction_from_folder(
             folder_name)  # reaction dict
@@ -609,8 +619,3 @@ class FolderReader:
             'ase_ids': self.ase_ids,
             'energy_corrections': self.energy_corrections,
             'username': self.user}
-
-
-def read_name_from_folder(root):
-    folder_name = root.split('/')[-1]
-    return folder_name
