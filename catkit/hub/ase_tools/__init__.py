@@ -1,116 +1,119 @@
 from ase import Atoms
 from ase.io import read
+# from ase.io.trajectory import convert
 import numpy as np
 import ase
 import copy
 
+# A lot of functions from os.path
+# in python 2 moved to os. and changed
+# their signature. Pathlib can be
+# installed under python2.X with
+# pip install pathlib2 and is in
+# standard library in Python 3,
+# hence we use it as a compatiblity
+# library
+try:
+    from pathlib import Path
+    Path().expanduser()
+except (ImportError, AttributeError):
+    from pathlib2 import Path
 
-def read_ase(filename):
-    import six
-    if isinstance(filename, six.string_types):
-        atoms = read(filename)
-    else:
-        atoms = filename
-    return atoms
 
-
-def check_traj(filename, strict=True, verbose=True):
-    from ase.io.trajectory import convert
-    import math
+def get_chemical_formula(atoms, mode='metal'):
+    """
+    Compatibility function, return mode=metal, when
+    available, mode=hill, when not (ASE <= 3.13)
+    """
     try:
-        atoms = read_ase(filename)
+        return atoms.get_chemical_formula(mode=mode)
+    except ValueError:
+        return atoms.get_chemical_formula(mode='hill')
+
+
+def symbols(atoms):
+    formula = get_chemical_formula(atoms)
+    symbols = ase.atoms.string2symbols(formula)
+    return ''.join(symbols)
+
+
+def collect_structures(foldername, verbose=False, level='*'):
+    structures = []
+    if verbose:
+        print(foldername)
+    for i, filename in enumerate(Path(foldername).glob(level)):
+        posix_filename = str(filename.as_posix())
         if verbose:
-            print('traj file read!')
-    except BaseException:
-        try:
-            convert(filename)
-            if verbose:
-                print('Converting to new ase format!')
-            atoms = read_ase(filename)
-        except BaseException:
-            print('Could not read traj file: {}'.format(filename))
-            return False
-
-    try:
-        atoms.get_potential_energy()
-        assert not math.isnan(atoms.get_potential_energy()), 'Energy is NaN!'
-    except BaseException:
-        if strict:
-            raise RuntimeError('No energy for .traj file: {}'.format(filename))
-        else:
-            print('No energy for .traj file: {}'.format(filename))
-            return False
-    return True
-
-
-def get_reference(filename):
-    atoms = read_ase(filename)
-    energy = atoms.get_potential_energy()
-    name = atoms.get_chemical_formula()
-    return {name: str(energy)}
-
-
-def get_pbc(filename):
-    atoms = read_ase(filename)
-    return atoms.get_pbc()
-
-
-def get_traj_str(filename):
-    from ase.db.row import AtomsRow
-    from ase.io.jsonio import encode
-    atoms = read_ase(filename)
-    row = AtomsRow(atoms)
-    dct = {}
-    for key in row.__dict__:
-        if key[0] == '_' or key in row._keys or key == 'id':
-            continue
-        dct[key] = row[key]
-    constraints = row.get('constraints')
-    if constraints:
-        dct['constraints'] = constraints
-
-    txt = ','.join('"{0}": {1}'.format(key, encode(dct[key]))
-                   for key in sorted(dct.keys()))
-
-    atoms_txt = '{{{0}}}'.format(txt)
-    return atoms_txt
-
-
-def get_chemical_formula(filename, mode='metal'):
-    atoms = read_ase(filename)
-    return atoms.get_chemical_formula(mode=mode)
+            print(i, posix_filename)
+        if posix_filename.endswith('publication.txt'):
+            with open(posix_filename) as infile:
+                global PUBLICATION_TEMPLATE
+                PUBLICATION_TEMPLATE = infile.read()
+        elif Path(posix_filename).is_file():
+            try:
+                filetype = ase.io.formats.filetype(posix_filename)
+            except Exception as e:
+                continue
+            if filetype:
+                try:
+                    structure = ase.io.read(posix_filename)
+                    structure.info['filename'] = posix_filename
+                    structure.info['filetype'] = ase.io.formats.filetype(
+                        posix_filename)
+                    try:
+                        structure.get_potential_energy()
+                        # ensure that the structure has an energy
+                        structures.append(structure)
+                    except RuntimeError:
+                        print("Did not add {posix_filename} since it has no energy"
+                              .format(
+                                  posix_filename=posix_filename,
+                              ))
+                except StopIteration:
+                    print("Warning: StopIteration {posix_filename} hit."
+                          .format(
+                              posix_filename=posix_filename,
+                          ))
+                except IndexError:
+                    print("Warning: File {posix_filename} looks incomplete"
+                          .format(
+                              posix_filename=posix_filename,
+                          ))
+                except OSError as e:
+                    print("Error with {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                    ))
+                except AssertionError as e:
+                    print("Hit an assertion error with {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                    ))
+                except ValueError as e:
+                    print("Trouble reading {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                    ))
+                except DeprecationWarning as e:
+                    print("Trouble reading {posix_filename}: {e}".format(
+                        posix_filename=posix_filename,
+                        e=e,
+                    ))
+    return structures
 
 
-def get_number_of_atoms(filename):
-    atoms = read_ase(filename)
-    return atoms.get_number_of_atoms()
-
-
-def get_energy_diff(filename, filename_ref):
-    atoms = read_ase(filename)
-    reference = read_ase(filename_ref)
-    return atoms.get_potential_energy() - reference.get_potential_energy()
-
-
-def get_energies(filenames):
-    if len(filenames) == 1:
-        atoms = read_ase(filenames[0])
-        return atoms.get_potential_energy()
-    elif len(filenames) > 1:
+def get_energies(atoms_list):
+    """ Potential energy for a list of atoms objects"""
+    if len(atoms_list) == 1:
+        return atoms_list[0].get_potential_energy()
+    elif len(atoms_list) > 1:
         energies = []
-        for filename in filenames:
-            atoms = read_ase(filename)
+        for atoms in atoms_list:
             energies.append(atoms.get_potential_energy())
         return energies
 
 
-def get_energy(filename):
-    atoms = read_ase(filename)
-    return atoms.get_potential_energy()
-
-
-def get_atomic_numbers(filename):
-    atoms = read_ase(filename)
+def get_atomic_numbers(atoms):
     return list(atoms.get_atomic_numbers())
 
 
@@ -185,22 +188,23 @@ def get_state(name):
     return state
 
 
-def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
+def get_reaction_energy(structures, reaction, reaction_atoms, states,
                         prefactors, prefactors_TS, energy_corrections):
     energies = {}
-    for key in traj_files.keys():
-        energies.update({key: ['' for n in range(len(traj_files[key]))]})
-    for key, trajlist in traj_files.items():
-        for i, traj in enumerate(trajlist):
+    for key in structures.keys():
+        energies.update({key: ['' for n in range(len(structures[key]))]})
+    for key, atoms_list in structures.items():
+        for i, atoms in enumerate(atoms_list):
             try:
-                trajname = clear_prefactor(reaction[key][i])
+                name = clear_prefactor(reaction[key][i])
             except BaseException:
-                trajname = None
-            if trajname in energy_corrections.keys():
-                Ecor = energy_corrections[trajname]
+                name = None
+            if name in energy_corrections.keys():
+                Ecor = energy_corrections[name]
             else:
                 Ecor = 0
-            energies[key][i] = prefactors[key][i] * (get_energy(traj) + Ecor)
+            energies[key][i] = prefactors[key][i] * \
+                (atoms.get_potential_energy() + Ecor)
 
     # Reaction energy:
     energy_reactants = np.sum(energies['reactants'])
@@ -209,28 +213,29 @@ def get_reaction_energy(traj_files, reaction, reaction_atoms, states,
     reaction_energy = energy_products - energy_reactants
 
     # Activation energy
-    if 'TS' in traj_files.keys():
+    if 'TS' in structures.keys():
         # Is a different empty surface used for the TS?
-        if 'TSempty' in traj_files.keys():
+        if 'TSempty' in structure.keys():
             for key in reaction_atoms.keys():
                 if '' in reaction_atoms[key]:
                     index = reaction_atoms[key].index('')
-                    traj_empty = traj_files[key][index]
-            traj_tsempty = traj_files['TSempty'][0]
-            tsemptydiff = get_energy(traj_tsempty) - get_energy(traj_empty)
+                    empty = structures[key][index]
+            tsempty = structures['TSempty'][0]
+            tsemptydiff = tsempty.get_potential_energy - \
+                empty.get_potential_energy()
 
-        for i, traj in enumerate(traj_files['reactants']):
+        for i, structure in enumerate(structures['reactants']):
             try:
-                trajname = clear_prefactor(reaction['reactants'][i])
+                name = clear_prefactor(reaction['reactants'][i])
             except BaseException:
-                trajname = None
-            if trajname in energy_corrections.keys():
-                Ecor = energy_corrections[trajname]
+                name = None
+            if name in energy_corrections.keys():
+                Ecor = energy_corrections[name]
             else:
                 Ecor = 0
             energies['reactants'][i] = prefactors_TS['reactants'][i]\
-                * (get_energy(traj) + Ecor)
-            if 'TSempty' in traj_files.keys() and \
+                * structure.get_potential_energy() + Ecor
+            if 'TSempty' in structures.keys() and \
                     states['reactants'][i] == 'star':
                 energies['reactants'][i] += prefactors_TS['reactants'][i]\
                     * tsemptydiff
@@ -272,23 +277,6 @@ def tag_atoms(atoms, types=None):
 
 
 def get_layers(atoms):
-    # WARNING: this function is defined twice
-    # with different parameter choices
-    tolerance = 0.2
-    d = atoms.positions[:, 2]
-    keys = np.argsort(d)
-    ikeys = np.argsort(keys)
-    mask = np.concatenate(([True], np.diff(d[keys]) > tolerance))
-    layer_i = np.cumsum(mask)[ikeys]
-
-    if layer_i.min() == 1:
-        layer_i -= 1
-    return layer_i
-
-
-def get_layers(atoms):
-    # WARNING: this function is defined twice
-    # with different parameter choices
     tolerance = 0.01
     d = atoms.positions[:, 2]
     keys = np.argsort(d)
@@ -301,10 +289,7 @@ def get_layers(atoms):
     return layer_i
 
 
-def get_surface_composition(filename):
-    filename = "{]".format(filename)
-    atoms = read_ase(filename)
-
+def get_surface_composition(atoms):
     if len(np.unique(atoms.get_atomic_numbers())) == 1:
         return atoms.get_chemical_symbols()[0]
 
@@ -319,16 +304,13 @@ def get_surface_composition(filename):
     return surface_composition
 
 
-def get_n_layers(filename):
-    atoms = read_ase(filename)
+def get_n_layers(atoms):
     layer_i = get_layers(atoms)
     n = np.max(layer_i)
     return n
 
 
-def get_bulk_composition(filename):
-    atoms = read_ase(filename)
-
+def get_bulk_composition(atoms):
     if len(np.unique(atoms.get_atomic_numbers())) == 1:
         return atoms.get_chemical_symbols()[0]
 
@@ -357,14 +339,13 @@ def get_bulk_composition(filename):
     return bulk_composition
 
 
-def check_in_ase(filename, ase_db, energy=None):
+def check_in_ase(atoms, ase_db, energy=None):
     """Check if entry is allready in ASE db"""
 
     db_ase = ase.db.connect(ase_db)
-    atoms = read_ase(filename)
     if energy is None:
         energy = atoms.get_potential_energy()
-    formula = atoms.get_chemical_formula(mode='metal')
+    formula = get_chemical_formula(atoms)
     rows = db_ase.select(energy=energy)
     n = 0
     ids = []
@@ -386,9 +367,8 @@ def _normalize_key_value_pairs_inplace(data):
             data[key] = int(data[key])
 
 
-def write_ase(filename, db_file, user=None, data=None, **key_value_pairs):
+def write_ase(atoms, db_file, user=None, data=None, **key_value_pairs):
     """Connect to ASE db"""
-    atoms = read_ase(filename)
     atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
     _normalize_key_value_pairs_inplace(key_value_pairs)
