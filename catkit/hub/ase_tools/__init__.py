@@ -4,6 +4,7 @@ from ase.io import read
 import numpy as np
 import ase
 import copy
+from catkit.hub.tools import get_atoms, get_state, clear_prefactor
 
 # A lot of functions from os.path
 # in python 2 moved to os. and changed
@@ -126,66 +127,6 @@ def get_numbers_from_formula(formula):
     atoms = Atoms(formula)
     return get_atomic_numbers(atoms)
 
-
-def clear_state(name):
-    name = name.replace('*', '').replace('(g)', '')
-    name = name.replace('star', '').replace('gas', '')
-    return name
-
-
-def clear_prefactor(molecule):
-    if molecule == '':
-        return molecule
-    if not molecule[0].isalpha():
-        i = 0
-        while not molecule[i].isalpha():
-            i += 1
-        molecule = molecule[i:]
-    return molecule
-
-
-def get_atoms(molecule):
-    molecule = clear_state(molecule)
-    if molecule == '':
-        prefactor = 1
-        return molecule, prefactor
-    try:
-        return '', float(molecule)
-    except BaseException:
-        pass
-    if not molecule[0].isalpha():
-        i = 0
-        while not molecule[i].isalpha():
-            i += 1
-        prefactor = molecule[:i]
-        if prefactor == '-':
-            prefactor = -1
-        prefactor = float(prefactor)
-        molecule = molecule[i:]
-    else:
-        prefactor = 1
-
-    temp = ''
-    for k in range(len(molecule)):
-        if molecule[k].isdigit():
-            for j in range(int(molecule[k]) - 1):
-                temp += molecule[k - 1]
-        else:
-            temp += molecule[k]
-
-    molecule = ''.join(sorted(temp))
-
-    return molecule, prefactor
-
-
-def get_state(name):
-    if '*' in name or 'star' in name:
-        state = 'star'
-    elif 'gas' in name:
-        state = 'gas'
-    else:
-        state = 'star'
-    return state
 
 
 def get_reaction_energy(structures, reaction, reaction_atoms, states,
@@ -367,25 +308,25 @@ def _normalize_key_value_pairs_inplace(data):
             data[key] = int(data[key])
 
 
-def write_ase(atoms, db_file, user=None, data=None, **key_value_pairs):
+def write_ase(atoms, db_file, stdout, user=None, data=None, **key_value_pairs):
     """Connect to ASE db"""
     atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
     _normalize_key_value_pairs_inplace(key_value_pairs)
     id = db_ase.write(atoms, data=data, **key_value_pairs)
-    print('writing atoms to ASE db row id = {}'.format(id))
+    stdout.write('  writing atoms to ASE db row id = {}\n'.format(id))
     unique_id = db_ase.get(id)['unique_id']
     return unique_id
 
 
-def update_ase(db_file, identity, **key_value_pairs):
+def update_ase(db_file, identity, stdout, **key_value_pairs):
     """Connect to ASE db"""
     db_ase = ase.db.connect(db_file)
 
     _normalize_key_value_pairs_inplace(key_value_pairs)
     count = db_ase.update(identity, **key_value_pairs)
-    print('Updating {0} key value pairs in ASE db row id = {1}'
-          .format(count, identity))
+    stdout.write('  Updating {0} key value pairs in ASE db row id = {1}\n'
+                 .format(count, identity))
     return
 
 

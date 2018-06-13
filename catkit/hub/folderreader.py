@@ -1,5 +1,5 @@
 from .cathubsqlite import CathubSQLite
-from .tools import get_bases
+from .tools import get_bases, clear_prefactor, clear_state
 from .ase_tools import collect_structures
 from . import ase_tools
 
@@ -92,7 +92,10 @@ class FolderReader:
         """ If publication level is input"""
         if os.path.isfile(self.data_base + '/publication.txt'):
             self.user_base_level -= 1
-
+            
+        self.stdout.write('---------------------- \n')
+        self.stdout.write('Starting folderreader! \n')
+        self.stdout.write('---------------------- \n')
         found_reaction = False
         for root, dirs, files in os.walk(self.user_base):
             for omit_folder in self.omit_folders:  # user specified omit_folder
@@ -108,7 +111,8 @@ class FolderReader:
 
             if level == self.XC_level:
                 self.DFT_functional = os.path.basename(root)
-                self.read_gas(root + '/gas/')
+                self.gas_folder = root + '/gas/'
+                self.read_gas()
 
             if level == self.reference_level:
                 if 'gas' in os.path.basename(root):
@@ -149,14 +153,14 @@ class FolderReader:
                 if id is None:
                     id = db.write(key_values)
                     self.stdout.write(
-                        'Written to reaction db row id = {}\n'.format(id))
+                        '  Written to reaction db row id = {}\n'.format(id))
                 elif self.update:
                     db.update(id, key_values)
                     self.stdout.write(
-                        'Updated reaction db row id = {}\n'.format(id))
+                        '  Updated reaction db row id = {}\n'.format(id))
                 else:
                     self.stdout.write(
-                        'Already in reaction db with row id = {}\n'.format(id))
+                        '  Already in reaction db with row id = {}\n'.format(id))
         assert self.cathub_db is not None, \
             'Wrong folder! No reactions found in {base}'\
             .format(base=self.user_base)
@@ -241,12 +245,12 @@ class FolderReader:
             str(self.year)
 
         self.cathub_db = '{}{}.db'.format(self.data_base, self.pub_id)
-
+        self.stdout.write('Writing to .db file {}:\n \n'.format(self.cathub_db))
         pub_data.update({'pub_id': self.pub_id})
         pid = self.write_publication(pub_data)
 
-    def read_gas(self, root):
-        gas_structures = collect_structures(root)
+    def read_gas(self):
+        gas_structures = collect_structures(self.gas_folder)
         self.ase_ids_gas = {}
         self.gas = {}
 
@@ -269,11 +273,12 @@ class FolderReader:
 
             if ase_id is None:
                 ase_id = ase_tools.write_ase(gas, self.cathub_db,
+                                             self.stdout,
                                              self.user,
                                              **key_value_pairs)
             elif self.update:
-                ase_tools.update_ase(self.cathub_db,
-                                     id, **key_value_pairs)
+                ase_tools.update_ase(self.cathub_db, id,
+                                     self.stdout, **key_value_pairs)
 
             self.ase_ids_gas.update({chemical_composition: ase_id})
             self.gas.update({chemical_composition: gas})
@@ -299,7 +304,7 @@ class FolderReader:
         if n_bulk == 0:
             return
         elif n_bulk > 1:
-            print('Warning: more than one bulk structure submitted at {root}'
+            self.stdout.write('Warning: more than one bulk structure submitted at {root}'
                   .format(root=root))
             return
 
@@ -314,10 +319,10 @@ class FolderReader:
         id, ase_id = ase_tools.check_in_ase(
             bulk, self.cathub_db)
         if ase_id is None:
-            ase_id = ase_tools.write_ase(bulk, self.cathub_db,
+            ase_id = ase_tools.write_ase(bulk, self.cathub_db, self.stdout,
                                          self.user, **key_value_pairs)
         elif self.update:
-            ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
+            ase_tools.update_ase(self.cathub_db, id, self.stdout, **key_value_pairs)
 
             self.ase_ids.update({'bulk' + self.crystal: ase_id})
 
@@ -329,11 +334,11 @@ class FolderReader:
         n_empty = len(empty_structures)
 
         if n_empty == 0:
-            print('Warning: No empty slab submitted at {root}'
+            self.stdout.write('Warning: No empty slab submitted at {root}'
                   .format(root=root))
             return
         elif n_empty > 1:
-            print('Warning: more than one empty slab submitted at {root}'
+            self.stdout.write('Warning: more than one empty slab submitted at {root}'
                   .format(root=root))
             filename_collapse = ''.join([empty.info['filename']
                                          for empty in empty_structures])
@@ -354,10 +359,10 @@ class FolderReader:
             self.empty, self.cathub_db)
 
         if ase_id is None:
-            ase_id = ase_tools.write_ase(self.empty, self.cathub_db,
+            ase_id = ase_tools.write_ase(self.empty, self.cathub_db, self.stdout,
                                          self.user, **key_value_pairs)
         elif self.update:
-            ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
+            ase_tools.update_ase(self.cathub_db, id, self.stdout, **key_value_pairs)
         self.ase_ids.update({'star': ase_id})
 
     def read_reaction(self, root):
@@ -386,12 +391,15 @@ class FolderReader:
         for key, mollist in self.reaction_atoms.items():
             for i, molecule in enumerate(mollist):
                 if self.states[key][i] == 'gas':
-                    assert molecule in self.ase_ids_gas.keys()
+                    assert molecule in self.ase_ids_gas.keys(), \
+                        """Molecule {molecule} is missing in folder {gas_folder}"""\
+                        .format(molecule = clear_prefactor(self.reaction[key][i]),
+                                gas_folder=self.gas_folder)
                     self.structures[key][i] = self.gas[molecule]
-                    species = ase_tools.clear_prefactor(
+                    species = clear_prefactor(
                         self.reaction[key][i])
                     key_value_pairs.update(
-                        {'species': ase_tools.clear_state(species)})
+                        {'species': clear_state(species)})
                     self.ase_ids.update({species: self.ase_ids_gas[molecule]})
 
         """ Add empty slab to structure dict"""
@@ -412,9 +420,9 @@ class FolderReader:
         slab_structures = collect_structures(root)
 
         if len(slab_structures) == 0:
-            print('Warning: No adsorbate structures in {root}: '
+            self.stdout.write('Warning: No adsorbate structures in {root}: '
                   .format(root=root))
-            print('Warning: No reaction added!')
+            self.stdout.write('Warning: No reaction added!')
             return
 
         n_atoms = np.array([])
@@ -456,7 +464,7 @@ class FolderReader:
             atns = list(slab.get_atomic_numbers())
             if not (np.array(atns) > 8).any() and \
                (np.array(empty_atn) > 8).any():
-                print("Warning: Only molecular species for structure: {}"
+                self.stdout.write("Warning: Only molecular species for structure: {}"
                       .format(f))
                 continue
 
@@ -482,9 +490,12 @@ class FolderReader:
                 key_value_pairs.update({'species': 'TS'})
                 if ase_id is None:
                     ase_id = ase_tools.write_ase(slab, self.cathub_db,
-                                                 self.user, **key_value_pairs)
+                                                 self.stdout,
+                                                 self.user,
+                                                 **key_value_pairs)
                 elif self.update:
-                    ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
+                    ase_tools.update_ase(self.cathub_db, id, self.stdout,
+                                         **key_value_pairs)
                 self.ase_ids.update({'TSstar': ase_id})
                 continue
 
@@ -495,9 +506,12 @@ class FolderReader:
                 key_value_pairs.update({'species': ''})
                 if ase_id is None:
                     ase_id = ase_tools.write_ase(slab, self.cathub_db,
-                                                 self.user, **key_value_pairs)
+                                                 self.stdout,
+                                                 self.user,
+                                                 **key_value_pairs)
                 elif self.update:
-                    ase_tools.update_ase(self.cathub_db, id, **key_value_pairs)
+                    ase_tools.update_ase(self.cathub_db, id, self.stdout,
+                                         **key_value_pairs)
                 self.ase_ids.update({'TSemptystar': ase_id})
                 continue
 
@@ -514,23 +528,25 @@ class FolderReader:
                         if ads_atn == mol_atn and \
                            self.states[key][n] == 'star':
                             self.structures[key][n] = slab
-                            species = ase_tools.clear_prefactor(
+                            species = clear_prefactor(
                                 self.reaction[key][n])
                             id, ase_id = ase_tools.check_in_ase(
                                 slab, self.cathub_db)
                             key_value_pairs.update(
                                 {'species':
-                                 ase_tools.clear_state(
+                                 clear_state(
                                      species),
                                  'n': n_ads,
                                  'site': self.sites[species]})
                             if ase_id is None:
                                 ase_id = ase_tools.write_ase(
-                                    slab, self.cathub_db, self.user,
+                                    slab, self.cathub_db, self.stdout,
+                                    self.user,
                                     **key_value_pairs)
                             elif self.update:
                                 ase_tools.update_ase(
-                                    self.cathub_db, id, **key_value_pairs)
+                                    self.cathub_db, id, self.stdout,
+                                    **key_value_pairs)
                             self.ase_ids.update({species: ase_id})
                             found = True
                             break
@@ -598,7 +614,7 @@ class FolderReader:
 
         for key in ['reactants', 'products']:
             for i, r in enumerate(self.reaction[key]):
-                r = ase_tools.clear_prefactor(r)
+                r = clear_prefactor(r)
                 reaction_info[key].update({r: self.prefactors[key][i]})
 
         self.key_value_pairs_reaction = {
