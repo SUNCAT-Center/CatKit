@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from .tools import check_reaction
+from .tools import check_reaction, get_state, clear_state, clear_prefactor
 import os
 import json
 
@@ -160,7 +160,6 @@ def main(
 
     gas_names = []
     ads_names = []
-    from catkit.hub.ase_tools import get_state, clear_state, clear_prefactor
     for i in range(len(reactions)):
         rnames = [r.split('@')[0] for r in reactions[i]['reactants'] +
                   reactions[i]['products']]
