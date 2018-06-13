@@ -4,6 +4,7 @@ import shutil
 from catkit.hub.postgresql import CathubPostgreSQL
 from catkit.hub import db2server, make_folders_template, folder2db
 
+path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 class UploadTestCase(unittest.TestCase):
     def setUp(self):
@@ -83,12 +84,13 @@ class UploadTestCase(unittest.TestCase):
         )
 
     def test1_read_folders(self):
-        folder2db.main('aayush')
+        folder2db.main('{path}/aayush/'.format(path=path))
 
     def test2_upload(self):
-        db2server.main('aayush//MontoyaThe2015.db', user='postgres')
-        if os.path.exists('aayush/MontoyaThe2015.db'):
-            os.remove('aayush/MontoyaThe2015.db')
+        db2server.main('{path}/aayush/MontoyaThe2015.db'.format(path=path),
+                       user='postgres')
+        if os.path.exists('{path}/aayush/MontoyaThe2015.db'.format(path=path)):
+            os.remove('{path}/aayush/MontoyaThe2015.db'.format(path=path))
 
 
 if __name__ == '__main__':
