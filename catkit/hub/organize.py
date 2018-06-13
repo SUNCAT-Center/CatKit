@@ -1,4 +1,84 @@
 #!/usr/bin/env python
+"""
+The `cathub organize` script aims to organize relaxed DFT calculations pertinent
+to reaction energies on slab surfaces into a semantic folder structure that can
+be parsed by other catalsis-hub.org tools.
+The reference parser is in `catkit.hub.folderreader.FolderReader`. The output
+basic schema is ::
+
+    level:
+
+    0    folder_name
+    1    |-- publication
+    2        |-- dft_code
+    3            |-- dft_functional
+    4                |-- gas
+    4                |-- metal1
+    5                    |-- facet
+    6                        |-- reaction
+
+The location and filename of the input structure file does not matter as long as it is
+within the specified path.
+
+For `cathub organize` a few assumptions are critical:
+
+    1. The folder to be parsed contains relaxed DFT output files or trajectory
+    files of all geometries required to calculate the reaction energy, in
+    particular empty slab, slab with adsorbate, gas phase molecules.
+
+    2. The supercells of the empty slab and the adsorbed slab match exactly.
+    A small tolerance of 1e-5 A is used to avoid round-off errors
+
+The matching heuristic uses the following criteria:
+
+    1. A density cutoff divides all found structures into bulk, slab, or
+    molecule. The defaults are `--max-density-gas 0.002` and
+    `--max-density-slab 0.08` and maybe be have to be adjusted.
+
+    2. All slabs are matched based on the simulation cell to within 1e-5 A.
+
+    3. Those slabs that have the same simulation cell are matched to agree
+    based on their chemical formula (e.g. a [1x1x4] Pt slab with CO would
+    be represented as 'COPtPtPtPt') to within a few edits based on the
+    Levenshtein distance. Levenshtein is a string metric that counts the
+    minimal number of operations to transform one string into another
+    for the operations Insert, Remove, and Replace.
+
+    4. If the chemical formula matches to within a few edits and the difference
+    is among those adsorbates stated by e.g. `---adsorbates O,OH,OOH` a
+    reaction energy is calculated based on those structures.
+
+
+    5. Gas phase molecules and stoichiometry are automatically assigned from
+    any gas phase structure found in the directory.
+
+Important flags:
+
+    `-a, --adsorbates`:
+        Adsorbate species to be considered.
+        E.g. `--adsorbates O, OH, OOH`
+
+
+    `-v, --verbose`:
+        Get more output from collection process
+
+    `-k, --keep`:
+        Keep all structures corresponding to the same empty slab
+        which could correspond to different sites. Otherwise just the
+        strongest binding energy is kept.
+
+    `-m, --max-energy`: [Default 10] (eV)
+        Binding energies larger than this are assumed to be incorrectly
+        assigned and discarded. Raise this number to include them.
+
+
+Also note:
+
+    An cache file <foldername>.cache.pckl is created in the process.
+    This is because usually reading large DFT output files takes the longest
+    time. This file can be deleted at any point.
+
+"""
 
 # builtin imports
 import pickle
@@ -32,16 +112,16 @@ from .ase_tools import gas_phase_references
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
 PUBLICATION_TEMPLATE = """{
-    "title": "",
-    "authors": [""],
+    "title": "Test",
+    "authors": ["Doe"],
     "journal": "",
     "volume": "",
     "number": "",
-     "pages": "",
-     "year": "",
-     "publisher": "",
-     "doi": "",
-     "tags": []
+    "pages": "",
+    "year": "2018",
+    "publisher": "",
+    "doi": "",
+    "tags": []
 }"""
 
 
@@ -262,6 +342,9 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
+                if options.verbose:
+                    print(surf1)
+                    print(surf2)
 
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
@@ -275,21 +358,39 @@ def fuzzy_match(structures, options):
                     for tag, i1, i2, j1, j2 in opcodes:
                         if tag == 'insert':
                             additions += f2[j1:j2]
+                        elif tag == 'replace':
+                            additions += f2[j1:j2]
                         elif tag == 'delete':
                             subtractions += f2[j1:j2]
                         elif tag == 'equal':
                             equal += f1[i1:i2]
-                    subtractions = ''.join(
-                        sorted(
-                            ase.atoms.string2symbols(
-                                subtractions)))
-                    additions = ''.join(
-                        sorted(
+
+                    if options.verbose:
+                        print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
+                        print("    ADDITIONS " + str(additions))
+                        print("    SUBTRACTIONS " + str(subtractions))
+
+                    try:
+                        subtractions = ''.join(
+                            sorted(
                                 ase.atoms.string2symbols(
-                                    additions)))
+                                    subtractions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {subtractions}"
+                                  .format(subtractions=subtractions))
+                    try:
+                        additions = ''.join(
+                            sorted(
+                                    ase.atoms.string2symbols(
+                                        additions)))
+                    except:
+                        if options.verbose:
+                            print("Warning: trouble parsing {additions}"
+                                  .format(additions=additions))
 
                     equal_formula = get_chemical_formula(
-                        ase.atoms.Atoms(equal))
+                        ase.atoms.Atoms(equal)) + '_structure'
 
                     # check if we have some additions of subtractions
                     # and either one (or both) are in user specifid
@@ -319,11 +420,13 @@ def fuzzy_match(structures, options):
                             adsorbates.append(additions)
                         if subtractions:
                             adsorbates.append(subtractions)
+
                         if options.verbose:
                             print("    ADDITIONS " + str(additions))
                             print("    SUBTRACTIONS " + str(subtractions))
                             print("    ADSORBATES " + str(adsorbates))
                             print("    REFERENCES " + str(references))
+
                         stoichiometry_factors =  \
                             gas_phase_references.get_stoichiometry_factors(
                                 adsorbates, references,
@@ -444,6 +547,7 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
+    out_format = 'traj'
     out_format = 'json'
 
     for key in structures:
