@@ -474,7 +474,7 @@ class FolderReader:
                 supercell_factor = len(res_slab_atn) // len(empty_atn)
 
             """Atomic numbers of adsorbate"""
-            ads_atn = atns.copy()
+            ads_atn = copy.copy(atns)
             for atn in empty_atn * supercell_factor:
                 ads_atn.remove(atn)
             ads_atn = sorted(ads_atn)
