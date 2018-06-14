@@ -514,11 +514,10 @@ class CathubPostgreSQL:
             for row in rows:
                 Npubstruc += 1
                 values = list(row)
-                key_str = get_key_str(table='publication_system')
                 value_list = get_value_list(values)
-
                 publication_system_values += [tuple(value_list)]
 
+            key_str = get_key_str(table='publication_system')
             insert_command = """INSERT INTO publication_system ({0})
             VALUES %s ON CONFLICT DO NOTHING;"""\
                 .format(key_str)
