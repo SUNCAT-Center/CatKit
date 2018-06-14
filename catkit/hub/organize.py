@@ -27,7 +27,8 @@ import numpy as np
 
 
 # local imports
-from .ase_tools import gas_phase_references
+from .ase_tools import gas_phase_references, get_chemical_formula, \
+    symbols, collect_structures
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
@@ -43,86 +44,6 @@ PUBLICATION_TEMPLATE = """{
     "doi": "",
     "tags": []
 }"""
-
-
-def get_chemical_formula(atoms):
-    """
-    Compatibility function, return mode=metal, when
-    available, mode=hill, when not (ASE <= 3.13)
-    """
-    try:
-        return atoms.get_chemical_formula(mode='metal')
-    except ValueError:
-        return atoms.get_chemical_formula(mode='hill')
-
-
-def symbols(atoms):
-    formula = get_chemical_formula(atoms)
-    symbols = ase.atoms.string2symbols(formula)
-    return ''.join(symbols)
-
-
-def collect_structures(foldername, options):
-    structures = []
-    if options.verbose:
-        print(foldername)
-    for i, filename in enumerate(Path(foldername).glob('**/*')):
-        posix_filename = str(filename.as_posix())
-        if options.verbose:
-            print(i, posix_filename)
-        if posix_filename.endswith('publication.txt'):
-            with open(posix_filename) as infile:
-
-                global PUBLICATION_TEMPLATE
-                PUBLICATION_TEMPLATE = infile.read()
-        elif Path(posix_filename).is_file():
-            try:
-                filetype = ase.io.formats.filetype(posix_filename)
-            except Exception as e:
-                continue
-            if filetype:
-                try:
-                    structure = ase.io.read(posix_filename)
-                    structure.info['filename'] = posix_filename
-                    structure.info['filetype'] = ase.io.formats.filetype(
-                        posix_filename)
-                    try:
-                        structure.get_potential_energy()
-                        # ensure that the structure has an energy
-                        structures.append(structure)
-                    except RuntimeError:
-                        print("Did not add {posix_filename} since it has no energy"
-                              .format(
-                                  posix_filename=posix_filename,
-                              ))
-                    print(structure)
-                except StopIteration:
-                    print("Warning: StopIteration {posix_filename} hit."
-                          .format(
-                              posix_filename=posix_filename,
-                          ))
-                except IndexError:
-                    print("Warning: File {posix_filename} looks incomplete"
-                          .format(
-                              posix_filename=posix_filename,
-                          ))
-                except OSError as e:
-                    print("Error with {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-                except AssertionError as e:
-                    print("Hit an assertion error with {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-                except ValueError as e:
-                    print("Trouble reading {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-
-    return structures
 
 
 def fuzzy_match(structures, options):
@@ -497,7 +418,8 @@ def main(options):
         with open(pickle_file, 'rb') as infile:
             structures = pickle.load(infile)
     else:
-        structures = collect_structures(options.foldername, options)
+        structures = collect_structures(options.foldername, options.verbose,
+                                        level='**/*')
         with open(pickle_file, 'wb') as outfile:
             pickle.dump(structures, outfile)
 

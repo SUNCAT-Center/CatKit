@@ -4,6 +4,7 @@ import shutil
 from catkit.hub.postgresql import CathubPostgreSQL
 from catkit.hub import db2server, make_folders_template, folder2db
 
+path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
 class UploadTestCase(unittest.TestCase):
     def setUp(self):
@@ -17,14 +18,10 @@ class UploadTestCase(unittest.TestCase):
         db._initialize(con)
         db.truncate_schema()
 
-
     def tearDown(self):
         """Clear temporary files."""
         shutil.rmtree('temp')
-        
-        if os.path.exists('aayush/MontoyaThe2015.db'):
-            os.remove('aayush/MontoyaThe2015.db')
-            
+
     def test_make_folders(self):
         template_data = {
             'title': 'Fancy title',
@@ -66,7 +63,7 @@ class UploadTestCase(unittest.TestCase):
         crystal_structures = template_data['crystal_structures']
         bulk_compositions = template_data['bulk_compositions']
         facets = template_data['facets']
-                
+
         make_folders_template.main(
             title=title,
             authors=authors,
@@ -86,11 +83,15 @@ class UploadTestCase(unittest.TestCase):
             facets=facets,
         )
 
-    def test_read_folders_and_upload(self):
-        folder2db.main('aayush')
-        db2server.main('aayush//MontoyaThe2015.db', user='postgres')
+    def test1_read_folders(self):
+        folder2db.main('{path}/aayush/'.format(path=path))
 
-        
+    def test2_upload(self):
+        db2server.main('{path}/aayush/MontoyaThe2015.db'.format(path=path),
+                       user='postgres')
+        if os.path.exists('{path}/aayush/MontoyaThe2015.db'.format(path=path)):
+            os.remove('{path}/aayush/MontoyaThe2015.db'.format(path=path))
+
+
 if __name__ == '__main__':
-    unittest.main()        
-        
+    unittest.main()

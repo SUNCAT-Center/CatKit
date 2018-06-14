@@ -39,7 +39,6 @@ def show_reactions(dbfile):
               help="""name of reaction folder to skip ahead to""")
 def folder2db(folder_name, debug, skip_folders, goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
-    folder_name = folder_name.strip('/')
     skip = []
     for s in skip_folders.split(', '):
         for sk in s.split(','):
