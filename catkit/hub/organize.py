@@ -1,84 +1,4 @@
 #!/usr/bin/env python
-"""
-The `cathub organize` script aims to organize relaxed DFT calculations pertinent
-to reaction energies on slab surfaces into a semantic folder structure that can
-be parsed by other catalsis-hub.org tools.
-The reference parser is in `catkit.hub.folderreader.FolderReader`. The output
-basic schema is ::
-
-    level:
-
-    0    folder_name
-    1    |-- publication
-    2        |-- dft_code
-    3            |-- dft_functional
-    4                |-- gas
-    4                |-- metal1
-    5                    |-- facet
-    6                        |-- reaction
-
-The location and filename of the input structure file does not matter as long as it is
-within the specified path.
-
-For `cathub organize` a few assumptions are critical:
-
-    1. The folder to be parsed contains relaxed DFT output files or trajectory
-    files of all geometries required to calculate the reaction energy, in
-    particular empty slab, slab with adsorbate, gas phase molecules.
-
-    2. The supercells of the empty slab and the adsorbed slab match exactly.
-    A small tolerance of 1e-5 A is used to avoid round-off errors
-
-The matching heuristic uses the following criteria:
-
-    1. A density cutoff divides all found structures into bulk, slab, or
-    molecule. The defaults are `--max-density-gas 0.002` and
-    `--max-density-slab 0.08` and maybe be have to be adjusted.
-
-    2. All slabs are matched based on the simulation cell to within 1e-5 A.
-
-    3. Those slabs that have the same simulation cell are matched to agree
-    based on their chemical formula (e.g. a [1x1x4] Pt slab with CO would
-    be represented as 'COPtPtPtPt') to within a few edits based on the
-    Levenshtein distance. Levenshtein is a string metric that counts the
-    minimal number of operations to transform one string into another
-    for the operations Insert, Remove, and Replace.
-
-    4. If the chemical formula matches to within a few edits and the difference
-    is among those adsorbates stated by e.g. `---adsorbates O,OH,OOH` a
-    reaction energy is calculated based on those structures.
-
-
-    5. Gas phase molecules and stoichiometry are automatically assigned from
-    any gas phase structure found in the directory.
-
-Important flags:
-
-    `-a, --adsorbates`:
-        Adsorbate species to be considered.
-        E.g. `--adsorbates O, OH, OOH`
-
-
-    `-v, --verbose`:
-        Get more output from collection process
-
-    `-k, --keep`:
-        Keep all structures corresponding to the same empty slab
-        which could correspond to different sites. Otherwise just the
-        strongest binding energy is kept.
-
-    `-m, --max-energy`: [Default 10] (eV)
-        Binding energies larger than this are assumed to be incorrectly
-        assigned and discarded. Raise this number to include them.
-
-
-Also note:
-
-    An cache file <foldername>.cache.pckl is created in the process.
-    This is because usually reading large DFT output files takes the longest
-    time. This file can be deleted at any point.
-
-"""
 
 # builtin imports
 import pickle
@@ -107,7 +27,8 @@ import numpy as np
 
 
 # local imports
-from .ase_tools import gas_phase_references
+from .ase_tools import gas_phase_references, get_chemical_formula, \
+    symbols, collect_structures
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
@@ -125,86 +46,6 @@ PUBLICATION_TEMPLATE = """{
 }"""
 
 
-def get_chemical_formula(atoms):
-    """
-    Compatibility function, return mode=metal, when
-    available, mode=hill, when not (ASE <= 3.13)
-    """
-    try:
-        return atoms.get_chemical_formula(mode='metal')
-    except ValueError:
-        return atoms.get_chemical_formula(mode='hill')
-
-
-def symbols(atoms):
-    formula = get_chemical_formula(atoms)
-    symbols = ase.atoms.string2symbols(formula)
-    return ''.join(symbols)
-
-
-def collect_structures(foldername, options):
-    structures = []
-    if options.verbose:
-        print(foldername)
-    for i, filename in enumerate(Path(foldername).glob('**/*')):
-        posix_filename = str(filename.as_posix())
-        if options.verbose:
-            print(i, posix_filename)
-        if posix_filename.endswith('publication.txt'):
-            with open(posix_filename) as infile:
-
-                global PUBLICATION_TEMPLATE
-                PUBLICATION_TEMPLATE = infile.read()
-        elif Path(posix_filename).is_file():
-            try:
-                filetype = ase.io.formats.filetype(posix_filename)
-            except Exception as e:
-                continue
-            if filetype:
-                try:
-                    structure = ase.io.read(posix_filename)
-                    structure.info['filename'] = posix_filename
-                    structure.info['filetype'] = ase.io.formats.filetype(
-                        posix_filename)
-                    try:
-                        structure.get_potential_energy()
-                        # ensure that the structure has an energy
-                        structures.append(structure)
-                    except RuntimeError:
-                        print("Did not add {posix_filename} since it has no energy"
-                              .format(
-                                  posix_filename=posix_filename,
-                              ))
-                    print(structure)
-                except StopIteration:
-                    print("Warning: StopIteration {posix_filename} hit."
-                          .format(
-                              posix_filename=posix_filename,
-                          ))
-                except IndexError:
-                    print("Warning: File {posix_filename} looks incomplete"
-                          .format(
-                              posix_filename=posix_filename,
-                          ))
-                except OSError as e:
-                    print("Error with {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-                except AssertionError as e:
-                    print("Hit an assertion error with {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-                except ValueError as e:
-                    print("Trouble reading {posix_filename}: {e}".format(
-                        posix_filename=posix_filename,
-                        e=e,
-                    ))
-
-    return structures
-
-
 def fuzzy_match(structures, options):
     # filter out cell with ill-defined unit cells
     structures = [structure for structure in structures
@@ -220,6 +61,7 @@ def fuzzy_match(structures, options):
     gas_phase_candidates = []
     reference_energy = {}
     collected_energies = {}
+    key_count = {}
     collected_structures = {}
     if options.verbose:
         print("Group By Densities")
@@ -342,9 +184,9 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
-                if options.verbose:
-                    print(surf1)
-                    print(surf2)
+                # if options.verbose:
+                    # print(surf1)
+                    # print(surf2)
 
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
@@ -366,7 +208,7 @@ def fuzzy_match(structures, options):
                             equal += f1[i1:i2]
 
                     if options.verbose:
-                        print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
+                        #print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
                         print("    ADDITIONS " + str(additions))
                         print("    SUBTRACTIONS " + str(subtractions))
 
@@ -390,7 +232,7 @@ def fuzzy_match(structures, options):
                                   .format(additions=additions))
 
                     equal_formula = get_chemical_formula(
-                        ase.atoms.Atoms(equal)) + '_structure'
+                        ase.atoms.Atoms(equal))
 
                     # check if we have some additions of subtractions
                     # and either one (or both) are in user specifid
@@ -432,20 +274,39 @@ def fuzzy_match(structures, options):
                                 adsorbates, references,
                             )
                         if options.verbose:
+                            print("COLLECTED ENERGIES")
+                            print(collected_energies)
                             print("    STOICH FACTORS " +
                                   str(stoichiometry_factors) + "\n\n")
 
-                        formula = '* ->'
+                        matching_keys = [
+                            _key for _key in collected_energies
+                            if _key.startswith(key)
+                        ]
+
                         adsorbate = get_chemical_formula(
                             ase.atoms.Atoms(additions))
+
+                        key = ("{equal_formula}"
+                               "({surface_facet})"
+                               "+{adsorbate}"
+                               ).format(
+                            formula=formula,
+                            equal_formula=equal_formula,
+                            surface_facet=surf1.info['facet'],
+                            adsorbate=adsorbate,
+                        )
+
+                        formula = '*@site' + str(key_count.get(key, 0)) + ' ->'
+
                         if additions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(additions)) + '*'
+                                    ase.atoms.Atoms(additions)) + '*@site' + str(key_count.get(key, 0))
                         if subtractions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(subtractions)) + '*'
+                                    ase.atoms.Atoms(subtractions)) + '*@site' + str(key_count.get(key, 0))
 
                         gas_phase_corrections = {}
 
@@ -474,15 +335,8 @@ def fuzzy_match(structures, options):
 
                         if abs(dE) < options.max_energy:
                             energy = dE
-
-                            key = ("{equal_formula:16s}"
-                                   " ({surface_facet})"
-                                   " {formula:30s}"
-                                   ).format(
-                                formula=formula,
-                                equal_formula=equal_formula,
-                                surface_facet=surf1.info['facet']
-                            )
+                            if options.verbose:
+                                print("KEY {key}".format(**locals()))
                             equation = (" {formula:30s}"
                                         ).format(
                                 formula=formula,
@@ -499,41 +353,33 @@ def fuzzy_match(structures, options):
                             collected_structures \
                                 .setdefault(structure.info['filetype'], {}) \
                                 .setdefault('XC_FUNCTIONAL', {}) \
-                                .setdefault(equal_formula, {}) \
+                                .setdefault(equal_formula + '_structure', {}) \
                                 .setdefault(surf1.info['facet'], {}) \
                                 .setdefault('empty_slab', surf1)
+
+                            collected_energies[key] = energy
+                            key_count[key] = key_count.get(key, 0) + 1
+                            if options.verbose:
+                                print(key)
+                                print(collected_energies)
+                                print(key in collected_energies)
                             if not options.keep_all_energies:
-                                if energy < collected_energies.get(
+                                if energy > collected_energies.get(
                                         key, float("inf")):
-                                    collected_energies[key] = energy
-                                    collected_structures .setdefault(
-                                        structure.info['filetype'],
-                                        {}) .setdefault(
-                                        'XC_FUNCTIONAL',
-                                        {}) .setdefault(
-                                        equal_formula,
-                                        {}) .setdefault(
-                                        surf1.info['facet'],
-                                        {}) .setdefault(
-                                        equation,
-                                        {})[adsorbate] = surf2
-                            else:
-                                # amend number if colliding keys are found
-                                matching_keys = [
-                                    _key for _key in collected_energies
-                                    if _key.startswith(key)
-                                ]
-                                key += '_' + str(len(matching_keys))
-                                collected_energies[key] = energy
-                                collected_structures .setdefault(
-                                    structure.info['filetype'], {}) \
-                                    .setdefault('XC_FUNCTIONAL', {}) \
-                                    .setdefault(equal_formula, {}) \
-                                    .setdefault(surf1.info['facet'], {}) \
-                                    .setdefault(
-                                    equation, {}) .setdefault(
-                                    adsorbate + '@site_' + str(
-                                        len(matching_keys)), surf2)
+                                    continue
+
+                            collected_energies[key] = energy
+                            collected_structures .setdefault(
+                                structure.info['filetype'],
+                                {}) .setdefault(
+                                'XC_FUNCTIONAL',
+                                {}) .setdefault(
+                                equal_formula + '_structure',
+                                {}) .setdefault(
+                                surf1.info['facet'],
+                                {}) .setdefault(
+                                equation,
+                                {})[adsorbate] = surf2
 
     print("\n\nCollected Reaction Energies")
     print("===========================")
@@ -547,7 +393,6 @@ def fuzzy_match(structures, options):
 
 
 def create_folders(options, structures, root=''):
-    out_format = 'traj'
     out_format = 'json'
 
     for key in structures:
@@ -578,7 +423,8 @@ def main(options):
         with open(pickle_file, 'rb') as infile:
             structures = pickle.load(infile)
     else:
-        structures = collect_structures(options.foldername, options)
+        structures = collect_structures(options.foldername, options.verbose,
+                                        level='**/*')
         with open(pickle_file, 'wb') as outfile:
             pickle.dump(structures, outfile)
 
