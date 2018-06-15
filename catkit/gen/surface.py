@@ -100,15 +100,15 @@ class SlabGenerator(object):
         self.miller_index = miller_index
 
         if standardize_bulk:
-            bulk = utils.get_spglib_cell(bulk)
-            norm = get_normal_vectors(bulk)
+            bulk = utils.get_spglib_cell(bulk, tol=5e-3)
+            norm = get_reciprocal_vectors(bulk)
 
-            bulk = utils.get_spglib_cell(bulk, primitive=True)
-            pnorm = get_normal_vectors(bulk)
+            bulk = utils.get_spglib_cell(bulk, primitive=True, tol=5e-3)
+            pnorm = get_reciprocal_vectors(bulk)
 
             if not np.allclose(norm, pnorm):
                 miller_index = np.dot(
-                    miller_index, np.dot(norm, np.linalg.pinv(pnorm)))
+                    miller_index, np.dot(norm, np.linalg.inv(pnorm)))
                 miller_index = np.round(miller_index)
                 miller_index = (miller_index /
                                 list_gcd(miller_index)).astype(int)
@@ -188,7 +188,7 @@ class SlabGenerator(object):
         for i in range(1, 3):
             if new_bulk.cell[i][i] < 0:
                 new_bulk.cell[i] *= -1
-        new_bulk.wrap()
+        new_bulk.wrap(eps=1e-3)
 
         return new_bulk
 
@@ -207,7 +207,7 @@ class SlabGenerator(object):
         if self.unique_terminations is not None:
             return self.unique_terminations
 
-        zcoords = utils.get_unique_coordinates(self._bulk, tol=self.tol)
+        zcoords = utils.get_unique_coordinates(self._bulk)
 
         if len(zcoords) > 1:
             itol = self.tol ** -1
@@ -272,7 +272,7 @@ class SlabGenerator(object):
             ibasis.set_scaled_positions(scaled_positions)
             ibasis.wrap(pbc=True)
 
-        bulk_layers = utils.get_unique_coordinates(_basis, tol=self.tol)
+        bulk_layers = utils.get_unique_coordinates(_basis)
 
         if self.layer_type != 'trim':
             height = np.abs(self._bulk.cell[2][2])
@@ -304,12 +304,9 @@ class SlabGenerator(object):
         zcoords = scaled_zpositions - np.mean(scaled_zpositions)
         top = indices[zcoords[indices] >= 0]
         bottom = indices[zcoords[indices] < 0]
-
         ibasis.set_surface_atoms(top=top, bottom=bottom)
 
-        utils.get_unique_coordinates(
-            ibasis, tag=True, tol=self.tol)
-
+        utils.get_unique_coordinates(ibasis, tag=True)
         self.slab_basis[iterm] = ibasis
 
         return ibasis
@@ -338,12 +335,9 @@ class SlabGenerator(object):
         """
         slab = self.get_slab_basis(iterm).copy()
 
-        if self.vacuum:
-            slab.center(vacuum=self.vacuum, axis=2)
-
         # Trim the bottom of the cell, bulk symmetry will be lost
         if self.layer_type == 'trim':
-            zlayers = utils.get_unique_coordinates(slab, tol=self.tol)
+            zlayers = utils.get_unique_coordinates(slab)
             reverse_sort = np.sort(zlayers)[::-1]
             ncut = reverse_sort[:self.layers][-1] * slab.cell[2][2]
 
@@ -353,8 +347,6 @@ class SlabGenerator(object):
 
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
-        if self.layer_type == 'sym':
-            slab = self.make_symmetric(slab)
 
         slab = self.set_size(slab, size)
 
@@ -368,6 +360,12 @@ class SlabGenerator(object):
         translation[2] = 0
         slab.translate(-translation)
         slab.wrap()
+
+        if self.vacuum:
+            slab.center(vacuum=self.vacuum, axis=2)
+
+        if self.layer_type == 'sym':
+            slab = self.make_symmetric(slab)
 
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
@@ -475,6 +473,9 @@ class SlabGenerator(object):
             # before this can be moved back to basis creation
             n = len(supercell)
             exsupercell = supercell * (1, 1, 2)
+
+            # Look into making bulk more orthogonoal
+            exsupercell.wrap()
             connectivity = utils.get_voronoi_neighbors(exsupercell)
             edges = utils.connectivity_to_edges(connectivity[:n, :n])
             supercell.graph.add_weighted_edges_from(edges, weight='bonds')
@@ -574,15 +575,17 @@ def transform_ab(slab, matrix, tol=1e-5):
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
     u, v = newcell[:2]
-    nu, nv = norm(u), norm(v)
 
-    # Ensure the longest axis is x without z-rotation.
-    if nv > nu:
-        matrix[:, [0, 1]] = matrix[:, [1, 0]]
-        u *= -1
+    # This is non-functional and needs to be mended.
+    # nu, nv = norm(u), norm(v)
 
-    if u[0] < 0 and v[1] > 0:
-        matrix[[0, 1]] = matrix[[1, 0]]
+    # # Ensure the longest axis is x without z-rotation.
+    # if nv > nu:
+    #     matrix[:, [0, 1]] = matrix[:, [1, 0]]
+    #     u *= -1
+
+    # if u[0] < 0 and v[1] > 0:
+    #     matrix[[0, 1]] = matrix[[1, 0]]
 
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
@@ -646,11 +649,11 @@ def list_gcd(values):
     return _gcd
 
 
-def get_normal_vectors(atoms):
-    """Return the normal vectors to a atoms unit cell."""
-    rotation1 = np.roll(atoms.cell, 1, axis=0)
-    rotation2 = np.roll(atoms.cell, -1, axis=0)
-    normal_vectors = np.cross(rotation1, rotation2, axis=0)
+def get_reciprocal_vectors(atoms):
+    """Return the reciprocal lattice vectors to a atoms unit cell."""
+    rotation1 = np.roll(atoms.cell, -1, axis=0)
+    rotation2 = np.roll(atoms.cell, 1, axis=0)
+    normal_vectors = np.cross(rotation1, rotation2)
 
     return normal_vectors
 

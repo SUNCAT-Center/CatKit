@@ -1,4 +1,3 @@
-from builtins import super
 import networkx as nx
 from networkx import Graph, MultiGraph
 from ase import Atoms, Atom
@@ -8,6 +7,12 @@ import networkx.algorithms.isomorphism as iso
 import numpy as np
 import copy
 import warnings
+try:
+    import builtins
+except(ImportError):
+    import __builtin__ as builtins
+from builtins import super
+
 sym = np.array(chemical_symbols)
 em = iso.numerical_edge_match('bonds', 1)
 nm = iso.numerical_node_match('number', 1)
@@ -37,9 +42,10 @@ class Gratoms(Atoms):
                  calculator=None,
                  info=None,
                  edges=None):
-        super().__init__(symbols, positions, numbers, tags, momenta, masses,
-                         magmoms, charges, scaled_positions, cell, pbc,
-                         celldisp, constraint, calculator, info)
+        super().__init__(
+            symbols, positions, numbers, tags, momenta,
+            masses, magmoms, charges, scaled_positions, cell,
+            pbc, celldisp, constraint, calculator, info)
 
         if isinstance(edges, np.ndarray):
             if self.pbc.any():
