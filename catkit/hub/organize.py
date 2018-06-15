@@ -33,13 +33,13 @@ from .ase_tools import gas_phase_references, get_chemical_formula, \
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
 PUBLICATION_TEMPLATE = """{
-    "title": "",
-    "authors": [""],
+    "title": "Test",
+    "authors": ["Doe"],
     "journal": "",
     "volume": "",
     "number": "",
     "pages": "",
-    "year": "",
+    "year": "2018",
     "publisher": "",
     "doi": "",
     "tags": []
@@ -61,6 +61,7 @@ def fuzzy_match(structures, options):
     gas_phase_candidates = []
     reference_energy = {}
     collected_energies = {}
+    key_count = {}
     collected_structures = {}
     if options.verbose:
         print("Group By Densities")
@@ -183,9 +184,9 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
-                if options.verbose:
-                    print(surf1)
-                    print(surf2)
+                # if options.verbose:
+                    # print(surf1)
+                    # print(surf2)
 
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
@@ -207,7 +208,7 @@ def fuzzy_match(structures, options):
                             equal += f1[i1:i2]
 
                     if options.verbose:
-                        print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
+                        #print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
                         print("    ADDITIONS " + str(additions))
                         print("    SUBTRACTIONS " + str(subtractions))
 
@@ -273,20 +274,39 @@ def fuzzy_match(structures, options):
                                 adsorbates, references,
                             )
                         if options.verbose:
+                            print("COLLECTED ENERGIES")
+                            print(collected_energies)
                             print("    STOICH FACTORS " +
                                   str(stoichiometry_factors) + "\n\n")
 
-                        formula = '* ->'
+                        matching_keys = [
+                            _key for _key in collected_energies
+                            if _key.startswith(key)
+                        ]
+
                         adsorbate = get_chemical_formula(
                             ase.atoms.Atoms(additions))
+
+                        key = ("{equal_formula}"
+                               "({surface_facet})"
+                               "+{adsorbate}"
+                               ).format(
+                            formula=formula,
+                            equal_formula=equal_formula,
+                            surface_facet=surf1.info['facet'],
+                            adsorbate=adsorbate,
+                        )
+
+                        formula = '*@site' + str(key_count.get(key, 0)) + ' ->'
+
                         if additions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(additions)) + '*'
+                                    ase.atoms.Atoms(additions)) + '*@site' + str(key_count.get(key, 0))
                         if subtractions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(subtractions)) + '*'
+                                    ase.atoms.Atoms(subtractions)) + '*@site' + str(key_count.get(key, 0))
 
                         gas_phase_corrections = {}
 
@@ -315,15 +335,8 @@ def fuzzy_match(structures, options):
 
                         if abs(dE) < options.max_energy:
                             energy = dE
-
-                            key = ("{equal_formula:16s}"
-                                   " ({surface_facet})"
-                                   " {formula:30s}"
-                                   ).format(
-                                formula=formula,
-                                equal_formula=equal_formula,
-                                surface_facet=surf1.info['facet']
-                            )
+                            if options.verbose:
+                                print("KEY {key}".format(**locals()))
                             equation = (" {formula:30s}"
                                         ).format(
                                 formula=formula,
@@ -340,41 +353,33 @@ def fuzzy_match(structures, options):
                             collected_structures \
                                 .setdefault(structure.info['filetype'], {}) \
                                 .setdefault('XC_FUNCTIONAL', {}) \
-                                .setdefault(equal_formula, {}) \
+                                .setdefault(equal_formula + '_structure', {}) \
                                 .setdefault(surf1.info['facet'], {}) \
                                 .setdefault('empty_slab', surf1)
+
+                            collected_energies[key] = energy
+                            key_count[key] = key_count.get(key, 0) + 1
+                            if options.verbose:
+                                print(key)
+                                print(collected_energies)
+                                print(key in collected_energies)
                             if not options.keep_all_energies:
-                                if energy < collected_energies.get(
+                                if energy > collected_energies.get(
                                         key, float("inf")):
-                                    collected_energies[key] = energy
-                                    collected_structures .setdefault(
-                                        structure.info['filetype'],
-                                        {}) .setdefault(
-                                        'XC_FUNCTIONAL',
-                                        {}) .setdefault(
-                                        equal_formula,
-                                        {}) .setdefault(
-                                        surf1.info['facet'],
-                                        {}) .setdefault(
-                                        equation,
-                                        {})[adsorbate] = surf2
-                            else:
-                                # amend number if colliding keys are found
-                                matching_keys = [
-                                    _key for _key in collected_energies
-                                    if _key.startswith(key)
-                                ]
-                                key += '_' + str(len(matching_keys))
-                                collected_energies[key] = energy
-                                collected_structures .setdefault(
-                                    structure.info['filetype'], {}) \
-                                    .setdefault('XC_FUNCTIONAL', {}) \
-                                    .setdefault(equal_formula, {}) \
-                                    .setdefault(surf1.info['facet'], {}) \
-                                    .setdefault(
-                                    equation, {}) .setdefault(
-                                    adsorbate + '@site_' + str(
-                                        len(matching_keys)), surf2)
+                                    continue
+
+                            collected_energies[key] = energy
+                            collected_structures .setdefault(
+                                structure.info['filetype'],
+                                {}) .setdefault(
+                                'XC_FUNCTIONAL',
+                                {}) .setdefault(
+                                equal_formula + '_structure',
+                                {}) .setdefault(
+                                surf1.info['facet'],
+                                {}) .setdefault(
+                                equation,
+                                {})[adsorbate] = surf2
 
     print("\n\nCollected Reaction Energies")
     print("===========================")
