@@ -2,9 +2,33 @@ from .gen.surface import SlabGenerator
 from .gen.molecules import get_topologies
 from .gen.geometry import _branch_molecule
 from .gen import utils
-from ase.build import bulk
+from ase.build import bulk as ase_bulk
 import networkx as nx
 from ase import Atoms
+
+
+def bulk(name, crystalstructure=None, **kwargs):
+    """Return the standard conventional cell of a bulk structure
+    created using ASE. Accepts all keyword arguments for the ase
+    bulk generator.
+
+    Parameters
+    ----------
+    name : str
+        Chemical symbol or symbols as in 'MgO' or 'NaCl'.
+crystalstructure : str
+        Must be one of sc, fcc, bcc, hcp, diamond, zincblende,
+        rocksalt, cesiumchloride, fluorite or wurtzite.
+
+    Returns
+    -------
+    standardized_bulk : Gratoms object
+        The standard conventional bulk structure.
+    """
+    atoms = ase_bulk(name, crystalstructure, **kwargs)
+    standardized_bulk = utils.get_spglib_cell(atoms)
+
+    return standardized_bulk
 
 
 def surface(
@@ -46,7 +70,7 @@ def surface(
     if isinstance(elements, Atoms):
         atoms = elements
     else:
-        atoms = bulk(elements, crystal, cubic=True, **kwargs)
+        atoms = ase_bulk(elements, crystal, cubic=True, **kwargs)
 
     gen = SlabGenerator(
         bulk=atoms,
