@@ -232,7 +232,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     return connectivity
 
 
-def get_spglib_cell(atoms, primitive=False, idealize=True, tol=1e-8):
+def get_spglib_cell(atoms, primitive=False, idealize=True, tol=1e-5):
     """Atoms object interface with spglib primitive cell finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
@@ -312,7 +312,7 @@ def get_point_group(atoms, tol=1e-8):
     return point_group, is_laue
 
 
-def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-5):
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
@@ -332,19 +332,19 @@ def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-5):
     values : ndarray (n,)
         Array of unique positions in fractional coordinates.
     """
-    positions = (atoms.get_scaled_positions() + tol) % 1
+    positions = (atoms.get_scaled_positions()[:, axis] + tol) % 1
     positions -= tol
 
-    values = [positions[0][axis]]
-    for d in positions[1:, axis]:
-        if not np.isclose(d, values, rtol=tol).any():
+    values = [positions[0]]
+    for d in positions[1:]:
+        if not np.isclose(d, values, atol=tol, rtol=tol).any():
             values += [d]
     values = np.sort(values)
 
     if tag:
         tags = []
-        for p in positions[:, axis]:
-            close = np.isclose(p, values[::-1], rtol=tol)
+        for p in positions:
+            close = np.isclose(p, values[::-1], atol=tol, rtol=tol)
             tags += [np.where(close)[0][0] + 1]
         atoms.set_tags(tags)
 

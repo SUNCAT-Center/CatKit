@@ -11,6 +11,7 @@ try:
     import builtins
 except(ImportError):
     import __builtin__ as builtins
+from builtins import super
 
 sym = np.array(chemical_symbols)
 em = iso.numerical_edge_match('bonds', 1)
@@ -41,7 +42,7 @@ class Gratoms(Atoms):
                  calculator=None,
                  info=None,
                  edges=None):
-        builtins.super().__init__(
+        super().__init__(
             symbols, positions, numbers, tags, momenta,
             masses, magmoms, charges, scaled_positions, cell,
             pbc, celldisp, constraint, calculator, info)
