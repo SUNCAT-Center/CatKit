@@ -15,4 +15,3 @@ psycopg2>=2
 python-Levenshtein>=0.12
 pathlib2>=2.3
 tabulate>=0.8.2
-pwgen

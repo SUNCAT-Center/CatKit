@@ -2,11 +2,11 @@ import os
 import sys
 import time
 import json
+import random
 import psycopg2
 from psycopg2.extras import execute_values
 import ase.db
 from ase.db.postgresql import PostgreSQLDatabase
-from pwgen import pwgen
 from past.utils import PY2
 
 from .cathubsqlite import CathubSQLite
@@ -109,6 +109,15 @@ tsvector_update = [
     coalesce(products::text, ''), 'star',''), 'gas', ''));
     """
 ]
+
+
+def pwgen(n):
+    return ''.join([
+        random.choice(
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            'abcdefghijklmnopqrstuvwxyz'
+            '0123456789'
+        ) for i in range(n)])
 
 
 class CathubPostgreSQL:
@@ -429,7 +438,7 @@ class CathubPostgreSQL:
         Parameters:
         filename_sqlite: str
             name of .db file
-        block_size: int (default 1000) 
+        block_size: int (default 1000)
             Number of atomic structures and reactions to write together
             in each block.
         start_block: int (default 0)
