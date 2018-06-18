@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from .tools import check_reaction
+from .tools import check_reaction, get_state, clear_state, clear_prefactor
 import os
 import json
 
@@ -141,11 +141,13 @@ def main(
                         }
 
     pub_txt = publication_base + 'publication.txt'
-    json.dump(publication_dict, open(pub_txt, 'w'))
+    with open(pub_txt, 'w') as f:
+        json.dump(publication_dict, f)
 
     if not len(energy_corrections.keys()) == 0:
         energy_txt = publication_base + 'energy_corrections.txt'
-        json.dump(energy_corrections, open(energy_txt, 'wb'))
+        with open(energy_txt, 'wb') as f:
+            json.dump(energy_corrections)
 
     def create(path):
         if not os.path.exists(path):
@@ -158,7 +160,6 @@ def main(
 
     gas_names = []
     ads_names = []
-    from catkit.hub.ase_tools import get_state, clear_state, clear_prefactor
     for i in range(len(reactions)):
         rnames = [r.split('@')[0] for r in reactions[i]['reactants'] +
                   reactions[i]['products']]

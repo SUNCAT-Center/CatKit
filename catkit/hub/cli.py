@@ -4,6 +4,8 @@ from . import psql_server_connect
 from . import folder2db as _folder2db
 from . import db2server as _db2server
 from . import organize as _organize
+from . import folderreader
+from .cathubsqlite import CathubSQLite
 from ase.atoms import string2symbols
 import os
 import json
@@ -18,6 +20,14 @@ def cli():
 
 
 @cli.command()
+@click.argument('dbfile')
+def show_reactions(dbfile):
+    """Extract and print reactions from sqlite3 (.db) file"""
+    db = CathubSQLite(dbfile)
+    db.print_summary()
+
+
+@cli.command()
 @click.argument('folder_name')
 @click.option('--debug', default=False)
 @click.option(
@@ -27,42 +37,39 @@ def cli():
     or a string with names of more folders seperated by ', '""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
-@click.option('--old', default=False)
-def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
+def folder2db(folder_name, debug, skip_folders, goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
-    folder_name = folder_name.strip('/')
     skip = []
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
     _folder2db.main(folder_name, debug,
-                    skip, goto_reaction, old)
+                    skip, goto_reaction)
 
 
 @cli.command()
 @click.argument('dbfile')
-@click.option('--start_id', default=1, type=int)
-@click.option('--write_reaction', default=True, type=bool)
-@click.option('--write_reaction_system', default=True, type=bool)
-@click.option('--write_ase', default=True, type=bool)
-@click.option('--write_publication', default=True, type=bool)
+@click.option('--write-reaction', default=True, type=bool)
+@click.option('--write-reaction_system', default=True, type=bool)
+@click.option('--write-ase', default=True, type=bool)
+@click.option('--write-publication', default=True, type=bool)
 @click.option('--block-size', default=1000, type=int)
 @click.option('--start-block', default=0, type=int)
-@click.option('--db_user', default='upload', type=str)
-@click.option('--db-password', type=str)
-def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, db_user,
-              db_password):
+@click.option('--user', default='upload', type=str)
+@click.option('--password', type=str)
+def db2server(dbfile, write_reaction, write_ase, write_publication,
+              write_reaction_system, block_size, start_block, user,
+              password):
     """Transfer data from local database to Catalysis Hub server"""
 
-    _db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
+    _db2server.main(dbfile, write_reaction=write_reaction,
                     write_ase=write_ase,
                     write_publication=write_publication,
                     write_reaction_system=write_reaction_system,
                     block_size=block_size,
                     start_block=start_block,
-                    db_user=db_user,
-                    db_password=db_password)
+                    user=user,
+                    password=password)
 
 
 reaction_columns = [
