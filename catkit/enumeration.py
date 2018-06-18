@@ -53,7 +53,7 @@ def surfaces(
     slabs : list of Gratoms objects
         Return a list of enumerated slab structures.
     """
-    standardized_bulk = utils.get_spglib_cell(bulk)
+    standardized_bulk = utils.get_spglib_cell(bulk, tol=5e-3)
 
     if isinstance(miller_indices, int):
         miller_indices = get_unique_indices(standardized_bulk, miller_indices)
@@ -67,7 +67,6 @@ def surfaces(
 
     slabs = []
     for miller in miller_indices:
-
         gen = SlabGenerator(
             bulk=standardized_bulk,
             miller_index=miller,
@@ -87,6 +86,8 @@ def surfaces(
 
         for i in iterms:
             for size in sizes:
-                slabs += [gen.get_slab(size=size, iterm=i)]
+                slab = gen.get_slab(size=int(size), iterm=i)
+                slab.info['miller'] = miller
+                slabs += [slab]
 
     return slabs
