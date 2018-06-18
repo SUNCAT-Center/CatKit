@@ -56,7 +56,7 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction):
 @click.option('--block-size', default=1000, type=int)
 @click.option('--start-block', default=0, type=int)
 @click.option('--user', default='upload', type=str)
-@click.option('--password', type=str)
+@click.option('--password', default='cHyuuQH0', type=str)
 def db2server(dbfile, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, user,
               password):
