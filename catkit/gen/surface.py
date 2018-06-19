@@ -100,10 +100,10 @@ class SlabGenerator(object):
         self.miller_index = miller_index
 
         if standardize_bulk:
-            bulk = utils.get_spglib_cell(bulk, tol=5e-3)
+            bulk = utils.get_spglib_cell(bulk, tol=1e-2)
             norm = get_reciprocal_vectors(bulk)
 
-            bulk = utils.get_spglib_cell(bulk, primitive=True, tol=5e-3)
+            bulk = utils.get_spglib_cell(bulk, primitive=True, tol=1e-2)
             pnorm = get_reciprocal_vectors(bulk)
 
             if not np.allclose(norm, pnorm):
@@ -306,12 +306,11 @@ class SlabGenerator(object):
         bottom = indices[zcoords[indices] < 0]
         ibasis.set_surface_atoms(top=top, bottom=bottom)
 
-        utils.get_unique_coordinates(ibasis, tag=True)
         self.slab_basis[iterm] = ibasis
 
         return ibasis
 
-    def get_slab(self, size=(1, 1), iterm=0):
+    def get_slab(self, size=1, iterm=0):
         """Generate a slab from the bulk structure. This function is meant
         specifically for selection of an individual termination or enumeration
         through surfaces of various size.
@@ -355,7 +354,10 @@ class SlabGenerator(object):
         slab.cell[2] = [0, 0, slab.cell[2][2]]
         slab.set_pbc([1, 1, 0])
 
-        tl = np.min(slab.get_surface_atoms())
+        if slab.cell[1][0] < 0:
+            slab = transform_ab(slab, [[-1, 0], [0, 1]])
+
+        tl = np.argmax(slab.get_scaled_positions()[:, 2])
         translation = slab[tl].position.copy()
         translation[2] = 0
         slab.translate(-translation)
@@ -364,6 +366,7 @@ class SlabGenerator(object):
         if self.vacuum:
             slab.center(vacuum=self.vacuum, axis=2)
 
+        utils.get_unique_coordinates(slab, tag=True)
         if self.layer_type == 'sym':
             slab = self.make_symmetric(slab)
 
@@ -474,7 +477,7 @@ class SlabGenerator(object):
             n = len(supercell)
             exsupercell = supercell * (1, 1, 2)
 
-            # Look into making bulk more orthogonoal
+            # Look into making bulk more orthogonal
             exsupercell.wrap()
             connectivity = utils.get_voronoi_neighbors(exsupercell)
             edges = utils.connectivity_to_edges(connectivity[:n, :n])
@@ -574,18 +577,6 @@ def transform_ab(slab, matrix, tol=1e-5):
     M = np.eye(3)
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
-    u, v = newcell[:2]
-
-    # This is non-functional and needs to be mended.
-    # nu, nv = norm(u), norm(v)
-
-    # # Ensure the longest axis is x without z-rotation.
-    # if nv > nu:
-    #     matrix[:, [0, 1]] = matrix[:, [1, 0]]
-    #     u *= -1
-
-    # if u[0] < 0 and v[1] > 0:
-    #     matrix[[0, 1]] = matrix[[1, 0]]
 
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
@@ -615,7 +606,7 @@ def transform_ab(slab, matrix, tol=1e-5):
     repeated = np.where(periodic_match != original_index)
     del slab[repeated]
 
-    # Align the longest basis vector with x
+    # Align the first basis vector with x
     slab.rotate(slab.cell[0], 'x', rotate_cell=True)
 
     if slab.cell[1][1] < 0:
