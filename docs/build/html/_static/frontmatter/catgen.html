@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2018-06-01 Fri 01:41 -->
+<!-- 2018-06-02 Sat 20:10 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CatGen: Catalysis Generator</title>
@@ -240,38 +240,38 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org431585b">1. Enumerations</a>
+<li><a href="#org0e3e58d">1. Enumerations</a>
 <ul>
-<li><a href="#org2c4b1bd">1.1. Surface module:</a>
+<li><a href="#orgf692752">1.1. Surface module:</a>
 <ul>
-<li><a href="#orge9486af">1.1.1. Slab enumeration:</a></li>
-<li><a href="#org411ebc7">1.1.2. Slab graph and surface atoms:</a></li>
-<li><a href="#org250e8bd">1.1.3. Simple site enumeration:</a></li>
+<li><a href="#org30991cf">1.1.1. Slab enumeration:</a></li>
+<li><a href="#org93a4d12">1.1.2. Slab graph and surface atoms:</a></li>
+<li><a href="#orgdc5dd3c">1.1.3. Simple site enumeration:</a></li>
 </ul>
 </li>
-<li><a href="#org171d9fd">1.2. Adsorption module</a>
+<li><a href="#orgbf84bf1">1.2. Adsorption module</a>
 <ul>
-<li><a href="#org71abb81">1.2.1. ``Manual'' Adsorption site enumeration and visualization:</a></li>
-<li><a href="#orgdaf52aa">1.2.2. Extended site enumeration:</a></li>
-<li><a href="#org9043dad">1.2.3. Adsorption vectors</a></li>
-<li><a href="#org4b4674b">1.2.4. Adsorption structure builder</a></li>
+<li><a href="#org06e25a4">1.2.1. ``Manual'' Adsorption site enumeration and visualization:</a></li>
+<li><a href="#org9ce6f58">1.2.2. Extended site enumeration:</a></li>
+<li><a href="#orge7728b9">1.2.3. Adsorption vectors</a></li>
+<li><a href="#orgd415e03">1.2.4. Adsorption structure builder</a></li>
 </ul>
 </li>
-<li><a href="#org7a07504">1.3. Gas-phase:</a>
+<li><a href="#org24eeb02">1.3. Gas-phase:</a>
 <ul>
-<li><a href="#org97f4274">1.3.1. Example usage:</a></li>
+<li><a href="#orgb177929">1.3.1. Example usage:</a></li>
 </ul>
 </li>
-<li><a href="#orgdd0820b">1.4. Reaction mechanisms:</a>
+<li><a href="#orgf0caef0">1.4. Reaction mechanisms:</a>
 <ul>
-<li><a href="#org8cc13c1">1.4.1. Reaction networks:</a></li>
+<li><a href="#org3cd1734">1.4.1. Reaction networks:</a></li>
 </ul>
 </li>
-<li><a href="#org889691c">1.5. Reaction routes</a>
+<li><a href="#org50cf3ef">1.5. Reaction routes</a>
 <ul>
-<li><a href="#org071e95c">1.5.1. Overall/Response reaction routes</a></li>
-<li><a href="#org19fcf2c">1.5.2. Linearly independent set</a></li>
-<li><a href="#orgb0d20bc">1.5.3. Complete full and empty enumeration</a></li>
+<li><a href="#org1f6c48b">1.5.1. Overall/Response reaction routes</a></li>
+<li><a href="#org2e49186">1.5.2. Linearly independent set</a></li>
+<li><a href="#orgd52d961">1.5.3. Complete full and empty enumeration</a></li>
 </ul>
 </li>
 </ul>
@@ -300,12 +300,12 @@ Current enumerations include:
 <li class="on"><code>[X]</code> Reaction routes</li>
 </ul>
 
-<div id="outline-container-org431585b" class="outline-2">
-<h2 id="org431585b"><span class="section-number-2">1</span> Enumerations</h2>
+<div id="outline-container-org0e3e58d" class="outline-2">
+<h2 id="org0e3e58d"><span class="section-number-2">1</span> Enumerations</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-org2c4b1bd" class="outline-3">
-<h3 id="org2c4b1bd"><span class="section-number-3">1.1</span> Surface module:</h3>
+<div id="outline-container-orgf692752" class="outline-3">
+<h3 id="orgf692752"><span class="section-number-3">1.1</span> Surface module:</h3>
 <div class="outline-text-3" id="text-1-1">
 <p>
 The surface module is designed to leverage information about the bulk structure which a slab is derived from.
@@ -321,19 +321,19 @@ The surface module is designed to leverage information about the bulk structure 
 </ul>
 </div>
 
-<div id="outline-container-orge9486af" class="outline-4">
-<h4 id="orge9486af"><span class="section-number-4">1.1.1</span> Slab enumeration:</h4>
+<div id="outline-container-org30991cf" class="outline-4">
+<h4 id="org30991cf"><span class="section-number-4">1.1.1</span> Slab enumeration:</h4>
 <div class="outline-text-4" id="text-1-1-1">
 <p>
 Example surface generation for the 2 terminations of a fcc(211) surface construction of an L1<sub>0</sub> CuPd<sub>3</sub> cubic alloy.
 </p>
 
 <p>
-<img src="../static/CuPd3-term-0.png" alt="CuPd3-term-0.png" /> <img src="../static/CuPd3-term-0-top.png" alt="CuPd3-term-0-top.png" />
+<img src="../CuPd3-term-0.png" alt="CuPd3-term-0.png" /> <img src="../CuPd3-term-0-top.png" alt="CuPd3-term-0-top.png" />
 </p>
 
 <p>
-<img src="../static/CuPd3-term-1.png" alt="CuPd3-term-1.png" /> <img src="../static/CuPd3-term-1-top.png" alt="CuPd3-term-1-top.png" />
+<img src="../CuPd3-term-1.png" alt="CuPd3-term-1.png" /> <img src="../CuPd3-term-1-top.png" alt="CuPd3-term-1-top.png" />
 </p>
 
 <div class="org-src-container">
@@ -384,8 +384,8 @@ slab.edit()
 </div>
 </div>
 
-<div id="outline-container-org411ebc7" class="outline-4">
-<h4 id="org411ebc7"><span class="section-number-4">1.1.2</span> Slab graph and surface atoms:</h4>
+<div id="outline-container-org93a4d12" class="outline-4">
+<h4 id="org93a4d12"><span class="section-number-4">1.1.2</span> Slab graph and surface atoms:</h4>
 <div class="outline-text-4" id="text-1-1-2">
 <p>
 One of the less visual features is the identification of the surface atoms and identification of nearest-neighbors which is subsequently used for creating graph edges. When performing more sophisticated operations, such as adsorption site identification, these functions are being called automatically.
@@ -393,26 +393,18 @@ One of the less visual features is the identification of the surface atoms and i
 
 
 <div class="figure">
-<p><img src="../static/Pd-surface-atoms.png" alt="Pd-surface-atoms.png" />
+<p><img src="../Pd-surface-atoms.png" alt="Pd-surface-atoms.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Slab of hcp Pd with (110) miller index. Top surface atoms have been changed to Au.</p>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-python"><span style="color: #0000FF;">from</span> catkit.gen.surface <span style="color: #0000FF;">import</span> SlabGenerator
-<span style="color: #0000FF;">from</span> ase.build <span style="color: #0000FF;">import</span> bulk
+<pre class="src src-python"><span style="color: #0000FF;">from</span> catkit.build <span style="color: #0000FF;">import</span> surface
 <span style="color: #0000FF;">from</span> ase.io <span style="color: #0000FF;">import</span> write
-<span style="color: #0000FF;">from</span> ase <span style="color: #0000FF;">import</span> Atom
 
-<span style="color: #BA36A5;">bulk</span> = bulk(<span style="color: #008000;">'Pd'</span>, <span style="color: #008000;">'hcp'</span>, a=3, cubic=<span style="color: #D0372D;">True</span>)
+<span style="color: #8D8D84;"># </span><span style="color: #8D8D84; font-style: italic;">Size is 3 layers and 3 times the unit area of the primitve cell</span>
+<span style="color: #BA36A5;">atoms</span> = surface(<span style="color: #008000;">'Pd'</span>, size=(3, 3), miller=(1, 1, 1), vacuum=4)
 
-<span style="color: #BA36A5;">gen</span> = SlabGenerator(
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   bulk,
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   miller_index=(1, 1, 0),
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   layers=6,
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   vacuum=4)
-
-<span style="color: #BA36A5;">atoms</span> = gen.get_slab()
 <span style="color: #0000FF;">print</span>(atoms.connectivity)
 
 <span style="color: #0000FF;">for</span> i <span style="color: #0000FF;">in</span> atoms.get_surface_atoms():
@@ -422,20 +414,138 @@ atoms.edit()
 </pre>
 </div>
 
-<p>
-[[0 2 2 2 0 1 0 0 0 0 0 0]
- [2 0 2 2 1 0 0 0 0 0 0 0]
- [2 2 0 2 2 2 1 0 0 0 0 0]
- [2 2 2 0 2 2 0 1 0 0 0 0]
- [0 1 2 2 0 2 2 2 1 0 0 0]
- [1 0 2 2 2 0 2 2 0 1 0 0]
- [0 0 1 0 2 2 0 2 2 2 1 0]
- [0 0 0 1 2 2 2 0 2 2 0 1]
- [0 0 0 0 1 0 2 2 0 2 2 2]
- [0 0 0 0 0 1 2 2 2 0 2 2]
- [0 0 0 0 0 0 1 0 2 2 0 2]
- [0 0 0 0 0 0 0 1 2 2 2 0]]
-</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+<td class="org-right">3</td>
+</tr>
+
+<tr>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">0</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">0</td>
+</tr>
+</tbody>
+</table>
 
 <p>
 CatGen automatically attaches the connectivity matrix into a NetworkX graph and stores it in the Gratoms object for future use.
@@ -443,8 +553,8 @@ CatGen automatically attaches the connectivity matrix into a NetworkX graph and 
 </div>
 </div>
 
-<div id="outline-container-org250e8bd" class="outline-4">
-<h4 id="org250e8bd"><span class="section-number-4">1.1.3</span> Simple site enumeration:</h4>
+<div id="outline-container-orgdc5dd3c" class="outline-4">
+<h4 id="orgdc5dd3c"><span class="section-number-4">1.1.3</span> Simple site enumeration:</h4>
 <div class="outline-text-4" id="text-1-1-3">
 <p>
 With a generated slab, we can also produce the unique adsorption sites which would be present on a given surface.
@@ -452,7 +562,7 @@ With a generated slab, we can also produce the unique adsorption sites which wou
 
 
 <div class="figure">
-<p><img src="../static/CuPd3_111-sites.png" alt="CuPd3_111-sites.png" />
+<p><img src="../CuPd3_111-sites.png" alt="CuPd3_111-sites.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Symmetry unique sites of CuPd<sub>3</sub> (111). Green denote 3-fold hollows, white are bridge, and red are top sites.</p>
 </div>
@@ -486,8 +596,8 @@ atoms.edit()
 </div>
 </div>
 
-<div id="outline-container-org171d9fd" class="outline-3">
-<h3 id="org171d9fd"><span class="section-number-3">1.2</span> Adsorption module</h3>
+<div id="outline-container-orgbf84bf1" class="outline-3">
+<h3 id="orgbf84bf1"><span class="section-number-3">1.2</span> Adsorption module</h3>
 <div class="outline-text-3" id="text-1-2">
 <p>
 Using the <code>AdsorptionSites</code> class form the adsorption module provides more powerful tools for surface site enumeration.
@@ -503,8 +613,8 @@ Using the <code>AdsorptionSites</code> class form the adsorption module provides
 </ul>
 </div>
 
-<div id="outline-container-org71abb81" class="outline-4">
-<h4 id="org71abb81"><span class="section-number-4">1.2.1</span> ``Manual'' Adsorption site enumeration and visualization:</h4>
+<div id="outline-container-org06e25a4" class="outline-4">
+<h4 id="org06e25a4"><span class="section-number-4">1.2.1</span> ``Manual'' Adsorption site enumeration and visualization:</h4>
 <div class="outline-text-4" id="text-1-2-1">
 <p>
 Adsorption site enumeration in CatGen is solely dependent upon surface atom identification. This is performed automatically using <code>catkit.gen.surface.SlabGenerator</code> or <code>catkit.build.surface</code>, however, this function relies upon bulk properties which are not always available.
@@ -520,7 +630,7 @@ Surface atoms are used to define top sites (green), which are then used to defin
 
 
 <div class="figure">
-<p><img src="../static/Pd3Cu-adsorption-sites.png" alt="Pd3Cu-adsorption-sites.png" />
+<p><img src="../Pd3Cu-adsorption-sites.png" alt="Pd3Cu-adsorption-sites.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Delaunay triangulation of surface atoms for fcc(111) structure.</p>
 </div>
@@ -549,8 +659,8 @@ sites.plot(<span style="color: #008000;">'./Pd3Cu-adsorption-sites.png'</span>)
 </div>
 </div>
 
-<div id="outline-container-orgdaf52aa" class="outline-4">
-<h4 id="orgdaf52aa"><span class="section-number-4">1.2.2</span> Extended site enumeration:</h4>
+<div id="outline-container-org9ce6f58" class="outline-4">
+<h4 id="org9ce6f58"><span class="section-number-4">1.2.2</span> Extended site enumeration:</h4>
 <div class="outline-text-4" id="text-1-2-2">
 <p>
 For more complex adsorption enumeration, we often require more detailed information.
@@ -566,7 +676,7 @@ All possible adsorption sites of of CuPd<sub>3</sub> (321). Site identifications
 
 
 <div class="figure">
-<p><img src="../static/CuPd3_321-sites.png" alt="CuPd3_321-sites.png" />
+<p><img src="../CuPd3_321-sites.png" alt="CuPd3_321-sites.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>Unique adsorption site enumeration for fcc(321) alloy.</p>
 </div>
@@ -621,6 +731,302 @@ atoms.edit()
 </div>
 
 <p>
+Coordinates:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">x</th>
+<th scope="col" class="org-right">y</th>
+<th scope="col" class="org-right">z</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">2.236</td>
+<td class="org-right">0.598</td>
+<td class="org-right">11.682</td>
+</tr>
+
+<tr>
+<td class="org-right">0.559</td>
+<td class="org-right">6.126</td>
+<td class="org-right">12.684</td>
+</tr>
+
+<tr>
+<td class="org-right">8.944</td>
+<td class="org-right">6.873</td>
+<td class="org-right">11.682</td>
+</tr>
+
+<tr>
+<td class="org-right">1.118</td>
+<td class="org-right">7.769</td>
+<td class="org-right">12.35</td>
+</tr>
+
+<tr>
+<td class="org-right">2.795</td>
+<td class="org-right">5.229</td>
+<td class="org-right">12.016</td>
+</tr>
+
+<tr>
+<td class="org-right">5.031</td>
+<td class="org-right">4.333</td>
+<td class="org-right">11.347</td>
+</tr>
+
+<tr>
+<td class="org-right">7.267</td>
+<td class="org-right">1.942</td>
+<td class="org-right">12.684</td>
+</tr>
+
+<tr>
+<td class="org-right">6.336</td>
+<td class="org-right">6.673</td>
+<td class="org-right">11.013</td>
+</tr>
+
+<tr>
+<td class="org-right">1.863</td>
+<td class="org-right">2.49</td>
+<td class="org-right">11.013</td>
+</tr>
+
+<tr>
+<td class="org-right">8.572</td>
+<td class="org-right">4.283</td>
+<td class="org-right">12.35</td>
+</tr>
+
+<tr>
+<td class="org-right">7.826</td>
+<td class="org-right">0.598</td>
+<td class="org-right">11.682</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Connectivity:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">1</td>
+<td class="org-right">1</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">2</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">3</td>
+<td class="org-right">4</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Topology:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">[16]</td>
+</tr>
+
+<tr>
+<td class="org-left">[21]</td>
+</tr>
+
+<tr>
+<td class="org-left">[23, 25]</td>
+</tr>
+
+<tr>
+<td class="org-left">[18, 23]</td>
+</tr>
+
+<tr>
+<td class="org-left">[25, 21]</td>
+</tr>
+
+<tr>
+<td class="org-left">[19, 25]</td>
+</tr>
+
+<tr>
+<td class="org-left">[19, 20]</td>
+</tr>
+
+<tr>
+<td class="org-left">[22, 24]</td>
+</tr>
+
+<tr>
+<td class="org-left">[20, 18, 17]</td>
+</tr>
+
+<tr>
+<td class="org-left">[21, 19, 16]</td>
+</tr>
+
+<tr>
+<td class="org-left">[20, 24, 23]</td>
+</tr>
+
+<tr>
+<td class="org-left">[17, 24, 18, 22]</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Sites by periodicity:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">40</td>
+<td class="org-right">45</td>
+<td class="org-right">203</td>
+<td class="org-right">242</td>
+<td class="org-right">250</td>
+<td class="org-right">282</td>
+<td class="org-right">287</td>
+<td class="org-right">294</td>
+<td class="org-right">389</td>
+<td class="org-right">409</td>
+<td class="org-right">415</td>
+<td class="org-right">451</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+Sites by symmetry:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+
+<col  class="org-right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-right">40</td>
+<td class="org-right">45</td>
+<td class="org-right">203</td>
+<td class="org-right">242</td>
+<td class="org-right">250</td>
+<td class="org-right">282</td>
+<td class="org-right">287</td>
+<td class="org-right">294</td>
+<td class="org-right">389</td>
+<td class="org-right">409</td>
+<td class="org-right">415</td>
+<td class="org-right">451</td>
+</tr>
+</tbody>
+</table>
+
+<p>
 When we call <code>get_periodic_sites()</code>, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set <code>screen</code> to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
 </p>
 
@@ -634,8 +1040,8 @@ NOTE: The indices of the periodic and symmetry site functions are in reference t
 </div>
 </div>
 
-<div id="outline-container-org9043dad" class="outline-4">
-<h4 id="org9043dad"><span class="section-number-4">1.2.3</span> Adsorption vectors</h4>
+<div id="outline-container-orge7728b9" class="outline-4">
+<h4 id="orge7728b9"><span class="section-number-4">1.2.3</span> Adsorption vectors</h4>
 <div class="outline-text-4" id="text-1-2-3">
 <p>
 The most commonly studied miller indices, such as fcc(111), produce a flat surface. This means the most favorable angle of adsorption will always be perpendicular to the surface. This is not always the case for higher miller indices. 
@@ -647,7 +1053,7 @@ CatGen defines the most favorable vector for adsorption as the one which is furt
 
 
 <div class="figure">
-<p><img src="../static/adsorption-vectors.png" alt="adsorption-vectors.png" />
+<p><img src="../adsorption-vectors.png" alt="adsorption-vectors.png" />
 </p>
 <p><span class="figure-number">Figure 5: </span>Illustration of adsorption vectors (red dots) on a CuPd<sub>3</sub> (211) surface.</p>
 </div>
@@ -686,8 +1092,8 @@ atoms.edit()
 </div>
 </div>
 
-<div id="outline-container-org4b4674b" class="outline-4">
-<h4 id="org4b4674b"><span class="section-number-4">1.2.4</span> Adsorption structure builder</h4>
+<div id="outline-container-orgd415e03" class="outline-4">
+<h4 id="orgd415e03"><span class="section-number-4">1.2.4</span> Adsorption structure builder</h4>
 <div class="outline-text-4" id="text-1-2-4">
 <p>
 Creating good initial guesses for 3D structures can be tedious to perform by hand, even for small molecules. The <code>Builder</code> module in the adsorption package seeks to help automate this task.
@@ -720,16 +1126,17 @@ atoms[3]<span style="color: #BA36A5;">.symbol</span> = <span style="color: #0080
 </pre>
 </div>
 
-<p>
+<pre class="example">
 Adsorption builder for Cu4Pd12 slab.
 unique adsorption sites: 9
 site connectivity: [1 1 2 2 2 3 3 3 3]
 unique adsorption edges: 21
-</p>
+
+</pre>
 </div>
 
 <ol class="org-ol">
-<li><a id="org7dfa303"></a>Monodentate adsorption<br />
+<li><a id="orgec911e7"></a>Monodentate adsorption<br />
 <div class="outline-text-5" id="text-1-2-4-1">
 <p>
 When a single atom of the molecule is considered bonded to the surface, the builder attempts to arrange non-bonded atoms in an intelligent fashion.
@@ -740,7 +1147,7 @@ In this example, the use of <code>-1</code> as a tag on the adsorbate is used to
 </p>
 
 <p>
-<img src="../static/CH3-ads.png" alt="CH3-ads.png" /> <img src="../static/CH3-ads-top.png" alt="CH3-ads-top.png" />
+<img src="../CH3-ads.png" alt="CH3-ads.png" /> <img src="../CH3-ads-top.png" alt="CH3-ads-top.png" />
 </p>
 
 <div class="org-src-container">
@@ -772,7 +1179,7 @@ ads_slab.edit()
 </div>
 </li>
 
-<li><a id="org4cf28ef"></a>Bidentate adsorption<br />
+<li><a id="org5f5c064"></a>Bidentate adsorption<br />
 <div class="outline-text-5" id="text-1-2-4-2">
 <p>
 The <code>Builder</code> class can also produce structures for species bonded in two locations. In this example, indexing of the atoms which bond to the surface is done with the <code>bonds</code> key.
@@ -783,7 +1190,7 @@ Also, using setting the <code>index</code> key to <code>-1</code> will return a 
 </p>
 
 <p>
-<img src="../static/CH2CH-ads.png" alt="CH2CH-ads.png" /> <img src="../static/CH2CH-ads-top.png" alt="CH2CH-ads-top.png" />
+<img src="../CH2CH-ads.png" alt="CH2CH-ads.png" /> <img src="../CH2CH-ads-top.png" alt="CH2CH-ads-top.png" />
 </p>
 
 <div class="org-src-container">
@@ -819,8 +1226,8 @@ view(ads_slab)
 </div>
 </div>
 
-<div id="outline-container-org7a07504" class="outline-3">
-<h3 id="org7a07504"><span class="section-number-3">1.3</span> Gas-phase:</h3>
+<div id="outline-container-org24eeb02" class="outline-3">
+<h3 id="org24eeb02"><span class="section-number-3">1.3</span> Gas-phase:</h3>
 <div class="outline-text-3" id="text-1-3">
 <ul class="org-ul">
 <li class="on"><code>[X]</code> Various chemical species (C, H, and O currently tested)</li>
@@ -834,19 +1241,19 @@ view(ads_slab)
 </ul>
 </div>
 
-<div id="outline-container-org97f4274" class="outline-4">
-<h4 id="org97f4274"><span class="section-number-4">1.3.1</span> Example usage:</h4>
+<div id="outline-container-orgb177929" class="outline-4">
+<h4 id="orgb177929"><span class="section-number-4">1.3.1</span> Example usage:</h4>
 <div class="outline-text-4" id="text-1-3-1">
 <p>
 Below is an example script which generates some simple figures using <a href="https://networkx.github.io/documentation/networkx-1.10/index.html">NetworkX</a> code for all molecules up to C<sub>2</sub>H<sub>6</sub>.
 </p>
 
 <p>
-<img src="../static/molecule-1.png" alt="molecule-1.png" /> <img src="../static/molecule-2.png" alt="molecule-2.png" /> <img src="../static/molecule-3.png" alt="molecule-3.png" /> <img src="../static/molecule-4.png" alt="molecule-4.png" /> 
-<img src="../static/molecule-5.png" alt="molecule-5.png" /> <img src="../static/molecule-6.png" alt="molecule-6.png" /> <img src="../static/molecule-7.png" alt="molecule-7.png" /> <img src="../static/molecule-8.png" alt="molecule-8.png" />
-<img src="../static/molecule-9.png" alt="molecule-9.png" /> <img src="../static/molecule-10.png" alt="molecule-10.png" /> <img src="../static/molecule-11.png" alt="molecule-11.png" /> <img src="../static/molecule-12.png" alt="molecule-12.png" />
-<img src="../static/molecule-13.png" alt="molecule-13.png" /> <img src="../static/molecule-14.png" alt="molecule-14.png" /> <img src="../static/molecule-15.png" alt="molecule-15.png" /> <img src="../static/molecule-16.png" alt="molecule-16.png" />
-<img src="../static/molecule-17.png" alt="molecule-17.png" />
+<img src="../molecule-1.png" alt="molecule-1.png" /> <img src="../molecule-2.png" alt="molecule-2.png" /> <img src="../molecule-3.png" alt="molecule-3.png" /> <img src="../molecule-4.png" alt="molecule-4.png" /> 
+<img src="../molecule-5.png" alt="molecule-5.png" /> <img src="../molecule-6.png" alt="molecule-6.png" /> <img src="../molecule-7.png" alt="molecule-7.png" /> <img src="../molecule-8.png" alt="molecule-8.png" />
+<img src="../molecule-9.png" alt="molecule-9.png" /> <img src="../molecule-10.png" alt="molecule-10.png" /> <img src="../molecule-11.png" alt="molecule-11.png" /> <img src="../molecule-12.png" alt="molecule-12.png" />
+<img src="../molecule-13.png" alt="molecule-13.png" /> <img src="../molecule-14.png" alt="molecule-14.png" /> <img src="../molecule-15.png" alt="molecule-15.png" /> <img src="../molecule-16.png" alt="molecule-16.png" />
+<img src="../molecule-17.png" alt="molecule-17.png" />
 </p>
 
 <div class="org-src-container">
@@ -867,15 +1274,16 @@ Below is an example script which generates some simple figures using <a href="ht
 </pre>
 </div>
 
-<p>
+<pre class="example">
 Process completed in 0.0s
-</p>
+
+</pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgdd0820b" class="outline-3">
-<h3 id="orgdd0820b"><span class="section-number-3">1.4</span> Reaction mechanisms:</h3>
+<div id="outline-container-orgf0caef0" class="outline-3">
+<h3 id="orgf0caef0"><span class="section-number-3">1.4</span> Reaction mechanisms:</h3>
 <div class="outline-text-3" id="text-1-4">
 <ul class="org-ul">
 <li class="on"><code>[X]</code> Addition and Reduction reactions (R1 + R2 &lt;&#x2013;&gt; P1)</li>
@@ -885,8 +1293,8 @@ Process completed in 0.0s
 </ul>
 </div>
 
-<div id="outline-container-org8cc13c1" class="outline-4">
-<h4 id="org8cc13c1"><span class="section-number-4">1.4.1</span> Reaction networks:</h4>
+<div id="outline-container-org3cd1734" class="outline-4">
+<h4 id="org3cd1734"><span class="section-number-4">1.4.1</span> Reaction networks:</h4>
 <div class="outline-text-4" id="text-1-4-1">
 <p>
 Enumeration of possible elementary reaction steps for gas-phase C<sub>2</sub>H<sub>6</sub> species.
@@ -894,7 +1302,7 @@ Enumeration of possible elementary reaction steps for gas-phase C<sub>2</sub>H<s
 
 
 <div class="figure">
-<p><img src="../static/reaction-network.png" alt="reaction-network.png" />
+<p><img src="../reaction-network.png" alt="reaction-network.png" />
 </p>
 <p><span class="figure-number">Figure 6: </span>Reaction network for C2H6 gas phase molecules. Numbers are indexes from the gas-phase example figures.</p>
 </div>
@@ -918,15 +1326,16 @@ Pathway exploration is currently integrated with gas-phase molecule search. See 
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   reconfiguration=<span style="color: #D0372D;">False</span>,
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   substitution=<span style="color: #D0372D;">False</span>)
 
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   rn.plot_reaction_network(file_name=<span style="color: #008000;">'../static/reaction-network.png'</span>)
+<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   rn.plot_reaction_network(file_name=<span style="color: #008000;">'../reaction-network.png'</span>)
 
 <span style="color: #0000FF;">print</span>(<span style="color: #008000;">'Process completed in {:.1f}s'</span>.<span style="color: #006FE0;">format</span>(time.time() - start))
 </pre>
 </div>
 
-<p>
+<pre class="example">
 Process completed in 0.3s
-</p>
+
+</pre>
 
 <p>
 Once the reaction network has been produce, we can illustrate the potential pathways using the following code.
@@ -943,7 +1352,7 @@ Once the reaction network has been produce, we can illustrate the potential path
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #BA36A5;">pathways</span> = rn.load_pathways()
 
 <span style="color: #BA36A5;">names</span> = np.empty(<span style="color: #006FE0;">len</span>(molecules) + 1, dtype=<span style="color: #008000;">'a5'</span>)
-<span style="color: #BA36A5;">names</span>[0] = <span style="color: #008000;">''</span>
+
 <span style="color: #0000FF;">for</span> k, v <span style="color: #0000FF;">in</span> molecules.items():
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #BA36A5;">atn</span> = nx.get_node_attributes(v.graph, <span style="color: #008000;">'number'</span>)
 
@@ -951,8 +1360,13 @@ Once the reaction network has been produce, we can illustrate the potential path
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #BA36A5;">hill</span> = formula_hill(<span style="color: #006FE0;">list</span>(atn.values()))
 <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #BA36A5;">names</span>[k] = hill
 
+<span style="color: #0000FF;">print</span>(<span style="color: #008000;">'|Reactants|Products|'</span>)
+<span style="color: #0000FF;">print</span>(<span style="color: #008000;">'|-'</span>)
 <span style="color: #0000FF;">for</span> path <span style="color: #0000FF;">in</span> pathways:
-<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #0000FF;">print</span>(<span style="color: #008000;">'|{} + {} --&gt; {} + {}|'</span>.<span style="color: #006FE0;">format</span>(*names[path]))
+<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #0000FF;">print</span>(<span style="color: #008000;">'|{} + {} | {} |'</span>.<span style="color: #006FE0;">format</span>(
+<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   names[path][0].decode(<span style="color: #008000;">"utf-8"</span>),
+<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   names[path][1].decode(<span style="color: #008000;">"utf-8"</span>),
+<span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   <span style="color: #9B9B9B; background-color: #EDEDED;"> </span>   names[path][3].decode(<span style="color: #008000;">"utf-8"</span>)))
 </pre>
 </div>
 
@@ -961,222 +1375,149 @@ Once the reaction network has been produce, we can illustrate the potential path
 
 <colgroup>
 <col  class="org-left" />
+
+<col  class="org-left" />
 </colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Reactants</th>
+<th scope="col" class="org-left">Products</th>
+</tr>
+</thead>
 <tbody>
 <tr>
-<td class="org-left">b'H' + b'H' &#x2013;&gt; b'' + b'H2'</td>
+<td class="org-left">H + H</td>
+<td class="org-left">H2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'H' &#x2013;&gt; b'' + b'H2'</td>
+<td class="org-left">H + C</td>
+<td class="org-left">CH</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C' &#x2013;&gt; b'' + b'CH'</td>
+<td class="org-left">H + CH</td>
+<td class="org-left">CH2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C' &#x2013;&gt; b'' + b'CH'</td>
+<td class="org-left">H + C2</td>
+<td class="org-left">C2H</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH' &#x2013;&gt; b'' + b'CH2'</td>
+<td class="org-left">H + CH2</td>
+<td class="org-left">CH3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH' &#x2013;&gt; b'' + b'CH2'</td>
+<td class="org-left">H + C2H</td>
+<td class="org-left">C2H2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2' &#x2013;&gt; b'' + b'C2H'</td>
+<td class="org-left">H + C2H</td>
+<td class="org-left">C2H2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2' &#x2013;&gt; b'' + b'C2H'</td>
+<td class="org-left">H + CH3</td>
+<td class="org-left">CH4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH2' &#x2013;&gt; b'' + b'CH3'</td>
+<td class="org-left">H + C2H2</td>
+<td class="org-left">C2H3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH2' &#x2013;&gt; b'' + b'CH3'</td>
+<td class="org-left">H + C2H2</td>
+<td class="org-left">C2H3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H' &#x2013;&gt; b'' + b'C2H2'</td>
+<td class="org-left">H + C2H2</td>
+<td class="org-left">C2H3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H' &#x2013;&gt; b'' + b'C2H2'</td>
+<td class="org-left">H + C2H3</td>
+<td class="org-left">C2H4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H' &#x2013;&gt; b'' + b'C2H2'</td>
+<td class="org-left">H + C2H3</td>
+<td class="org-left">C2H4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H' &#x2013;&gt; b'' + b'C2H2'</td>
+<td class="org-left">H + C2H3</td>
+<td class="org-left">C2H4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH3' &#x2013;&gt; b'' + b'CH4'</td>
+<td class="org-left">H + C2H4</td>
+<td class="org-left">C2H5</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'CH3' &#x2013;&gt; b'' + b'CH4'</td>
+<td class="org-left">H + C2H4</td>
+<td class="org-left">C2H5</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">H + C2H5</td>
+<td class="org-left">C2H6</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">C + C</td>
+<td class="org-left">C2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">C + CH</td>
+<td class="org-left">C2H</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">C + CH2</td>
+<td class="org-left">C2H2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">C + CH3</td>
+<td class="org-left">C2H3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H2' &#x2013;&gt; b'' + b'C2H3'</td>
+<td class="org-left">CH + CH</td>
+<td class="org-left">C2H2</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
+<td class="org-left">CH + CH2</td>
+<td class="org-left">C2H3</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
+<td class="org-left">CH + CH3</td>
+<td class="org-left">C2H4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
+<td class="org-left">CH2 + CH2</td>
+<td class="org-left">C2H4</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
+<td class="org-left">CH2 + CH3</td>
+<td class="org-left">C2H5</td>
 </tr>
 
 <tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H3' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H4' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H4' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H4' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H4' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H5' &#x2013;&gt; b'' + b'C2H6'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'H' + b'C2H5' &#x2013;&gt; b'' + b'C2H6'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'C' &#x2013;&gt; b'' + b'C2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'C' &#x2013;&gt; b'' + b'C2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH' &#x2013;&gt; b'' + b'C2H'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH' &#x2013;&gt; b'' + b'C2H'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH2' &#x2013;&gt; b'' + b'C2H2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH2' &#x2013;&gt; b'' + b'C2H2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH3' &#x2013;&gt; b'' + b'C2H3'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'C' + b'CH3' &#x2013;&gt; b'' + b'C2H3'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH' &#x2013;&gt; b'' + b'C2H2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH' &#x2013;&gt; b'' + b'C2H2'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH2' &#x2013;&gt; b'' + b'C2H3'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH2' &#x2013;&gt; b'' + b'C2H3'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH3' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH' + b'CH3' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH2' + b'CH2' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH2' + b'CH2' &#x2013;&gt; b'' + b'C2H4'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH2' + b'CH3' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH2' + b'CH3' &#x2013;&gt; b'' + b'C2H5'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH3' + b'CH3' &#x2013;&gt; b'' + b'C2H6'</td>
-</tr>
-
-<tr>
-<td class="org-left">b'CH3' + b'CH3' &#x2013;&gt; b'' + b'C2H6'</td>
+<td class="org-left">CH3 + CH3</td>
+<td class="org-left">C2H6</td>
 </tr>
 </tbody>
 </table>
@@ -1184,8 +1525,8 @@ Once the reaction network has been produce, we can illustrate the potential path
 </div>
 </div>
 
-<div id="outline-container-org889691c" class="outline-3">
-<h3 id="org889691c"><span class="section-number-3">1.5</span> Reaction routes</h3>
+<div id="outline-container-org50cf3ef" class="outline-3">
+<h3 id="org50cf3ef"><span class="section-number-3">1.5</span> Reaction routes</h3>
 <div class="outline-text-3" id="text-1-5">
 <ul class="org-ul">
 <li class="on"><code>[X]</code> Overall/Response reaction routes</li>
@@ -1196,8 +1537,8 @@ Once the reaction network has been produce, we can illustrate the potential path
 </ul>
 </div>
 
-<div id="outline-container-org071e95c" class="outline-4">
-<h4 id="org071e95c"><span class="section-number-4">1.5.1</span> Overall/Response reaction routes</h4>
+<div id="outline-container-org1f6c48b" class="outline-4">
+<h4 id="org1f6c48b"><span class="section-number-4">1.5.1</span> Overall/Response reaction routes</h4>
 <div class="outline-text-4" id="text-1-5-1">
 <p>
 For a given set of elementary mechanisms, there is frequently many types of chemistry which could be considered simultaneously. As an example, we reproduce an example from the original literature which the algorithm is adopted from <a class='org-ref-reference' href="#fishtik-2004-new-approac">fishtik-2004-new-approac</a>.
@@ -1239,7 +1580,7 @@ In this example, we choose the number of independent species.
 </pre>
 </div>
 
-<p>
+<pre class="example">
 Overall reaction routes:
 [[ 0  0  0  0  0  0  2 -1 -1  0  0  0]
  [ 0  0  0  0  0  0  0  1  0  2 -2  0]
@@ -1249,9 +1590,7 @@ Overall reaction routes:
  [ 0  0  0  0  0  2  6  0 -3 -2  0 -4]
  [ 0  0  0  0  0  1  4  0 -2  0 -1 -2]
  [ 0  0  0  0  0  1  0  0  0 -4  3 -2]] 
-</p>
 
-<p>
 Terminal species:
 [[ 5  6  7  8  9]
  [ 5  6  7  9 10]
@@ -1261,7 +1600,7 @@ Terminal species:
  [ 5  6  8  9 11]
  [ 5  6  8 10 11]
  [ 5  6  9 10 11]]
-</p>
+</pre>
 
 <p>
 The terminal species matrix will always contain <code>s + 1</code> entries, where <code>s</code> is the number of elements in the chemistry. This does not necessarily mean that the overall reaction produced will include all <code>s + 1</code> species.
@@ -1269,8 +1608,8 @@ The terminal species matrix will always contain <code>s + 1</code> entries, wher
 </div>
 </div>
 
-<div id="outline-container-org19fcf2c" class="outline-4">
-<h4 id="org19fcf2c"><span class="section-number-4">1.5.2</span> Linearly independent set</h4>
+<div id="outline-container-org2e49186" class="outline-4">
+<h4 id="org2e49186"><span class="section-number-4">1.5.2</span> Linearly independent set</h4>
 <div class="outline-text-4" id="text-1-5-2">
 <p>
 Currently, only Happel-Sellers reaction routes can be enumerated <a class='org-ref-reference' href="#fishtik-2004-new-approac">fishtik-2004-new-approac</a>. These routes require that the user choose a number of terminal species equal to <code>s + 1</code>. The terminal species selected will only produce overall reactions associated with the chemistry which is enumerated in the previous example.
@@ -1335,7 +1674,7 @@ Below we take another example from to produce a linearly independent set of reac
 </pre>
 </div>
 
-<p>
+<pre class="example">
 Linearly independent set of reaction routes:
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0  0  0]
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0  0  0]
@@ -1344,9 +1683,7 @@ Linearly independent set of reaction routes:
  [ 0  0  0  1  0  1  0  0  0  0  0  0 -1  0  0]
  [ 1  1  1  0  1  1  1  0  0  0  0  0  0  1  0]
  [ 1  1  1  0  1  1  0  1  0  0  0  0  0  0  1]] 
-</p>
 
-<p>
 Overall reaction routes:
 [[ 0  0  0  0  0  0  0  0 -1 -1  1  1]
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
@@ -1355,7 +1692,7 @@ Overall reaction routes:
  [ 0  0  0  0  0  0  0  0  0  0  0  0]
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]
  [ 0  0  0  0  0  0  0  0 -1 -1  1  1]]
-</p>
+</pre>
 
 <p>
 Note that all of the linearly independent reaction routes return the same overall reaction except for one. This is because some routes will return a trivial solution. Routes which return the correct overall chemistry are known as full routes (FR) and those which return trivial solutions are called empty routes (ER).
@@ -1363,8 +1700,8 @@ Note that all of the linearly independent reaction routes return the same overal
 </div>
 </div>
 
-<div id="outline-container-orgb0d20bc" class="outline-4">
-<h4 id="orgb0d20bc"><span class="section-number-4">1.5.3</span> Complete full and empty enumeration</h4>
+<div id="outline-container-orgd52d961" class="outline-4">
+<h4 id="orgd52d961"><span class="section-number-4">1.5.3</span> Complete full and empty enumeration</h4>
 <div class="outline-text-4" id="text-1-5-3">
 <p>
 Computationally, collecting an arbitrary set of linearly independent reaction routes is computationally inexpensive and can potentially be useful on its own. Complete enumeration techniques currently implemented in CatGen become computationally infeasible with large numbers of species and elementary steps.
@@ -1429,7 +1766,7 @@ np.set_printoptions(threshold=np.inf)
 </pre>
 </div>
 
-<p>
+<pre class="example">
 17 Full reaction routes:
 [[ 1  1  1  1  1  1  1  0  1  0  0  0  0]
  [ 1  1  1  1  1  1  0  0  0  1  0  0  0]
@@ -1448,9 +1785,7 @@ np.set_printoptions(threshold=np.inf)
  [ 1  1  1  1  1  2  0  1  0  0  0  1 -1]
  [ 1  1  1  1  1  1  0  1  1  0  0  1  0]
  [ 1  1  1  1  1  1  1  0  0  0  1 -1  0]] 
-</p>
 
-<p>
 12 Empty reaction routes:
 [[ 0  0  0  0  0  0  1 -1  0  0  0 -1  0]
  [ 0  0  0  0  0  0  0  0  1  0 -1  1  0]
@@ -1464,7 +1799,7 @@ np.set_printoptions(threshold=np.inf)
  [ 0  0  0  0  0  1  0  1  0 -1  0  1 -1]
  [ 0  0  0  0  0  1  1  0  0 -1  0  0 -1]
  [ 0  0  0  0  0  1  1 -1  0  0 -1  0 -1]]
-</p>
+</pre>
 </div>
 </div>
 </div>
@@ -1472,7 +1807,7 @@ np.set_printoptions(threshold=np.inf)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Jacob Boes</p>
-<p class="date">Created: 2018-06-01 Fri 01:41</p>
+<p class="date">Created: 2018-06-02 Sat 20:10</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

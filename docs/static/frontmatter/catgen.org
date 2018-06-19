@@ -93,7 +93,7 @@ terminations = gen.get_unique_terminations()
 
 images = []
 for i, t in enumerate(terminations):
-    images += [gen.get_slab(iterm=i)]
+    images += [gen.get_slab(size=1, iterm=i)]
 
 view(images)
 #+END_SRC
@@ -135,6 +135,19 @@ for i in atoms.get_surface_atoms():
 
 atoms.edit()
 #+END_SRC
+
+#+RESULTS:
+:RESULTS:
+[[0 3 3 1 1 1 0 0 0]
+ [3 0 3 1 1 1 0 0 0]
+ [3 3 0 1 1 1 0 0 0]
+ [1 1 1 0 3 3 1 1 1]
+ [1 1 1 3 0 3 1 1 1]
+ [1 1 1 3 3 0 1 1 1]
+ [0 0 0 1 1 1 0 3 3]
+ [0 0 0 1 1 1 3 0 3]
+ [0 0 0 1 1 1 3 3 0]]
+:END:
 
 #+BEGIN_SRC python :results output org drawer :exports results
 from catkit.build import surface
@@ -279,6 +292,8 @@ sites.plot('../Pd3Cu-adsorption-sites.png')
 #+END_SRC
 
 #+CAPTION: Delaunay triangulation of surface atoms for fcc(111) structure.
+#+attr_latex: :width 0.35\linewidth :placement [H]
+#+attr_org: :width 500
 [[../Pd3Cu-adsorption-sites.png]]
 
 #+BEGIN_SRC python :results silent :exports code
@@ -360,6 +375,37 @@ for i, c in enumerate(coordinates):
 atoms.edit()
 #+END_SRC
 
+#+RESULTS:
+:RESULTS:
+Coordinates:
+ [[ 0.          0.         10.34522484]
+ [ 8.66025404  9.258201   11.68153105]
+ [ 1.44337567  0.19287919 11.3474545 ]
+ [ 4.33012702  6.36501319 10.67930139]
+ [ 7.21687836  8.48668425 12.34968415]
+ [ 7.21687836  5.59349644 11.3474545 ]
+ [ 5.77350269  3.66470456 10.67930139]
+ [ 7.21687836  0.96439594 10.67930139]
+ [ 3.84900179  5.52920337 11.01337794]
+ [ 7.69800359  7.58658137 12.34968415]
+ [ 6.73575314  0.12858612 11.01337794]
+ [ 7.21687836  3.85758375 11.68153105]] 
+
+Connectivity:
+ [1 1 2 2 2 2 2 2 3 3 3 4] 
+
+Topology:
+ [array([16]) array([21]) array([16, 22]) array([17, 19]) array([21, 25])
+ array([17, 23]) array([17, 18]) array([18, 16]) array([20, 17, 19])
+ array([25, 23, 21]) array([18, 21, 16]) array([17, 24, 18, 23])] 
+
+Sites by periodicity:
+ [ 40  45  98 141 146 224 229 234 343 376 381 447] 
+
+Sites by symmetry:
+ [ 40  45  98 141 146 224 229 234 343 376 381 447]
+:END:
+
 #+BEGIN_SRC python :results output org drawer :exports results
 from catkit.gen.adsorption import AdsorptionSites
 from catkit.gen.surface import SlabGenerator
@@ -437,18 +483,18 @@ write(
 Coordinates:
 #+attr_latex: :mode math :environment matrix
 |     x |     y |      z |
-|-------+-------+--------|
-| 2.236 | 0.598 | 11.682 |
-| 0.559 | 6.126 | 12.684 |
-| 8.944 | 6.873 | 11.682 |
-| 1.118 | 7.769 |  12.35 |
-| 2.795 | 5.229 | 12.016 |
-| 5.031 | 4.333 | 11.347 |
-| 7.267 | 1.942 | 12.684 |
-| 6.336 | 6.673 | 11.013 |
-| 1.863 |  2.49 | 11.013 |
-| 8.572 | 4.283 |  12.35 |
-| 7.826 | 0.598 | 11.682 |
+|   0.0 |   0.0 | 10.345 |
+|  8.66 | 9.258 | 11.682 |
+| 1.443 | 0.193 | 11.347 |
+|  4.33 | 6.365 | 10.679 |
+| 7.217 | 8.487 |  12.35 |
+| 7.217 | 5.593 | 11.347 |
+| 5.774 | 3.665 | 10.679 |
+| 7.217 | 0.964 | 10.679 |
+| 3.849 | 5.529 | 11.013 |
+| 7.698 | 7.587 |  12.35 |
+| 6.736 | 0.129 | 11.013 |
+| 7.217 | 3.858 | 11.682 |
 
 Connectivity:
 #+attr_latex: :mode math :environment matrix
@@ -458,22 +504,22 @@ Topology:
 #+attr_latex: :mode math :environment matrix
 | [16]             |
 | [21]             |
-| [23, 25]         |
-| [18, 23]         |
-| [25, 21]         |
-| [19, 25]         |
-| [19, 20]         |
-| [22, 24]         |
-| [20, 18, 17]     |
-| [21, 19, 16]     |
-| [20, 24, 23]     |
-| [17, 24, 18, 22] |
+| [16, 22]         |
+| [17, 19]         |
+| [21, 25]         |
+| [17, 23]         |
+| [17, 18]         |
+| [18, 16]         |
+| [20, 17, 19]     |
+| [25, 23, 21]     |
+| [18, 21, 16]     |
+| [17, 24, 18, 23] |
 
 Sites by periodicity:
-|40|45|203|242|250|282|287|294|389|409|415|451
+| 40 | 45 | 98 | 141 | 146 | 224 | 229 | 234 | 343 | 376 | 381 | 447 |
 
 Sites by symmetry:
-|40|45|203|242|250|282|287|294|389|409|415|451
+| 40 | 45 | 98 | 141 | 146 | 224 | 229 | 234 | 343 | 376 | 381 | 447 |
 :END:
 
 When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
@@ -693,7 +739,7 @@ slab = gen.get_slab()
 adsorbate = molecule('C2H3')[1]
 
 builder = Builder(slab)
-ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=15)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=6)
 
 img_name = '../CH2CH-ads.pov'
 write(
