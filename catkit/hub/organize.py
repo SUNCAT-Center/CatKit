@@ -208,7 +208,6 @@ def fuzzy_match(structures, options):
                             equal += f1[i1:i2]
 
                     if options.verbose:
-                        #print('    f1 {f1} f2 {f2}'.format(f1=f1, f2=f2))
                         print("    ADDITIONS " + str(additions))
                         print("    SUBTRACTIONS " + str(subtractions))
 
@@ -217,19 +216,19 @@ def fuzzy_match(structures, options):
                             sorted(
                                 ase.atoms.string2symbols(
                                     subtractions)))
-                    except:
+                    except Exception as e:
                         if options.verbose:
-                            print("Warning: trouble parsing {subtractions}"
-                                  .format(subtractions=subtractions))
+                            print("Warning: trouble parsing {subtractions}:{e}"
+                                  .format(subtractions=subtractions, e=e))
                     try:
                         additions = ''.join(
                             sorted(
                                     ase.atoms.string2symbols(
                                         additions)))
-                    except:
+                    except Exception as e:
                         if options.verbose:
-                            print("Warning: trouble parsing {additions}"
-                                  .format(additions=additions))
+                            print("Warning: trouble parsing {additions}, {e}"
+                                  .format(additions=additions, e=e))
 
                     equal_formula = get_chemical_formula(
                         ase.atoms.Atoms(equal))
@@ -249,13 +248,6 @@ def fuzzy_match(structures, options):
                             gas_phase_references.molecules2symbols(
                                 [additions, subtractions],
                             )
-                        references = \
-                            gas_phase_references.construct_reference_system(
-                                difference_symbols, gas_phase_candidates,
-                            )
-                        atomic_references = {}
-                        for i, j in references:
-                            atomic_references[i] = j
 
                         adsorbates = []
                         if additions:
@@ -267,12 +259,46 @@ def fuzzy_match(structures, options):
                             print("    ADDITIONS " + str(additions))
                             print("    SUBTRACTIONS " + str(subtractions))
                             print("    ADSORBATES " + str(adsorbates))
-                            print("    REFERENCES " + str(references))
 
-                        stoichiometry_factors =  \
-                            gas_phase_references.get_stoichiometry_factors(
-                                adsorbates, references,
-                            )
+                        # TODO: len(gas_phase_candidates) >= symbols
+                        if len(gas_phase_candidates)  \
+                           >= len(difference_symbols):
+                            references = \
+                                gas_phase_references \
+                                .construct_reference_system(
+                                    difference_symbols,
+                                    gas_phase_candidates,
+                                    options,
+                                )
+                            if options.verbose:
+                                print(" REFERENCES " + str(references))
+
+                            stoichiometry_factors =  \
+                                gas_phase_references.get_stoichiometry_factors(
+                                    adsorbates, references,
+                                )
+                        else:
+                            stoichiometry_factors = {}
+                            for adsorbate in adsorbates:
+                                if adsorbate in gas_phase_candidates:
+                                    stoichiometry_factors \
+                                        .setdefault(adsorbate, {}) \
+                                        .setdefault(adsorbate, 1)
+                                else:
+                                    raise UserWarning((
+                                        "Could not construct stoichiometry"
+                                        " factors for {adsorbate}\n"
+                                        "from {candidates}."
+                                        "Please add more gas phase molecule"
+                                        " to your folder.\n"
+                                    ).format(
+                                        adsorbate=adsorbate,
+                                        candidates=gas_phase_candidates,
+                                    ))
+
+                        if options.verbose:
+                            print("STOICHIOMETRY FACTORS "
+                                  + str(stoichiometry_factors))
                         if options.verbose:
                             print("COLLECTED ENERGIES")
                             print(collected_energies)
@@ -302,11 +328,13 @@ def fuzzy_match(structures, options):
                         if additions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(additions)) + '*@site' + str(key_count.get(key, 0))
+                                    ase.atoms.Atoms(additions)) \
+                                + '*@site' + str(key_count.get(key, 0))
                         if subtractions:
                             formula += ' ' + \
                                 get_chemical_formula(
-                                    ase.atoms.Atoms(subtractions)) + '*@site' + str(key_count.get(key, 0))
+                                    ase.atoms.Atoms(subtractions)) \
+                                + '*@site' + str(key_count.get(key, 0))
 
                         gas_phase_corrections = {}
 
