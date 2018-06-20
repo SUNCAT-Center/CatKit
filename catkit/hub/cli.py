@@ -373,12 +373,6 @@ def connect(user):
     show_default=True,
     help="Regular expression that matches"
          " only those files that are included.",)
-@click.option(
-    '-m', '--max-energy',
-    type=float,
-    default=10.,
-    show_default=True,
-    help="Maximum absolute energy (in eV) that is considered.",)
 @click.option('-k', '--keep-all-energies',
               type=bool,
               is_flag=True,
@@ -386,6 +380,20 @@ def connect(user):
               "are found keep all energies"
               "not only the most stable."
               )
+@click.option(
+    '-m', '--max-energy',
+    type=float,
+    default=10.,
+    show_default=True,
+    help="Maximum absolute energy (in eV) that is considered.",)
+@click.option(
+    '-n', '--no-hydrogen',
+    type=bool,
+    is_flag=True,
+    help="By default hydrogen is included as a gas-phase species"
+         "to avoid using typically less accurate gas-phase references."
+         "Use this flag to avoid using hydrogen."
+             )
 @click.option(
     '-r', '--exclude-reference',
     type=str,
