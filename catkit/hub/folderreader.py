@@ -40,7 +40,7 @@ class FolderReader:
 
     def __init__(self, folder_name, debug=False, strict=True, verbose=False,
                  update=True, stdin=sys.stdin,
-                 stdout=sys.stdout):
+                 stdout=sys.stdout, userhandle=None):
         self.debug = debug
         self.strict = strict
         self.verbose = verbose
@@ -48,6 +48,8 @@ class FolderReader:
 
         self.catbase, self.data_base, self.user, self.user_base \
             = get_bases(folder_name=folder_name)
+        if userhandle:
+            self.user = userhandle
         self.user_base_level = len(self.user_base.split("/"))
 
         self.pub_level = 1

@@ -168,20 +168,20 @@ def main(
                       for i in range(len(states)) if states[i] == 'gas']
 
     for name in set(gas_names):
-        with open(gas_base + 'MISSING: {}_gas.traj'.format(name), 'w'):
+        with open(gas_base + 'MISSING:{}_gas'.format(name), 'w'):
             pass
 
     for bulk in bulk_compositions:
         for crystal_structure in crystal_structures:
             bulk_name = bulk + '_' + crystal_structure
             facet_base = create(bulk_base + bulk_name + '/')
-            with open(facet_base + 'MISSING: {}_bulk.traj'.format(bulk_name),
+            with open(facet_base + 'MISSING:{}_bulk'.format(bulk_name),
                       'w'):
                 pass
 
             for facet in facets:
                 reaction_base = create(facet_base + facet + '/')
-                with open(reaction_base + 'MISSING: empty_slab.traj'
+                with open(reaction_base + 'MISSING:empty_slab'
                           .format(bulk_name), 'w'):
                     pass
 
@@ -202,7 +202,9 @@ def main(
                     for ads in ads_names:
                         if ads == '':
                             continue
-                        with open(base + 'MISSING: {}.traj'.format(ads), 'w'):
+                        with open(base + 'MISSING:{}_slab'.format(ads), 'w'):
+                            pass
+                        with open(base + 'MISSING:TS?'.format(ads), 'w'):
                             pass
 
 

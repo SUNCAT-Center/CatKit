@@ -29,6 +29,7 @@ import numpy as np
 # local imports
 from .ase_tools import gas_phase_references, get_chemical_formula, \
     symbols, collect_structures
+import catkit.hub.ase_tools
 
 np.set_printoptions(threshold=500, linewidth=1800, edgeitems=80)
 
@@ -420,7 +421,8 @@ def fuzzy_match(structures, options):
     return collected_structures
 
 
-def create_folders(options, structures, root=''):
+def create_folders(options, structures, root='',
+                   publication_template=PUBLICATION_TEMPLATE):
     out_format = 'json'
 
     for key in structures:
@@ -433,7 +435,7 @@ def create_folders(options, structures, root=''):
                 with open(str(
                         Path(root).joinpath('publication.txt')),
                         'w') as outfile:
-                    outfile.write(PUBLICATION_TEMPLATE)
+                    outfile.write(publication_template)
             create_folders(options, structures[key], root=d)
         else:
             ase.io.write(
@@ -456,6 +458,14 @@ def main(options):
         with open(pickle_file, 'wb') as outfile:
             pickle.dump(structures, outfile)
 
+    if hasattr(catkit.hub.ase_tools, 'PUBLICATION_TEMPLATE') \
+            and catkit.hub.ase_tools.PUBLICATION_TEMPLATE:
+        publication_template = catkit.hub.ase_tools.PUBLICATION_TEMPLATE
+    else:
+        publication_template = PUBLICATION_TEMPLATE
+
     structures = fuzzy_match(structures, options)
     create_folders(options, structures,
-                   root=options.foldername.strip('/') + '.organized')
+                   root=options.foldername.strip('/') + '.organized',
+                   publication_template=publication_template,
+                   )
