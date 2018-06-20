@@ -349,7 +349,7 @@ def connect(user):
     type=str,
     default='',
     show_default=True,
-    help="Specificy DFT Code used to calculate"
+    help="Specify DFT Code used to calculate"
     " If not specified it will be generated from"
     " filetype the processed files.")
 @click.option(
@@ -379,12 +379,13 @@ def connect(user):
     show_default=True,
     help="Regular expression that matches"
          " only those files that are included.",)
-@click.option('-k', '--keep-all-energies',
-              type=bool,
-              is_flag=True,
-              help="When multiple energies for the same facet and adsorbate"
-              "are found keep all energies"
-              "not only the most stable."
+@click.option(
+    '-k', '--keep-all-energies',
+    type=bool,
+    is_flag=True,
+    help="When multiple energies for the same facet and adsorbate"
+    "are found keep all energies"
+    "not only the most stable."
               )
 @click.option(
     '-m', '--max-energy',
@@ -408,6 +409,14 @@ def connect(user):
     help="Gas phase reference molecules"
     " that should not be considered.")
 @click.option(
+    '-S', '--structure',
+    type=str,
+    default='structure',
+    show_default=True,
+    help='Bulk structure from which slabs where generated.'
+    'E.g. fcc or A_a_225 for the general case.'
+        )
+@click.option(
     '-s', '--max-density-slab',
     type=float,
     default=0.08,
@@ -422,14 +431,6 @@ def connect(user):
     show_default=True,
     help="Store intermediate filetype as traj"
     "instead of json files")
-@click.option(
-    '-S', '--structure',
-    type=str,
-    default='structure',
-    show_default=True,
-    help='Bulk structure from which slabs where generated.'
-    'E.g. fcc or A_a_225 for the general case.'
-        )
 @click.option(
     '-v', '--verbose',
     is_flag=True,
