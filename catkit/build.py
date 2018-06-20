@@ -16,7 +16,7 @@ def bulk(name, crystalstructure=None, **kwargs):
     ----------
     name : str
         Chemical symbol or symbols as in 'MgO' or 'NaCl'.
-crystalstructure : str
+    crystalstructure : str
         Must be one of sc, fcc, bcc, hcp, diamond, zincblende,
         rocksalt, cesiumchloride, fluorite or wurtzite.
 

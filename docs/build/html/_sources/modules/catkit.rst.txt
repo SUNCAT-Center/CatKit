@@ -19,6 +19,16 @@ catkit\.build module
     :undoc-members:
     :show-inheritance:
 
+
+catkit\.enumeration module
+--------------------------
+
+.. automodule:: catkit.enumeration
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 catkit\.db module
 -----------------
 

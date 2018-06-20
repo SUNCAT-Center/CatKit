@@ -8,10 +8,9 @@ import numpy as np
 import copy
 import warnings
 try:
-    import builtins
+    from builtins import super
 except(ImportError):
-    import __builtin__ as builtins
-from builtins import super
+    from __builtin__ import super
 
 sym = np.array(chemical_symbols)
 em = iso.numerical_edge_match('bonds', 1)
