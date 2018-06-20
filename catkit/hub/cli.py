@@ -29,7 +29,12 @@ def show_reactions(dbfile):
 
 @cli.command()
 @click.argument('folder_name')
-@click.option('--userhandle', type=str, help='SLack or Github username. Alternatively your email adress.')
+@click.option(
+    '--userhandle',
+    type=str,
+    default='anonymous',
+    show_default=True,
+    help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug', default=False)
 @click.option(
     '--skip-folders',
@@ -58,7 +63,6 @@ def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
 @click.option('--start-block', default=0, type=int)
 @click.option('--dbuser', default='upload', type=str)
 @click.option('--dbpassword', default='cHyuuQH0', type=str)
-
 def db2server(dbfile, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, dbuser,
               dbpassword):
@@ -341,6 +345,14 @@ def connect(user):
     show_default=True,
     help="Specify adsorbates that are to be included. E.g. -a CO,O,H )")
 @click.option(
+    '-c', '--dft-code',
+    type=str,
+    default='',
+    show_default=True,
+    help="Specificy DFT Code used to calculate"
+    " If not specified it will be generated from"
+    " filetype the processed files.")
+@click.option(
     '-e', '--exclude-pattern',
     type=str,
     default='',
@@ -411,11 +423,26 @@ def connect(user):
     help="Store intermediate filetype as traj"
     "instead of json files")
 @click.option(
+    '-S', '--structure',
+    type=str,
+    default='structure',
+    show_default=True,
+    help='Bulk structure from which slabs where generated.'
+    'E.g. fcc or A_a_225 for the general case.'
+        )
+@click.option(
     '-v', '--verbose',
     is_flag=True,
     default=False,
     show_default=True,
     help="Show more debugging messages.")
+@click.option(
+    '-x', '--xc-functional',
+    type=str,
+    default='XC_FUNCTIONAL',
+    show_default=True,
+    help="Set the DFT exchange-correlation functional"
+    " used to calculate total energies.")
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
 
