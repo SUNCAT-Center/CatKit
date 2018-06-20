@@ -2,11 +2,11 @@ import os
 import sys
 import time
 import json
+import random
 import psycopg2
 from psycopg2.extras import execute_values
 import ase.db
 from ase.db.postgresql import PostgreSQLDatabase
-from pwgen import pwgen
 from past.utils import PY2
 
 from .cathubsqlite import CathubSQLite
@@ -111,6 +111,15 @@ tsvector_update = [
 ]
 
 
+def pwgen(n):
+    return ''.join([
+        random.choice(
+            'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            'abcdefghijklmnopqrstuvwxyz'
+            '0123456789'
+        ) for i in range(n)])
+
+
 class CathubPostgreSQL:
     """ Class for setting up the catalysis hub reaction energy database
     on postgreSQL server.
@@ -123,12 +132,10 @@ class CathubPostgreSQL:
         self.id = None
         self.server = 'catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com'
         self.database = 'catalysishub'
-
         if user == 'catroot' or user == 'catvisitor':
             self.schema = 'public'
             if password is None:
                 password = os.environ['DB_PASSWORD']
-
         elif user == 'postgres':  # For testing on travis
             self.schema = 'public'
             self.server = 'localhost'
@@ -200,7 +207,9 @@ class CathubPostgreSQL:
         self.initialized = True
         return self
 
-    def create_user(self, user):
+    def create_user(self, user, table_priviledges=['ALL PRIVILEDGES'],
+                    schema_priviledges=['ALL PRIVILEDGES'],
+                    row_limit=50000):
         con = self.connection or self._connect()
         cur = con.cursor()
 
@@ -208,30 +217,79 @@ class CathubPostgreSQL:
         # self._initialize(schema=schema_name)
         password = pwgen(8)
         cur.execute(
-            "CREATE USER {0} with PASSWORD '{1}';".format(user, password))
-        cur.execute('GRANT USAGE ON SCHEMA {0} TO {0};'.format(user))
+            "CREATE USER {user} with PASSWORD '{password}';"
+            .format(user=user, password=password))
+
+        """ Grant SELECT on public schema """
+        cur.execute('GRANT USAGE ON SCHEMA public TO {user};'.format(user=user))
         cur.execute(
-            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO {0};'.format(user))
-        cur.execute('GRANT USAGE ON SCHEMA {0} TO catroot;'.format(user))
+            'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};'.format(user=user))
         cur.execute(
-            'GRANT ALL PRIVILEGES ON SCHEMA {0} TO catroot;'.format(user))
-        cur.execute('GRANT USAGE ON SCHEMA public TO {0};'.format(user))
-        cur.execute(
-            'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {0};'.format(user))
-        cur.execute(
-            'ALTER ROLE {0} SET search_path TO {0};'.format(user))
+            'ALTER ROLE {user} SET search_path TO {user};'.format(user=user))
 
         self.stdout.write(
-            'CREATED USER {0} WITH PASSWORD {1}\n'.format(user, password))
+            'CREATED USER {user} WITH PASSWORD {password}\n'
+            .format(user=user, password=password))
 
-        con.commit()
-        con.close()
-
+        """ initialize user-schema """
+        old_schema = self.schema
+        self.initialized=False
         self.schema = user
-        self.user = user
-        self.password = password
-        con = self._connect()
         self._initialize(con)
+
+        """ Priviledges on user-schema"""
+        cur.execute(
+            'GRANT {priviledges} ON SCHEMA {user} TO {user};'
+            .format(priviledges=', '.join(schema_priviledges), user=user))
+        cur.execute(
+            'GRANT {priviledges} ON ALL TABLES IN SCHEMA {user} TO {user};'
+            .format(priviledges=', '.join(table_priviledges), user=user))
+        cur.execute(
+            'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA {user} TO {user};'
+            .format(user=user))
+        con.commit()
+
+        """ Limit number of rows"""
+        for table in ['reaction', 'publication', 'systems', 'reaction_system',
+                      'publication_system', 'text_key_values', 'number_key_values',
+                      'keys', 'information']:
+            table_factor = 1
+            if table in [ 'reaction_system', 'publication_system', 'text_key_values',
+                          'number_key_values', 'keys']:
+                table_factor = 15
+            elif table == 'publication':
+                table_factor = 1 / 100
+            elif table == 'information':
+                table_factor = 1 / 100
+
+            trigger_function = """
+            CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
+            RETURNS TRIGGER AS
+            $BODY$
+            BEGIN
+                IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
+                THEN
+                    RAISE EXCEPTION 'INSERT statement exceeding maximum number of rows';
+                END IF;
+                RETURN NEW;
+            END;
+            $BODY$
+            LANGUAGE plpgsql""".format(user=user, table=table,
+                                       row_limit=row_limit * table_factor)
+            cur.execute(trigger_function)
+
+            trigger="""
+            DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table} on {user}.{table};
+            CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
+            BEFORE INSERT ON {user}.systems
+            FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
+            """.format(user=user, table=table)
+            cur.execute(trigger)
+
+        self.schema = old_schema
+        set_schema = 'ALTER ROLE {user} SET search_path TO {schema};'\
+                     .format(user=self.user, schema=self.schema)
+        cur.execute(set_schema)
 
         con.commit()
         con.close()
@@ -241,17 +299,18 @@ class CathubPostgreSQL:
     def delete_user(self, user):
         """ Delete user and all data"""
         assert self.user == 'catroot'
+        assert not user == 'public'
         con = self.connection or self._connect()
         cur = con.cursor()
-        cur.execute('DROP SCHEMA {0} CASCADE;'.format(user))
-        cur.execute('REVOKE USAGE ON SCHEMA public FROM {0};'.format(user))
+        cur.execute('DROP SCHEMA {user} CASCADE;'.format(user=user))
+        cur.execute('REVOKE USAGE ON SCHEMA public FROM {user};'.format(user=user))
         cur.execute(
-            'REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM {0};'
-            .format(user))
+            'REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM {user};'
+            .format(user=user))
         cur.execute(
-            'DROP ROLE {0};'.format(user))
+            'DROP ROLE {user};'.format(user=user))
         self.stdout.write(
-            'REMOVED USER {0}\n'.format(user))
+            'REMOVED USER {user}\n'.format(user=user))
         con.commit()
         con.close()
 
@@ -261,7 +320,7 @@ class CathubPostgreSQL:
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
-        cur.execute("SELECT COUNT(id) from {0};".format(table))
+        cur.execute("SELECT COUNT(id) from {table};".format(table=table))
         count = cur.fetchone()
         return count[0]
 
@@ -272,16 +331,15 @@ class CathubPostgreSQL:
 
         cur.execute(
             """SELECT column_name FROM information_schema.columns
-            WHERE table_schema = 'public' AND table_name='{0}';"""
-            .format(table))
+            WHERE table_schema = 'public' AND table_name='{table}';"""
+            .format(table=table))
         columns = cur.fetchall()
 
         if id == 'all':
-            cur.execute('SELECT * FROM \n {0} \n'.format(table,
-                                                         table))
+            cur.execute('SELECT * FROM \n {table} \n'.format(table=table))
         else:
-            cur.execute('SELECT * FROM \n {0} \n WHERE \n {1}.id={2}'
-                        .format(table, table, id))
+            cur.execute('SELECT * FROM \n {table} \n WHERE \n {table}.id={id}'
+                        .format(table=table, id=id))
         row = cur.fetchall()
 
         return columns, row
@@ -293,7 +351,7 @@ class CathubPostgreSQL:
         # pub_id = pub_values[1].encode('ascii','ignore')
         pub_id = pub_values[1]
         cur.execute(
-            """SELECT id from publication where pub_id='{0}'""".format(pub_id))
+            """SELECT id from publication where pub_id='{pub_id}'""".format(pub_id=pub_id))
         row = cur.fetchone()
         if row is not None:  # len(row) > 0:
             id = row  # [0]
@@ -429,7 +487,7 @@ class CathubPostgreSQL:
         Parameters:
         filename_sqlite: str
             name of .db file
-        block_size: int (default 1000) 
+        block_size: int (default 1000)
             Number of atomic structures and reactions to write together
             in each block.
         start_block: int (default 0)
