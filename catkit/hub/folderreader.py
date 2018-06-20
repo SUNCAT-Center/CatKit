@@ -287,7 +287,9 @@ class FolderReader:
         basename = os.path.basename(root)
         assert '_' in basename, \
             """Wrong folderstructure! Folder should be of format
-            <metal>_<crystalstructure>"""
+            <metal>_<crystalstructure> but found {basename}""".format(
+                    basename=basename
+                    )
         self.metal, self.crystal = basename.split('_', 1)
 
         self.stdout.write(

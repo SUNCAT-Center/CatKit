@@ -26,17 +26,10 @@ def molecules2symbols(molecules, add_hydrogen=True):
 
 
 def construct_reference_system(
-    symbols,
-    candidates=[
-        'H2',
-        'H2O',
-        'NH3',
-        'CH4',
-        'CO',
-        'SH2',
-        'HCl',
-        'N2',
-        'O2']):
+                               symbols,
+                               candidates=None,
+                               options=None,
+                              ):
     """Take a list of symbols and construct gas phase
     references system, when possible avoiding O2.
     Candidates can be rearranged, where earlier candidates
@@ -44,20 +37,47 @@ def construct_reference_system(
 
     assume symbols sorted by atomic number
     """
+    if hasattr(options, 'no_hydrogen') and options.no_hydrogen:
+        add_hydrogen = False
+    else:
+        add_hydrogen = True
+
     references = {}
+    if candidates is None:
+        candidates = [
+                    'H2',
+                    'H2O',
+                    'NH3',
+                    'CH4',
+                    'CO',
+                    'H2S',
+                    'HCl',
+                    'N2',
+                    'O2']
+
     added_symbols = []
     for symbol in symbols:
         added_symbols.append(symbol)
         for candidate in candidates:
-            symbols = ase.atoms.string2symbols(candidate)
+            _symbols = ase.atoms.string2symbols(candidate)
 
-            if set(added_symbols) == set(list(references.keys()) + symbols):
+            if set(added_symbols) == set(list(references.keys()) + _symbols):
                 references[symbol] = candidate
                 break
         else:
-            raise UserWarning(
-                "No candidate satisfied {symbol}. Add more candidates".format(
-                    **locals()))
+            raise UserWarning((
+                "No candidate satisfied {symbol}. Add more candidates\n"
+                "    Symbols {symbols}\n"
+                "    _Symbols {_symbols}\n"
+                "    References {references}\n"
+                "    Candidates {candidates}\n"
+                ).format(
+                    symbol=symbol,
+                    symbols=symbols,
+                    _symbols=_symbols,
+                    candidates=candidates,
+                    references=list(references.keys()),
+                    ))
 
     return sorted(references.items(),
                   key=lambda _x: ase.data.atomic_numbers[_x[0]]
@@ -330,6 +350,7 @@ if __name__ == '__main__':
 
     examples = [
         ['NH', 'CO', 'O', 'SH', 'OH', 'CH3'],
+        # (['CO'], ['CO'], False), Won't work
         ['CO', 'O'],
         ['CO', 'N'],
         ['NO', 'O2', 'CO', 'CO2'],
@@ -343,6 +364,12 @@ if __name__ == '__main__':
 
     results = []
     for adsorbates in examples:
+        if type(adsorbates) is tuple:
+            adsorbates, candidates, add_hydrogen = adsorbates
+        else:
+            candidates = None
+            add_hydrogen = True
+
         result = {}
         results.append(result)
 
@@ -352,12 +379,15 @@ if __name__ == '__main__':
             print("ADSORBATES {adsorbates}".format(**locals()))
         result['adsorbates'] = adsorbates
 
-        symbols = molecules2symbols(adsorbates)
+        symbols = molecules2symbols(adsorbates, add_hydrogen=add_hydrogen)
         if verbose:
             print("SYMBOlS {symbols}".format(**locals()))
         result['symbols'] = symbols
 
-        references = construct_reference_system(symbols)
+        references = construct_reference_system(
+                symbols=symbols,
+                candidates=candidates,
+                )
         if verbose:
             print("REFERENCES {references}".format(**locals()))
         result['references'] = references
@@ -380,4 +410,8 @@ if __name__ == '__main__':
         pprint.pprint(results)
 
     if options.test:
-        assert results == test_results
+        assert results == test_results, \
+                '\n\n---\n' \
+                + str(pprint.pformat(results))  \
+                + "\n---\n" \
+                + str(pprint.pformat(test_results))
