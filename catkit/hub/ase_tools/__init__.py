@@ -20,6 +20,8 @@ try:
 except (ImportError, AttributeError):
     from pathlib2 import Path
 
+PUBLICATION_TEMPLATE = ''
+
 
 def get_chemical_formula(atoms, mode='metal'):
     """
