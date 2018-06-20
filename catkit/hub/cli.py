@@ -343,11 +343,11 @@ def connect(user):
     type=str,
     default='',
     show_default=True,
-    help="Specify adsorbates that are to be included. E.g. -a CO,O,H )")
+    help="Specify adsorbates that are to be included. (E.g. -a CO,O,H )")
 @click.option(
     '-c', '--dft-code',
-    type=str,
     default='',
+    type=str,
     show_default=True,
     help="Specify DFT Code used to calculate"
     " If not specified it will be generated from"
