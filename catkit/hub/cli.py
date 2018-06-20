@@ -194,38 +194,44 @@ def make_folders(create_template, template, custom_base, diagnose):
     Dear all
 
     Use this command make the right structure for your folders
-    for submitting data for Catalysis Hub.
+    for submitting data for Catalysis Hub's Surface Reactions.
 
     Start by creating a template file by calling:
 
     $ cathub make_folders --create-template <template_name>
 
-    Then open the template and modify it to so that it contains the information
-    for you data. You will need to enter publication/dataset information,
+    Then open the template and modify it to so that it contains information
+    about your data. You will need to enter publication/dataset information,
     and specify the types of surfaces, facets and reactions.
 
     The 'reactions' key is a list of dictionaries.
     A new dictionary is required for each reaction, and should include two
     lists, 'reactants' and 'products'. Remember to balance the equation and
-    include a minus sign in the name when relevant.
+    include a minus sign in the name when relevant. For example:
 
-    'reactions': [
-        {
-          'reactants': ['CCH3star@ontop'],
-          'products': ['Cstar@hollow', 'CH3star@ontop']
-        },
-        {
-           'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-           'products':  ['CH3star']
-        }
-     ]
+    'reactions': [{
 
-    Also, include the phase and of the species as an extension:
-      'gas' for gas phase (i.e. CH4 -> CH4gas)
-      'star' for empty site or adsorbed phase. (i.e. OH -> OHstar)
+        'reactants': ['CCH3star@ontop'],
+
+        'products': ['Cstar@hollow', 'CH3star@ontop']
+
+      }, {
+
+         'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+
+         'products':  ['CH3star']
+
+      }]
+
+    Please include the phase of the species as an extension:
+
+        'gas' for gas phase (i.e. CH4 -> CH4gas)
+
+        'star' for empty slab or adsorbed phase. (i.e. OH -> OHstar)
 
     The site of adsorbed species is also included as an extension:
-      '@site' (i.e. OHstar in bridge-> OHstar@bridge)
+
+        '@site' (i.e. OHstar in bridge-> OHstar@bridge)
 
     Then, save the template and call:
 
