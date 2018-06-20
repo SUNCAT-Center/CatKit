@@ -29,6 +29,7 @@ def show_reactions(dbfile):
 
 @cli.command()
 @click.argument('folder_name')
+@click.option('--userhandle', type=str, help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug', default=False)
 @click.option(
     '--skip-folders',
@@ -37,14 +38,14 @@ def show_reactions(dbfile):
     or a string with names of more folders seperated by ', '""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
-def folder2db(folder_name, debug, skip_folders, goto_reaction):
+def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
     skip = []
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
     _folder2db.main(folder_name, debug,
-                    skip, goto_reaction)
+                    skip, userhandle, goto_reaction)
 
 
 @cli.command()
@@ -55,21 +56,23 @@ def folder2db(folder_name, debug, skip_folders, goto_reaction):
 @click.option('--write-publication', default=True, type=bool)
 @click.option('--block-size', default=1000, type=int)
 @click.option('--start-block', default=0, type=int)
-@click.option('--user', default='upload', type=str)
-@click.option('--password', default='cHyuuQH0', type=str)
+@click.option('--dbuser', default='upload', type=str)
+@click.option('--dbpassword', default='cHyuuQH0', type=str)
+
 def db2server(dbfile, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, user,
-              password):
+              write_reaction_system, block_size, start_block, dbuser,
+              dbpassword):
     """Transfer data from local database to Catalysis Hub server"""
 
-    _db2server.main(dbfile, write_reaction=write_reaction,
+    _db2server.main(dbfile,
+                    write_reaction=write_reaction,
                     write_ase=write_ase,
                     write_publication=write_publication,
                     write_reaction_system=write_reaction_system,
                     block_size=block_size,
                     start_block=start_block,
-                    user=user,
-                    password=password)
+                    user=dbuser,
+                    password=dbpassword)
 
 
 reaction_columns = [
