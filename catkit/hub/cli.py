@@ -29,7 +29,12 @@ def show_reactions(dbfile):
 
 @cli.command()
 @click.argument('folder_name')
-@click.option('--userhandle', type=str, help='SLack or Github username. Alternatively your email adress.')
+@click.option(
+    '--userhandle',
+    type=str,
+    default='anonymous',
+    show_default=True,
+    help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug', default=False)
 @click.option(
     '--skip-folders',
@@ -58,7 +63,6 @@ def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
 @click.option('--start-block', default=0, type=int)
 @click.option('--dbuser', default='upload', type=str)
 @click.option('--dbpassword', default='cHyuuQH0', type=str)
-
 def db2server(dbfile, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, dbuser,
               dbpassword):
@@ -345,7 +349,15 @@ def connect(user):
     type=str,
     default='',
     show_default=True,
-    help="Specify adsorbates that are to be included. E.g. -a CO,O,H )")
+    help="Specify adsorbates that are to be included. (E.g. -a CO,O,H )")
+@click.option(
+    '-c', '--dft-code',
+    default='',
+    type=str,
+    show_default=True,
+    help="Specify DFT Code used to calculate"
+    " If not specified it will be generated from"
+    " filetype the processed files.")
 @click.option(
     '-e', '--exclude-pattern',
     type=str,
@@ -373,12 +385,13 @@ def connect(user):
     show_default=True,
     help="Regular expression that matches"
          " only those files that are included.",)
-@click.option('-k', '--keep-all-energies',
-              type=bool,
-              is_flag=True,
-              help="When multiple energies for the same facet and adsorbate"
-              "are found keep all energies"
-              "not only the most stable."
+@click.option(
+    '-k', '--keep-all-energies',
+    type=bool,
+    is_flag=True,
+    help="When multiple energies for the same facet and adsorbate"
+    "are found keep all energies"
+    "not only the most stable."
               )
 @click.option(
     '-m', '--max-energy',
@@ -402,6 +415,14 @@ def connect(user):
     help="Gas phase reference molecules"
     " that should not be considered.")
 @click.option(
+    '-S', '--structure',
+    type=str,
+    default='structure',
+    show_default=True,
+    help='Bulk structure from which slabs where generated.'
+    'E.g. fcc or A_a_225 for the general case.'
+        )
+@click.option(
     '-s', '--max-density-slab',
     type=float,
     default=0.08,
@@ -422,6 +443,13 @@ def connect(user):
     default=False,
     show_default=True,
     help="Show more debugging messages.")
+@click.option(
+    '-x', '--xc-functional',
+    type=str,
+    default='XC_FUNCTIONAL',
+    show_default=True,
+    help="Set the DFT exchange-correlation functional"
+    " used to calculate total energies.")
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
 
