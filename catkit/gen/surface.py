@@ -30,7 +30,7 @@ class SlabGenerator(object):
                  layers,
                  vacuum=None,
                  fixed=None,
-                 layer_type='trim',
+                 layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=True,
                  tol=1e-8):
