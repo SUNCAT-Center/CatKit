@@ -32,7 +32,7 @@ class SlabGenerator(object):
                  fixed=None,
                  layer_type='ang',
                  attach_graph=True,
-                 standardize_bulk=True,
+                 standardize_bulk=False,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
@@ -40,7 +40,7 @@ class SlabGenerator(object):
         values. Follows the following steps:
 
         - Convert Miller-Bravais notation into standard Miller index.
-        - Ensure the bulk cell is in its standard form.
+        - (optional) Ensure the bulk cell is in its standard form.
         - Convert the indices to the cell for the primitive lattice.
         - Reduce the indices by their greatest common divisor.
 
@@ -101,26 +101,20 @@ class SlabGenerator(object):
 
         if standardize_bulk:
             bulk = utils.get_spglib_cell(bulk, tol=1e-2)
-            norm = get_reciprocal_vectors(bulk)
-
-            bulk = utils.get_spglib_cell(bulk, primitive=True, tol=1e-2)
-            pnorm = get_reciprocal_vectors(bulk)
-
-            if not np.allclose(norm, pnorm):
-                miller_index = np.dot(
-                    miller_index, np.dot(norm, np.linalg.inv(pnorm)))
-                miller_index = np.round(miller_index)
-                miller_index = (miller_index /
-                                list_gcd(miller_index)).astype(int)
-
-            self._bulk = self.align_crystal(bulk, miller_index)
         else:
-            self._bulk = self.align_crystal(bulk, miller_index)
+            warnings.warn(
+                ("Not using a standardized bulk will result in an arbitrary "
+                 "Miller index. To get ensure you are using the correct "
+                 "miller index, use standardize_bulk=True"))
+
+        primitive_bulk = utils.get_spglib_cell(bulk, primitive=True, tol=1e-2)
+        miller_index = convert_miller_index(miller_index, bulk, primitive_bulk)
+
+        self._bulk = self.align_crystal(primitive_bulk, miller_index)
 
     def align_crystal(self, bulk, miller_index):
-        """Return a standardized unit cell from bulk unit cell. This
-        standardization rotates the a and b basis vectors to be parallel
-        to the Miller index.
+        """Return an aligned unit cell from bulk unit cell. This alignment
+        rotates the a and b basis vectors to be parallel to the Miller index.
 
         Parameters
         ----------
@@ -426,7 +420,7 @@ class SlabGenerator(object):
         ----------
         slab : Atoms object
             Slab to be made into the requested size.
-        size : int, list-like (2,) or (2, 2)
+        size : int, array_like (2,) or (2, 2)
             Size of the unit cell to create as described above.
 
         Returns
@@ -505,52 +499,6 @@ class SlabGenerator(object):
                 break
 
         return slab
-
-
-def get_unique_indices(bulk, max_index):
-    """Returns an array of miller indices which are likely to produce
-    unique surface terminations based on a provided bulk structure.
-
-    Parameters
-    ----------
-    max_index : int
-        Maximum number that will be considered for a given surface.
-
-    Returns
-    -------
-    unique_millers : ndarray (n, 3)
-        Symmetrically distinct miller indices for a given bulk.
-    """
-    unique_index = generate_indices(max_index)
-
-    rotations, translations = utils.get_symmetry(bulk)
-    rotations = np.swapaxes(rotations, 1, 2)
-
-    operations = []
-    for i, rot in enumerate(rotations):
-        A = np.eye(4)
-        A[:3, :3] = rot
-        A[-1, :3] = translations[i]
-        operations += [A]
-
-    unique_millers = []
-
-    def analyzed(affine_point):
-        for aff in operations:
-            operation = np.dot(aff, affine_point)[:3]
-            if len(geometry.matching_coordinates(
-                    operation, unique_millers)) > 0:
-                return True
-
-    for miller in unique_index:
-        affine_point = np.insert(miller, 3, 1)
-
-        if not analyzed(affine_point):
-            unique_millers += [miller]
-
-    unique_millers = np.array(unique_millers)
-
-    return unique_millers
 
 
 def transform_ab(slab, matrix, tol=1e-5):
@@ -649,6 +597,22 @@ def get_reciprocal_vectors(atoms):
     return normal_vectors
 
 
+def convert_miller_index(miller_index, atoms1, atoms2):
+    """Return a converted miller index between two atoms objects."""
+    recip1 = get_reciprocal_vectors(atoms1)
+    recip2 = get_reciprocal_vectors(atoms2)
+
+    converted_index = np.dot(
+        miller_index, np.dot(recip1, np.linalg.inv(recip2)))
+    converted_index = np.round(converted_index)
+    converted_index = (converted_index /
+                       list_gcd(converted_index)).astype(int)
+    if converted_index[0] < 0:
+        converted_index *= -1
+
+    return converted_index
+
+
 def generate_indices(max_index):
     """Return an array of miller indices enumerated up to values
     plus or minus some maximum. Filters out lists with greatest
@@ -673,3 +637,70 @@ def generate_indices(max_index):
     unique_index = index.T[np.where(gcd == 1)]
 
     return unique_index
+
+
+def get_unique_indices(bulk, max_index):
+    """Returns an array of miller indices which will produce unique
+    surface terminations based on a provided bulk structure.
+
+    Parameters
+    ----------
+    max_index : int
+        Maximum number that will be considered for a given surface.
+
+    Returns
+    -------
+    unique_millers : ndarray (n, 3)
+        Symmetrically distinct miller indices for a given bulk.
+    """
+    rotations, translations = utils.get_symmetry(bulk)
+    rotations = np.swapaxes(rotations, 1, 2)
+
+    operations = []
+    for i, rot in enumerate(rotations):
+        A = np.eye(4)
+        A[:3, :3] = rot
+        A[-1, :3] = translations[i]
+        operations += [A]
+
+    unique_millers = []
+
+    def analyzed(affine_point):
+        for aff in operations:
+            operation = np.dot(aff, affine_point)[:3]
+            if len(geometry.matching_coordinates(
+                    operation, unique_millers)) > 0:
+                print(operation)
+                return True
+
+    unique_index = generate_indices(max_index)
+    for miller in unique_index:
+        affine_point = np.insert(miller, 3, 1)
+
+        if not analyzed(affine_point):
+            unique_millers += [miller]
+
+    unique_millers = np.array(unique_millers)
+
+    return unique_millers
+
+
+def get_degenerate_indices(bulk, miller_index):
+    """Return the miller indices which are degenerate to a
+    given miller index for a particular bulk structure.
+
+    Parameters
+    ----------
+    bulk : Atoms object
+        Bulk structure to get the degenerate miller indices for.
+    miller_index : array_like (3,)
+        Miller index to get the degenerate indices for.
+
+    Returns
+    -------
+    degenerate_indices : array (N, 3)
+        Degenerate miller indices to the provided index.
+    """
+
+
+    return degenerate_indices
