@@ -328,6 +328,16 @@ class SlabGenerator(object):
             given.
         """
         slab = self.get_slab_basis(iterm).copy()
+        slab = self.set_size(slab, size)
+
+        # Orthogonalize the z-coordinate
+        # Breaks bulk periodicity in the c-basis
+        slab.cell[2] = [0, 0, slab.cell[2][2]]
+        slab.set_pbc([1, 1, 0])
+
+        if slab.cell[1][0] < 0:
+            slab = transform_ab(slab, [[-1, 0], [0, 1]])
+            slab.arrays['surface_atoms'] *= -1
 
         # Trim the bottom of the cell, bulk symmetry may be lost
         if self.layer_type == 'trim':
@@ -341,16 +351,6 @@ class SlabGenerator(object):
 
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
-
-        slab = self.set_size(slab, size)
-
-        # Orthogonalize the z-coordinate
-        # Breaks bulk periodicity in the c-basis
-        slab.cell[2] = [0, 0, slab.cell[2][2]]
-        slab.set_pbc([1, 1, 0])
-
-        if slab.cell[1][0] < 0:
-            slab = transform_ab(slab, [[-1, 0], [0, 1]])
 
         tl = np.argmax(slab.get_scaled_positions()[:, 2])
         translation = slab[tl].position.copy()
