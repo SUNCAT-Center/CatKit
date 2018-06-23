@@ -2,12 +2,10 @@ from __future__ import division
 from catkit import Gratoms
 from . import utils
 from . import adsorption
-from . import geometry
 import numpy as np
-from numpy.linalg import norm, solve
 from ase.build import rotate
 from ase.constraints import FixAtoms
-from itertools import product
+import itertools
 import warnings
 import scipy
 try:
@@ -94,7 +92,8 @@ class SlabGenerator(object):
         if len(miller_index) == 4:
             miller_index[[0, 1]] -= miller_index[2]
             miller_index = np.delete(miller_index, 2)
-        miller_index = (miller_index / list_gcd(miller_index)).astype(int)
+        miller_index = (miller_index /
+                        utils.list_gcd(miller_index)).astype(int)
 
         # Store the Miller indices associated with the standard cell.
         self.miller_index = miller_index
@@ -107,7 +106,8 @@ class SlabGenerator(object):
                  "Miller index. To get ensure you are using the correct "
                  "miller index, use standardize_bulk=True"))
 
-        primitive_bulk = utils.get_spglib_cell(bulk, primitive=True, tol=1e-2)
+        primitive_bulk = utils.get_spglib_cell(
+            bulk, primitive=True, tol=1e-2)
         miller_index = convert_miller_index(miller_index, bulk, primitive_bulk)
 
         self._bulk = self.align_crystal(primitive_bulk, miller_index)
@@ -136,7 +136,7 @@ class SlabGenerator(object):
                 miller_index[::-1] / mi).astype(int)
         else:
             h, k, l = miller_index
-            p, q = ext_gcd(k, l)
+            p, q = utils.ext_gcd(k, l)
             a1, a2, a3 = bulk.cell
 
             k1 = np.dot(p * (k * a1 - h * a2) + q * (l * a1 - h * a3),
@@ -148,14 +148,15 @@ class SlabGenerator(object):
                 i = -int(np.round(k1 / k2))
                 p, q = p + i * l, q - i * k
 
-            a, b = ext_gcd(p * k + q * l, h)
+            a, b = utils.ext_gcd(p * k + q * l, h)
 
             c1 = (p * k + q * l, -p * h, -q * h)
             c2 = np.array((0, l, -k)) // abs(gcd(l, k))
             c3 = (b, a * p, a * q)
             new_lattice = np.array([c1, c2, c3])
 
-        scaled = solve(new_lattice.T, bulk.get_scaled_positions().T).T
+        scaled = np.linalg.solve(new_lattice.T,
+                                 bulk.get_scaled_positions().T).T
         scaled -= np.floor(scaled + self.tol)
 
         new_bulk = Gratoms(
@@ -170,7 +171,7 @@ class SlabGenerator(object):
         new_bulk.set_cell(np.dot(new_lattice, bulk.cell), scale_atoms=True)
 
         # Align the longest of the ab basis vectors with x
-        d = norm(new_bulk.cell[:2], axis=1)
+        d = np.linalg.norm(new_bulk.cell[:2], axis=1)
         if d[1] > d[0]:
             new_bulk.cell[[0, 1]] = new_bulk.cell[[1, 0]]
         a = new_bulk.cell[0]
@@ -328,7 +329,7 @@ class SlabGenerator(object):
         """
         slab = self.get_slab_basis(iterm).copy()
 
-        # Trim the bottom of the cell, bulk symmetry will be lost
+        # Trim the bottom of the cell, bulk symmetry may be lost
         if self.layer_type == 'trim':
             zlayers = utils.get_unique_coordinates(slab)
             reverse_sort = np.sort(zlayers)[::-1]
@@ -435,7 +436,8 @@ class SlabGenerator(object):
             T = np.mgrid[-a:a + 1, -a:a + 1].reshape(2, -1).T
 
             metrics = []
-            for i, M in enumerate(product(T, repeat=2)):
+            search_space = itertools.product(T, repeat=2)
+            for i, M in enumerate(search_space):
                 M = np.array(M)
                 if ~np.isclose(abs(np.linalg.det(M)), size):
                     continue
@@ -512,8 +514,7 @@ def transform_ab(slab, matrix, tol=1e-5):
     slab : Atoms object
         The slab to be transformed.
     matrix : array_like (2, 2)
-        The matrix notation transformation of the a and b
-        basis vectors.
+        The matrix notation transformation of the a and b basis vectors.
     tol : float
         Float point precision tolerance.
 
@@ -548,7 +549,7 @@ def transform_ab(slab, matrix, tol=1e-5):
         if i != j:
             continue
 
-        matched = geometry.matching_sites(coords[i], coords)
+        matched = utils.matching_sites(coords[i], coords)
         periodic_match[matched] = i
 
     repeated = np.where(periodic_match != original_index)
@@ -566,47 +567,16 @@ def transform_ab(slab, matrix, tol=1e-5):
     return slab
 
 
-def ext_gcd(a, b):
-    """Extension of greatest common divisor."""
-    if b == 0:
-        return 1, 0
-    elif a % b == 0:
-        return 0, 1
-    else:
-        x, y = ext_gcd(b, a % b)
-        return y, x - y * (a // b)
-
-
-def list_gcd(values):
-    """Return the greatest common divisor of a list of values."""
-    if isinstance(values[0], float):
-        values = np.array(values, dtype=int)
-
-    gcd_func = np.frompyfunc(gcd, 2, 1)
-    _gcd = np.ufunc.reduce(gcd_func, values)
-
-    return _gcd
-
-
-def get_reciprocal_vectors(atoms):
-    """Return the reciprocal lattice vectors to a atoms unit cell."""
-    rotation1 = np.roll(atoms.cell, -1, axis=0)
-    rotation2 = np.roll(atoms.cell, 1, axis=0)
-    normal_vectors = np.cross(rotation1, rotation2)
-
-    return normal_vectors
-
-
 def convert_miller_index(miller_index, atoms1, atoms2):
     """Return a converted miller index between two atoms objects."""
-    recip1 = get_reciprocal_vectors(atoms1)
-    recip2 = get_reciprocal_vectors(atoms2)
+    recip1 = utils.get_reciprocal_vectors(atoms1)
+    recip2 = utils.get_reciprocal_vectors(atoms2)
 
     converted_index = np.dot(
         miller_index, np.dot(recip1, np.linalg.inv(recip2)))
     converted_index = np.round(converted_index)
     converted_index = (converted_index /
-                       list_gcd(converted_index)).astype(int)
+                       utils.list_gcd(converted_index)).astype(int)
     if converted_index[0] < 0:
         converted_index *= -1
 
@@ -633,7 +603,7 @@ def generate_indices(max_index):
                     max_index:-max_index-1:-1,
                     max_index:-max_index-1:-1]
     index = grid.reshape(3, -1)
-    gcd = list_gcd(index)
+    gcd = utils.list_gcd(index)
     unique_index = index.T[np.where(gcd == 1)]
 
     return unique_index
@@ -645,6 +615,8 @@ def get_unique_indices(bulk, max_index):
 
     Parameters
     ----------
+    bulk : Atoms object
+        Bulk structure to get the unique miller indices.
     max_index : int
         Maximum number that will be considered for a given surface.
 
@@ -653,31 +625,23 @@ def get_unique_indices(bulk, max_index):
     unique_millers : ndarray (n, 3)
         Symmetrically distinct miller indices for a given bulk.
     """
-    rotations, translations = utils.get_symmetry(bulk)
-    rotations = np.swapaxes(rotations, 1, 2)
-
-    operations = []
-    for i, rot in enumerate(rotations):
-        A = np.eye(4)
-        A[:3, :3] = rot
-        A[-1, :3] = translations[i]
-        operations += [A]
+    operations = utils.get_affine_operations(bulk)
+    unique_index = generate_indices(max_index)
 
     unique_millers = []
-
-    def analyzed(affine_point):
-        for aff in operations:
-            operation = np.dot(aff, affine_point)[:3]
-            if len(geometry.matching_coordinates(
-                    operation, unique_millers)) > 0:
-                print(operation)
-                return True
-
-    unique_index = generate_indices(max_index)
-    for miller in unique_index:
+    for i, miller in enumerate(unique_index):
         affine_point = np.insert(miller, 3, 1)
 
-        if not analyzed(affine_point):
+        symmetry = False
+        for affine_matrix in operations:
+            operation = np.dot(affine_matrix, affine_point)[:3]
+
+            match = utils.matching_coordinates(operation, unique_millers)
+            if len(match) > 0:
+                symmetry = True
+                break
+
+        if not symmetry:
             unique_millers += [miller]
 
     unique_millers = np.array(unique_millers)
@@ -692,7 +656,7 @@ def get_degenerate_indices(bulk, miller_index):
     Parameters
     ----------
     bulk : Atoms object
-        Bulk structure to get the degenerate miller indices for.
+        Bulk structure to get the degenerate miller indices.
     miller_index : array_like (3,)
         Miller index to get the degenerate indices for.
 
@@ -701,6 +665,28 @@ def get_degenerate_indices(bulk, miller_index):
     degenerate_indices : array (N, 3)
         Degenerate miller indices to the provided index.
     """
+    miller_index = np.asarray(miller_index)
+    miller_index = np.divide(miller_index, utils.list_gcd(miller_index))
 
+    operations = utils.get_affine_operations(bulk)
+    affine_point = np.insert(miller_index, 3, 1)
+    symmetric_indices = np.dot(affine_point, operations)[:, :3]
+
+    unique_indices = np.arange(symmetric_indices.shape[0])
+    for i, j in enumerate(unique_indices):
+        if i != j:
+            continue
+
+        index = symmetric_indices[i]
+        integers = [_.is_integer() for _ in index]
+        if not np.all(integers):
+            unique_indices[i] = -1
+            continue
+
+        matches = utils.matching_coordinates(index, symmetric_indices)
+        unique_indices[matches] = j
+
+    unique = np.where(np.unique(unique_indices) >= 0)
+    degenerate_indices = symmetric_indices[unique].astype(int)
 
     return degenerate_indices

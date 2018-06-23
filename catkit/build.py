@@ -1,6 +1,5 @@
 from .gen.surface import SlabGenerator
 from .gen.molecules import get_topologies
-from .gen.geometry import _branch_molecule
 from .gen import utils
 from ase.build import bulk as ase_bulk
 import networkx as nx
@@ -143,7 +142,7 @@ def molecule(
 
         root = None
         for i, branch in enumerate(branches):
-            _branch_molecule(atoms, branch, root, adsorption)
+            utils._branch_molecule(atoms, branch, root, adsorption)
             root = 0
 
         if vacuum:
