@@ -234,11 +234,16 @@ class SlabGenerator(object):
 
         return unique_shift
 
-    def get_slab_basis(self, iterm=0):
+    def get_slab_basis(self, iterm=0, maxn=20):
         """Return a list of all terminations which have been properly shifted
         and with an appropriate number of layers added. This function is mainly
         for performance, to prevent looping over other operations which are not
         related the size of the slab.
+
+        This step also contains periodically constrained orthogonalization of
+        the c basis. This implementation only works if the a anb b basis
+        vectors are properly aligned with the x and y axis. This is strictly to
+        assist the correct identification of surface atoms.
 
         Only produces the terminations requested as a lazy evaluator.
 
@@ -246,6 +251,8 @@ class SlabGenerator(object):
         ----------
         iterm : int
             Index of the slab termination to return.
+        maxn : int
+            The maximum integer component to search for a more orthogonal bulk.
 
         Returns
         -------
@@ -276,8 +283,39 @@ class SlabGenerator(object):
             minimum_repetitions = np.ceil(self.layers / len(bulk_layers))
 
         ibasis *= (1, 1, int(minimum_repetitions))
-        exbasis = ibasis * (1, 1, 2)
 
+        # Get difference in the 2nd components of the b and c
+        # basis, this is a good starting guess for the needed
+        # value of the 2nd component (+/- 2 for safety)
+        div = ibasis.cell[2][1] / ibasis.cell[1][1]
+        sign = -np.sign(div)
+        m = np.ceil(np.abs(div)) + 1
+
+        # Try to be smart and only search a limited space
+        search = np.mgrid[maxn:-maxn-1:-1, sign*m:m-4*sign:-sign, 1:2]
+        search = search.T.reshape(-1, 3)
+
+        # Need the reciprocal unit cell.
+        recp = np.linalg.inv(ibasis.cell).T
+        normal = np.dot(self.miller_index, recp)
+        normal /= np.linalg.norm(normal)
+
+        # Compute the lengths of the possible transformed vectors
+        # and the cosine of the vector normal to the miller plane.
+        vectors = np.dot(search, ibasis.cell)
+        length = np.linalg.norm(vectors, axis=1)
+        angles = np.abs(np.dot(vectors, normal) / length)
+
+        # Find the cosine closest to 1 and the smallest lengths
+        sort = np.lexsort([angles, length])
+        scale = np.eye(3)
+        scale[2] = search[sort[0]]
+
+        newcell = np.dot(scale, ibasis.cell)
+        ibasis.set_cell(newcell)
+        ibasis.wrap()
+
+        exbasis = ibasis * (1, 1, 2)
         connectivity = utils.get_voronoi_neighbors(exbasis)
 
         n = len(ibasis)
@@ -337,7 +375,6 @@ class SlabGenerator(object):
 
         if slab.cell[1][0] < 0:
             slab = transform_ab(slab, [[-1, 0], [0, 1]])
-            slab.arrays['surface_atoms'] *= -1
 
         # Trim the bottom of the cell, bulk symmetry may be lost
         if self.layer_type == 'trim':
@@ -556,7 +593,10 @@ def transform_ab(slab, matrix, tol=1e-5):
     del slab[repeated]
 
     # Align the first basis vector with x
+    sign = np.sign(slab.cell[2][2])
     slab.rotate(slab.cell[0], 'x', rotate_cell=True)
+    if sign != np.sign(slab.cell[2][2]):
+        slab.arrays['surface_atoms'] *= -1
 
     if slab.cell[1][1] < 0:
         slab.cell[1] *= -1

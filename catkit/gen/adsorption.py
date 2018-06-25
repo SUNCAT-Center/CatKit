@@ -17,9 +17,9 @@ class AdsorptionSites():
 
         Parameters
         ----------
-        slab : atoms object
-            The atoms object to manage adsorption sites for. Must contain
-            surface atom identification.
+        slab : Gatoms object
+            The slab associated with the adsorption site network to be
+            attached.
         r : float
             Minimum basis vector length in Angstroms for creating extended
             unit cell.
@@ -390,7 +390,7 @@ class AdsorptionSites():
         other = self.connectivity != 1
         dt = scipy.spatial.Delaunay(self.coordinates[:, :2][top])
 
-        fig = plt.figure(figsize=(6 * 2, 3.5 * 2), frameon=False)
+        fig = plt.figure(figsize=(6, 4), frameon=False)
         ax = fig.add_axes([0, 0, 1, 1])
 
         ax.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
