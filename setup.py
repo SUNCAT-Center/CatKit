@@ -22,6 +22,8 @@ setuptools.setup(
         'catkit',
         'catkit.pawprint',
         'catkit.gen',
+        'catkit.gen.analysis',
+        'catkit.gen.utils',
         'catkit.flow',
         'catkit.hub',
         'catkit.hub.ase_tools'

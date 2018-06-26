@@ -1,5 +1,5 @@
+from ..utils import running_mean
 import numpy as np
-from ..utils import rmean
 import matplotlib.pyplot as plt
 
 
@@ -24,7 +24,7 @@ def id_reconstruction(images, save=False):
         forces += [np.sqrt((atoms.get_forces()**2).sum())]
     forces = np.array(forces)
 
-    frm = rmean(forces)
+    frm = running_mean(forces)
     fdiff = np.diff(frm)
     fterm = np.array([fdiff > 0.25 * frm[:-1]]).astype(int)[0]
     predicted_events = np.where(fterm[:-1] < fterm[1:])[0]

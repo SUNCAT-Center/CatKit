@@ -31,20 +31,21 @@ class TestSlabGenerator(unittest.TestCase):
         greatest common divisor.
         """
         atoms = bulk('Pd', 'fcc')
-        gen = SlabGenerator(atoms, miller_index=(3, 3, 3), layers=3)
+        gen = SlabGenerator(atoms, miller_index=(3, 3, 3),
+                            layers=3, layer_type='trim')
 
         np.testing.assert_array_equal(gen.miller_index, [1, 1, 1])
 
     def test_no_standardization(self):
         """Test that the slab generator functions if not standardized."""
         atoms = bulk('Pd', 'fcc', cubic=True)
-        SlabGenerator(atoms, miller_index=(1, 1, 1),
-                      layers=3, standardize_bulk=False)
+        SlabGenerator(atoms, miller_index=(1, 1, 1), layer_type='trim',
+                      layers=3, standardize_bulk=True)
 
     def test_matrix_notation_search(self):
         """Test the matrix notation algorithm."""
         atoms = bulk('Pd', 'fcc', cubic=True)
-        gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layers=3)
+        gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layers=6)
 
         gen.get_slab(size=1)
         gen.get_slab(size=[[1, 0], [0, 1]])

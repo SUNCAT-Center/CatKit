@@ -1,32 +1,37 @@
 from .gen.surface import SlabGenerator
 from .gen.molecules import get_topologies
-from .gen.geometry import _branch_molecule
 from .gen import utils
 from ase.build import bulk as ase_bulk
 import networkx as nx
 from ase import Atoms
 
 
-def bulk(name, crystalstructure=None, **kwargs):
+def bulk(name, crystalstructure=None, primitive=False, **kwargs):
     """Return the standard conventional cell of a bulk structure
     created using ASE. Accepts all keyword arguments for the ase
     bulk generator.
 
     Parameters
     ----------
-    name : str
+    name : Atoms | str
         Chemical symbol or symbols as in 'MgO' or 'NaCl'.
     crystalstructure : str
         Must be one of sc, fcc, bcc, hcp, diamond, zincblende,
         rocksalt, cesiumchloride, fluorite or wurtzite.
+    primitive : bool
+        Return the primitive unit cell instead of the conventional
+        standard cell.
 
     Returns
     -------
     standardized_bulk : Gratoms object
-        The standard conventional bulk structure.
+        The conventional standard or primitive bulk structure.
     """
-    atoms = ase_bulk(name, crystalstructure, **kwargs)
-    standardized_bulk = utils.get_spglib_cell(atoms)
+    if isinstance(name, str):
+        atoms = ase_bulk(name, crystalstructure, **kwargs)
+    else:
+        atoms = name
+    standardized_bulk = utils.get_spglib_cell(atoms, primitive=primitive)
 
     return standardized_bulk
 
@@ -137,7 +142,7 @@ def molecule(
 
         root = None
         for i, branch in enumerate(branches):
-            _branch_molecule(atoms, branch, root, adsorption)
+            utils._branch_molecule(atoms, branch, root, adsorption)
             root = 0
 
         if vacuum:
