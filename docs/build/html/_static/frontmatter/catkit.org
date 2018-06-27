@@ -28,7 +28,7 @@ table_matrix = np.array(matrix, dtype=str)
 
 print('#+attr_latex: :mode math :environment matrix')
 for row in table_matrix:
-    print('|' + '|'.join(row.astype(str)))
+    print('|' + '|'.join(row))
 
 atoms1 = atoms0.copy()
 del atoms1[0]
@@ -45,7 +45,7 @@ table_matrix = np.array(matrix, dtype=str)
 
 print('#+attr_latex: :mode math :environment matrix')
 for row in table_matrix:
-    print('|' + '|'.join(row.astype(str)))
+    print('|' + '|'.join(row))
 
 print('\nAre isomorphs: {}'.format(atoms0.is_isomorph(atoms1)))
 #+END_SRC

@@ -1,7 +1,7 @@
-from .utils import get_atomic_numbers
-from . import defaults
 from catkit import Gratoms
-from itertools import combinations
+from . import utils
+from . import defaults
+import itertools
 import numpy as np
 
 
@@ -54,7 +54,7 @@ def get_topologies(symbols, saturate=False):
     Returns
     -------
     """
-    num, cnt = get_atomic_numbers(symbols, True)
+    num, cnt = utils.get_atomic_numbers(symbols, True)
     mcnt = cnt[num != 1]
     mnum = num[num != 1]
 
@@ -88,7 +88,8 @@ def get_topologies(symbols, saturate=False):
     il = np.tril_indices(n, -1)
 
     backbones, molecules = [], []
-    for c in combinations(np.arange(ln), n - 1):
+    combos = itertools.combinations(np.arange(ln), n - 1)
+    for c in combos:
         # Construct the connectivity matrix
         ltm = np.zeros(ln)
         ltm[[c]] = 1

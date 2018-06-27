@@ -1,14 +1,11 @@
+from . import defaults
 from . import utils
-from . import geometry
-from scipy.spatial import Delaunay
-from scipy.linalg import circulant
-from itertools import product
-from numpy.linalg import pinv, norm
-import numpy as np
-from ase.data import covalent_radii as radii
-from scipy.spatial import Voronoi
 import matplotlib.pyplot as plt
+import itertools
 import networkx as nx
+import numpy as np
+import scipy
+radii = defaults.get('covalent_radii')
 
 
 class AdsorptionSites():
@@ -20,9 +17,9 @@ class AdsorptionSites():
 
         Parameters
         ----------
-        slab : atoms object
-            The atoms object to manage adsorption sites for. Must contain
-            surface atom identification.
+        slab : Gatoms object
+            The slab associated with the adsorption site network to be
+            attached.
         r : float
             Minimum basis vector length in Angstroms for creating extended
             unit cell.
@@ -63,7 +60,7 @@ class AdsorptionSites():
         self.connectivity = np.array(self.connectivity, dtype=int)
         self.r1_topology = np.array(self.r1_topology)
         self.r2_topology = np.array(self.r2_topology)
-        self.frac_coords = np.dot(self.coordinates, pinv(slab.cell))
+        self.frac_coords = np.dot(self.coordinates, np.linalg.pinv(slab.cell))
         self.slab = slab
 
         screen = (self.frac_coords[:, 0] > 0 - self.tol) & \
@@ -129,17 +126,17 @@ class AdsorptionSites():
             'hollow': [[], [], []],
             '4fold': [[], [], []]}
 
-        dt = Delaunay(sites['top'][0][:, :2])
+        dt = scipy.spatial.Delaunay(sites['top'][0][:, :2])
         neighbors = dt.neighbors
         simplices = dt.simplices
 
         for i, corners in enumerate(simplices):
-            cir = circulant(corners)
+            cir = scipy.linalg.circulant(corners)
             edges = cir[:, 1:]
 
             # Inner angle of each triangle corner
             vec = sites['top'][0][edges.T] - sites['top'][0][corners]
-            uvec = vec.T / norm(vec, axis=2).T
+            uvec = vec.T / np.linalg.norm(vec, axis=2).T
             angles = np.sum(uvec.T[0] * uvec.T[1], axis=1)
 
             # Angle types
@@ -179,7 +176,7 @@ class AdsorptionSites():
                     # Assumption: If not 4-fold, this suggests
                     # no hollow OR bridge site is present.
                     ovec = sites['top'][0][edge] - sites['top'][0][oc]
-                    ouvec = ovec / norm(ovec)
+                    ouvec = ovec / np.linalg.norm(ovec)
                     oangle = np.dot(*ouvec)
                     oright = np.isclose(oangle, 0)
                     if oright:
@@ -202,7 +199,8 @@ class AdsorptionSites():
         # For collecting missed bridge neighbors
         for s in sites['4fold'][1]:
 
-            for edge in product(s[:2], s[2:]):
+            edges = itertools.product(s[:2], s[2:])
+            for edge in edges:
                 edge = sorted(edge)
                 i = sites['bridge'][1].index(edge)
                 n, m = sites['bridge'][1][i], sites['bridge'][2][i]
@@ -238,7 +236,7 @@ class AdsorptionSites():
         periodic = periodic_match.copy()[self.screen]
 
         for p in periodic:
-            matched = geometry.matching_sites(self.frac_coords[p], coords)
+            matched = utils.matching_sites(self.frac_coords[p], coords)
             periodic_match[matched] = p
 
         return periodic_match
@@ -336,8 +334,8 @@ class AdsorptionSites():
             All edges crossing ridge or vertices indexed by the expanded
             unit slab.
         """
-        vt = Voronoi(self.coordinates[:, :2],
-                     qhull_options='Qbb Qc Qz C{}'.format(1e-2))
+        vt = scipy.spatial.Voronoi(self.coordinates[:, :2],
+                                   qhull_options='Qbb Qc Qz C{}'.format(1e-2))
 
         select, lens = [], []
         for i, p in enumerate(vt.point_region):
@@ -390,9 +388,9 @@ class AdsorptionSites():
         """Create a visualization of the sites."""
         top = self.connectivity == 1
         other = self.connectivity != 1
-        dt = Delaunay(self.coordinates[:, :2][top])
+        dt = scipy.spatial.Delaunay(self.coordinates[:, :2][top])
 
-        fig = plt.figure(figsize=(6 * 2, 3.5 * 2), frameon=False)
+        fig = plt.figure(figsize=(6, 4), frameon=False)
         ax = fig.add_axes([0, 0, 1, 1])
 
         ax.triplot(dt.points[:, 0], dt.points[:, 1], dt.simplices.copy())
@@ -531,7 +529,7 @@ class Builder(AdsorptionSites):
         if len(branches[0][1]) != 0:
             vectors = self.get_adsorption_vectors(screen=False, unique=False)
             uvec0 = vectors[ind]
-            uvec1 = slab.cell[1] / norm(slab.cell[1])
+            uvec1 = slab.cell[1] / np.linalg.norm(slab.cell[1])
             uvec2 = np.cross(uvec0, uvec1)
             uvec = [uvec0, uvec1, uvec2]
 
@@ -566,7 +564,7 @@ class Builder(AdsorptionSites):
             coords[i] = utils.trilaterate(top_sites[u], R[i] + r)
 
         vec = coords[1] - coords[0]
-        n = norm(vec)
+        n = np.linalg.norm(vec)
         uvec0 = vec / n
         d = np.sum(radii[numbers]) * 0.95
         dn = (d - n) / 2
@@ -584,7 +582,7 @@ class Builder(AdsorptionSites):
         vectors = self.get_adsorption_vectors(screen=False, unique=False)
         uvec1 = vectors[edges[edge_index]]
         uvec2 = np.cross(uvec1, uvec0)
-        uvec2 /= -norm(uvec2, axis=1)[:, None]
+        uvec2 /= -np.linalg.norm(uvec2, axis=1)[:, None]
         uvec1 = np.cross(uvec2, uvec0)
 
         branches0 = list(nx.bfs_successors(atoms.graph, bonds[0]))
@@ -740,10 +738,10 @@ def get_adsorption_sites(slab,
 
     Parameters
     ----------
-    slab : atoms object
+    slab : Atoms object
         The slab to find adsorption sites for. Must have surface
         atoms defined.
-    surface_atoms : list (n,)
+    surface_atoms : array_like (N,)
         List of the surface atom indices.
     symmetry_reduced : bool
         Return the symmetrically unique sites only.
@@ -752,11 +750,11 @@ def get_adsorption_sites(slab,
 
     Returns
     -------
-    coordinates : ndarray (n, 3)
+    coordinates : ndarray (N, 3)
         Cartesian coordinates of activate sites.
-    connectivity : ndarray (n,)
+    connectivity : ndarray (N,)
         Number of bonds formed for a given adsorbate.
-    symmetry_index : ndarray(n,)
+    symmetry_index : ndarray (N,)
         Arbitrary indices of symmetric sites.
     """
     if surface_atoms is not None:

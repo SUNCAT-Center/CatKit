@@ -1,5 +1,5 @@
-from .. import utils
 from catkit import Gratoms
+from .. import utils
 from ase import Atoms
 import networkx as nx
 import numpy as np

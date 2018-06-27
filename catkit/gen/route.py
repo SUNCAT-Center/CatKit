@@ -1,7 +1,6 @@
+from . import utils
 import numpy as np
-from numpy.linalg import matrix_rank, det
-from itertools import combinations
-import math
+import itertools
 
 
 def get_reaction_routes(nu, sigma, empty_routes=True, independent_only=False):
@@ -39,20 +38,21 @@ def get_reaction_routes(nu, sigma, empty_routes=True, independent_only=False):
 
     ER = [rr for rr in sigma[~isFR]]
     FR = [rr for rr in sigma[isFR]]
-    for c in combinations(rsample, r=m - 1):
+    route_combinations = itertools.combinations(rsample, r=m - 1)
+    for c in route_combinations:
         S = np.repeat(sigma[:, c][None], sigma.shape[0], axis=0)
         eye = np.eye(sigma.shape[0])[:, :, None]
         R = np.concatenate([S, eye], axis=2)
 
         # Does not convert to correct integers without round
-        values = np.round(det(R)).astype(int)
+        values = np.round(np.linalg.det(R)).astype(int)
 
         # Screen trivial solutions
         if np.all(values == 0):
             continue
 
         # Normalize first index as positive and reduce by gcd
-        _gcd = list_gcd(values)
+        _gcd = utils.list_gcd(values)
         values = (values / _gcd).astype(int)
         route = (sigma * values[:, None]).sum(axis=0)
         route *= np.sign(route[np.nonzero(route)[0][0]])
@@ -70,7 +70,7 @@ def get_reaction_routes(nu, sigma, empty_routes=True, independent_only=False):
 
             if independent_only:
                 liRR[n] = route
-                if matrix_rank(liRR) == n + 1:
+                if np.linalg.matrix_rank(liRR) == n + 1:
                     n += 1
 
                     if n == m:
@@ -111,7 +111,7 @@ def get_heppel_sellers(nu, terminal):
 
     # Setting up some commonly used parameters
     n = nu.shape[1]
-    m = matrix_rank(nu)
+    m = np.linalg.matrix_rank(nu)
     inter = np.where(inter)[0]
     selection = inter == inter[0]
     nuT = nu.T[inter]
@@ -121,7 +121,7 @@ def get_heppel_sellers(nu, terminal):
         selection[i + 1] = True
 
         A = nuT[selection]
-        rank = matrix_rank(A)
+        rank = np.linalg.matrix_rank(A)
         if rank == A.shape[0]:
             if rank == m - 1:
                 break
@@ -140,7 +140,7 @@ def get_heppel_sellers(nu, terminal):
         selection[n] = True
         R = nu[selection][:, inter]
 
-        rank = matrix_rank(R)
+        rank = np.linalg.matrix_rank(R)
         if rank == R.shape[0]:
             if rank == m - 1:
                 break
@@ -160,7 +160,7 @@ def get_heppel_sellers(nu, terminal):
         R = np.concatenate([S, eye], axis=2)
 
         # Does not convert to correct integers without round
-        values = np.round(det(R)).astype(int)
+        values = np.round(np.linalg.det(R)).astype(int)
 
         # Screen trivial solutions
         if np.all(values == 0):
@@ -168,7 +168,7 @@ def get_heppel_sellers(nu, terminal):
             continue
 
         # Normalize first index as positive and reduce by gcd
-        _gcd = list_gcd(values)
+        _gcd = utils.list_gcd(values)
         values *= np.sign(values[np.nonzero(values)[0][0]])
         values = (values / _gcd).astype(int)
 
@@ -199,12 +199,13 @@ def get_response_reactions(epsilon, selection=None, species=False):
         Indices of the k terminal species use to produce the
         l response reactions.
     """
-    s = matrix_rank(epsilon)
+    s = np.linalg.matrix_rank(epsilon)
     RER, index = [], []
     if not selection:
         selection = np.arange(epsilon.shape[0])
 
-    for sel in combinations(selection, r=s + 1):
+    possible_routes = itertools.combinations(selection, r=s + 1)
+    for sel in possible_routes:
         values = np.zeros(epsilon.shape[0], dtype=int)
 
         sigma = np.repeat(epsilon[[sel]][None], s + 1, axis=0)
@@ -212,14 +213,14 @@ def get_response_reactions(epsilon, selection=None, species=False):
         R = np.concatenate([sigma, eye], axis=2)
 
         # Does not convert to correct integers without round
-        values[[sel]] = np.round(det(R))
+        values[[sel]] = np.round(np.linalg.det(R))
 
         # Screen trivial solutions
         if np.all(values == 0):
             continue
 
         # Normalize first index as positive and reduce by gcd
-        _gcd = list_gcd(values)
+        _gcd = utils.list_gcd(values)
         values *= np.sign(values[np.nonzero(values)[0][0]])
         values = (values / _gcd).astype(int)
 
@@ -238,13 +239,3 @@ def get_response_reactions(epsilon, selection=None, species=False):
     if species:
         index = np.array(index)
         return RER, index
-
-    return RER
-
-
-def list_gcd(values):
-    """Return the greatest common denominator of values in a list."""
-    gcd = np.frompyfunc(math.gcd, 2, 1)
-    list_gcd = np.ufunc.reduce(gcd, values)
-
-    return list_gcd
