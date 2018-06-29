@@ -322,7 +322,6 @@ class CathubPostgreSQL:
     def release(self, pub_id=None, userhandle=None):
         """ Transfer dataset from upload to public schema on the server"""
         con = self.connection or self._connect()
-        self._initialize(con)
         cur = con.cursor()
         assert self.user == 'release' or self.user == 'catroot', \
             "You don't have permission to perform this operation"
@@ -334,7 +333,7 @@ class CathubPostgreSQL:
 
         pub_ids = [id[0] for id in cur.fetchall()]
 
-        schema = 'test_public'  # Use test schema for now
+        schema = 'test_public'  ### Use test_public schema for now
         for pub_id in pub_ids:
             self.stdout.write('Releasing publication: {pub_id} to public\n'\
                          .format(pub_id=pub_id))
@@ -405,7 +404,7 @@ class CathubPostgreSQL:
 
             execute_values(cur=cur, sql=insert_command,
                            argslist=reaction_system_values, page_size=1000)
-            self.stdout.write('Transfer complete')
+            self.stdout.write('Transfer complete\n')
         if self.connection is None:
             con.commit()
             con.close()
@@ -851,7 +850,15 @@ def get_key_list(table='reaction', start_index=0):
                                 'publisher', 'doi', 'tags'],
                 'reaction_system': ['name', 'energy_correction',
                                     'ase_id', 'id'],
-                'publication_system': ['ase_id, pub_id']}
+                'publication_system': ['ase_id, pub_id'],
+                'systems': ['id', 'unique_id', 'ctime', 'mtime', 'username',
+                            'numbers', 'positions', 'cell', 'pbc',
+                            'initial_magmoms', 'initial_charges', 'masses',
+                            'tags', 'momenta', 'constraints', 'calculator',
+                            'calculator_parameters', 'energy', 'free_energy',
+                            'forces', 'stress', 'dipole', 'magmoms', 'magmom',
+                            'charges', 'key_value_pairs', 'data', 'natoms',
+                            'fmax', 'smax', 'volume', 'mass', 'charge']}
 
     return key_list[table][start_index:]
 
