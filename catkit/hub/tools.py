@@ -106,17 +106,10 @@ def get_catbase():
 
 
 def get_bases(folder_name):
-    catbase = get_catbase()
-
-    if os.environ['USER'] == 'winther':
-        data_base = catbase + 'winther/databases/'
-        user = folder_name
-    else:
-        user = os.environ['USER']
-        data_base = catbase + folder_name + '/'
-
-    user_base = catbase + folder_name
-    return catbase, data_base, user, user_base
+    user = os.environ['USER']
+    data_base = folder_name + '/'
+    user_base = folder_name
+    return data_base, user, user_base
 
 def clear_state(name):
     name = name.replace('*', '').replace('(g)', '')

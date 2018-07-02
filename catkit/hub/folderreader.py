@@ -46,7 +46,7 @@ class FolderReader:
         self.verbose = verbose
         self.update = update
 
-        self.catbase, self.data_base, self.user, self.user_base \
+        self.data_base, self.user, self.user_base \
             = get_bases(folder_name=folder_name)
         if userhandle:
             self.user = userhandle
