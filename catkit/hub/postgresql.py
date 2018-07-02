@@ -207,8 +207,8 @@ class CathubPostgreSQL:
         self.initialized = True
         return self
 
-    def create_user(self, user, table_priviledges=['ALL PRIVILEDGES'],
-                    schema_priviledges=['ALL PRIVILEDGES'],
+    def create_user(self, user, table_privileges=['ALL PRIVILEGES'],
+                    schema_privileges=['ALL PRIVILEGES'],
                     row_limit=50000):
         con = self.connection or self._connect()
         cur = con.cursor()
@@ -237,13 +237,13 @@ class CathubPostgreSQL:
         self.schema = user
         self._initialize(con)
 
-        """ Priviledges on user-schema"""
+        """ Privileges on user-schema"""
         cur.execute(
-            'GRANT {priviledges} ON SCHEMA {user} TO {user};'
-            .format(priviledges=', '.join(schema_priviledges), user=user))
+            'GRANT {privileges} ON SCHEMA {user} TO {user};'
+            .format(privileges=', '.join(schema_privileges), user=user))
         cur.execute(
-            'GRANT {priviledges} ON ALL TABLES IN SCHEMA {user} TO {user};'
-            .format(priviledges=', '.join(table_priviledges), user=user))
+            'GRANT {privileges} ON ALL TABLES IN SCHEMA {user} TO {user};'
+            .format(privileges=', '.join(table_privileges), user=user))
         cur.execute(
             'GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA {user} TO {user};'
             .format(user=user))
@@ -251,11 +251,9 @@ class CathubPostgreSQL:
 
         """ Limit number of rows"""
         for table in ['reaction', 'publication', 'systems', 'reaction_system',
-                      'publication_system', 'text_key_values', 'number_key_values',
-                      'keys', 'information']:
+                      'publication_system', 'information']:
             table_factor = 1
-            if table in [ 'reaction_system', 'publication_system', 'text_key_values',
-                          'number_key_values', 'keys']:
+            if table in [ 'reaction_system', 'publication_system']:
                 table_factor = 15
             elif table == 'publication':
                 table_factor = 1 / 100
@@ -269,7 +267,8 @@ class CathubPostgreSQL:
             BEGIN
                 IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
                 THEN
-                    RAISE EXCEPTION 'INSERT statement exceeding maximum number of rows';
+                    RAISE EXCEPTION 
+                        'INSERT statement exceeding maximum number of rows';
                 END IF;
                 RETURN NEW;
             END;
@@ -279,7 +278,8 @@ class CathubPostgreSQL:
             cur.execute(trigger_function)
 
             trigger="""
-            DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table} on {user}.{table};
+            DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
+                on {user}.{table};
             CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
             BEFORE INSERT ON {user}.systems
             FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
@@ -291,8 +291,9 @@ class CathubPostgreSQL:
                      .format(user=self.user, schema=self.schema)
         cur.execute(set_schema)
 
-        con.commit()
-        con.close()
+        if self.connection is None:
+            con.commit()
+            con.close()
 
         return self
 
@@ -311,10 +312,103 @@ class CathubPostgreSQL:
             'DROP ROLE {user};'.format(user=user))
         self.stdout.write(
             'REMOVED USER {user}\n'.format(user=user))
-        con.commit()
-        con.close()
+
+        if self.connection is None:
+            con.commit()
+            con.close()
 
         return self
+
+    def release(self, pub_id=None, userhandle=None):
+        """ Transfer dataset from upload to public schema on the server"""
+        con = self.connection or self._connect()
+        cur = con.cursor()
+        assert self.user == 'release' or self.user == 'catroot', \
+            "You don't have permission to perform this operation"
+
+        cur.execute(
+            """SELECT distinct pub_id
+            FROM upload.reaction
+            WHERE username = '{}'""".format(userhandle))
+
+        pub_ids = [id[0] for id in cur.fetchall()]
+
+        schema = 'test_public'  ### Use test_public schema for now
+        for pub_id in pub_ids:
+            self.stdout.write('Releasing publication: {pub_id} to public\n'\
+                         .format(pub_id=pub_id))
+            columns = get_key_str('systems', start_index=1)
+            cur.execute(
+                """INSERT INTO {schema}.systems ({columns})
+                SELECT {columns}
+                FROM upload.systems
+                WHERE unique_id in
+                  (SELECT distinct ase_id
+                   FROM upload.publication_system
+                   WHERE pub_id = '{pub_id}')"""\
+                .format(schema=schema,
+                        columns=columns,
+                        pub_id=pub_id))
+
+            columns = get_key_str('publication', start_index=1)  # new id
+            cur.execute(
+                 """INSERT INTO {schema}.publication ({columns})
+                 SELECT {columns}
+                 FROM upload.publication
+                 WHERE pub_id = '{pub_id}'"""\
+                .format(schema=schema, columns=columns, pub_id=pub_id))
+            cur.execute(
+                 """INSERT INTO {schema}.publication_system
+                 SELECT *
+                 FROM upload.publication_system
+                 WHERE pub_id = '{pub_id}'"""\
+                .format(schema=schema, columns=columns, pub_id=pub_id))
+
+            columns = get_key_str('reaction', start_index=1)  # new id
+
+            cur.execute(
+                """INSERT INTO {schema}.reaction ({columns})
+                SELECT {columns}
+                FROM upload.reaction
+                WHERE pub_id = '{pub_id}'
+                ORDER BY upload.reaction.id
+                RETURNING id"""\
+                .format(schema=schema, columns=columns, pub_id=pub_id))
+
+            new_ids =  [id[0] for id in cur.fetchall()]
+
+            cur.execute(
+                """SELECT * from upload.reaction_system
+                WHERE ase_id in
+                (SELECT distinct ase_id
+                FROM upload.publication_system
+                WHERE pub_id = '{pub_id}') ORDER BY id"""\
+                .format(pub_id=pub_id))
+
+            reaction_system0 = cur.fetchall()
+            reaction_system_values = []
+            id0 = reaction_system0[0][3]
+            i=0
+            for row in reaction_system0:
+                row = list(row)
+                if not id0 == row[3]:
+                    i += 1
+                    id0 = row[3]
+                row[3] = new_ids[i]
+                reaction_system_values += [tuple(row)]
+            key_str = get_key_str('reaction_system')
+            insert_command = """
+            INSERT INTO {schema}.reaction_system ({key_str})
+            VALUES %s ON CONFLICT DO NOTHING;"""\
+                .format(schema=schema, key_str=key_str)
+
+            execute_values(cur=cur, sql=insert_command,
+                           argslist=reaction_system_values, page_size=1000)
+            self.stdout.write('Transfer complete\n')
+        if self.connection is None:
+            con.commit()
+            con.close()
+        return
 
     def status(self, table='reaction'):
         con = self.connection or self._connect()
@@ -515,7 +609,7 @@ class CathubPostgreSQL:
             self.stdout.write('Transfering atomic structures\n')
             db = ase.db.connect(filename_sqlite)
             n_structures = db.count()
-            n_blocks = int(n_structures / block_size) + 1
+            n_blocks = n_structures // block_size + 1
             t_av = 0
             for block_id in range(start_block, n_blocks):
                 i = block_id - start_block
@@ -756,7 +850,15 @@ def get_key_list(table='reaction', start_index=0):
                                 'publisher', 'doi', 'tags'],
                 'reaction_system': ['name', 'energy_correction',
                                     'ase_id', 'id'],
-                'publication_system': ['ase_id, pub_id']}
+                'publication_system': ['ase_id, pub_id'],
+                'systems': ['id', 'unique_id', 'ctime', 'mtime', 'username',
+                            'numbers', 'positions', 'cell', 'pbc',
+                            'initial_magmoms', 'initial_charges', 'masses',
+                            'tags', 'momenta', 'constraints', 'calculator',
+                            'calculator_parameters', 'energy', 'free_energy',
+                            'forces', 'stress', 'dipole', 'magmoms', 'magmom',
+                            'charges', 'key_value_pairs', 'data', 'natoms',
+                            'fmax', 'smax', 'volume', 'mass', 'charge']}
 
     return key_list[table][start_index:]
 

@@ -22,20 +22,20 @@ def surfaces(
 
     Parameters
     ----------
-    bulk : str or object
+    bulk : str | Atoms
         The atomic symbol to be passed to the as bulk builder function
         or an atoms object representing the bulk structure to use.
     width : float
         Minimum width of the slab in angstroms before trimming. Imposing
         symmetry requirements will reduce the width.
-    miller_indices : int, list (3,), or list of list (n, 3)
+    miller_indices : int | list (3,) | list of list (n, 3)
         List of the miller indices to enumerate slabs for. If an integer is
         provided, the value is treated as the maximum miller index to consider
         for an enumeration of all possible unique miller indices.
-    terminations : int or list-like
+    terminations : int | array_like
         Return the terminations associated with the provided indices. If -1,
         all possible terminations are enumerated.
-    sizes : None, int, or array-like (n,)
+    sizes : None | int | array_like (n,)
         Enumerate all surface sizes in the provided list. Sizes are integers
         which represent multiples of the smallest possible surface area.
         If None, return slabs with the smallest possible surface area. If an
@@ -44,7 +44,7 @@ def surfaces(
         Angstroms of vacuum to add to the unit cell.
     fixed : int
         Number of layers to constrain.
-    layer_type : 'angs', 'trim', 'stoich', or 'sym'
+    layer_type : 'angs' | 'trim' | 'stoich' | 'sym'
         Method of slab layering to perform. See also:
         :meth:`catkit.gen.surface.SlabGenerator`
 

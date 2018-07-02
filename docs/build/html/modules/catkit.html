@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Modules &mdash; CatKit 0.4.4 documentation</title>
+  <title>Modules &mdash; CatKit 0.5.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -100,6 +100,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-catkit.enumeration">catkit.enumeration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.db">catkit.db module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.gratoms">catkit.gratoms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-catkit.learn">catkit.learn module</a></li>
@@ -250,6 +251,39 @@
 <div class="section" id="module-catkit.build">
 <span id="catkit-build-module"></span><h2>catkit.build module<a class="headerlink" href="#module-catkit.build" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="catkit.build.add_adsorbate">
+<code class="descclassname">catkit.build.</code><code class="descname">add_adsorbate</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/build.html#add_adsorbate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.add_adsorbate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an adsorbate to a surface.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.build.bulk">
+<code class="descclassname">catkit.build.</code><code class="descname">bulk</code><span class="sig-paren">(</span><em>name</em>, <em>crystalstructure=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/build.html#bulk"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.bulk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the standard conventional cell of a bulk structure
+created using ASE. Accepts all keyword arguments for the ase
+bulk generator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Chemical symbol or symbols as in ‘MgO’ or ‘NaCl’.</li>
+<li><strong>crystalstructure</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Must be one of sc, fcc, bcc, hcp, diamond, zincblende,
+rocksalt, cesiumchloride, fluorite or wurtzite.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>standardized_bulk</strong> – The standard conventional bulk structure.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Gratoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="catkit.build.molecule">
 <code class="descclassname">catkit.build.</code><code class="descname">molecule</code><span class="sig-paren">(</span><em>species</em>, <em>topology=None</em>, <em>adsorption=False</em>, <em>vacuum=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/build.html#molecule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.molecule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return gas-phase molecule structures based on species and
@@ -279,7 +313,7 @@ parallel to the z-axis.</li>
 
 <dl class="function">
 <dt id="catkit.build.surface">
-<code class="descclassname">catkit.build.</code><code class="descname">surface</code><span class="sig-paren">(</span><em>elements</em>, <em>size</em>, <em>crystal='fcc'</em>, <em>miller=(1</em>, <em>1</em>, <em>1)</em>, <em>fixed=0</em>, <em>vacuum=10</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/build.html#surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.surface" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.build.</code><code class="descname">surface</code><span class="sig-paren">(</span><em>elements</em>, <em>size</em>, <em>crystal='fcc'</em>, <em>miller=(1</em>, <em>1</em>, <em>1)</em>, <em>termination=0</em>, <em>fixed=0</em>, <em>vacuum=10</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/build.html#surface"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.build.surface" title="Permalink to this definition">¶</a></dt>
 <dd><p>A helper function to return the surface associated with a
 given set of input parameters to the general surface generator.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -292,7 +326,8 @@ or an atoms object representing the bulk structure to use.</li>
 <li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>)</em>) – Number of time to expand the x, y, and z primitive cell.</li>
 <li><strong>crystal</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – The bulk crystal structure to pass to the ase bulk builder.</li>
 <li><strong>miller</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>) or </em><em>(</em><em>4</em><em>,</em><em>)</em>) – The miller index to cleave the surface structure from. If 4 values
-are used,</li>
+are used, assume Miller-Bravis convention.</li>
+<li><strong>termination</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – The index associated with a specific slab termination.</li>
 <li><strong>fixed</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of layers to constrain.</li>
 <li><strong>vacuum</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Angstroms of vacuum to add to the unit cell.</li>
 </ul>
@@ -301,7 +336,52 @@ are used,</li>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slab</strong> – Return a slab generated from the specified bulk structure.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)">object</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Gratoms object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-catkit.enumeration">
+<span id="catkit-enumeration-module"></span><h2>catkit.enumeration module<a class="headerlink" href="#module-catkit.enumeration" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="catkit.enumeration.surfaces">
+<code class="descclassname">catkit.enumeration.</code><code class="descname">surfaces</code><span class="sig-paren">(</span><em>bulk</em>, <em>width</em>, <em>miller_indices=(1</em>, <em>1</em>, <em>1)</em>, <em>terminations=None</em>, <em>sizes=None</em>, <em>vacuum=10</em>, <em>fixed=0</em>, <em>layer_type='angs'</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/enumeration.html#surfaces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.enumeration.surfaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a list of enumerated surfaces based on symmetry properties of
+interest to the user. Any bulk structure provided will be standardized.</p>
+<p>This function will take additional keyword arguments for the
+<a class="reference internal" href="catkit.gen.html#catkit.gen.surface.SlabGenerator" title="catkit.gen.surface.SlabGenerator"><code class="xref py py-meth docutils literal"><span class="pre">catkit.gen.surface.SlabGenerator()</span></code></a> Class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>bulk</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – The atomic symbol to be passed to the as bulk builder function
+or an atoms object representing the bulk structure to use.</li>
+<li><strong>width</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Minimum width of the slab in angstroms before trimming. Imposing
+symmetry requirements will reduce the width.</li>
+<li><strong>miller_indices</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>)</em><em>, or </em><em>list of list</em><em> (</em><em>n</em><em>, </em><em>3</em><em>)</em>) – List of the miller indices to enumerate slabs for. If an integer is
+provided, the value is treated as the maximum miller index to consider
+for an enumeration of all possible unique miller indices.</li>
+<li><strong>terminations</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em> or </em><em>list-like</em>) – Return the terminations associated with the provided indices. If -1,
+all possible terminations are enumerated.</li>
+<li><strong>sizes</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, or </em><em>array-like</em><em> (</em><em>n</em><em>,</em><em>)</em>) – Enumerate all surface sizes in the provided list. Sizes are integers
+which represent multiples of the smallest possible surface area.
+If None, return slabs with the smallest possible surface area. If an
+integer, enumerate all sizes up to that multiple.</li>
+<li><strong>vacuum</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Angstroms of vacuum to add to the unit cell.</li>
+<li><strong>fixed</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Number of layers to constrain.</li>
+<li><strong>layer_type</strong> (<em>'angs'</em><em>, </em><em>'trim'</em><em>, </em><em>'stoich'</em><em>, or </em><em>'sym'</em>) – Method of slab layering to perform. See also:
+<a class="reference internal" href="catkit.gen.html#catkit.gen.surface.SlabGenerator" title="catkit.gen.surface.SlabGenerator"><code class="xref py py-meth docutils literal"><span class="pre">catkit.gen.surface.SlabGenerator()</span></code></a></li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>slabs</strong> – Return a list of enumerated slab structures.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of Gratoms objects</p>
 </td>
 </tr>
 </tbody>
@@ -992,7 +1072,7 @@ or include bonding (rank 1).</p>
 
 <dl class="method">
 <dt id="catkit.gratoms.Gratoms.set_surface_atoms">
-<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>surface_atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.set_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
+<code class="descname">set_surface_atoms</code><span class="sig-paren">(</span><em>top</em>, <em>bottom=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gratoms.html#Gratoms.set_surface_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gratoms.Gratoms.set_surface_atoms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign surface atoms.</p>
 </dd></dl>
 
@@ -1068,7 +1148,7 @@ arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Fri, 01 Jun 2018 05:26:08.
+      Last updated on Mon, 18 Jun 2018 18:49:23.
 
     </p>
   </div>
@@ -1090,7 +1170,7 @@ arguments. <a class="reference external" href="https://docs.scipy.org/doc/scipy/
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4.4',
+            VERSION:'0.5.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

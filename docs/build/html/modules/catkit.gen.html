@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>catkit.gen package &mdash; CatKit 0.4.4 documentation</title>
+  <title>catkit.gen package &mdash; CatKit 0.5.0 documentation</title>
   
 
   
@@ -59,7 +59,7 @@
             
             
               <div class="version">
-                0.4
+                0.5
               </div>
             
           
@@ -112,6 +112,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.enumeration">catkit.enumeration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
@@ -405,11 +406,41 @@ atoms defined.</li>
 <div class="section" id="module-catkit.gen.geometry">
 <span id="catkit-gen-geometry-module"></span><h2>catkit.gen.geometry module<a class="headerlink" href="#module-catkit.gen.geometry" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
+<dt id="catkit.gen.geometry.matching_coordinates">
+<code class="descclassname">catkit.gen.geometry.</code><code class="descname">matching_coordinates</code><span class="sig-paren">(</span><em>position</em>, <em>comparators</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/geometry.html#matching_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.geometry.matching_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the indices of all points in a comparator list that are
+equal to a given position (with a tolerance), taking into
+account periodic boundary conditions (adaptation from Pymatgen).</p>
+<p>This will only accept a Cartesian coordinate scheme.
+TODO: merge this with matching_sites.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>position</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>,</em><em>)</em>) – Fractional coordinate to compare to list.</li>
+<li><strong>comparators</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>3</em><em>, </em><em>n</em><em>)</em>) – Fractional coordinates to compare against.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Absolute tolerance.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>match</strong> – Indices of matches.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)">list</a> (n,)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="catkit.gen.geometry.matching_sites">
 <code class="descclassname">catkit.gen.geometry.</code><code class="descname">matching_sites</code><span class="sig-paren">(</span><em>position</em>, <em>comparators</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/geometry.html#matching_sites"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.geometry.matching_sites" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the indices of all points in a comparator list that are
 equal to a given position (with a tolerance), taking into
 account periodic boundary conditions (adaptation from Pymatgen).</p>
+<p>This will only accept a fractional coordinate scheme.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -746,7 +777,7 @@ l response reactions.</li>
 <span id="catkit-gen-surface-module"></span><h2>catkit.gen.surface module<a class="headerlink" href="#module-catkit.gen.surface" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="catkit.gen.surface.SlabGenerator">
-<em class="property">class </em><code class="descclassname">catkit.gen.surface.</code><code class="descname">SlabGenerator</code><span class="sig-paren">(</span><em>bulk</em>, <em>miller_index</em>, <em>layers</em>, <em>vacuum=None</em>, <em>fixed=None</em>, <em>fix_stoichiometry=False</em>, <em>attach_graph=True</em>, <em>standardize_bulk=True</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">catkit.gen.surface.</code><code class="descname">SlabGenerator</code><span class="sig-paren">(</span><em>bulk</em>, <em>miller_index</em>, <em>layers</em>, <em>vacuum=None</em>, <em>fixed=None</em>, <em>layer_type='trim'</em>, <em>attach_graph=True</em>, <em>standardize_bulk=True</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Class for generation of slab unit cells from bulk unit cells.</p>
 <p>Many surface operations rely upon / are made easier through the
@@ -801,9 +832,9 @@ to the Miller index.</p>
 
 <dl class="method">
 <dt id="catkit.gen.surface.SlabGenerator.get_slab">
-<code class="descname">get_slab</code><span class="sig-paren">(</span><em>size=(1</em>, <em>1)</em>, <em>iterm=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_slab</code><span class="sig-paren">(</span><em>size=1</em>, <em>iterm=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a slab from the bulk structure. This function is meant
-specifically selection of an individual termination or enumeration
+specifically for selection of an individual termination or enumeration
 through surfaces of various size.</p>
 <p>This function will orthogonalize the c basis vector and align it
 with the z-axis which breaks bulk symmetry along the z-axis.</p>
@@ -812,8 +843,7 @@ with the z-axis which breaks bulk symmetry along the z-axis.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#tuple" title="(in Python v3.6)"><em>tuple</em></a><em> (</em><em>2</em><em>,</em><em>)</em>) – Repeat the x and y lattice vectors by the indicated
-dimensions</li>
+<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>array_like</em><em> (</em><em>2</em><em>,</em><em>) or </em><em>(</em><em>2</em><em>, </em><em>2</em><em>)</em>) – Size of the unit cell to create as described in <a class="reference internal" href="#catkit.gen.surface.SlabGenerator.set_size" title="catkit.gen.surface.SlabGenerator.set_size"><code class="xref py py-meth docutils literal"><span class="pre">set_size()</span></code></a>.</li>
 <li><strong>iterm</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – A termination index in reference to the list of possible
 terminations.</li>
 </ul>
@@ -823,7 +853,7 @@ terminations.</li>
 given.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Atoms object</p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Gratoms object</p>
 </td>
 </tr>
 </tbody>
@@ -832,12 +862,12 @@ given.</p>
 
 <dl class="method">
 <dt id="catkit.gen.surface.SlabGenerator.get_slab_basis">
-<code class="descname">get_slab_basis</code><span class="sig-paren">(</span><em>iterm</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab_basis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab_basis" title="Permalink to this definition">¶</a></dt>
+<code class="descname">get_slab_basis</code><span class="sig-paren">(</span><em>iterm=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.get_slab_basis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.get_slab_basis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a list of all terminations which have been properly shifted
 and with an appropriate number of layers added. This function is mainly
 for performance, to prevent looping over other operations which are not
 related the size of the slab.</p>
-<p>Only produces the terminations requested.</p>
+<p>Only produces the terminations requested as a lazy evaluator.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -873,27 +903,37 @@ terminations.</td>
 </dd></dl>
 
 <dl class="method">
+<dt id="catkit.gen.surface.SlabGenerator.make_symmetric">
+<code class="descname">make_symmetric</code><span class="sig-paren">(</span><em>slab</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.make_symmetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.make_symmetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a symmetric slab. Note, this will trim the slab potentially
+resulting in loss of stoichiometry.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="catkit.gen.surface.SlabGenerator.set_size">
 <code class="descname">set_size</code><span class="sig-paren">(</span><em>slab</em>, <em>size</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#SlabGenerator.set_size"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.SlabGenerator.set_size" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the size of a slab based one of three methods.</p>
 <p>1. An integer value performs a search of valid matrix operations
 to perform on the ab-basis vectors to return a set which with
-a minimal sum of distances and an angle closes to 90 degrees.</p>
-<p>2. A list-like of length 2 will multiply the existing basis
+a minimal sum of distances and an angle closest to 90 degrees.</p>
+<p>2. An array_like of length 2 will multiply the existing basis
 vectors by that amount.</p>
-<p>3. A list of two list-likes of length 2 will be interpreted
-as matrix notation to multiply the ab-basis vectors by.</p>
+<p>3. An array of shape (2, 2) will be interpreted as matrix
+notation to multiply the ab-basis vectors by.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>slab</strong> (<em>Atoms object</em>) – Slab to be made into the requested size.</li>
-<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em> (</em><em>2</em><em>,</em><em>) or </em><em>(</em><em>2</em><em>, </em><em>2</em><em>)</em>) – Size of the unit cell to create as described above.</li>
-<li><strong>Returns</strong> – </li>
-<li><strong>--------</strong> – </li>
-<li><strong>supercell</strong> (<em>Gratoms object</em>) – Supercell of the requested size.</li>
+<li><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a><em>, </em><em>list-like</em><em> (</em><em>2</em><em>,</em><em>) or </em><em>(</em><em>2</em><em>, </em><em>2</em><em>)</em>) – Size of the unit cell to create as described above.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>supercell</strong> – Supercell of the requested size.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Gratoms object</p>
 </td>
 </tr>
 </tbody>
@@ -909,9 +949,49 @@ as matrix notation to multiply the ab-basis vectors by.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="catkit.gen.surface.get_normal_vectors">
-<code class="descclassname">catkit.gen.surface.</code><code class="descname">get_normal_vectors</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#get_normal_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.get_normal_vectors" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the normal vectors to a atoms unit cell.</p>
+<dt id="catkit.gen.surface.generate_indices">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">generate_indices</code><span class="sig-paren">(</span><em>max_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#generate_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.generate_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an array of miller indices enumerated up to values
+plus or minus some maximum. Filters out lists with greatest
+common divisors greater than one. Only positive values need to
+be considered for the first index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_index</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Maximum number that will be considered for a given surface.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>unique_index</strong> – Unique miller indices</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray (n, 3)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.get_reciprocal_vectors">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">get_reciprocal_vectors</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#get_reciprocal_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.get_reciprocal_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the reciprocal lattice vectors to a atoms unit cell.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="catkit.gen.surface.get_unique_indices">
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">get_unique_indices</code><span class="sig-paren">(</span><em>bulk</em>, <em>max_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#get_unique_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.get_unique_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an array of miller indices which are likely to produce
+unique surface terminations based on a provided bulk structure.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>max_index</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – Maximum number that will be considered for a given surface.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>unique_millers</strong> – Symmetrically distinct miller indices for a given bulk.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">ndarray (n, 3)</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -922,7 +1002,7 @@ as matrix notation to multiply the ab-basis vectors by.</p>
 
 <dl class="function">
 <dt id="catkit.gen.surface.transform_ab">
-<code class="descclassname">catkit.gen.surface.</code><code class="descname">transform_ab</code><span class="sig-paren">(</span><em>slab</em>, <em>matrix</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#transform_ab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.transform_ab" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.surface.</code><code class="descname">transform_ab</code><span class="sig-paren">(</span><em>slab</em>, <em>matrix</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/surface.html#transform_ab"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.surface.transform_ab" title="Permalink to this definition">¶</a></dt>
 <dd><p>Transform the slab basis vectors parallel to the z-plane
 by matrix notation. This can result in changing the slabs
 cell size. This can also result in very unusual slab dimensions,
@@ -935,6 +1015,7 @@ use with caution.</p>
 <li><strong>slab</strong> (<em>Atoms object</em>) – The slab to be transformed.</li>
 <li><strong>matrix</strong> (<em>array_like</em><em> (</em><em>2</em><em>, </em><em>2</em><em>)</em>) – The matrix notation transformation of the a and b
 basis vectors.</li>
+<li><strong>tol</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – Float point precision tolerance.</li>
 </ul>
 </td>
 </tr>
@@ -1040,6 +1121,12 @@ unit cell information to use.</li>
 </dd></dl>
 
 <dl class="function">
+<dt id="catkit.gen.utils.get_point_group">
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_point_group</code><span class="sig-paren">(</span><em>atoms</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_point_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_point_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the point group operations of a systems.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="catkit.gen.utils.get_reference_energies">
 <code class="descclassname">catkit.gen.utils.</code><code class="descname">get_reference_energies</code><span class="sig-paren">(</span><em>species</em>, <em>energies</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_reference_energies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_reference_energies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get reference energies for the elements in a set of molecules.</p>
@@ -1066,7 +1153,7 @@ unit cell information to use.</li>
 
 <dl class="function">
 <dt id="catkit.gen.utils.get_spglib_cell">
-<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_spglib_cell</code><span class="sig-paren">(</span><em>atoms</em>, <em>primitive=False</em>, <em>idealize=True</em>, <em>tol=1e-08</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_spglib_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_spglib_cell" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_spglib_cell</code><span class="sig-paren">(</span><em>atoms</em>, <em>primitive=False</em>, <em>idealize=True</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_spglib_cell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_spglib_cell" title="Permalink to this definition">¶</a></dt>
 <dd><p>Atoms object interface with spglib primitive cell finder:
 <a class="reference external" href="https://atztogo.github.io/spglib/python-spglib.html#python-spglib">https://atztogo.github.io/spglib/python-spglib.html#python-spglib</a></p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1118,7 +1205,7 @@ unit cell information to use.</li>
 
 <dl class="function">
 <dt id="catkit.gen.utils.get_unique_coordinates">
-<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_unique_coordinates</code><span class="sig-paren">(</span><em>atoms</em>, <em>axis=2</em>, <em>tag=False</em>, <em>tol=1e-05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_unique_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_unique_coordinates" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_unique_coordinates</code><span class="sig-paren">(</span><em>atoms</em>, <em>axis=2</em>, <em>tag=False</em>, <em>tol=0.001</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_unique_coordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_unique_coordinates" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return unique coordinate values of a given atoms object
 for a specified axis.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1171,7 +1258,7 @@ to maximum z-coordinate by default.</p>
 
 <dl class="function">
 <dt id="catkit.gen.utils.get_voronoi_neighbors">
-<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_voronoi_neighbors</code><span class="sig-paren">(</span><em>atoms</em>, <em>r=8</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_voronoi_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_voronoi_neighbors" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.gen.utils.</code><code class="descname">get_voronoi_neighbors</code><span class="sig-paren">(</span><em>atoms</em>, <em>r=4</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/gen/utils.html#get_voronoi_neighbors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.gen.utils.get_voronoi_neighbors" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the connectivity matrix from the Voronoi
 method. Multi-bonding occurs through periodic boundary conditions.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -1317,7 +1404,7 @@ points and perpendicular to the positive z coordinate.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Fri, 01 Jun 2018 05:26:08.
+      Last updated on Mon, 18 Jun 2018 18:49:23.
 
     </p>
   </div>
@@ -1339,7 +1426,7 @@ points and perpendicular to the positive z coordinate.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'0.4.4',
+            VERSION:'0.5.0',
             LANGUAGE:'None',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',

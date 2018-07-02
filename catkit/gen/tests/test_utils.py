@@ -6,12 +6,12 @@ import numpy as np
 class TestUtils(unittest.TestCase):
     """Test features of catkit.gen.utils"""
 
-    def test_rmean(self):
-        """Test the rolling mean."""
-        test_range = utils.rmean(np.arange(4))
+    def test_running_mean(self):
+        """Test the running mean."""
+        test_range = utils.running_mean(np.arange(4))
         assert(test_range == [1.5])
 
-        test_range = utils.rmean(np.arange(7))
+        test_range = utils.running_mean(np.arange(7))
         assert(test_range.tolist() == [2.0, 3.0, 4.0])
 
     def test_trilaterate(self):

@@ -28,14 +28,14 @@ class TestGenDocs(unittest.TestCase):
         atoms[3].symbol = 'Cu'
 
         gen = SlabGenerator(
-            atoms, miller_index=(2, 1, 1), layers=9, fixed=5, vacuum=4)
+            atoms, miller_index=(2, 1, 1), layers=6, fixed=5, vacuum=4)
 
         terminations = gen.get_unique_terminations()
         assert (len(terminations) == 2)
 
         for i, t in enumerate(terminations):
             slab = gen.get_slab(iterm=i)
-            assert (len(slab) == 18)
+            assert (len(slab) == 16)
 
         atoms = surface('Pd', size=(3, 3), miller=(1, 1, 1), vacuum=4)
         con_matrix = atoms.connectivity
@@ -60,7 +60,8 @@ class TestGenDocs(unittest.TestCase):
         atoms[3].symbol = 'Cu'
 
         gen = SlabGenerator(
-            atoms, miller_index=(1, 1, 1), layers=3, fixed=2, vacuum=10)
+            atoms, miller_index=(1, 1, 1), layers=3, layer_type='trim',
+            fixed=2, vacuum=10)
 
         atoms = gen.get_slab()
         coordinates, connectivity = gen.adsorption_sites(atoms)
@@ -73,7 +74,8 @@ class TestGenDocs(unittest.TestCase):
         atoms = bulk('Pd', 'fcc', a=5, cubic=True)
         atoms[3].symbol = 'Cu'
 
-        gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layers=3, vacuum=4)
+        gen = SlabGenerator(atoms, miller_index=(1, 1, 1), layer_type='trim',
+                            layers=3, vacuum=4)
 
         atoms = gen.get_slab()
 
@@ -83,7 +85,7 @@ class TestGenDocs(unittest.TestCase):
         atoms = bulk('Pd', 'fcc', a=5, cubic=True)
         atoms[3].symbol = 'Cu'
 
-        gen = SlabGenerator(atoms, miller_index=(3, 2, 1), layers=13, vacuum=5)
+        gen = SlabGenerator(atoms, miller_index=(3, 2, 1), layers=8, vacuum=5)
 
         atoms = gen.get_slab()
         sites = AdsorptionSites(atoms)
@@ -107,7 +109,7 @@ class TestGenDocs(unittest.TestCase):
         atoms = bulk('Pd', 'fcc', a=5, cubic=True)
         atoms[3].symbol = 'Cu'
 
-        gen = SlabGenerator(atoms, miller_index=(2, 1, 1), layers=10, vacuum=5)
+        gen = SlabGenerator(atoms, miller_index=(2, 1, 1), layers=8, vacuum=5)
 
         atoms = gen.get_slab()
         sites = AdsorptionSites(atoms)
