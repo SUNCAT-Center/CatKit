@@ -55,26 +55,21 @@ def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
 
 @cli.command()
 @click.argument('dbfile')
-@click.option('--write-reaction', default=True, type=bool)
-@click.option('--write-reaction_system', default=True, type=bool)
-@click.option('--write-ase', default=True, type=bool)
-@click.option('--write-publication', default=True, type=bool)
-@click.option('--block-size', default=1000, type=int)
-@click.option('--start-block', default=0, type=int)
+@click.option('--block-size', default=1000, type=int,
+              help="Number of atomic structure to transfer per transaction",
+              show_default=True)
 @click.option('--dbuser', default='upload', type=str)
 @click.option('--dbpassword', default='cHyuuQH0', type=str)
-def db2server(dbfile, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, dbuser,
-              dbpassword):
+def db2server(dbfile, block_size, dbuser, dbpassword):
     """Transfer data from local database to Catalysis Hub server"""
 
     _db2server.main(dbfile,
-                    write_reaction=write_reaction,
-                    write_ase=write_ase,
-                    write_publication=write_publication,
-                    write_reaction_system=write_reaction_system,
+                    write_reaction=True,
+                    write_ase=True,
+                    write_publication=True,
+                    write_reaction_system=True,
                     block_size=block_size,
-                    start_block=start_block,
+                    start_block=0,
                     user=dbuser,
                     password=dbpassword)
 
@@ -111,16 +106,17 @@ publication_columns = [
 @click.option('--columns', '-c',
               default=('chemicalComposition', 'Equation', 'reactionEnergy'),
               type=click.Choice(reaction_columns),
+              show_default=True,
               multiple=True)
-@click.option('--n-results', '-n', default=10)
+@click.option('--n-results', '-n', default=10, show_default=True)
 @click.option(
     '--queries',
     '-q',
     default={},
     multiple='True',
     help="""Make a selection on one of the columns:
-    {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing
-    Pt \n -q reactants=CO for reactions with CO as a reactants"""
+    {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt
+    \n -q reactants=CO for reactions with CO as a reactants"""
     .format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def reactions(columns, n_results, queries):
@@ -151,6 +147,7 @@ def reactions(columns, n_results, queries):
 @click.option('--columns', '-c',
               default=('title', 'authors', 'journal', 'year'),
               type=click.Choice(publication_columns),
+              show_default=True,
               multiple=True)
 @click.option('--n-results', '-n', default=10)
 @click.option(
