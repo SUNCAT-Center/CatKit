@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from .tools import check_reaction
+from .tools import check_reaction, get_state, clear_state, clear_prefactor
 import os
 import json
 
@@ -141,11 +141,13 @@ def main(
                         }
 
     pub_txt = publication_base + 'publication.txt'
-    json.dump(publication_dict, open(pub_txt, 'w'))
+    with open(pub_txt, 'w') as f:
+        json.dump(publication_dict, f)
 
     if not len(energy_corrections.keys()) == 0:
         energy_txt = publication_base + 'energy_corrections.txt'
-        json.dump(energy_corrections, open(energy_txt, 'wb'))
+        with open(energy_txt, 'wb') as f:
+            json.dump(energy_corrections)
 
     def create(path):
         if not os.path.exists(path):
@@ -158,7 +160,6 @@ def main(
 
     gas_names = []
     ads_names = []
-    from catkit.hub.ase_tools import get_state, clear_state, clear_prefactor
     for i in range(len(reactions)):
         rnames = [r.split('@')[0] for r in reactions[i]['reactants'] +
                   reactions[i]['products']]
@@ -167,20 +168,20 @@ def main(
                       for i in range(len(states)) if states[i] == 'gas']
 
     for name in set(gas_names):
-        with open(gas_base + 'MISSING: {}_gas.traj'.format(name), 'w'):
+        with open(gas_base + 'MISSING:{}_gas'.format(name), 'w'):
             pass
 
     for bulk in bulk_compositions:
         for crystal_structure in crystal_structures:
             bulk_name = bulk + '_' + crystal_structure
             facet_base = create(bulk_base + bulk_name + '/')
-            with open(facet_base + 'MISSING: {}_bulk.traj'.format(bulk_name),
+            with open(facet_base + 'MISSING:{}_bulk'.format(bulk_name),
                       'w'):
                 pass
 
             for facet in facets:
                 reaction_base = create(facet_base + facet + '/')
-                with open(reaction_base + 'MISSING: empty_slab.traj'
+                with open(reaction_base + 'MISSING:empty_slab'
                           .format(bulk_name), 'w'):
                     pass
 
@@ -201,7 +202,9 @@ def main(
                     for ads in ads_names:
                         if ads == '':
                             continue
-                        with open(base + 'MISSING: {}.traj'.format(ads), 'w'):
+                        with open(base + 'MISSING:{}_slab'.format(ads), 'w'):
+                            pass
+                        with open(base + 'MISSING:TS?'.format(ads), 'w'):
                             pass
 
 
