@@ -72,6 +72,12 @@ def collect_structures(foldername, verbose=False, level='*'):
                               .format(
                                   posix_filename=posix_filename,
                               ))
+                except TypeError:
+                    print("Warning: Could not read {posix_filename}"
+                            .format(
+                                posix_filename=posix_filename,
+                                ))
+
                 except StopIteration:
                     print("Warning: StopIteration {posix_filename} hit."
                           .format(
