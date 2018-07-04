@@ -102,8 +102,9 @@ def fuzzy_match(structures, options):
             structure.info['state'] = 'molecule'
             molecules.append(structure)
             collected_structures \
-                .setdefault(structure.info['filetype'], {}) \
-                .setdefault('XC_FUNCTIONAL', {}) \
+                .setdefault(options.dft_code
+                            or structure.info['filetype'], {}) \
+                .setdefault(options.xc_functional or 'XC_FUNCTIONAL', {}) \
                 .setdefault('gas', {}) \
                 .setdefault(get_chemical_formula(structure), structure)
 
@@ -380,10 +381,18 @@ def fuzzy_match(structures, options):
                             # We keep the empty structure whether or not
                             # we keep all structures
                             collected_structures \
-                                .setdefault(structure.info['filetype'], {}) \
-                                .setdefault('XC_FUNCTIONAL', {}) \
-                                .setdefault(equal_formula + '_structure', {}) \
-                                .setdefault(surf1.info['facet'], {}) \
+                                .setdefault(
+                                    options.dft_code
+                                    or structure.info['filetype'],
+                                    {}) \
+                                .setdefault(options.xc_functional, {}) \
+                                .setdefault(equal_formula + '_' + (
+                                    options.structure
+                                    or 'structure'
+                                    ), {}) \
+                                .setdefault(
+                                        options.facet_name
+                                        or surf1.info['facet'], {}) \
                                 .setdefault('empty_slab', surf1)
 
                             collected_energies[key] = energy
@@ -397,15 +406,21 @@ def fuzzy_match(structures, options):
                                         key, float("inf")):
                                     continue
 
+                            # persist adsorbate slab structures
+                            ####################################
                             collected_energies[key] = energy
                             collected_structures .setdefault(
-                                structure.info['filetype'],
+                                options.dft_code
+                                or structure.info['filetype'],
                                 {}) .setdefault(
-                                'XC_FUNCTIONAL',
+                                options.xc_functional,
                                 {}) .setdefault(
-                                equal_formula + '_structure',
-                                {}) .setdefault(
-                                surf1.info['facet'],
+                                equal_formula + '_' + (
+                                    options.structure
+                                    or 'structure'), {}
+                                ).setdefault(
+                                options.facet_name
+                                or surf1.info['facet'],
                                 {}) .setdefault(
                                 equation,
                                 {})[adsorbate] = surf2

@@ -29,7 +29,12 @@ def show_reactions(dbfile):
 
 @cli.command()
 @click.argument('folder_name')
-@click.option('--userhandle', type=str, help='SLack or Github username. Alternatively your email adress.')
+@click.option(
+    '--userhandle',
+    type=str,
+    default='anonymous',
+    show_default=True,
+    help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug', default=False)
 @click.option(
     '--skip-folders',
@@ -58,7 +63,6 @@ def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
 @click.option('--start-block', default=0, type=int)
 @click.option('--dbuser', default='upload', type=str)
 @click.option('--dbpassword', default='cHyuuQH0', type=str)
-
 def db2server(dbfile, write_reaction, write_ase, write_publication,
               write_reaction_system, block_size, start_block, dbuser,
               dbpassword):
@@ -194,38 +198,44 @@ def make_folders(create_template, template, custom_base, diagnose):
     Dear all
 
     Use this command make the right structure for your folders
-    for submitting data for Catalysis Hub.
+    for submitting data for Catalysis Hub's Surface Reactions.
 
     Start by creating a template file by calling:
 
     $ cathub make_folders --create-template <template_name>
 
-    Then open the template and modify it to so that it contains the information
-    for you data. You will need to enter publication/dataset information,
+    Then open the template and modify it to so that it contains information
+    about your data. You will need to enter publication/dataset information,
     and specify the types of surfaces, facets and reactions.
 
     The 'reactions' key is a list of dictionaries.
     A new dictionary is required for each reaction, and should include two
     lists, 'reactants' and 'products'. Remember to balance the equation and
-    include a minus sign in the name when relevant.
+    include a minus sign in the name when relevant. For example:
 
-    'reactions': [
-        {
-          'reactants': ['CCH3star@ontop'],
-          'products': ['Cstar@hollow', 'CH3star@ontop']
-        },
-        {
-           'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-           'products':  ['CH3star']
-        }
-     ]
+    'reactions': [{
 
-    Also, include the phase and of the species as an extension:
-      'gas' for gas phase (i.e. CH4 -> CH4gas)
-      'star' for empty site or adsorbed phase. (i.e. OH -> OHstar)
+        'reactants': ['CCH3star@ontop'],
+
+        'products': ['Cstar@hollow', 'CH3star@ontop']
+
+      }, {
+
+         'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+
+         'products':  ['CH3star']
+
+      }]
+
+    Please include the phase of the species as an extension:
+
+        'gas' for gas phase (i.e. CH4 -> CH4gas)
+
+        'star' for empty slab or adsorbed phase. (i.e. OH -> OHstar)
 
     The site of adsorbed species is also included as an extension:
-      '@site' (i.e. OHstar in bridge-> OHstar@bridge)
+
+        '@site' (i.e. OHstar in bridge-> OHstar@bridge)
 
     Then, save the template and call:
 
@@ -339,7 +349,15 @@ def connect(user):
     type=str,
     default='',
     show_default=True,
-    help="Specify adsorbates that are to be included. E.g. -a CO,O,H )")
+    help="Specify adsorbates that are to be included. (E.g. -a CO,O,H )")
+@click.option(
+    '-c', '--dft-code',
+    default='',
+    type=str,
+    show_default=True,
+    help="Specify DFT Code used to calculate"
+    " If not specified it will be generated from"
+    " filetype the processed files.")
 @click.option(
     '-e', '--exclude-pattern',
     type=str,
@@ -367,12 +385,13 @@ def connect(user):
     show_default=True,
     help="Regular expression that matches"
          " only those files that are included.",)
-@click.option('-k', '--keep-all-energies',
-              type=bool,
-              is_flag=True,
-              help="When multiple energies for the same facet and adsorbate"
-              "are found keep all energies"
-              "not only the most stable."
+@click.option(
+    '-k', '--keep-all-energies',
+    type=bool,
+    is_flag=True,
+    help="When multiple energies for the same facet and adsorbate"
+    "are found keep all energies"
+    "not only the most stable."
               )
 @click.option(
     '-m', '--max-energy',
@@ -396,6 +415,14 @@ def connect(user):
     help="Gas phase reference molecules"
     " that should not be considered.")
 @click.option(
+    '-S', '--structure',
+    type=str,
+    default='structure',
+    show_default=True,
+    help='Bulk structure from which slabs where generated.'
+    'E.g. fcc or A_a_225 for the general case.'
+        )
+@click.option(
     '-s', '--max-density-slab',
     type=float,
     default=0.08,
@@ -416,6 +443,13 @@ def connect(user):
     default=False,
     show_default=True,
     help="Show more debugging messages.")
+@click.option(
+    '-x', '--xc-functional',
+    type=str,
+    default='XC_FUNCTIONAL',
+    show_default=True,
+    help="Set the DFT exchange-correlation functional"
+    " used to calculate total energies.")
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
 
