@@ -195,7 +195,7 @@ class Classifier():
 
         Returns
         -------
-        adsorabtes : list (n,)
+        adsorbates : list (n,)
             Adsorbate indices of adsorbates in unit cell.
         """
         atoms = self.atoms.copy()
@@ -214,7 +214,7 @@ class Classifier():
             G.add_weighted_edges_from(edges, weight='bonds')
             SG = nx.connected_component_subgraphs(G)
 
-            adsorabtes = []
+            adsorbates = []
             for sg in SG:
                 nodes = list(sg.nodes)
                 if return_atoms:
@@ -226,6 +226,6 @@ class Classifier():
                     ads.center(vacuum=5)
                 else:
                     ads = nodes
-                adsorabtes += [ads]
+                adsorbates += [ads]
 
-        return adsorabtes
+        return adsorbates
