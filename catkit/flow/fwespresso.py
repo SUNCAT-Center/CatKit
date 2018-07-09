@@ -1,10 +1,6 @@
 from .fwio import array_to_list, atoms_to_encode
-from .qeio import log_to_atoms
 from .hpcio import get_nnodes
-from ase.dft.bee import BEEFEnsemble
-from ase.io import read, write
-from ase.neb import NEB
-from ase.optimize import BFGS
+import ase
 import msgpack
 import numpy as np
 import json
@@ -25,9 +21,9 @@ def get_relaxed_calculation(in_file='output.traj'):
     in_file : str
         Name of the relaxed trajectroy file to load.
     """
-    atoms = read(in_file)
+    atoms = ase.io.read(in_file)
 
-    # Reinitialize the calculator from calc.tgz and attach it.
+    # Reinitialize the calculator from calc.tar.gz and attach it.
     calc = espresso(**atoms.info)
     calc.load_flev_output()
     atoms.set_calculator(calc)
@@ -47,7 +43,7 @@ def get_potential_energy(in_file='input.traj'):
     in_file : str
         Name of the input file to load from the local directory.
     """
-    atoms = read(in_file)
+    atoms = ase.io.read(in_file)
 
     # Planewave basis set requires periodic boundary conditions
     atoms.set_pbc([1, 1, 1])
@@ -63,7 +59,7 @@ def get_potential_energy(in_file='input.traj'):
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
-    images = log_to_atoms(out_file='output.traj')
+    images = ase.io.read('log', ':')
 
     # Save the calculator to the local disk for later use.
     try:
@@ -72,9 +68,9 @@ def get_potential_energy(in_file='input.traj'):
         calc.save_output()
 
     if images[-1].info.get('beefensemble'):
-        beef = BEEFEnsemble(calc).get_ensemble_energies()
+        beef = ase.dft.bee.BEEFEnsemble(calc).get_ensemble_energies()
         images[-1].info['beef_std'] = beef.std()
-        write('output.traj', images)
+        ase.io.write('output.traj', images)
 
     return atoms_to_encode(images)
 
@@ -106,7 +102,7 @@ def get_total_potential(out_file='potential.msg'):
     return json.dumps(potential, encoding='utf-8')
 
 
-def get_pdos(out_file='dos.msg'):
+def get_pdos(out_file='dos.msg', resolution=2):
     """Calculate and save the projected DOS. Requires a previously relaxed
     calculation.
 
@@ -114,6 +110,8 @@ def get_pdos(out_file='dos.msg'):
     ----------
     out_file : str
         Name of the output file to save the results to.
+    resolution : int | array (3,)
+        Multiple of the kpoints to increase their resolution by.
     """
     atoms = get_relaxed_calculation()
     calc = atoms.get_calculator()
@@ -121,7 +119,7 @@ def get_pdos(out_file='dos.msg'):
     # Calculate the pdos and write to disk
     dos = calc.calc_pdos(
         nscf=True,
-        kpts=atoms.info['kpts'] * [2, 2, 1],
+        kpts=atoms.info['kpts'] * resolution,
         DeltaE=0.01,
         slab=True,
         Emin=-40,
@@ -150,16 +148,16 @@ def get_neb(in_file='input.traj'):
     in_file : str
         Name of the input file to load from the local directory.
     """
-    images = read(in_file, ':')
+    images = ase.io.read(in_file, ':')
 
     for atoms in images[1:-1]:
         calc = espresso(**atoms.info)
         atoms.set_calculator(calc)
 
-    neb = NEB(images)
-    opt = BFGS(neb, trajectory='output.traj', logfile=None)
+    neb = ase.neb.NEB(images)
+    opt = ase.optimize.BFGS(neb, trajectory='output.traj', logfile=None)
     opt.run(fmax=atoms.info.get('fmax'))
-    out_images = read('output.traj', ':')
+    out_images = ase.io.read('output.traj', ':')
 
     # Save the calculator to the local disk for later use.
     try:

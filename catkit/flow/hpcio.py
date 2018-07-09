@@ -13,14 +13,8 @@ def get_server():
         local = False
         return server, local
     else:
+        server = evars.get('CLUSTER')
         local = True
-
-    # Try collecting from user defined environment variable
-    server = evars.get('CLUSTER')
-    if not server:
-        raise ValueError(
-            'Server could not be identified with user, '
-            'LSB, or SLURM environment vars')
 
     return server, local
 
