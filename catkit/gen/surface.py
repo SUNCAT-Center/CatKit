@@ -31,6 +31,7 @@ class SlabGenerator(object):
                  layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=False,
+                 primitive=True,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
@@ -83,6 +84,7 @@ class SlabGenerator(object):
         self.tol = tol
         self.layer_type = layer_type
         self.standardized = standardize_bulk
+        self.primitive = primitive
         self.attach_graph = attach_graph
         self.unique_terminations = None
         self.slab_basis = None
@@ -106,9 +108,13 @@ class SlabGenerator(object):
                  "Miller index. To get ensure you are using the correct "
                  "miller index, use standardize_bulk=True"))
 
-        primitive_bulk = utils.get_spglib_cell(
-            bulk, primitive=True, tol=1e-2)
-        miller_index = convert_miller_index(miller_index, bulk, primitive_bulk)
+        if primitive:
+            primitive_bulk = utils.get_spglib_cell(
+                bulk, primitive=True, tol=1e-2)
+            miller_index = convert_miller_index(
+                miller_index, bulk, primitive_bulk)
+        else:
+            primitive_bulk = bulk
 
         self._bulk = self.align_crystal(primitive_bulk, miller_index)
 

@@ -1,13 +1,8 @@
 from .fwio import array_to_list, atoms_to_encode
-from .hpcio import get_nnodes
+from espresso import Espresso
 import ase
 import msgpack
-import numpy as np
 import json
-try:
-    from espresso import espresso
-except(ImportError):
-    pass
 
 
 def get_relaxed_calculation(in_file='output.traj'):
@@ -24,55 +19,11 @@ def get_relaxed_calculation(in_file='output.traj'):
     atoms = ase.io.read(in_file)
 
     # Reinitialize the calculator from calc.tar.gz and attach it.
-    calc = espresso(**atoms.info)
+    calc = Espresso(**atoms.info)
     calc.load_flev_output()
     atoms.set_calculator(calc)
 
     return atoms
-
-
-def get_potential_energy(in_file='input.traj'):
-    """Performs a ASE get_potential_energy() call with the ase-espresso calculator
-    with the keywords defined inside the atoms object information.
-
-    This can be a singlepoint calculation or a full relaxation depending
-    on the keywords.
-
-    Parameters
-    ----------
-    in_file : str
-        Name of the input file to load from the local directory.
-    """
-    atoms = ase.io.read(in_file)
-
-    # Planewave basis set requires periodic boundary conditions
-    atoms.set_pbc([1, 1, 1])
-
-    # Assign kpoints to be split across nodes
-    if get_nnodes() > 1:
-        if not np.prod(atoms.info['kpts']) == 1:
-            atoms.info['parflags'] = '-npool {}'.format(get_nnodes())
-
-    # Setting up the calculator
-    calc = espresso(**atoms.info)
-    atoms.set_calculator(calc)
-
-    # Perform the calculation and write trajectory from log.
-    atoms.get_potential_energy()
-    images = ase.io.read('log', ':')
-
-    # Save the calculator to the local disk for later use.
-    try:
-        calc.save_flev_output()
-    except(RuntimeError):
-        calc.save_output()
-
-    if images[-1].info.get('beefensemble'):
-        beef = ase.dft.bee.BEEFEnsemble(calc).get_ensemble_energies()
-        images[-1].info['beef_std'] = beef.std()
-        ase.io.write('output.traj', images)
-
-    return atoms_to_encode(images)
 
 
 def get_total_potential(out_file='potential.msg'):
@@ -151,7 +102,7 @@ def get_neb(in_file='input.traj'):
     images = ase.io.read(in_file, ':')
 
     for atoms in images[1:-1]:
-        calc = espresso(**atoms.info)
+        calc = Espresso(**atoms.info)
         atoms.set_calculator(calc)
 
     neb = ase.neb.NEB(images)
