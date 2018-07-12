@@ -8,7 +8,8 @@ from . import folderreader
 from .cathubsqlite import CathubSQLite
 from ase.atoms import string2symbols
 import os
-import json
+#import json
+import yaml
 import click
 import six
 import collections
@@ -280,18 +281,14 @@ def make_folders(create_template, template, custom_base, diagnose):
                     .format(**locals()))
             with open(template, 'w') as outfile:
                 outfile.write(
-                    json.dumps(
+                    yaml.dump(
                         template_data,
-                        indent=4,
-                        separators=(
-                            ',',
-                            ': '),
-                        sort_keys=True) +
+                        indent=4) + 
                     '\n')
                 return
         else:
             with open(template) as infile:
-                template_data = json.load(infile)
+                template_data = yaml.load(infile)
                 title = template_data['title']
                 authors = template_data['authors']
                 journal = template_data['journal']

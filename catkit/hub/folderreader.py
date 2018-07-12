@@ -9,6 +9,7 @@ import numpy as np
 import os
 import copy
 import json
+import yaml
 
 
 class FolderReader:
@@ -186,7 +187,7 @@ class FolderReader:
         publication_keys = {}
         try:
             with open(root + '/publication.txt', 'r') as f:
-                pub_data = json.load(f)
+                pub_data = yaml.load(f)
             if 'url' in pub_data.keys():
                 del pub_data['url']
             self.title = pub_data['title']
@@ -228,7 +229,7 @@ class FolderReader:
 
         try:
             with open(root + '/energy_corrections.txt', 'r') as f:
-                self.energy_corrections = json.load(f)
+                self.energy_corrections = yaml.load(f)
         except BaseException:
             self.energy_corrections = {}
 

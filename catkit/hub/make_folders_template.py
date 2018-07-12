@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from .tools import check_reaction, get_state, clear_state, clear_prefactor
 import os
-import json
+import yaml
 
 username = os.environ['USER']
 
@@ -142,12 +142,12 @@ def main(
 
     pub_txt = publication_base + 'publication.txt'
     with open(pub_txt, 'w') as f:
-        json.dump(publication_dict, f)
+        yaml.dump(publication_dict, f)
 
     if not len(energy_corrections.keys()) == 0:
         energy_txt = publication_base + 'energy_corrections.txt'
         with open(energy_txt, 'wb') as f:
-            json.dump(energy_corrections)
+            yaml.dump(energy_corrections)
 
     def create(path):
         if not os.path.exists(path):
