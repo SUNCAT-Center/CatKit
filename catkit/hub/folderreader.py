@@ -243,8 +243,14 @@ class FolderReader:
             self.year = date.today().year
             pub_data.update({'year': self.year})
 
+        if len(self.title.split(' ')) > 1 \
+            and self.title.split(' ')[0].lower() in ['the', 'a']:
+                _first_word = self.title.split(' ')[1].split('_')[0]
+        else:
+            _first_word = self.title.split(' ')[0].split('_')[0]
+
         self.pub_id = self.authors[0].split(',')[0].split(' ')[0] + \
-            self.title.split(' ')[0].split('_')[0] + \
+            _first_word + \
             str(self.year)
 
         self.cathub_db = '{}{}.db'.format(self.data_base, self.pub_id)
