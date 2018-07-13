@@ -319,19 +319,26 @@ class CathubPostgreSQL:
 
         return self
 
-    def release(self, pub_id=None, userhandle=None):
+    def release(self, pub_ids=None, userhandle=None):
         """ Transfer dataset from upload to public schema on the server"""
+
+        assert pub_ids or userhandle,\
+            "Specify either pub_ids or userhandle"
+        assert not (pub_ids and userhandle),\
+            "Specify either pub_ids or userhandle"
+
         con = self.connection or self._connect()
         cur = con.cursor()
         assert self.user == 'release' or self.user == 'catroot', \
             "You don't have permission to perform this operation"
 
-        cur.execute(
-            """SELECT distinct pub_id
-            FROM upload.reaction
-            WHERE username = '{}'""".format(userhandle))
+        if userhandle:
+            cur.execute(
+                """SELECT distinct pub_id
+                FROM upload.reaction
+                WHERE username = '{}'""".format(userhandle))
 
-        pub_ids = [id[0] for id in cur.fetchall()]
+            pub_ids = [id[0] for id in cur.fetchall()]
 
         schema = 'test_public'  ### Use test_public schema for now
         for pub_id in pub_ids:
@@ -405,6 +412,44 @@ class CathubPostgreSQL:
             execute_values(cur=cur, sql=insert_command,
                            argslist=reaction_system_values, page_size=1000)
             self.stdout.write('Transfer complete\n')
+        if self.connection is None:
+            con.commit()
+            con.close()
+        return
+
+    def delete_publication(self, pub_id, schema='upload'):
+        """ Delete dataset from upload schema"""
+        if schema == 'upload':
+            user = 'upload_admin'
+        elif schema = 'public':
+            user = 'catroot'
+
+        assert self.user == user, \
+            "You don't have permission to perform this operation"
+
+        con = self.connection or self._connect()
+        cur = con.cursor()
+
+        self.stdout.write('Deleting publication: {pub_id} from {schema}\n'\
+                          .format(pub_id=pub_id, schema=schema))
+
+        cur.execute(
+            """DELETE FROM {schema}.systems
+            WHERE unique_id in
+            (SELECT distinct ase_id
+            FROM {schema}.publication_system
+            WHERE pub_id = '{pub_id}')"""\
+            .format(schema=schema,
+                    pub_id=pub_id))
+
+        cur.execute(
+            """ DELETE FROM {schema}.publication
+            WHERE pub_id = '{pub_id}'"""\
+            .format(schema=schema,
+                    pub_id=pub_id))
+
+        self.stdout.write('Delete complete\n')
+
         if self.connection is None:
             con.commit()
             con.close()
