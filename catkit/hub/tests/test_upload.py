@@ -87,10 +87,10 @@ class UploadTestCase(unittest.TestCase):
         folder2db.main('{path}/aayush/'.format(path=path))
 
     def test2_upload(self):
-        db2server.main('{path}/aayush/MontoyaThe2015.db'.format(path=path),
+        db2server.main('{path}/aayush/MontoyaChallenge2015.db'.format(path=path),
                        user='postgres')
-        if os.path.exists('{path}/aayush/MontoyaThe2015.db'.format(path=path)):
-            os.remove('{path}/aayush/MontoyaThe2015.db'.format(path=path))
+        if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'.format(path=path)):
+            os.remove('{path}/aayush/MontoyaChallenge2015.db'.format(path=path))
 
 
 if __name__ == '__main__':

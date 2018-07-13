@@ -55,7 +55,7 @@ class CommandLineTestCase(unittest.TestCase):
         db.truncate_schema()
         runner = CliRunner()
         runner.invoke(db2server, ['--user=postgres',
-                                  'aayush/MontoyaThe2015.db'])
+                                  'aayush/MontoyaChallenge2015.db'])
 
 
 if __name__ == '__main__':
