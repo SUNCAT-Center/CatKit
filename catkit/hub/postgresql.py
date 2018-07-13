@@ -417,6 +417,20 @@ class CathubPostgreSQL:
             con.close()
         return
 
+    def get_pub_id_owner(self, pub_id):
+        """Check if a user owns a publication"""
+        con = self.connection or self._connect()
+        cur = con.cursor()
+
+        cur.execute(
+            """SELECT distinct username from upload.reaction
+            WHERE pub_id = '{pub_id}'"""\
+            .format(pub_id=pub_id))
+
+        username = cur.fetchall()[0]
+
+        return username
+
     def delete_publication(self, pub_id, schema='upload'):
         """ Delete dataset from upload schema"""
         if schema == 'upload':
