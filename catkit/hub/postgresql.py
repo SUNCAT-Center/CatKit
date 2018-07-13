@@ -421,7 +421,7 @@ class CathubPostgreSQL:
         """ Delete dataset from upload schema"""
         if schema == 'upload':
             user = 'upload_admin'
-        elif schema = 'public':
+        elif schema == 'public':
             user = 'catroot'
 
         assert self.user == user, \
