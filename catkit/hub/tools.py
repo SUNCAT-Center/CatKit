@@ -1,6 +1,20 @@
 import os
 
 
+def get_pub_id(title, authors, year):
+    "construct publication id"
+    if len(title.split(' ')) > 1 \
+       and title.split(' ')[0].lower() in ['the', 'a']:
+        _first_word = title.split(' ')[1].split('_')[0]
+    else:
+        _first_word = title.split(' ')[0].split('_')[0]
+
+    pub_id = authors[0].split(',')[0].split(' ')[0] + \
+                  _first_word + \
+                  str(year)
+    return pub_id
+
+
 def extract_atoms(molecule):
     """Return a string with all atoms in molecule"""
     if molecule == '':

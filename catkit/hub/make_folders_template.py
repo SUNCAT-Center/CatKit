@@ -4,7 +4,8 @@ import os
 import subprocess
 import yaml
 
-from .tools import check_reaction, get_state, clear_state, clear_prefactor
+from .tools import check_reaction, get_state, clear_state, clear_prefactor, \
+    get_pub_id
 
 username = os.environ['USER']
 
@@ -122,8 +123,7 @@ def main(
     if not os.path.exists(base):
         os.mkdir(base)
 
-    publication_shortname = '%s_%s_%s' % (authors[0].split(',')[0].lower(),
-                                          title.split()[0].lower(), year)
+    publication_shortname = get_pub_id(title, authors, year)
 
     publication_base = base + publication_shortname + '/'
 
@@ -218,11 +218,11 @@ def main(
                                 pass
 
     print('Folders were succesfully created under {}'.format(publication_base))
-    print('')
-    print('Printing output from "tree -F {}":'.format(publication_base))
-    print('')
-    subprocess.call(
-        ('tree -F {}'.format(publication_base)).split())
+    #print('')
+    #print('Printing output from "tree -F {}":'.format(publication_base))
+    #print('')
+    #subprocess.call(
+    #    ('tree -F {}'.format(publication_base)).split())
 
 
 if __name__ == "__main__":
