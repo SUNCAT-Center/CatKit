@@ -206,24 +206,22 @@ def make_folders(create_template, template, custom_base, diagnose):
     about your data. You will need to enter publication/dataset information,
     and specify the types of surfaces, facets and reactions.
 
-    The 'reactions' key is a list of dictionaries.
-    A new dictionary is required for each reaction, and should include two
-    lists, 'reactants' and 'products'. Remember to balance the equation and
-    include a minus sign in the name when relevant. For example:
+    The 'reactions' entry should include two lists for each reaction;
+    'reactants' and 'products', corresponding to left- and right hand side of
+    each chemical equation respectively.
+    Remember to balance the equation by including a prefactor or minus sign
+    in the name when relevant. For example:
 
-    'reactions': [{
+    reactions:
 
-        'reactants': ['CCH3star@ontop'],
+    -    reactants: ['CCH3star@ontop']
 
-        'products': ['Cstar@hollow', 'CH3star@ontop']
+         products: ['Cstar@hollow', 'CH3star@ontop']
 
-      }, {
+    -    reactants: ['CH4gas', '-0.5H2gas', 'star']
 
-         'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+         products:  ['CH3star']
 
-         'products':  ['CH3star']
-
-      }]
 
     Please include the phase of the species as an extension:
 
