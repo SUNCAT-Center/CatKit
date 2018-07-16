@@ -340,7 +340,7 @@ class CathubPostgreSQL:
 
             pub_ids = [id[0] for id in cur.fetchall()]
 
-        schema = 'test_public'  ### Use test_public schema for now
+        schema = 'public'
         for pub_id in pub_ids:
             self.stdout.write('Releasing publication: {pub_id} to public\n'\
                          .format(pub_id=pub_id))
@@ -427,7 +427,7 @@ class CathubPostgreSQL:
             WHERE pub_id = '{pub_id}'"""\
             .format(pub_id=pub_id))
 
-        username = cur.fetchall()[0]
+        username = cur.fetchall()[0][0]
 
         return username
 
