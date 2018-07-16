@@ -447,6 +447,15 @@ class CathubPostgreSQL:
         self.stdout.write('Deleting publication: {pub_id} from {schema}\n'\
                           .format(pub_id=pub_id, schema=schema))
 
+        cur.execute("""SELECT to_regclass('keys');""")
+        if cur.fetchone()[0] is not  None:  # remove data from old tables
+            old_tables = ['text_key_values', 'number_key_values', 'species', 'keys']
+            for table in old_tables:
+                cur.execute(
+                    """DELETE FROM {schema}.{table}"""\
+                    .format(schema=schema,
+                            table=table))
+
         cur.execute(
             """DELETE FROM {schema}.systems
             WHERE unique_id in
