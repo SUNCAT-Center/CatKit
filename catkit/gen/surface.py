@@ -168,6 +168,7 @@ class SlabGenerator(object):
         new_bulk = Gratoms(
             positions=bulk.positions,
             numbers=bulk.get_atomic_numbers(),
+            magmoms=bulk.get_initial_magnetic_moments(),
             pbc=True)
 
         if not self.attach_graph:

@@ -49,22 +49,26 @@ def trilaterate(centers, r):
     an intersection of a plane whose normal is aligned with the
     points and perpendicular to the positive z-coordinate.
 
+    If more than three spheres are supplied, the centroid of the
+    points is returned (no radii used).
+
     Parameters
     ----------
-    centers : list or ndarray (n,)
-        Array of values to have a average taken from.
-    r : int
-        Number of values to take an average with.
+    centers : list | ndarray (n, 3)
+        Cartesian coordinates representing the center of each sphere
+    r : list | ndarray (n,)
+        The radii of the spheres.
 
     Returns
     -------
     intersection : ndarray (3,)
         The point where all spheres/planes intersect.
     """
-    if len(r) > 3:
-        raise ValueError('Cannot trilaterate more than 3 points')
-    elif len(r) == 1:
+    if len(r) == 1:
         return centers[0] + [0, 0, r[0]]
+    elif len(r) > 3:
+        sums = np.sum(centers, axis=0)
+        return sums / len(centers)
 
     vec1 = centers[1] - centers[0]
     uvec1 = vec1 / np.linalg.norm(vec1)

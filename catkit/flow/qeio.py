@@ -128,11 +128,6 @@ def cd(path):
     """Does path management: if the path doesn't exists, create it
     otherwise, move into it until the indentation is broken.
 
-    e.g.
-
-    with cd('the/path/is/real'):
-        'do things in the new path'
-
     Parameters
     ----------
     path : str
