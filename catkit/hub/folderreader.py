@@ -539,7 +539,7 @@ class FolderReader:
                                  clear_state(
                                      species),
                                  'n': n_ads,
-                                 'site': self.sites[species]})
+                                 'site': self.sites.get(species, '')})
                             if ase_id is None:
                                 ase_id = ase_tools.write_ase(
                                     slab, self.cathub_db, self.stdout,
