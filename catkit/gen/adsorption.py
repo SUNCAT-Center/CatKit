@@ -11,7 +11,7 @@ radii = defaults.get('covalent_radii')
 class AdsorptionSites():
     """Adsorption site object."""
 
-    def __init__(self, slab, surface_atoms=None, r=8, tol=1e-5):
+    def __init__(self, slab, surface_atoms=None, r=6, tol=1e-5):
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
@@ -46,13 +46,13 @@ class AdsorptionSites():
         # Put data into array format
         selection = ['bridge', 'hollow', '4fold']
         for i, k in enumerate(selection):
-            coords, r1top, r2top = sites[k]
+            coordinates, r1top, r2top = sites[k]
 
             if k in ['hollow', '4fold']:
-                r2top = [[] for _ in coords]
+                r2top = [[] for _ in coordinates]
 
-            self.connectivity += (np.ones(len(coords)) * (i + 2)).tolist()
-            self.coordinates += coords
+            self.connectivity += (np.ones(len(coordinates)) * (i + 2)).tolist()
+            self.coordinates += coordinates
             self.r1_topology += r1top
             self.r2_topology += r2top
 
@@ -576,7 +576,7 @@ class Builder(AdsorptionSites):
         atoms[bonds[0]].position = base_position0
         atoms[bonds[1]].position = base_position1
 
-        # Temporarily break adsorbate
+        # Temporarily break adsorbate bond
         atoms.graph.remove_edge(*bonds)
 
         vectors = self.get_adsorption_vectors(screen=False, unique=False)

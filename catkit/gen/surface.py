@@ -296,6 +296,8 @@ class SlabGenerator(object):
         # value of the 2nd component (+/- 2 for safety)
         div = ibasis.cell[2][1] / ibasis.cell[1][1]
         sign = -np.sign(div)
+        if sign == 0:
+            sign = 1
         m = np.ceil(np.abs(div)) + 1
 
         # Try to be smart and only search a limited space
@@ -571,16 +573,12 @@ def transform_ab(slab, matrix, tol=1e-5):
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
 
-    M[:2, :2] = np.array(matrix).T
-    newcell = np.dot(M, slab.cell)
-
     scorners_newcell = np.array([
-        [0, 0], [0, 0],
+        [0, 0], [1, 0],
         [0, 1], [1, 1]])
 
     corners = np.dot(scorners_newcell, newcell[:2, :2])
     scorners = np.linalg.solve(slab.cell[:2, :2].T, corners.T).T
-
     rep = np.ceil(scorners.ptp(axis=0)).astype(int)
 
     slab *= (rep[0], rep[1], 1)
