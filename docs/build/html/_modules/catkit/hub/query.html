@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -194,8 +193,8 @@
                                  <span class="n">n_results</span><span class="o">=</span><span class="n">n_results</span><span class="p">,</span>
                                  <span class="n">queries</span><span class="o">=</span><span class="n">queries</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">execute_graphQL</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="n">execute_graphQL</span><span class="p">(</span><span class="n">query_string</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="execute_graphQL"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.execute_graphQL">[docs]</a><span class="k">def</span> <span class="nf">execute_graphQL</span><span class="p">(</span><span class="n">query_string</span><span class="p">):</span>
     <span class="n">root</span> <span class="o">=</span> <span class="s1">&#39;http://catappdatabase2.herokuapp.com/graphql&#39;</span>
@@ -211,8 +210,8 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Result:&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">pprint</span><span class="o">.</span><span class="n">pprint</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">data</span></div>
-
+    <span class="k">return</span> <span class="n">data</span>
+</div>
 
 <div class="viewcode-block" id="graphql_query"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.graphql_query">[docs]</a><span class="k">def</span> <span class="nf">graphql_query</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;reactions&#39;</span><span class="p">,</span>
                   <span class="n">subtables</span><span class="o">=</span><span class="p">[],</span>
@@ -250,8 +249,8 @@
     <span class="n">statement</span> <span class="o">+=</span> <span class="s1">&#39;  }</span><span class="se">\n</span><span class="s1">&#39;</span>
     <span class="n">statement</span> <span class="o">+=</span> <span class="s1">&#39;}}&#39;</span>
 
-    <span class="k">return</span> <span class="n">statement</span></div>
-
+    <span class="k">return</span> <span class="n">statement</span>
+</div>
 
 <div class="viewcode-block" id="get_reactions"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.get_reactions">[docs]</a><span class="k">def</span> <span class="nf">get_reactions</span><span class="p">(</span><span class="n">n_results</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">write_db</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -336,8 +335,8 @@
                         <span class="n">atomsrow</span> <span class="o">=</span> <span class="n">get_atomsrow_by_id</span><span class="p">(</span><span class="n">unique_id</span><span class="p">)</span>
                         <span class="n">ase_db</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">atomsrow</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">data</span></div>
-
+    <span class="k">return</span> <span class="n">data</span>
+</div>
 
 <div class="viewcode-block" id="get_publications"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.get_publications">[docs]</a><span class="k">def</span> <span class="nf">get_publications</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="n">queries</span> <span class="o">=</span> <span class="p">{}</span>
@@ -356,20 +355,20 @@
 
     <span class="c1"># WARNING: undefined variable name &#39;publication_columns&#39;</span>
     <span class="k">return</span> <span class="n">query</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;publications&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">publication_columns</span><span class="p">,</span>
-                 <span class="n">queries</span><span class="o">=</span><span class="n">queries</span><span class="p">)</span></div>
-
+                 <span class="n">queries</span><span class="o">=</span><span class="n">queries</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="get_ase_db"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.get_ase_db">[docs]</a><span class="k">def</span> <span class="nf">get_ase_db</span><span class="p">():</span>
     <span class="n">ps</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;DB_PASSWORD&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ase</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span>
-        <span class="s1">&#39;postgresql://catvisitor:</span><span class="si">{}</span><span class="s1">@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ps</span><span class="p">))</span></div>
-
+        <span class="s1">&#39;postgresql://catvisitor:</span><span class="si">{}</span><span class="s1">@catalysishub.c8gwuc8jwb7l.us-west-2.rds.amazonaws.com:5432/catalysishub&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ps</span><span class="p">))</span>
+</div>
 
 <div class="viewcode-block" id="get_atomsrow_by_id"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.get_atomsrow_by_id">[docs]</a><span class="k">def</span> <span class="nf">get_atomsrow_by_id</span><span class="p">(</span><span class="n">unique_id</span><span class="p">):</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">get_ase_db</span><span class="p">()</span>
     <span class="n">row</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;unique_id=</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">unique_id</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">row</span></div>
-
+    <span class="k">return</span> <span class="n">row</span>
+</div>
 <span class="c1"># def get_atomsrow_by_ids(unique_ids):</span>
 <span class="c1">#    db = get_ase_db()</span>
 <span class="c1">#    con = db._connect()</span>
@@ -378,8 +377,8 @@
 
 <div class="viewcode-block" id="get_atoms_by_id"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.get_atoms_by_id">[docs]</a><span class="k">def</span> <span class="nf">get_atoms_by_id</span><span class="p">(</span><span class="n">unique_id</span><span class="p">):</span>
     <span class="n">row</span> <span class="o">=</span> <span class="n">get_atomsrow_by_id</span><span class="p">(</span><span class="n">unique_id</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">row</span><span class="o">.</span><span class="n">toatoms</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">row</span><span class="o">.</span><span class="n">toatoms</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="map_column_names"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.map_column_names">[docs]</a><span class="k">def</span> <span class="nf">map_column_names</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
     <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;surface&#39;</span><span class="p">:</span> <span class="s1">&#39;chemicalComposition&#39;</span><span class="p">}</span>
@@ -387,13 +386,13 @@
     <span class="k">if</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">mapping</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">mapping</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">column</span></div>
-
+        <span class="k">return</span> <span class="n">column</span>
+</div>
 
 <div class="viewcode-block" id="convert"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.query.convert">[docs]</a><span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="n">s1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;(.)([A-Z][a-z]+)&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1_\2&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;([a-z0-9])([A-Z])&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1_\2&#39;</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;([a-z0-9])([A-Z])&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\1_\2&#39;</span><span class="p">,</span> <span class="n">s1</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
     <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="p">(</span><span class="n">table</span><span class="o">=</span><span class="s1">&#39;reactions&#39;</span><span class="p">,</span>
@@ -415,7 +414,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -452,10 +451,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

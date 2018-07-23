@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -166,8 +165,8 @@
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">atoms</span> <span class="o">=</span> <span class="n">filename</span>
-    <span class="k">return</span> <span class="n">atoms</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span>
+</div>
 
 <div class="viewcode-block" id="check_traj"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.check_traj">[docs]</a><span class="k">def</span> <span class="nf">check_traj</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ase.io.trajectory</span> <span class="k">import</span> <span class="n">convert</span>
@@ -195,20 +194,20 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No energy for .traj file: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="kc">True</span></div>
-
+    <span class="k">return</span> <span class="kc">True</span>
+</div>
 
 <div class="viewcode-block" id="get_reference"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_reference">[docs]</a><span class="k">def</span> <span class="nf">get_reference</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">energy</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">()</span>
-    <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">energy</span><span class="p">)}</span></div>
-
+    <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">energy</span><span class="p">)}</span>
+</div>
 
 <div class="viewcode-block" id="get_pbc"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_pbc">[docs]</a><span class="k">def</span> <span class="nf">get_pbc</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_pbc</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="get_traj_str"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_traj_str">[docs]</a><span class="k">def</span> <span class="nf">get_traj_str</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ase.db.row</span> <span class="k">import</span> <span class="n">AtomsRow</span>
@@ -228,24 +227,24 @@
                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dct</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
 
     <span class="n">atoms_txt</span> <span class="o">=</span> <span class="s1">&#39;{{</span><span class="si">{0}</span><span class="s1">}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms_txt</span></div>
-
+    <span class="k">return</span> <span class="n">atoms_txt</span>
+</div>
 
 <div class="viewcode-block" id="get_chemical_formula"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_chemical_formula">[docs]</a><span class="k">def</span> <span class="nf">get_chemical_formula</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="get_number_of_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_number_of_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_number_of_atoms</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_number_of_atoms</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_number_of_atoms</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="get_energy_diff"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_energy_diff">[docs]</a><span class="k">def</span> <span class="nf">get_energy_diff</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">filename_ref</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">reference</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename_ref</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> <span class="o">-</span> <span class="n">reference</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span> <span class="o">-</span> <span class="n">reference</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="get_energies"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_energies">[docs]</a><span class="k">def</span> <span class="nf">get_energies</span><span class="p">(</span><span class="n">filenames</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">filenames</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -256,34 +255,34 @@
         <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
             <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
             <span class="n">energies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">energies</span></div>
-
+        <span class="k">return</span> <span class="n">energies</span>
+</div>
 
 <div class="viewcode-block" id="get_energy"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_energy">[docs]</a><span class="k">def</span> <span class="nf">get_energy</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_potential_energy</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="get_atomic_numbers"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_numbers</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">())</span></div>
-
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">())</span>
+</div>
 
 <div class="viewcode-block" id="get_formula_from_numbers"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_formula_from_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_formula_from_numbers</span><span class="p">(</span><span class="n">numbers</span><span class="p">):</span>
     <span class="n">formula</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">formula</span></div>
-
+    <span class="k">return</span> <span class="n">formula</span>
+</div>
 
 <div class="viewcode-block" id="get_numbers_from_formula"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_numbers_from_formula">[docs]</a><span class="k">def</span> <span class="nf">get_numbers_from_formula</span><span class="p">(</span><span class="n">formula</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">Atoms</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="clear_state"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.clear_state">[docs]</a><span class="k">def</span> <span class="nf">clear_state</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(g)&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;star&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;gas&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">name</span></div>
-
+    <span class="k">return</span> <span class="n">name</span>
+</div>
 
 <div class="viewcode-block" id="clear_prefactor"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.clear_prefactor">[docs]</a><span class="k">def</span> <span class="nf">clear_prefactor</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">molecule</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
@@ -293,8 +292,8 @@
         <span class="k">while</span> <span class="ow">not</span> <span class="n">molecule</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isalpha</span><span class="p">():</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">molecule</span> <span class="o">=</span> <span class="n">molecule</span><span class="p">[</span><span class="n">i</span><span class="p">:]</span>
-    <span class="k">return</span> <span class="n">molecule</span></div>
-
+    <span class="k">return</span> <span class="n">molecule</span>
+</div>
 
 <div class="viewcode-block" id="get_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_atoms</span><span class="p">(</span><span class="n">molecule</span><span class="p">):</span>
     <span class="n">molecule</span> <span class="o">=</span> <span class="n">clear_state</span><span class="p">(</span><span class="n">molecule</span><span class="p">)</span>
@@ -327,8 +326,8 @@
 
     <span class="n">molecule</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">temp</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">prefactor</span></div>
-
+    <span class="k">return</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">prefactor</span>
+</div>
 
 <div class="viewcode-block" id="get_state"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_state">[docs]</a><span class="k">def</span> <span class="nf">get_state</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
     <span class="k">if</span> <span class="s1">&#39;*&#39;</span> <span class="ow">in</span> <span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;star&#39;</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
@@ -337,8 +336,8 @@
         <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;gas&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">state</span> <span class="o">=</span> <span class="s1">&#39;star&#39;</span>
-    <span class="k">return</span> <span class="n">state</span></div>
-
+    <span class="k">return</span> <span class="n">state</span>
+</div>
 
 <div class="viewcode-block" id="get_reaction_energy"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_reaction_energy">[docs]</a><span class="k">def</span> <span class="nf">get_reaction_energy</span><span class="p">(</span><span class="n">traj_files</span><span class="p">,</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">reaction_atoms</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span>
                         <span class="n">prefactors</span><span class="p">,</span> <span class="n">prefactors_TS</span><span class="p">,</span> <span class="n">energy_corrections</span><span class="p">):</span>
@@ -395,8 +394,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">activation_energy</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">return</span> <span class="n">reaction_energy</span><span class="p">,</span> <span class="n">activation_energy</span></div>
-
+    <span class="k">return</span> <span class="n">reaction_energy</span><span class="p">,</span> <span class="n">activation_energy</span>
+</div>
 
 <div class="viewcode-block" id="tag_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.tag_atoms">[docs]</a><span class="k">def</span> <span class="nf">tag_atoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">types</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="n">non_metals</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;H&#39;</span><span class="p">,</span> <span class="s1">&#39;He&#39;</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span><span class="p">,</span> <span class="s1">&#39;Ne&#39;</span><span class="p">,</span>
@@ -423,8 +422,8 @@
             <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">atoms_i</span><span class="p">:</span>
                 <span class="n">atoms</span><span class="p">[</span><span class="n">l</span><span class="p">]</span><span class="o">.</span><span class="n">tag</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">atoms</span></div>
-
+    <span class="k">return</span> <span class="n">atoms</span>
+</div>
 
 <span class="k">def</span> <span class="nf">get_layers</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
     <span class="c1"># WARNING: this function is defined twice</span>
@@ -453,8 +452,8 @@
 
     <span class="k">if</span> <span class="n">layer_i</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">layer_i</span> <span class="o">-=</span> <span class="mi">1</span>
-    <span class="k">return</span> <span class="n">layer_i</span></div>
-
+    <span class="k">return</span> <span class="n">layer_i</span>
+</div>
 
 <div class="viewcode-block" id="get_surface_composition"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_surface_composition">[docs]</a><span class="k">def</span> <span class="nf">get_surface_composition</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;{]&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -471,15 +470,15 @@
 
     <span class="n">surface_composition</span> <span class="o">=</span> <span class="n">layer_atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">surface_composition</span></div>
-
+    <span class="k">return</span> <span class="n">surface_composition</span>
+</div>
 
 <div class="viewcode-block" id="get_n_layers"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_n_layers">[docs]</a><span class="k">def</span> <span class="nf">get_n_layers</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
     <span class="n">layer_i</span> <span class="o">=</span> <span class="n">get_layers</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
     <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">layer_i</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">n</span></div>
-
+    <span class="k">return</span> <span class="n">n</span>
+</div>
 
 <div class="viewcode-block" id="get_bulk_composition"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_bulk_composition">[docs]</a><span class="k">def</span> <span class="nf">get_bulk_composition</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
     <span class="n">atoms</span> <span class="o">=</span> <span class="n">read_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
@@ -509,8 +508,8 @@
         <span class="n">bulk_composition</span> <span class="o">=</span> <span class="n">bulk_compositions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">bulk_composition</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">bulk_composition</span></div>
-
+    <span class="k">return</span> <span class="n">bulk_composition</span>
+</div>
 
 <div class="viewcode-block" id="check_in_ase"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.check_in_ase">[docs]</a><span class="k">def</span> <span class="nf">check_in_ase</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">ase_db</span><span class="p">,</span> <span class="n">energy</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check if entry is allready in ASE db&quot;&quot;&quot;</span>
@@ -532,8 +531,8 @@
         <span class="n">unique_id</span> <span class="o">=</span> <span class="n">db_ase</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="nb">id</span><span class="p">,</span> <span class="n">unique_id</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
-
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+</div>
 
 <span class="k">def</span> <span class="nf">_normalize_key_value_pairs_inplace</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
@@ -550,8 +549,8 @@
     <span class="nb">id</span> <span class="o">=</span> <span class="n">db_ase</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;writing atoms to ASE db row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
     <span class="n">unique_id</span> <span class="o">=</span> <span class="n">db_ase</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">id</span><span class="p">)[</span><span class="s1">&#39;unique_id&#39;</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">unique_id</span></div>
-
+    <span class="k">return</span> <span class="n">unique_id</span>
+</div>
 
 <div class="viewcode-block" id="update_ase"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.update_ase">[docs]</a><span class="k">def</span> <span class="nf">update_ase</span><span class="p">(</span><span class="n">db_file</span><span class="p">,</span> <span class="n">identity</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Connect to ASE db&quot;&quot;&quot;</span>
@@ -561,8 +560,8 @@
     <span class="n">count</span> <span class="o">=</span> <span class="n">db_ase</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Updating </span><span class="si">{0}</span><span class="s1"> key value pairs in ASE db row id = </span><span class="si">{1}</span><span class="s1">&#39;</span>
           <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">identity</span><span class="p">))</span>
-    <span class="k">return</span></div>
-
+    <span class="k">return</span>
+</div>
 
 <div class="viewcode-block" id="get_reaction_from_folder"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_reaction_from_folder">[docs]</a><span class="k">def</span> <span class="nf">get_reaction_from_folder</span><span class="p">(</span><span class="n">folder_name</span><span class="p">):</span>
     <span class="n">reaction</span> <span class="o">=</span> <span class="p">{}</span>
@@ -605,8 +604,8 @@
                 <span class="n">mollist</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;star&#39;</span><span class="p">)</span>
             <span class="n">mollist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">n_star</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;star&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">sites</span></div>
-
+    <span class="k">return</span> <span class="n">reaction</span><span class="p">,</span> <span class="n">sites</span>
+</div>
 
 <div class="viewcode-block" id="get_reaction_atoms"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.get_reaction_atoms">[docs]</a><span class="k">def</span> <span class="nf">get_reaction_atoms</span><span class="p">(</span><span class="n">reaction</span><span class="p">):</span>
     <span class="n">reaction_atoms</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reactants&#39;</span><span class="p">:</span> <span class="p">[],</span>
@@ -679,8 +678,8 @@
             <span class="n">index</span> <span class="o">=</span> <span class="n">reaction_atoms</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
             <span class="n">prefactors_TS</span><span class="p">[</span><span class="s1">&#39;reactants&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="k">return</span> <span class="n">reaction_atoms</span><span class="p">,</span> <span class="n">prefactors</span><span class="p">,</span> <span class="n">prefactors_TS</span><span class="p">,</span> <span class="n">states</span></div>
-
+    <span class="k">return</span> <span class="n">reaction_atoms</span><span class="p">,</span> <span class="n">prefactors</span><span class="p">,</span> <span class="n">prefactors_TS</span><span class="p">,</span> <span class="n">states</span>
+</div>
 
 <div class="viewcode-block" id="debug_assert"><a class="viewcode-back" href="../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.debug_assert">[docs]</a><span class="k">def</span> <span class="nf">debug_assert</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
@@ -692,8 +691,8 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">expression</span><span class="p">,</span> <span class="n">message</span>
 
-    <span class="k">return</span> <span class="kc">True</span></div>
-</pre></div>
+    <span class="k">return</span> <span class="kc">True</span>
+</pre></div></div>
 
            </div>
            
@@ -706,7 +705,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -743,10 +742,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

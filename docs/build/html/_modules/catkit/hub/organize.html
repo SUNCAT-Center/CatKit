@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -208,14 +207,14 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;metal&#39;</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span></div>
-
+        <span class="k">return</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;hill&#39;</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="symbols"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.symbols">[docs]</a><span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
     <span class="n">formula</span> <span class="o">=</span> <span class="n">get_chemical_formula</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">ase</span><span class="o">.</span><span class="n">atoms</span><span class="o">.</span><span class="n">string2symbols</span><span class="p">(</span><span class="n">formula</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span></div>
-
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="collect_structures"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.collect_structures">[docs]</a><span class="k">def</span> <span class="nf">collect_structures</span><span class="p">(</span><span class="n">foldername</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="n">structures</span> <span class="o">=</span> <span class="p">[]</span>
@@ -277,8 +276,8 @@
                         <span class="n">e</span><span class="o">=</span><span class="n">e</span><span class="p">,</span>
                     <span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">structures</span></div>
-
+    <span class="k">return</span> <span class="n">structures</span>
+</div>
 
 <div class="viewcode-block" id="fuzzy_match"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.fuzzy_match">[docs]</a><span class="k">def</span> <span class="nf">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
     <span class="c1"># filter out cell with ill-defined unit cells</span>
@@ -595,8 +594,8 @@
             <span class="n">energy</span><span class="o">=</span><span class="n">energy</span><span class="p">,</span>
         <span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">collected_structures</span></div>
-
+    <span class="k">return</span> <span class="n">collected_structures</span>
+</div>
 
 <div class="viewcode-block" id="create_folders"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.create_folders">[docs]</a><span class="k">def</span> <span class="nf">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
     <span class="n">out_format</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
@@ -618,8 +617,8 @@
                 <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">out_format</span><span class="p">)),</span>
                 <span class="n">structures</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
                 <span class="nb">format</span><span class="o">=</span><span class="n">out_format</span><span class="p">,</span>
-            <span class="p">)</span></div>
-
+            <span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.organize.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
     <span class="n">pickle_file</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span>
@@ -635,8 +634,8 @@
 
     <span class="n">structures</span> <span class="o">=</span> <span class="n">fuzzy_match</span><span class="p">(</span><span class="n">structures</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
     <span class="n">create_folders</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">structures</span><span class="p">,</span>
-                   <span class="n">root</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.organized&#39;</span><span class="p">)</span></div>
-</pre></div>
+                   <span class="n">root</span><span class="o">=</span><span class="n">options</span><span class="o">.</span><span class="n">foldername</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.organized&#39;</span><span class="p">)</span>
+</pre></div></div>
 
            </div>
            
@@ -649,7 +648,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -686,10 +685,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
