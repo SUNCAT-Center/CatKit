@@ -43,7 +43,7 @@ def expand_cell(atoms, r=6):
     return index, coords, offsets
 
 
-def trilaterate(centers, r):
+def trilaterate(centers, r, zvector=None):
     """Find the intersection of two or three spheres. In the case
     of two sphere intersection, the z-coordinate is assumed to be
     an intersection of a plane whose normal is aligned with the
@@ -58,17 +58,24 @@ def trilaterate(centers, r):
         Cartesian coordinates representing the center of each sphere
     r : list | ndarray (n,)
         The radii of the spheres.
+    zvector : ndarray (3,)
+        The vector associated with the upward direction for under-specified
+        coordinations (1 and 2).
 
     Returns
     -------
     intersection : ndarray (3,)
         The point where all spheres/planes intersect.
     """
+    if zvector is None:
+        zvector = np.array([0, 0, 1])
+
     if len(r) == 1:
-        return centers[0] + [0, 0, r[0]]
+        return centers[0] + r[0] * zvector
     elif len(r) > 3:
-        sums = np.sum(centers, axis=0)
-        return sums / len(centers)
+        centroid = np.sum(centers, axis=0) / len(centers)
+        centroid += np.mean(r) / 2 * zvector
+        return centroid
 
     vec1 = centers[1] - centers[0]
     uvec1 = vec1 / np.linalg.norm(vec1)
@@ -81,7 +88,7 @@ def trilaterate(centers, r):
         z = 0.5 * (1 / d) * a
         if np.isnan(z):
             z = 0.01
-        h = [0, 0, z]
+        h = z * zvector
         intersection = centers[0] + uvec1 * x + h
 
     elif len(r) == 3:

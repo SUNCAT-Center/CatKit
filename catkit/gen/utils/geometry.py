@@ -75,7 +75,12 @@ def _get_position(coordinates, basis=None,
     return position
 
 
-def _branch_molecule(atoms, branch, base_root=None, adsorption=False):
+def _branch_molecule(
+        atoms,
+        branch,
+        base_root=None,
+        adsorption=False,
+        origin_basis=None):
     root, nodes = branch
 
     if len(nodes) == 0:
@@ -100,7 +105,7 @@ def _branch_molecule(atoms, branch, base_root=None, adsorption=False):
             d = d[1:]
         else:
             # Move adsorption structures away from surface
-            angle_mod = 25
+            angle_mod = 15
     else:
         c1 = atoms[base_root].position
 

@@ -437,7 +437,7 @@ class Builder(AdsorptionSites):
 
         return slab
 
-    def add_adsorbate(self, adsorbate, bonds=None, index=0):
+    def add_adsorbate(self, adsorbate, bonds=None, index=0, **kwargs):
         """Add and adsorbate to a slab.
 
         Parameters
@@ -468,17 +468,20 @@ class Builder(AdsorptionSites):
                 for i, _ in enumerate(self.get_symmetric_sites()):
                     slab += [self._single_adsorption(adsorbate,
                                                      bond=bonds[0],
-                                                     site_index=i)]
+                                                     site_index=i,
+                                                     **kwargs)]
             elif isinstance(index, (list, np.ndarray)):
                 slab = []
                 for i in index:
                     slab += [self._single_adsorption(adsorbate,
                                                      bond=bonds[0],
-                                                     site_index=i)]
+                                                     site_index=i,
+                                                     **kwargs)]
             else:
                 slab = self._single_adsorption(adsorbate,
                                                bond=bonds[0],
-                                               site_index=index)
+                                               site_index=index,
+                                               **kwargs)
 
         elif len(bonds) == 2:
             if index == -1:
@@ -487,54 +490,56 @@ class Builder(AdsorptionSites):
                 for i, _ in enumerate(edges):
                     slab += [self._double_adsorption(adsorbate,
                                                      bonds=bonds,
-                                                     edge_index=i)]
+                                                     edge_index=i,
+                                                     **kwargs)]
             else:
                 slab = self._double_adsorption(adsorbate,
                                                bonds=bonds,
-                                               edge_index=index)
+                                               edge_index=index,
+                                               **kwargs)
 
         else:
             raise ValueError('Only mono- and bidentate adsorption supported.')
 
         return slab
 
-    def _single_adsorption(self, adsorbate, slab=None,
-                           bond=None, site_index=0, symmetric=True):
+    def _single_adsorption(self, adsorbate, bond, slab=None,
+                           site_index=0, symmetric=True):
         """Bond and adsorbate by a single atom."""
         if slab is None:
             slab = self.slab.copy()
         atoms = adsorbate.copy()
         atoms.set_cell(slab.cell)
 
-        numbers = atoms.numbers[bond]
-        R = radii[numbers] * 0.95
-
         if symmetric:
             ind = self.get_symmetric_sites()[site_index]
+            vector = self.get_adsorption_vectors()[site_index]
         else:
-            ind = self.get_periodic_sites(screen=False)[site_index]
-
-        u = self.r1_topology[ind]
-        r = radii[slab[self.index[u]].numbers] * 0.95
+            ind = self.get_periodic_sites()[site_index]
+            vector = self.get_adsorption_vectors(unique=False)[site_index]
 
         # Improved position estimate for site.
+        u = self.r1_topology[ind]
+        r = radii[slab[self.index[u]].numbers]
         top_sites = self.coordinates[self.connectivity == 1]
-        base_position = utils.trilaterate(top_sites[u], R + r)
 
-        # Position the base atom
-        atoms[bond].position = base_position
+        numbers = atoms.numbers[bond]
+        R = radii[numbers]
+        base_position = utils.trilaterate(top_sites[u], r + R, vector)
 
-        branches = list(nx.bfs_successors(atoms.graph, bond))
+        branches = nx.bfs_successors(atoms.graph, bond)
 
-        if len(branches[0][1]) != 0:
-            vectors = self.get_adsorption_vectors(screen=False, unique=False)
-            uvec0 = vectors[ind]
-            uvec1 = slab.cell[1] / np.linalg.norm(slab.cell[1])
-            uvec2 = np.cross(uvec0, uvec1)
-            uvec = [uvec0, uvec1, uvec2]
+        root = None
+        for i, branch in enumerate(branches):
+            utils._branch_molecule(
+                atoms, branch, root,
+                adsorption=True,
+            )
+            root = bond
 
-            for branch in branches:
-                self._branch_monodentate(atoms, uvec, branch)
+        atoms.set_cell(slab.cell)
+        atoms.rotate([0, 0, 1], vector)
+        atoms.translate(base_position)
 
         n = len(slab)
         slab += atoms
@@ -544,11 +549,10 @@ class Builder(AdsorptionSites):
 
         return slab
 
-    def _double_adsorption(self, adsorbate, slab=None,
+    def _double_adsorption(self, adsorbate,
                            bonds=None, edge_index=0):
         """Bond and adsorbate by two adjacent atoms."""
-        if slab is None:
-            slab = self.slab.copy()
+        slab = self.slab.copy()
         atoms = adsorbate.copy()
         atoms.set_cell(slab.cell)
 
@@ -588,14 +592,22 @@ class Builder(AdsorptionSites):
         branches0 = list(nx.bfs_successors(atoms.graph, bonds[0]))
         if len(branches0[0][1]) != 0:
             uvec = [-uvec0, uvec1[0], uvec2[0]]
-            for branch in branches0:
-                self._branch_bidentate(atoms, uvec, branch)
+            self._branch_bidentate(atoms, uvec, branches0[0])
+            root = branches0[0][0]
+            for branch in branches0[1:]:
+                utils._branch_molecule(
+                    atoms, branch, root,
+                    adsorption=True)
 
         branches1 = list(nx.bfs_successors(atoms.graph, bonds[1]))
         if len(branches1[0][1]) != 0:
             uvec = [uvec0, uvec1[0], uvec2[0]]
-            for branch in branches1:
-                self._branch_bidentate(atoms, uvec, branch)
+            self._branch_bidentate(atoms, uvec, branches1[0])
+            root = branches1[0][0]
+            for branch in branches1[1:]:
+                utils._branch_molecule(
+                    atoms, branch, root,
+                    adsorption=True)
 
         n = len(slab)
         slab += atoms
@@ -637,53 +649,6 @@ class Builder(AdsorptionSites):
                 0.866 * d[1] * -uvec[2] * np.sin(1 / 3. * np.pi)
             atoms[nodes[1]].position = coord1
 
-        else:
-            raise ValueError('Too many bonded atoms to position correctly.')
-
-    def _branch_monodentate(self, atoms, uvec, branch):
-        """Return extended positions for additional adsorbates
-        based on provided unit vectors.
-        """
-        r, nodes = branch
-        num = atoms.numbers[[r] + nodes]
-        d = radii[num[1:]] + radii[num[0]]
-        c = atoms[r].position
-
-        # Single additional atom
-        if len(nodes) == 1:
-            coord0 = c + uvec[0] * d[0]
-            atoms[nodes[0]].position = coord0
-
-        # Two branch system
-        elif len(nodes) == 2:
-            coord0 = c + \
-                d[0] * uvec[0] * np.cos(1 / 3. * np.pi) + \
-                d[0] * uvec[1] * np.sin(1 / 3. * np.pi)
-            atoms[nodes[0]].position = coord0
-
-            coord1 = c + \
-                d[1] * uvec[0] * np.cos(1 / 3. * np.pi) + \
-                d[1] * -uvec[1] * np.sin(1 / 3. * np.pi)
-            atoms[nodes[1]].position = coord1
-
-        # Three branch system
-        elif len(nodes) == 3:
-            coord0 = c + \
-                d[0] * uvec[0] * np.cos(1 / 3. * np.pi) + \
-                0.866 * d[0] * uvec[1] * np.cos(1 / 3. * np.pi) + \
-                0.866 * d[0] * uvec[2] * np.sin(1 / 3. * np.pi)
-            atoms[nodes[0]].position = coord0
-
-            coord1 = c + \
-                d[1] * uvec[0] * np.cos(1 / 3. * np.pi) + \
-                0.866 * d[1] * uvec[1] * np.cos(1 / 3. * np.pi) + \
-                0.866 * d[1] * -uvec[2] * np.sin(1 / 3. * np.pi)
-            atoms[nodes[1]].position = coord1
-
-            coord2 = c + \
-                d[2] * uvec[0] * np.cos(1 / 3. * np.pi) + \
-                d[2] * -uvec[1] * np.sin(1 / 3. * np.pi)
-            atoms[nodes[2]].position = coord2
         else:
             raise ValueError('Too many bonded atoms to position correctly.')
 
