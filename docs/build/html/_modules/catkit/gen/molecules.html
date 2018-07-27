@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -155,10 +154,10 @@
            <div itemprop="articleBody">
             
   <h1>Source code for catkit.gen.molecules</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.utils</span> <span class="k">import</span> <span class="n">get_atomic_numbers</span>
+<span></span><span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">utils</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="k">import</span> <span class="n">defaults</span>
-<span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="k">import</span> <span class="n">combinations</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
@@ -211,7 +210,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">num</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="n">num</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="n">mcnt</span> <span class="o">=</span> <span class="n">cnt</span><span class="p">[</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
     <span class="n">mnum</span> <span class="o">=</span> <span class="n">num</span><span class="p">[</span><span class="n">num</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">]</span>
 
@@ -245,7 +244,8 @@
     <span class="n">il</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tril_indices</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">backbones</span><span class="p">,</span> <span class="n">molecules</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ln</span><span class="p">),</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">combos</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">ln</span><span class="p">),</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">combos</span><span class="p">:</span>
         <span class="c1"># Construct the connectivity matrix</span>
         <span class="n">ltm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">ln</span><span class="p">)</span>
         <span class="n">ltm</span><span class="p">[[</span><span class="n">c</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
@@ -315,7 +315,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -352,10 +352,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

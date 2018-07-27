@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -274,8 +273,8 @@
             <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">final_level</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">read_energies</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span></div>
-
+                    <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span>
+</div>
 <div class="viewcode-block" id="FolderReader.write"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="p">[],</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">key_values</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">goto_reaction</span><span class="o">=</span><span class="n">goto_reaction</span><span class="p">):</span>
             <span class="k">with</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
@@ -289,16 +288,16 @@
                     <span class="n">db</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">key_values</span><span class="p">)</span>
                     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Updated reaction db row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Already in reaction db with row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span></div>
-
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Already in reaction db with row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">id</span><span class="p">))</span>
+</div>
 <div class="viewcode-block" id="FolderReader.write_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_data</span><span class="p">):</span>
         <span class="k">with</span> <span class="n">CathubSQLite</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">)</span> <span class="k">as</span> <span class="n">db</span><span class="p">:</span>
             <span class="n">pid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">check_publication</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">pid</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Written to publications db row id = </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">pid</span></div>
-
+        <span class="k">return</span> <span class="n">pid</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_pub"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_pub">[docs]</a>    <span class="k">def</span> <span class="nf">read_pub</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="n">pub_folder</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">publication_keys</span> <span class="o">=</span> <span class="p">{}</span>
@@ -369,8 +368,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}{}</span><span class="s1">.db&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_base</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span><span class="p">)</span>
 
         <span class="n">pub_data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;pub_id&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">pub_id</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_publication</span><span class="p">(</span><span class="n">pub_data</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_gas"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_gas">[docs]</a>    <span class="k">def</span> <span class="nf">read_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">):</span>
         <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">root</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">f</span><span class="p">)]</span>
         <span class="n">traj_files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -408,8 +407,8 @@
                                      <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
 
             <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">chemical_composition</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">chemical_composition</span><span class="p">:</span> <span class="n">traj</span><span class="p">})</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">traj_gas</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">chemical_composition</span><span class="p">:</span> <span class="n">traj</span><span class="p">})</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_bulk"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_bulk">[docs]</a>    <span class="k">def</span> <span class="nf">read_bulk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">metal</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -441,8 +440,8 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
             <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;bulk&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;bulk&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">crystal</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_slab"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_slab">[docs]</a>    <span class="k">def</span> <span class="nf">read_slab</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">facet</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ase_facet</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">facet</span><span class="p">))</span>
@@ -470,8 +469,8 @@
                                          <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">:</span>
             <span class="n">ase_tools</span><span class="o">.</span><span class="n">update_ase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cathub_db</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="o">**</span><span class="n">key_value_pairs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;star&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;star&#39;</span><span class="p">:</span> <span class="n">ase_id</span><span class="p">})</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_reaction"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_reaction">[docs]</a>    <span class="k">def</span> <span class="nf">read_reaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
         <span class="n">folder_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -503,8 +502,8 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">reaction</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
                     <span class="n">key_value_pairs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                         <span class="p">{</span><span class="s1">&#39;species&#39;</span><span class="p">:</span> <span class="n">ase_tools</span><span class="o">.</span><span class="n">clear_state</span><span class="p">(</span><span class="n">species</span><span class="p">)})</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">species</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="p">[</span><span class="n">molecule</span><span class="p">]})</span></div>
-
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">species</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids_gas</span><span class="p">[</span><span class="n">molecule</span><span class="p">]})</span>
+</div>
 <div class="viewcode-block" id="FolderReader.read_energies"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.FolderReader.read_energies">[docs]</a>    <span class="k">def</span> <span class="nf">read_energies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">files</span><span class="p">):</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">key_value_pairs_reaction</span> <span class="o">=</span> <span class="kc">None</span>
@@ -744,13 +743,13 @@
             <span class="s1">&#39;year&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">year</span><span class="p">),</span>
             <span class="s1">&#39;ase_ids&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">ase_ids</span><span class="p">,</span>
             <span class="s1">&#39;energy_corrections&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_corrections</span><span class="p">,</span>
-            <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">}</span></div></div>
-
+            <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span><span class="p">}</span>
+</div></div>
 
 <div class="viewcode-block" id="read_name_from_folder"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.folderreader.read_name_from_folder">[docs]</a><span class="k">def</span> <span class="nf">read_name_from_folder</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
     <span class="n">folder_name</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">folder_name</span></div>
-</pre></div>
+    <span class="k">return</span> <span class="n">folder_name</span>
+</pre></div></div>
 
            </div>
            
@@ -763,7 +762,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -800,10 +799,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
