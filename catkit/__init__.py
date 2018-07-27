@@ -5,4 +5,4 @@
 from .gratoms import Gratoms
 
 __all__ = ['Gratoms']
-__version__ = '0.5.1'
+__version__ = '0.5.2'
