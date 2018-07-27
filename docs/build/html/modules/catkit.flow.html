@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -108,7 +107,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.build">catkit.build module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="catkit.html#catkit-enumeration-module">catkit.enumeration module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.enumeration">catkit.enumeration module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.db">catkit.db module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.gratoms">catkit.gratoms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="catkit.html#module-catkit.learn">catkit.learn module</a></li>
@@ -204,31 +203,18 @@ calculator with the keywords defined inside the atoms object information.</p>
 
 <dl class="function">
 <dt id="catkit.flow.fwespresso.get_pdos">
-<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_pdos</code><span class="sig-paren">(</span><em>out_file='dos.msg'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/fwespresso.html#get_pdos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_pdos" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_pdos</code><span class="sig-paren">(</span><em>out_file='dos.msg'</em>, <em>resolution=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/fwespresso.html#get_pdos"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_pdos" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate and save the projected DOS. Requires a previously relaxed
 calculation.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the output file to save the results to.</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="catkit.flow.fwespresso.get_potential_energy">
-<code class="descclassname">catkit.flow.fwespresso.</code><code class="descname">get_potential_energy</code><span class="sig-paren">(</span><em>in_file='input.traj'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/fwespresso.html#get_potential_energy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.fwespresso.get_potential_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Performs a ASE get_potential_energy() call with the ase-espresso calculator
-with the keywords defined inside the atoms object information.</p>
-<p>This can be a singlepoint calculation or a full relaxation depending
-on the keywords.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>in_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the input file to load from the local directory.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>out_file</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – Name of the output file to save the results to.</li>
+<li><strong>resolution</strong> (<em>int | array</em><em> (</em><em>3</em><em>,</em><em>)</em>) – Multiple of the kpoints to increase their resolution by.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -309,23 +295,10 @@ This is meant to be run on a calculation node.</p>
 <div class="section" id="module-catkit.flow.qeio">
 <span id="catkit-flow-qeio-module"></span><h2>catkit.flow.qeio module<a class="headerlink" href="#module-catkit.flow.qeio" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="catkit.flow.qeio.attach_results">
-<code class="descclassname">catkit.flow.qeio.</code><code class="descname">attach_results</code><span class="sig-paren">(</span><em>f</em>, <em>atoms</em>, <em>write_file=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/qeio.html#attach_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.attach_results" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the TS corrected energy for a scf instance
-in a log file and attach them to the given atoms obejct.</p>
-<p>Will also attach the forces and stress if applicable.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="catkit.flow.qeio.cd">
 <code class="descclassname">catkit.flow.qeio.</code><code class="descname">cd</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/qeio.html#cd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.cd" title="Permalink to this definition">¶</a></dt>
 <dd><p>Does path management: if the path doesn’t exists, create it
 otherwise, move into it until the indentation is broken.</p>
-<p>e.g.</p>
-<dl class="docutils">
-<dt>with cd(‘the/path/is/real’):</dt>
-<dd>‘do things in the new path’</dd>
-</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -345,15 +318,6 @@ an atoms object: positions, cell, and symbols.</p>
 so pbc is not considered.</p>
 <p>Each element is sorted in the algorithem to help prevent
 new hashs for identical geometries.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="catkit.flow.qeio.log_to_atoms">
-<code class="descclassname">catkit.flow.qeio.</code><code class="descname">log_to_atoms</code><span class="sig-paren">(</span><em>log_file='log'</em>, <em>ent=-1</em>, <em>out_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/flow/qeio.html#log_to_atoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.flow.qeio.log_to_atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Parse a QE log file for atoms trajectory and return a list
-of atoms objects representative of the relaxation path.</p>
-<p>NOTE: trajectory information is only returned for calculations
-run with BFGS internal to QE.</p>
 </dd></dl>
 
 <dl class="function">
@@ -390,7 +354,7 @@ each atoms image inside a QE directory.</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:48:31.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -427,10 +391,7 @@ each atoms image inside a QE directory.</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

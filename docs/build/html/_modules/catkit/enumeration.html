@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -177,20 +176,20 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    bulk : str or object</span>
+<span class="sd">    bulk : str | Atoms</span>
 <span class="sd">        The atomic symbol to be passed to the as bulk builder function</span>
 <span class="sd">        or an atoms object representing the bulk structure to use.</span>
 <span class="sd">    width : float</span>
 <span class="sd">        Minimum width of the slab in angstroms before trimming. Imposing</span>
 <span class="sd">        symmetry requirements will reduce the width.</span>
-<span class="sd">    miller_indices : int, list (3,), or list of list (n, 3)</span>
+<span class="sd">    miller_indices : int | list (3,) | list of list (n, 3)</span>
 <span class="sd">        List of the miller indices to enumerate slabs for. If an integer is</span>
 <span class="sd">        provided, the value is treated as the maximum miller index to consider</span>
 <span class="sd">        for an enumeration of all possible unique miller indices.</span>
-<span class="sd">    terminations : int or list-like</span>
+<span class="sd">    terminations : int | array_like</span>
 <span class="sd">        Return the terminations associated with the provided indices. If -1,</span>
 <span class="sd">        all possible terminations are enumerated.</span>
-<span class="sd">    sizes : None, int, or array-like (n,)</span>
+<span class="sd">    sizes : None | int | array_like (n,)</span>
 <span class="sd">        Enumerate all surface sizes in the provided list. Sizes are integers</span>
 <span class="sd">        which represent multiples of the smallest possible surface area.</span>
 <span class="sd">        If None, return slabs with the smallest possible surface area. If an</span>
@@ -199,7 +198,7 @@
 <span class="sd">        Angstroms of vacuum to add to the unit cell.</span>
 <span class="sd">    fixed : int</span>
 <span class="sd">        Number of layers to constrain.</span>
-<span class="sd">    layer_type : &#39;angs&#39;, &#39;trim&#39;, &#39;stoich&#39;, or &#39;sym&#39;</span>
+<span class="sd">    layer_type : &#39;angs&#39; | &#39;trim&#39; | &#39;stoich&#39; | &#39;sym&#39;</span>
 <span class="sd">        Method of slab layering to perform. See also:</span>
 <span class="sd">        :meth:`catkit.gen.surface.SlabGenerator`</span>
 
@@ -259,7 +258,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -296,10 +295,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

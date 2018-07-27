@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -370,8 +369,8 @@
         <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
         <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.remove_user"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.remove_user">[docs]</a>    <span class="k">def</span> <span class="nf">remove_user</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">user</span><span class="p">):</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">user</span> <span class="o">==</span> <span class="s1">&#39;catroot&#39;</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
@@ -388,16 +387,16 @@
         <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
         <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span></div>
-
+        <span class="k">return</span> <span class="bp">self</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.status"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.status">[docs]</a>    <span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
         <span class="n">cur</span> <span class="o">=</span> <span class="n">con</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
         <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;SELECT COUNT(id) from </span><span class="si">{0}</span><span class="s2">;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">))</span>
         <span class="n">count</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchone</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
-
+        <span class="k">return</span> <span class="n">count</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.read"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -417,8 +416,8 @@
                         <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">table</span><span class="p">,</span> <span class="n">table</span><span class="p">,</span> <span class="nb">id</span><span class="p">))</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">row</span></div>
-
+        <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">row</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.write_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_values</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -441,8 +440,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">id</span><span class="p">,</span> <span class="n">pub_id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span><span class="p">,</span> <span class="n">pub_id</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.write"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
 
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
@@ -460,8 +459,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.update"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">key_names</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -477,8 +476,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.update_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.update_publication">[docs]</a>    <span class="k">def</span> <span class="nf">update_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_dict</span><span class="p">):</span>
         <span class="kn">import</span> <span class="nn">json</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
@@ -513,8 +512,8 @@
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span></div>
-
+        <span class="k">return</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.delete"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.delete">[docs]</a>    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">authorlist</span><span class="p">,</span> <span class="n">year</span><span class="p">,</span> <span class="n">doi</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -531,8 +530,8 @@
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">count</span></div>
-
+        <span class="k">return</span> <span class="n">count</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.transfer"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.transfer">[docs]</a>    <span class="k">def</span> <span class="nf">transfer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_sqlite</span><span class="p">,</span> <span class="n">start_id</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">write_ase</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">write_publication</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">write_reaction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                  <span class="n">write_reaction_system</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">block_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
@@ -711,8 +710,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  publication: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Npub</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  publication_system: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Npubstruc</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  reaction: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ncat</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  reaction_system: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ncatstruc</span><span class="p">))</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;  reaction_system: </span><span class="si">{0}</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">Ncatstruc</span><span class="p">))</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.check"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_id</span><span class="p">,</span> <span class="n">chemical_composition</span><span class="p">,</span> <span class="n">reactants</span><span class="p">,</span> <span class="n">products</span><span class="p">,</span>
               <span class="n">reaction_energy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
@@ -745,8 +744,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubPostgreSQL.publication_status"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.CathubPostgreSQL.publication_status">[docs]</a>    <span class="k">def</span> <span class="nf">publication_status</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -761,8 +760,8 @@
         <span class="n">cur</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select_statement</span><span class="p">)</span>
         <span class="n">pubs</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="n">pubs</span></div></div>
-
+        <span class="k">return</span> <span class="n">pubs</span>
+</div></div>
 
 <div class="viewcode-block" id="get_key_value_str"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.postgresql.get_key_value_str">[docs]</a><span class="k">def</span> <span class="nf">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
     <span class="n">key_str</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reaction&#39;</span><span class="p">:</span> <span class="s2">&quot;&quot;&quot;chemical_composition, surface_composition,</span>
@@ -796,8 +795,8 @@
             <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="c1"># print(value_str)</span>
 
-    <span class="k">return</span> <span class="n">key_str</span><span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">value_str</span></div>
-</pre></div>
+    <span class="k">return</span> <span class="n">key_str</span><span class="p">[</span><span class="n">table</span><span class="p">],</span> <span class="n">value_str</span>
+</pre></div></div>
 
            </div>
            
@@ -810,7 +809,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -847,10 +846,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

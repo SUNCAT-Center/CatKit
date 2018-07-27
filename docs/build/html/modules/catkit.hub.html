@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -224,7 +223,7 @@
 <dl class="class">
 <dt id="catkit.hub.cathubsqlite.CathubSQLite">
 <em class="property">class </em><code class="descclassname">catkit.hub.cathubsqlite.</code><code class="descname">CathubSQLite</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/cathubsqlite.html#CathubSQLite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.cathubsqlite.CathubSQLite" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for managing SQLite3 database for reaction energies,
 publications and atomic structures. Builds on top of the ASE database for
 atomic strucutres <a class="reference external" href="https://wiki.fysik.dtu.dk/ase/ase/db/db.html">https://wiki.fysik.dtu.dk/ase/ase/db/db.html</a> with four
@@ -313,7 +312,7 @@ to database file</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>cur</strong> (<em>database connection</em><em>(</em><em>)</em><em>cursor</em><em>(</em><em>) </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><em>object</em></a>) – </li>
 <li><strong>table</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – ‘reaction’, ‘publication’, ‘publication_system’, ‘reaction_system’</li>
-<li><strong>Returns</strong> (<a class="reference internal" href="catkit.html#catkit.db.Atom.id" title="catkit.db.Atom.id"><em>id</em></a>) – </li>
+<li><strong>Returns</strong> (<em>id</em>) – </li>
 </ul>
 </td>
 </tr>
@@ -483,7 +482,7 @@ For reaction H2Ogas -&gt; 2Hstar + O star you would write:
 <dl class="class">
 <dt id="catkit.hub.folderreader.FolderReader">
 <em class="property">class </em><code class="descclassname">catkit.hub.folderreader.</code><code class="descname">FolderReader</code><span class="sig-paren">(</span><em>folder_name</em>, <em>debug=False</em>, <em>strict=True</em>, <em>verbose=False</em>, <em>update=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/folderreader.html#FolderReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.folderreader.FolderReader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for reading data from organized folders and writing to local
 CathubSQLite database. Folders should be arranged with
 make_folders_template and are read in the order:</p>
@@ -582,7 +581,7 @@ in spite of errors.</li>
 <dl class="class">
 <dt id="catkit.hub.maintain_server.MaintainPostgres">
 <em class="property">class </em><code class="descclassname">catkit.hub.maintain_server.</code><code class="descname">MaintainPostgres</code><span class="sig-paren">(</span><em>user='catroot'</em>, <em>password=None</em>, <em>stdin=&lt;_io.TextIOWrapper name='&lt;stdin&gt;' mode='r' encoding='UTF-8'&gt;</em>, <em>stdout=&lt;_io.TextIOWrapper name='&lt;stdout&gt;' mode='w' encoding='UTF-8'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/maintain_server.html#MaintainPostgres"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.maintain_server.MaintainPostgres" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#catkit.hub.postgresql.CathubPostgreSQL" title="catkit.hub.postgresql.CathubPostgreSQL"><code class="xref py py-class docutils literal"><span class="pre">catkit.hub.postgresql.CathubPostgreSQL</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#catkit.hub.postgresql.CathubPostgreSQL" title="catkit.hub.postgresql.CathubPostgreSQL"><code class="xref py py-class docutils literal notranslate"><span class="pre">catkit.hub.postgresql.CathubPostgreSQL</span></code></a></p>
 <dl class="method">
 <dt id="catkit.hub.maintain_server.MaintainPostgres.delete_lost_systems">
 <code class="descname">delete_lost_systems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/maintain_server.html#MaintainPostgres.delete_lost_systems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.maintain_server.MaintainPostgres.delete_lost_systems" title="Permalink to this definition">¶</a></dt>
@@ -702,7 +701,7 @@ available, mode=hill, when not (ASE &lt;= 3.13)</p>
 <dl class="class">
 <dt id="catkit.hub.postgresql.CathubPostgreSQL">
 <em class="property">class </em><code class="descclassname">catkit.hub.postgresql.</code><code class="descname">CathubPostgreSQL</code><span class="sig-paren">(</span><em>user='catroot'</em>, <em>password=None</em>, <em>stdin=&lt;_io.TextIOWrapper name='&lt;stdin&gt;' mode='r' encoding='UTF-8'&gt;</em>, <em>stdout=&lt;_io.TextIOWrapper name='&lt;stdout&gt;' mode='w' encoding='UTF-8'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/catkit/hub/postgresql.html#CathubPostgreSQL"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#catkit.hub.postgresql.CathubPostgreSQL" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Class for setting up the catalysis hub reaction energy database
 on postgreSQL server.</p>
 <dl class="method">
@@ -894,7 +893,7 @@ list of reactants -&gt; list of products</p>
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -931,10 +930,7 @@ list of reactants -&gt; list of products</p>
 
   
 
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

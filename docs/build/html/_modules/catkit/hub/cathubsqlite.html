@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -302,8 +301,8 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">row</span><span class="p">)</span> <span class="o">==</span> <span class="mi">14</span><span class="p">:</span>  <span class="c1"># Old schema</span>
             <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">row</span></div>
-
+        <span class="k">return</span> <span class="n">row</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.write_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.write_publication">[docs]</a>    <span class="k">def</span> <span class="nf">write_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write publication info to db</span>
@@ -344,8 +343,8 @@
 
         <span class="n">pid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_last_id</span><span class="p">(</span><span class="n">cur</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;publication&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">pid</span></div>
-
+        <span class="k">return</span> <span class="n">pid</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.write"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Write reaction info to db file</span>
@@ -434,8 +433,8 @@
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.update"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">key_names</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update reaction info for a selected row</span>
@@ -494,8 +493,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">con</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
             <span class="n">con</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.get_last_id"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.get_last_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_last_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cur</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the id of the last written row in table</span>
@@ -515,8 +514,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.check"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.check">[docs]</a>    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chemical_composition</span><span class="p">,</span> <span class="n">reaction_energy</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check if entry with same surface and energy is allready written</span>
@@ -541,8 +540,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.check_reaction_on_surface"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.check_reaction_on_surface">[docs]</a>    <span class="k">def</span> <span class="nf">check_reaction_on_surface</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chemical_composition</span><span class="p">,</span> <span class="n">reactants</span><span class="p">,</span>
                                   <span class="n">products</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -572,8 +571,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.check_publication"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.check_publication">[docs]</a>    <span class="k">def</span> <span class="nf">check_publication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_id</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -588,8 +587,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="nb">id</span></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div>
 <div class="viewcode-block" id="CathubSQLite.check_publication_structure"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.CathubSQLite.check_publication_structure">[docs]</a>    <span class="k">def</span> <span class="nf">check_publication_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pub_id</span><span class="p">,</span> <span class="n">ase_id</span><span class="p">):</span>
         <span class="n">con</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">connection</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
@@ -605,8 +604,8 @@
             <span class="nb">id</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="nb">id</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="nb">id</span></div></div>
-
+        <span class="k">return</span> <span class="nb">id</span>
+</div></div>
 
 <div class="viewcode-block" id="check_ase_ids"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.check_ase_ids">[docs]</a><span class="k">def</span> <span class="nf">check_ase_ids</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">ase_ids</span><span class="p">):</span>
     <span class="n">ase_values</span> <span class="o">=</span> <span class="n">ase_ids</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
@@ -622,8 +621,8 @@
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">reaction_species</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ase_values</span><span class="p">)</span> <span class="o">+</span> <span class="n">n_split</span><span class="p">,</span> \
         <span class="s1">&#39;ASE ids missing!&#39;</span>
-    <span class="k">return</span></div>
-
+    <span class="k">return</span>
+</div>
 
 <div class="viewcode-block" id="get_key_value_str"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.get_key_value_str">[docs]</a><span class="k">def</span> <span class="nf">get_key_value_str</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
     <span class="n">key_str</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;chemical_composition, surface_composition, facet, sites,</span>
@@ -644,8 +643,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value_str</span> <span class="o">+=</span> <span class="s2">&quot;, </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span></div>
-
+    <span class="k">return</span> <span class="n">key_str</span><span class="p">,</span> <span class="n">value_str</span>
+</div>
 
 <div class="viewcode-block" id="get_key_value_list"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.get_key_value_list">[docs]</a><span class="k">def</span> <span class="nf">get_key_value_list</span><span class="p">(</span><span class="n">key_list</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="s1">&#39;reaction&#39;</span><span class="p">):</span>
     <span class="n">total_keys</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reaction&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;chemical_composition&#39;</span><span class="p">,</span> <span class="s1">&#39;surface_composition&#39;</span><span class="p">,</span>
@@ -668,8 +667,8 @@
             <span class="k">assert</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">total_key_list</span>
 
     <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">key_list</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">key_list</span><span class="p">,</span> <span class="n">value_list</span></div>
-
+    <span class="k">return</span> <span class="n">key_list</span><span class="p">,</span> <span class="n">value_list</span>
+</div>
 
 <div class="viewcode-block" id="get_value_strlist"><a class="viewcode-back" href="../../../modules/catkit.hub.html#catkit.hub.cathubsqlite.get_value_strlist">[docs]</a><span class="k">def</span> <span class="nf">get_value_strlist</span><span class="p">(</span><span class="n">value_list</span><span class="p">):</span>
     <span class="n">value_strlist</span> <span class="o">=</span> <span class="p">[]</span>
@@ -690,8 +689,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value_strlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">value_strlist</span></div>
-</pre></div>
+    <span class="k">return</span> <span class="n">value_strlist</span>
+</pre></div></div>
 
            </div>
            
@@ -704,7 +703,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -741,10 +740,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

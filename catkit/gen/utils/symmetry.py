@@ -54,7 +54,7 @@ def get_point_group(atoms, tol=1e-8):
     return point_group, is_laue
 
 
-def get_symmetry(atoms, tol=1e-8):
+def get_symmetry(atoms, tol=1e-5):
     """Atoms object interface with spglib symmetry finder:
     https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
