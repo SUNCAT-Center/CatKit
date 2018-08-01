@@ -384,6 +384,47 @@ class AdsorptionSites():
 
         return edges
 
+    def ex_sites(self, index, select='inner', cutoff=0):
+        """Get site indices inside or outside of a cutoff radii from a
+        provided periodic site index. If two sites are provided, an
+        option to return the mutually inclusive points is also available.
+        """
+        per = self.get_periodic_sites(False)
+        sym = self.get_symmetric_sites()
+        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
+        coords = self.coordinates[:, :2]
+
+        if isinstance(index, int):
+            index = [index]
+
+        if not cutoff:
+            for i in per[index]:
+                sd = np.where(edges == i)[0]
+                select_coords = coords[edges[sd]]
+                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
+                cutoff = max(d.max(), cutoff)
+        cutoff += self.tol
+
+        diff = coords[:, None] - coords[sym]
+        norm = np.linalg.norm(diff, axis=2)
+        neighbors = np.array(np.where(norm < cutoff))
+
+        neighbors = []
+        for i in index:
+            diff = coords[:, None] - coords[per[i]]
+            norm = np.linalg.norm(diff, axis=2)
+            if select == 'mutual' and len(index) == 2:
+                neighbors += [np.where(norm < cutoff)[0].tolist()]
+            else:
+                neighbors += np.where(norm < cutoff)[0].tolist()
+
+        if select == 'inner':
+            return per[neighbors]
+        elif select == 'outer':
+            return np.setdiff1d(per, per[neighbors])
+        elif select == 'mutual':
+            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
+
     def plot(self, savefile=None):
         """Create a visualization of the sites."""
         top = self.connectivity == 1
@@ -651,47 +692,6 @@ class Builder(AdsorptionSites):
 
         else:
             raise ValueError('Too many bonded atoms to position correctly.')
-
-    def ex_sites(self, index, select='inner', cutoff=0):
-        """Get site indices inside or outside of a cutoff radii from a
-        provided periodic site index. If two sites are provided, an
-        option to return the mutually inclusive points is also available.
-        """
-        per = self.get_periodic_sites(False)
-        sym = self.get_symmetric_sites()
-        edges = self.get_adsorption_edges(symmetric=False, periodic=False)
-        coords = self.coordinates[:, :2]
-
-        if isinstance(index, int):
-            index = [index]
-
-        if not cutoff:
-            for i in per[index]:
-                sd = np.where(edges == i)[0]
-                select_coords = coords[edges[sd]]
-                d = np.linalg.norm(np.diff(select_coords, axis=1), axis=2)
-                cutoff = max(d.max(), cutoff)
-        cutoff += self.tol
-
-        diff = coords[:, None] - coords[sym]
-        norm = np.linalg.norm(diff, axis=2)
-        neighbors = np.array(np.where(norm < cutoff))
-
-        neighbors = []
-        for i in index:
-            diff = coords[:, None] - coords[per[i]]
-            norm = np.linalg.norm(diff, axis=2)
-            if select == 'mutual' and len(index) == 2:
-                neighbors += [np.where(norm < cutoff)[0].tolist()]
-            else:
-                neighbors += np.where(norm < cutoff)[0].tolist()
-
-        if select == 'inner':
-            return per[neighbors]
-        elif select == 'outer':
-            return np.setdiff1d(per, per[neighbors])
-        elif select == 'mutual':
-            return np.intersect1d(per[neighbors[0]], per[neighbors[1]])
 
 
 def get_adsorption_sites(slab,
