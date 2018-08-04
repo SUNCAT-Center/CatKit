@@ -53,7 +53,9 @@ def encode_to_atoms(encode, out_file='input.traj'):
         atoms=atoms,
         energy=data['trajectory']['0'].get('energy'),
         forces=data['trajectory']['0'].get('forces'),
-        stress=data['trajectory']['0'].get('stress'))
+        stress=data['trajectory']['0'].get('stress'),
+        magmoms=data['trajectory']['0'].get('magmoms')
+    )
     atoms.set_calculator(calc)
 
     # Collect the rest of the trajectory information
@@ -71,7 +73,9 @@ def encode_to_atoms(encode, out_file='input.traj'):
             atoms=atoms,
             energy=data['trajectory'][str(i)].get('energy'),
             forces=data['trajectory'][str(i)].get('forces'),
-            stress=data['trajectory'][str(i)].get('stress'))
+            stress=data['trajectory'][str(i)].get('stress'),
+            magmoms=data['trajectory'][str(i)].get('magmoms')
+        )
         atoms.set_calculator(calc)
 
         images += [atoms]
@@ -84,7 +88,7 @@ def encode_to_atoms(encode, out_file='input.traj'):
 
 
 def atoms_to_encode(images):
-    """ Converts an list of atoms objects to an encoding
+    """Converts an list of atoms objects to an encoding
     from a .traj file.
     """
     if not isinstance(images, list):
@@ -145,6 +149,7 @@ def atoms_to_encode(images):
             nrg = atoms.get_potential_energy()
             force = atoms.get_forces()
             stress = atoms.get_stress()
+            magmoms = atoms._calc.results.get('magmoms')
 
             # Stage results and convert to lists in needed
             results = {
@@ -152,7 +157,9 @@ def atoms_to_encode(images):
                 'cell': update_cell,
                 'energy': nrg,
                 'forces': force,
-                'stress': stress}
+                'stress': stress,
+                'magmoms': magmoms
+            }
 
         else:
             results = {
