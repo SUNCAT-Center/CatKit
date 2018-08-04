@@ -166,7 +166,7 @@ def atoms_to_encode(images):
                 'positions': update_pos,
                 'cell': update_cell}
 
-        for k, v in list(results.items()):
+        for k, v in results.items():
             if isinstance(v, np.ndarray):
                 results[k] = v.tolist()
 

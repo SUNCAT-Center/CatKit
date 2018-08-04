@@ -43,6 +43,9 @@ def get_potential_energy(
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
+
     images = ase.io.read(out_file, ':')
+    for image in images:
+        image.constraints = atoms.constraints
 
     return atoms_to_encode(images)
