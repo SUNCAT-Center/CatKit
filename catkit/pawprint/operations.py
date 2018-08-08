@@ -85,14 +85,14 @@ def local_ads_metal_fp(
         atoms_parameters=None,
         connectivity=None,
         fuse=False):
-    """Sum of the properties of the atoms in the metal-adsorbate interface"""
+    """Sum of the differences in properties of the atoms in the 
+       metal-adsorbate interface"""
     bond_index = np.where(atoms.get_tags() == -1)[0]
-    ads_parameters = atoms_parameters[:, bond_index]
     fp = np.empty([len(atoms_parameters), len(bond_index)])
     for i, bi in enumerate(bond_index):
         bonded_ap = atoms_parameters[:, np.where(connectivity[bi] == 1)[0]]
         fp[:, i] = np.mean(bonded_ap - 
-                ads_parameters[:, i].reshape(-1, 1), axis=1)
+                atoms_parameters[:, bi].reshape(-1, 1), axis=1)
     if not fuse:
         return fp.reshape(-1)
     else:

@@ -70,7 +70,7 @@ class Fingerprinter():
 
         return atoms_parameters
 
-    def get_fp(self, parameters, operation_list):
+    def get_fp(self, parameters_list, operation_list):
         """Return the fingerprints for a list of images of single atoms
         object for the given parameters.
 
@@ -90,7 +90,6 @@ class Fingerprinter():
         """
         fingerprints = [[] for _ in self._images]
         for i, atoms in enumerate(self._images):
-            atoms_parameters = self._get_atoms_parameters(atoms, parameters)
 
             method = None
             if np.all(atoms.pbc):
@@ -108,6 +107,13 @@ class Fingerprinter():
 
                 if isinstance(operation, str):
                     operation = getattr(operations, operation)
+                
+                if all(isinstance(pl, list) for pl in parameters_list):
+                    atoms_parameters = self._get_atoms_parameters(atoms, 
+                            parameters_list[j])
+                else:
+                    atoms_parameters = self._get_atoms_parameters(atoms, 
+                            parameters_list)
 
                 fingerprint = _generate_fingerprint(
                     operation,
