@@ -1,7 +1,11 @@
 #!/usr/bin/python
-from .tools import check_reaction, get_state, clear_state, clear_prefactor
+
 import os
-import json
+import subprocess
+import yaml
+
+from .tools import check_reaction, get_state, clear_state, clear_prefactor, \
+    get_pub_id
 
 username = os.environ['USER']
 
@@ -19,7 +23,7 @@ def main(
         doi='',
         tags=[],
         DFT_code='Quantum ESPRESSO',
-        DFT_functional='BEEF-vdW',
+        DFT_functionals=['BEEF-vdW'],
         reactions=[
             {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
              'products': ['OOHstar@ontop']}],
@@ -52,23 +56,23 @@ def main(
         Year of (submission?)
     journal : str
         Publications journal name
-    volume : str, optional
+    volume : str
         Publications volume number
-    number : str, optional
+    number : str
         Publication number
-    pages : str, optional
+    pages : str
         Publication page numbers
-    publisher : str, optional
+    publisher : str
         Publisher name
     doi : str, optional
         DOI of publication
     tags : list, optional
         User defined quire tags
-    DFT_code : str, optional
+    DFT_code : str
         e.g. 'Quantum ESPRESSO'
-    DFT_functional : str, optional
+    DFT_functionals : list of str
         Calculator functional used, e.g. 'BEEF-vdW'
-    reactions : list of dict, optional
+    reactions : list of dict
         A new dictionary is required for each reaction, and should include two
         lists, 'reactants' and 'products'. Remember to include a minus sign and
         prefactor in the name when relevant. If your reaction is not balanced,
@@ -96,14 +100,14 @@ def main(
 
     energy_corrections : dict, optional
         e.g. {'H2gas': 0.1}
-    bulk_compositions  : list of str, optional
+    bulk_compositions  : list of str
         e.g. ['Pt', 'Ag']
-    crystal_structures : list of str, optional
+    crystal_structures : list of str
         e.g. ['fcc', 'hcp']
-    facets : list, optional
+    facets : list
         For complicated structures use term you would use in publication.
         e.g. ['111']
-    custom_base : str, optional
+    custom_base : str
         TODO
     """
     for reaction in reactions:
@@ -119,8 +123,7 @@ def main(
     if not os.path.exists(base):
         os.mkdir(base)
 
-    publication_shortname = '%s_%s_%s' % (authors[0].split(',')[0].lower(),
-                                          title.split()[0].lower(), year)
+    publication_shortname = get_pub_id(title, authors, year)
 
     publication_base = base + publication_shortname + '/'
 
@@ -142,12 +145,12 @@ def main(
 
     pub_txt = publication_base + 'publication.txt'
     with open(pub_txt, 'w') as f:
-        json.dump(publication_dict, f)
+        yaml.dump(publication_dict, f)
 
     if not len(energy_corrections.keys()) == 0:
         energy_txt = publication_base + 'energy_corrections.txt'
         with open(energy_txt, 'wb') as f:
-            json.dump(energy_corrections)
+            yaml.dump(energy_corrections)
 
     def create(path):
         if not os.path.exists(path):
@@ -155,8 +158,11 @@ def main(
         return path
 
     base = create(publication_base + DFT_code + '/')
-    bulk_base = create(base + DFT_functional + '/')
-    gas_base = create(bulk_base + '/gas/')
+    bulk_bases = []
+    gas_bases = []
+    for DFT_functional in DFT_functionals:
+        bulk_bases += [create(base + DFT_functional + '/')]
+        gas_bases += [create(base + DFT_functional + '/gas/')]
 
     gas_names = []
     ads_names = []
@@ -167,45 +173,56 @@ def main(
         gas_names += [clear_state(clear_prefactor(rnames[i]))
                       for i in range(len(states)) if states[i] == 'gas']
 
-    for name in set(gas_names):
-        with open(gas_base + 'MISSING:{}_gas'.format(name), 'w'):
-            pass
-
-    for bulk in bulk_compositions:
-        for crystal_structure in crystal_structures:
-            bulk_name = bulk + '_' + crystal_structure
-            facet_base = create(bulk_base + bulk_name + '/')
-            with open(facet_base + 'MISSING:{}_bulk'.format(bulk_name),
-                      'w'):
+    for gas_base in gas_bases:
+        for name in set(gas_names):
+            with open(gas_base + 'MISSING:{}_gas'.format(name), 'w'):
                 pass
 
-            for facet in facets:
-                reaction_base = create(facet_base + facet + '/')
-                with open(reaction_base + 'MISSING:empty_slab'
-                          .format(bulk_name), 'w'):
+    for bulk_base in bulk_bases:
+        for bulk in bulk_compositions:
+            for crystal_structure in crystal_structures:
+                bulk_name = bulk + '_' + crystal_structure
+                facet_base = create(bulk_base + bulk_name + '/')
+                with open(facet_base + 'MISSING:{}_bulk'.format(bulk_name),
+                          'w'):
                     pass
 
-                for i in range(len(reactions)):
-                    rname = '_'.join(reactions[i]['reactants'])
-                    pname = '_'.join(reactions[i]['products'])
-                    reaction_name = '__'.join([rname, pname])
-                    base = create(reaction_base + reaction_name + '/')
-                    rnames = [r.split('@')[0] for r in
-                              reactions[i]['reactants'] +
-                              reactions[i]['products']]
-                    states = [get_state(r) for r in rnames]
+                for facet in facets:
+                    reaction_base = create(facet_base + facet + '/')
+                    with open(reaction_base + 'MISSING:empty_slab'
+                              .format(bulk_name), 'w'):
+                        pass
 
-                    ads_names = [clear_prefactor(clear_state(rnames[i]))
-                                 for i in range(len(states))
-                                 if states[i] == 'star']
+                    for i in range(len(reactions)):
+                        rname = '_'.join(reactions[i]['reactants'])
+                        pname = '_'.join(reactions[i]['products'])
+                        reaction_name = '__'.join([rname, pname])
+                        base = create(reaction_base + reaction_name + '/')
+                        rnames = [r.split('@')[0] for r in
+                                  reactions[i]['reactants'] +
+                                  reactions[i]['products']]
+                        states = [get_state(r) for r in rnames]
 
-                    for ads in ads_names:
-                        if ads == '':
-                            continue
-                        with open(base + 'MISSING:{}_slab'.format(ads), 'w'):
-                            pass
-                        with open(base + 'MISSING:TS?'.format(ads), 'w'):
-                            pass
+                        ads_names = [clear_prefactor(clear_state(rnames[i]))
+                                     for i in range(len(states))
+                                     if states[i] == 'star']
+
+                        for ads in ads_names:
+                            if ads == '':
+                                continue
+                            with open(base + 'MISSING:{}_slab'.format(ads),
+                                      'w'):
+                                pass
+                            with open(base + 'MISSING:TS?'.format(ads),
+                                      'w'):
+                                pass
+
+    print('Folders were succesfully created under {}'.format(publication_base))
+    #print('')
+    #print('Printing output from "tree -F {}":'.format(publication_base))
+    #print('')
+    #subprocess.call(
+    #    ('tree -F {}'.format(publication_base)).split())
 
 
 if __name__ == "__main__":

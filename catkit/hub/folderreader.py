@@ -1,5 +1,5 @@
 from .cathubsqlite import CathubSQLite
-from .tools import get_bases, clear_prefactor, clear_state
+from .tools import get_bases, clear_prefactor, clear_state, get_pub_id
 from .ase_tools import collect_structures
 from . import ase_tools
 
@@ -9,6 +9,7 @@ import numpy as np
 import os
 import copy
 import json
+import yaml
 
 
 class FolderReader:
@@ -186,7 +187,7 @@ class FolderReader:
         publication_keys = {}
         try:
             with open(root + '/publication.txt', 'r') as f:
-                pub_data = json.load(f)
+                pub_data = yaml.load(f)
             if 'url' in pub_data.keys():
                 del pub_data['url']
             self.title = pub_data['title']
@@ -228,7 +229,7 @@ class FolderReader:
 
         try:
             with open(root + '/energy_corrections.txt', 'r') as f:
-                self.energy_corrections = json.load(f)
+                self.energy_corrections = yaml.load(f)
         except BaseException:
             self.energy_corrections = {}
 
@@ -242,16 +243,7 @@ class FolderReader:
             self.year = date.today().year
             pub_data.update({'year': self.year})
 
-        if len(self.title.split(' ')) > 1 \
-            and self.title.split(' ')[0].lower() in ['the', 'a']:
-                _first_word = self.title.split(' ')[1].split('_')[0]
-        else:
-            _first_word = self.title.split(' ')[0].split('_')[0]
-
-        self.pub_id = self.authors[0].split(',')[0].split(' ')[0] + \
-            _first_word + \
-            str(self.year)
-
+        self.pub_id = get_pub_id(self.title, self.authors, self.year)
         self.cathub_db = '{}{}.db'.format(self.data_base, self.pub_id)
         self.stdout.write('Writing to .db file {}:\n \n'.format(self.cathub_db))
         pub_data.update({'pub_id': self.pub_id})
@@ -334,7 +326,7 @@ class FolderReader:
         elif self.update:
             ase_tools.update_ase(self.cathub_db, id, self.stdout, **key_value_pairs)
 
-            self.ase_ids.update({'bulk' + self.crystal: ase_id})
+        self.ase_ids.update({'bulk' + self.crystal: ase_id})
 
     def read_slab(self, root):
         self.facet = root.split('/')[-1]
@@ -547,7 +539,7 @@ class FolderReader:
                                  clear_state(
                                      species),
                                  'n': n_ads,
-                                 'site': self.sites[species]})
+                                 'site': self.sites.get(species, '')})
                             if ase_id is None:
                                 ase_id = ase_tools.write_ase(
                                     slab, self.cathub_db, self.stdout,

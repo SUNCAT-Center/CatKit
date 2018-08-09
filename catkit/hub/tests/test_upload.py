@@ -34,7 +34,7 @@ class UploadTestCase(unittest.TestCase):
             'publisher': 'ACS',
             'doi': '10.NNNN/....',
             'DFT_code': 'Quantum Espresso',
-            'DFT_functional': 'BEEF-vdW',
+            'DFT_functionals': ['BEEF-vdW'],
             'reactions': [
                 {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
                  'products': ['OOHstar@top']},
@@ -58,7 +58,7 @@ class UploadTestCase(unittest.TestCase):
         publisher = template_data['publisher']
         doi = template_data['doi']
         dft_code = template_data['DFT_code']
-        dft_functional = template_data['DFT_functional']
+        dft_functionals = template_data['DFT_functionals']
         reactions = template_data['reactions']
         crystal_structures = template_data['crystal_structures']
         bulk_compositions = template_data['bulk_compositions']
@@ -75,7 +75,7 @@ class UploadTestCase(unittest.TestCase):
             publisher=publisher,
             doi=doi,
             DFT_code=dft_code,
-            DFT_functional=dft_functional,
+            DFT_functionals=dft_functionals,
             reactions=reactions,
             custom_base='temp',
             bulk_compositions=bulk_compositions,
@@ -87,10 +87,10 @@ class UploadTestCase(unittest.TestCase):
         folder2db.main('{path}/aayush/'.format(path=path))
 
     def test2_upload(self):
-        db2server.main('{path}/aayush/MontoyaThe2015.db'.format(path=path),
+        db2server.main('{path}/aayush/MontoyaChallenge2015.db'.format(path=path),
                        user='postgres')
-        if os.path.exists('{path}/aayush/MontoyaThe2015.db'.format(path=path)):
-            os.remove('{path}/aayush/MontoyaThe2015.db'.format(path=path))
+        if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'.format(path=path)):
+            os.remove('{path}/aayush/MontoyaChallenge2015.db'.format(path=path))
 
 
 if __name__ == '__main__':

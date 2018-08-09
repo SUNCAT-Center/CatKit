@@ -8,7 +8,9 @@ from . import folderreader
 from .cathubsqlite import CathubSQLite
 from ase.atoms import string2symbols
 import os
-import json
+#import json
+import yaml
+from yaml import Dumper
 import click
 import six
 import collections
@@ -205,24 +207,22 @@ def make_folders(create_template, template, custom_base, diagnose):
     about your data. You will need to enter publication/dataset information,
     and specify the types of surfaces, facets and reactions.
 
-    The 'reactions' key is a list of dictionaries.
-    A new dictionary is required for each reaction, and should include two
-    lists, 'reactants' and 'products'. Remember to balance the equation and
-    include a minus sign in the name when relevant. For example:
+    The 'reactions' entry should include two lists for each reaction;
+    'reactants' and 'products', corresponding to left- and right hand side of
+    each chemical equation respectively.
+    Remember to balance the equation by including a prefactor or minus sign
+    in the name when relevant. For example:
 
-    'reactions': [{
+    reactions:
 
-        'reactants': ['CCH3star@ontop'],
+    -    reactants: ['CCH3star@ontop']
 
-        'products': ['Cstar@hollow', 'CH3star@ontop']
+         products: ['Cstar@hollow', 'CH3star@ontop']
 
-      }, {
+    -    reactants: ['CH4gas', '-0.5H2gas', 'star']
 
-         'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+         products:  ['CH3star']
 
-         'products':  ['CH3star']
-
-      }]
 
     Please include the phase of the species as an extension:
 
@@ -243,12 +243,23 @@ def make_folders(create_template, template, custom_base, diagnose):
     You can create several templates and call make_folders again
     if you, for example, are using different functionals or are
     doing different reactions on different surfaces.
+
+    After creating your folders, add your output files from the
+    electronic structure calculations at the positions.
+    Accepted file formats include everything that can be read by ASE
+    and contains the total potential energy of the calculation, such
+    as .traj or .OUTCAR files.
     """
+
+    def dict_representer(dumper, data):
+        return dumper.represent_dict(data.items())
+
+    Dumper.add_representer(collections.OrderedDict, dict_representer)
 
     if custom_base is None:
         custom_base = os.path.abspath(os.path.curdir)
 
-    template_data = {
+    template_data = collections.OrderedDict({
         'title': 'Fancy title',
         'authors': ['Doe, John', 'Einstein, Albert'],
         'journal': 'JACS',
@@ -259,19 +270,19 @@ def make_folders(create_template, template, custom_base, diagnose):
         'publisher': 'ACS',
         'doi': '10.NNNN/....',
         'DFT_code': 'Quantum Espresso',
-        'DFT_functional': 'BEEF-vdW',
+        'DFT_functionals': ['BEEF-vdW', 'HSE06'],
         'reactions': [
-                {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
-                 'products': ['OOHstar@top']},
-                {'reactants': ['CCH3star@bridge'],
-                 'products': ['Cstar@hollow', 'CH3star@ontop']},
-                {'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-                 'products': ['CH3star@ontop']}
+            collections.OrderedDict({'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
+                                     'products': ['OOHstar@top']}),
+            collections.OrderedDict({'reactants': ['CCH3star@bridge'],
+                                     'products': ['Cstar@hollow', 'CH3star@ontop']}),
+            collections.OrderedDict({'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+                                     'products': ['CH3star@ontop']})
         ],
         'bulk_compositions': ['Pt'],
         'crystal_structures': ['fcc', 'hcp'],
         'facets': ['111']
-    }
+    })
     if template is not None:
         if create_template:
             if os.path.exists(template):
@@ -280,18 +291,15 @@ def make_folders(create_template, template, custom_base, diagnose):
                     .format(**locals()))
             with open(template, 'w') as outfile:
                 outfile.write(
-                    json.dumps(
+                    yaml.dump(
                         template_data,
                         indent=4,
-                        separators=(
-                            ',',
-                            ': '),
-                        sort_keys=True) +
+                        Dumper=Dumper) +
                     '\n')
                 return
         else:
             with open(template) as infile:
-                template_data = json.load(infile)
+                template_data = yaml.load(infile)
                 title = template_data['title']
                 authors = template_data['authors']
                 journal = template_data['journal']
@@ -302,7 +310,7 @@ def make_folders(create_template, template, custom_base, diagnose):
                 publisher = template_data['publisher']
                 doi = template_data['doi']
                 dft_code = template_data['DFT_code']
-                dft_functional = template_data['DFT_functional']
+                dft_functionals = template_data['DFT_functionals']
                 reactions = template_data['reactions']
                 crystal_structures = template_data['crystal_structures']
                 bulk_compositions = template_data['bulk_compositions']
@@ -320,7 +328,7 @@ def make_folders(create_template, template, custom_base, diagnose):
         publisher=publisher,
         doi=doi,
         DFT_code=dft_code,
-        DFT_functional=dft_functional,
+        DFT_functionals=dft_functionals,
         reactions=eval(reactions) if isinstance(
             reactions, six.string_types) else reactions,
         custom_base=custom_base,

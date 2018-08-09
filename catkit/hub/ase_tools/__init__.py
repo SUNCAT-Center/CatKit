@@ -367,7 +367,7 @@ def get_reaction_from_folder(folder_name):
         for n, mol in enumerate(mollist):
             if '@' in mol:
                 mol, site = mol.split('@')
-                sites.update({mol: site})
+                sites.update({clear_prefactor(mol): site})
                 reaction[key][n] = mol
             if 'gas' not in mol and 'star' not in mol:
                 reaction[key][n] = mol + 'star'

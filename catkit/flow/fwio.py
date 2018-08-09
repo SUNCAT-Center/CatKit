@@ -45,7 +45,7 @@ def encode_to_atoms(encode, out_file='input.traj'):
     atoms.info = data['calculator_parameters']
     atoms.set_constraint([dict2constraint(_) for _ in data['constraints']])
     initial_magmoms = data.get('initial_magmoms')
-    if initial_magmoms is not None:
+    if initial_magmoms:
         atoms.set_initial_magnetic_moments(initial_magmoms)
 
     # Attach the calculator
