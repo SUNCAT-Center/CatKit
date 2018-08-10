@@ -691,7 +691,8 @@ class CathubPostgreSQL:
                 rows = list(db.select('{}<id<{}'.format(b0, b1)))
 
                 with ase.db.connect(self.server_name, type='postgresql') as db2:
-                    db2.write(rows)
+                    for row in rows:
+                        db2.write(row)
 
                 nrows += len(rows)
                 t2 = time.time()
