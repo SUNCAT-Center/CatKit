@@ -291,7 +291,7 @@ def fuzzy_match(structures, options):
                                         "Could not construct stoichiometry"
                                         " factors for {adsorbate}\n"
                                         "from {candidates}."
-                                        "Please add more gas phase molecule"
+                                        "Please add more gas phase molecules"
                                         " to your folder.\n"
                                     ).format(
                                         adsorbate=adsorbate,
