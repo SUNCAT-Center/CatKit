@@ -1,3 +1,4 @@
+import sys
 from ase import Atoms
 from ase.io import read
 # from ase.io.trajectory import convert
@@ -316,7 +317,7 @@ def _normalize_key_value_pairs_inplace(data):
             data[key] = int(data[key])
 
 
-def write_ase(atoms, db_file, stdout, user=None, data=None, **key_value_pairs):
+def write_ase(atoms, db_file, stdout=sys.stdout, user=None, data=None, **key_value_pairs):
     """Connect to ASE db"""
     atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
