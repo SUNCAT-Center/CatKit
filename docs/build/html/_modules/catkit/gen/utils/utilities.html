@@ -1,0 +1,396 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.utils.utilities &mdash; CatKit 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/catkit.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../gen.html">catkit.gen</a> &raquo;</li>
+        
+          <li><a href="../utils.html">catkit.gen.utils</a> &raquo;</li>
+        
+      <li>catkit.gen.utils.utilities</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.gen.utils.utilities</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
+<span class="kn">from</span> <span class="nn">ase.data</span> <span class="k">import</span> <span class="n">chemical_symbols</span> <span class="k">as</span> <span class="n">sym</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">gcd</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">fractions</span> <span class="k">import</span> <span class="n">gcd</span>
+
+
+<div class="viewcode-block" id="running_mean"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.running_mean">[docs]</a><span class="k">def</span> <span class="nf">running_mean</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the running mean of array for N instances.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    array : array_like | ndarray (N,)</span>
+<span class="sd">        Array of values to have a average taken from.</span>
+<span class="sd">    N : int</span>
+<span class="sd">        Number of values to take an average with.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    running_mean : ndarray (N + 1,)</span>
+<span class="sd">        Mean value of the running average.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">N</span><span class="p">:</span>
+        <span class="n">N</span> <span class="o">=</span> <span class="n">length</span>
+
+    <span class="n">cumsum</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">running_mean</span> <span class="o">=</span> <span class="p">(</span><span class="n">cumsum</span><span class="p">[</span><span class="n">N</span><span class="p">:]</span> <span class="o">-</span> <span class="n">cumsum</span><span class="p">[:</span><span class="o">-</span><span class="n">N</span><span class="p">])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">running_mean</span></div>
+
+
+<div class="viewcode-block" id="to_gratoms"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.to_gratoms">[docs]</a><span class="k">def</span> <span class="nf">to_gratoms</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Convert and atom object to a gratoms object.&quot;&quot;&quot;</span>
+    <span class="n">gratoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span>
+        <span class="n">numbers</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">numbers</span><span class="p">,</span>
+        <span class="n">positions</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span>
+        <span class="n">pbc</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">,</span>
+        <span class="n">cell</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">cell</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+        <span class="n">gratoms</span><span class="o">.</span><span class="n">set_constraint</span><span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">gratoms</span></div>
+
+
+<div class="viewcode-block" id="get_atomic_numbers"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_atomic_numbers">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_numbers</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">return_count</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the atomic numbers associated with a chemical formula.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    formula : string</span>
+<span class="sd">        A chemical formula to parse into atomic numbers.</span>
+<span class="sd">    return_count : bool</span>
+<span class="sd">        Return the count of each element in the formula.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numbers : ndarray (n,)</span>
+<span class="sd">        Element numbers in associated species.</span>
+<span class="sd">    counts : ndarray (n,)</span>
+<span class="sd">        Count of each element in a species.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parse</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="s1">&#39;[A-Z][a-z]?|[0-9]+&#39;</span><span class="p">,</span> <span class="n">formula</span><span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">parse</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">parse</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">e</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">sym</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">keys</span><span class="p">()])</span>
+    <span class="n">srt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">[</span><span class="n">srt</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">return_count</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">values</span><span class="p">()])[</span><span class="n">srt</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">numbers</span><span class="p">,</span> <span class="n">counts</span>
+
+    <span class="k">return</span> <span class="n">numbers</span></div>
+
+
+<div class="viewcode-block" id="get_reference_energies"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_reference_energies">[docs]</a><span class="k">def</span> <span class="nf">get_reference_energies</span><span class="p">(</span><span class="n">species</span><span class="p">,</span> <span class="n">energies</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get reference energies for the elements in a set of molecules.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    species : list (n,)</span>
+<span class="sd">        Chemical formulas for each molecular species.</span>
+<span class="sd">    energies : list (n,)</span>
+<span class="sd">        Total energies associated with each species.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    elements : ndarray (n,)</span>
+<span class="sd">        Atomic elements associated with all species.</span>
+<span class="sd">    references : ndarray (n,)</span>
+<span class="sd">        Reference energies associated with each element.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">energies</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">energies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">energies</span><span class="p">)</span>
+
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">)))</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">species</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Construct the elements array as they appear</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">species</span><span class="p">):</span>
+        <span class="n">num</span><span class="p">,</span> <span class="n">cnt</span> <span class="o">=</span> <span class="n">get_atomic_numbers</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">num</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">elements</span><span class="p">)]:</span>
+            <span class="n">elements</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">j</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="n">num</span><span class="p">)]</span> <span class="o">=</span> <span class="n">cnt</span>
+
+    <span class="n">references</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">energies</span><span class="p">)</span>
+    <span class="n">srt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+    <span class="n">references</span> <span class="o">=</span> <span class="n">references</span><span class="p">[</span><span class="n">srt</span><span class="p">]</span>
+    <span class="n">elements</span> <span class="o">=</span> <span class="n">elements</span><span class="p">[</span><span class="n">srt</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">elements</span><span class="p">,</span> <span class="n">references</span></div>
+
+
+<div class="viewcode-block" id="parse_slice"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.parse_slice">[docs]</a><span class="k">def</span> <span class="nf">parse_slice</span><span class="p">(</span><span class="n">slice_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a correctly parsed slice from input of varying types.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slice_name</span><span class="p">,</span> <span class="p">(</span><span class="nb">slice</span><span class="p">)):</span>
+        <span class="n">_slice</span> <span class="o">=</span> <span class="n">slice_name</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slice_name</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)):</span>
+        <span class="n">_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slice_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">slice_name</span><span class="p">)</span>
+        <span class="n">_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">slice_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">slice_name</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">slice_name</span><span class="p">)</span>
+            <span class="n">_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">split</span> <span class="o">=</span> <span class="n">slice_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+            <span class="n">split</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">_</span><span class="p">)</span> <span class="k">if</span> <span class="n">_</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+                     <span class="k">else</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">split</span><span class="p">]</span>
+            <span class="n">_slice</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">split</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_slice</span></div>
+
+
+<div class="viewcode-block" id="ext_gcd"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.ext_gcd">[docs]</a><span class="k">def</span> <span class="nf">ext_gcd</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Extension of greatest common divisor.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="n">a</span> <span class="o">%</span> <span class="n">b</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">ext_gcd</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">%</span> <span class="n">b</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">y</span><span class="p">,</span> <span class="n">x</span> <span class="o">-</span> <span class="n">y</span> <span class="o">*</span> <span class="p">(</span><span class="n">a</span> <span class="o">//</span> <span class="n">b</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="list_gcd"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.list_gcd">[docs]</a><span class="k">def</span> <span class="nf">list_gcd</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the greatest common divisor of a list of values.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="n">gcd_func</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frompyfunc</span><span class="p">(</span><span class="n">gcd</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">_gcd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ufunc</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="n">gcd_func</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_gcd</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.5.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

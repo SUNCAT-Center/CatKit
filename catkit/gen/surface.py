@@ -31,6 +31,7 @@ class SlabGenerator(object):
                  layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=False,
+                 primitive=True,
                  tol=1e-8):
         """Generate a slab from a bulk atoms object.
 
@@ -83,6 +84,7 @@ class SlabGenerator(object):
         self.tol = tol
         self.layer_type = layer_type
         self.standardized = standardize_bulk
+        self.primitive = primitive
         self.attach_graph = attach_graph
         self.unique_terminations = None
         self.slab_basis = None
@@ -106,9 +108,13 @@ class SlabGenerator(object):
                  "Miller index. To get ensure you are using the correct "
                  "miller index, use standardize_bulk=True"))
 
-        primitive_bulk = utils.get_spglib_cell(
-            bulk, primitive=True, tol=1e-2)
-        miller_index = convert_miller_index(miller_index, bulk, primitive_bulk)
+        if primitive:
+            primitive_bulk = utils.get_spglib_cell(
+                bulk, primitive=True, tol=1e-2)
+            miller_index = convert_miller_index(
+                miller_index, bulk, primitive_bulk)
+        else:
+            primitive_bulk = bulk
 
         self._bulk = self.align_crystal(primitive_bulk, miller_index)
 
@@ -162,6 +168,7 @@ class SlabGenerator(object):
         new_bulk = Gratoms(
             positions=bulk.positions,
             numbers=bulk.get_atomic_numbers(),
+            magmoms=bulk.get_initial_magnetic_moments(),
             pbc=True)
 
         if not self.attach_graph:
@@ -289,6 +296,8 @@ class SlabGenerator(object):
         # value of the 2nd component (+/- 2 for safety)
         div = ibasis.cell[2][1] / ibasis.cell[1][1]
         sign = -np.sign(div)
+        if sign == 0:
+            sign = 1
         m = np.ceil(np.abs(div)) + 1
 
         # Try to be smart and only search a limited space
@@ -564,16 +573,12 @@ def transform_ab(slab, matrix, tol=1e-5):
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
 
-    M[:2, :2] = np.array(matrix).T
-    newcell = np.dot(M, slab.cell)
-
     scorners_newcell = np.array([
-        [0, 0], [0, 0],
+        [0, 0], [1, 0],
         [0, 1], [1, 1]])
 
     corners = np.dot(scorners_newcell, newcell[:2, :2])
     scorners = np.linalg.solve(slab.cell[:2, :2].T, corners.T).T
-
     rep = np.ceil(scorners.ptp(axis=0)).astype(int)
 
     slab *= (rep[0], rep[1], 1)

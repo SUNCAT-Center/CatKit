@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -164,8 +163,8 @@
     <span class="sd">&quot;&quot;&quot;Return all atom properties without manipulation.&quot;&quot;&quot;</span>
     <span class="n">fingerprint</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">atoms_parameters</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">fingerprint</span></div>
-
+    <span class="k">return</span> <span class="n">fingerprint</span>
+</div>
 
 <div class="viewcode-block" id="periodic_convolution"><a class="viewcode-back" href="../../../modules/catkit.pawprint.html#catkit.pawprint.operations.periodic_convolution">[docs]</a><span class="k">def</span> <span class="nf">periodic_convolution</span><span class="p">(</span>
         <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -189,8 +188,8 @@
     <span class="k">if</span> <span class="n">normalize</span><span class="p">:</span>
         <span class="n">convolution</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">convolution</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">atoms</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">convolution</span></div>
-
+    <span class="k">return</span> <span class="n">convolution</span>
+</div>
 
 <div class="viewcode-block" id="bonding_convolution"><a class="viewcode-back" href="../../../modules/catkit.pawprint.html#catkit.pawprint.operations.bonding_convolution">[docs]</a><span class="k">def</span> <span class="nf">bonding_convolution</span><span class="p">(</span>
         <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -204,8 +203,8 @@
     <span class="n">P</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">atoms_parameters</span><span class="p">[:,</span> <span class="n">bond_index</span><span class="p">]</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span>
     <span class="n">convolution</span> <span class="o">=</span> <span class="n">P</span> <span class="o">/</span> <span class="n">connectivity</span><span class="p">[</span><span class="n">bond_index</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">convolution</span></div>
-
+    <span class="k">return</span> <span class="n">convolution</span>
+</div>
 
 <div class="viewcode-block" id="autocorrelation"><a class="viewcode-back" href="../../../modules/catkit.pawprint.html#catkit.pawprint.operations.autocorrelation">[docs]</a><span class="k">def</span> <span class="nf">autocorrelation</span><span class="p">(</span>
         <span class="n">atoms</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -220,8 +219,8 @@
 
     <span class="n">AC</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">atoms_parameters</span><span class="p">,</span> <span class="n">S</span><span class="p">),</span> <span class="n">atoms_parameters</span><span class="o">.</span><span class="n">T</span><span class="p">)</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span>
 
-    <span class="k">return</span> <span class="n">AC</span></div>
-</pre></div>
+    <span class="k">return</span> <span class="n">AC</span>
+</pre></div></div>
 
            </div>
            
@@ -234,7 +233,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -271,10 +270,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {
