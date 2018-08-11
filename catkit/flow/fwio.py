@@ -4,6 +4,7 @@ from ase import Atoms
 from ase.constraints import dict2constraint
 import numpy as np
 import json
+supported_properties = ['energy', 'forces', 'stress', 'magmoms', 'magmom']
 
 
 def array_to_list(data):
@@ -49,13 +50,10 @@ def encode_to_atoms(encode, out_file='input.traj'):
         atoms.set_initial_magnetic_moments(initial_magmoms)
 
     # Attach the calculator
-    calc = SPC(
-        atoms=atoms,
-        energy=data['trajectory']['0'].get('energy'),
-        forces=data['trajectory']['0'].get('forces'),
-        stress=data['trajectory']['0'].get('stress'),
-        magmoms=data['trajectory']['0'].get('magmoms')
-    )
+    results = {'atoms': atoms}
+    for prop in supported_properties:
+        results.update({prop: data['trajectory']['0'].get(prop)})
+    calc = SPC(**results)
     atoms.set_calculator(calc)
 
     # Collect the rest of the trajectory information
@@ -69,13 +67,10 @@ def encode_to_atoms(encode, out_file='input.traj'):
         if data['trajectory'][str(i)]['positions']:
             atoms.set_positions(data['trajectory'][str(i)]['positions'])
 
-        calc = SPC(
-            atoms=atoms,
-            energy=data['trajectory'][str(i)].get('energy'),
-            forces=data['trajectory'][str(i)].get('forces'),
-            stress=data['trajectory'][str(i)].get('stress'),
-            magmoms=data['trajectory'][str(i)].get('magmoms')
-        )
+        results = {'atoms': atoms}
+        for prop in supported_properties:
+            results.update({prop: data['trajectory'][str(i)].get(prop)})
+        calc = SPC(**results)
         atoms.set_calculator(calc)
 
         images += [atoms]
@@ -145,26 +140,10 @@ def atoms_to_encode(images):
                 cell = atoms.get_cell()
                 update_cell = cell
 
+        results = {'positions': update_pos, 'cell': update_cell}
         if atoms._calc:
-            nrg = atoms.get_potential_energy()
-            force = atoms.get_forces()
-            stress = atoms.get_stress()
-            magmoms = atoms._calc.results.get('magmoms')
-
-            # Stage results and convert to lists in needed
-            results = {
-                'positions': update_pos,
-                'cell': update_cell,
-                'energy': nrg,
-                'forces': force,
-                'stress': stress,
-                'magmoms': magmoms
-            }
-
-        else:
-            results = {
-                'positions': update_pos,
-                'cell': update_cell}
+            for prop in supported_properties:
+                results.update({prop: atoms._calc.results.get(prop)})
 
         for k, v in results.items():
             if isinstance(v, np.ndarray):

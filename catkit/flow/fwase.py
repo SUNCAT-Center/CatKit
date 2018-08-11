@@ -1,4 +1,4 @@
-from .fwio import atoms_to_encode
+from . import fwio
 import functools
 import ase
 import sys
@@ -34,18 +34,25 @@ def get_potential_energy(
     """
     atoms = ase.io.read(in_file)
 
-    # Planewave basis set requires periodic boundary conditions
-    atoms.set_pbc([1, 1, 1])
-
     # Setting up the calculator
     calculator = str_to_class(calculator)
-    calculator(atoms, **atoms.info)
+    calc = calculator(atoms, **atoms.info)
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
 
-    images = ase.io.read(out_file, ':')
+    if isinstance(calc, espresso.Espresso):
+        # Patch for reading magmom of trajectory
+        images = espresso.io.read(out_file, ':')
+        if 'magmoms' in calc.results:
+            calc.get_pdos(update_projections=True)
+            images[-1]._calc.results = calc.results.copy()
+    else:
+        images = ase.io.read(out_file, ':')
+
+    # Moneky patch for constraints
     for image in images:
         image.constraints = atoms.constraints
+        image._pbc = atoms.pbc
 
-    return atoms_to_encode(images)
+    return fwio.atoms_to_encode(images)

@@ -71,11 +71,11 @@ class Laminar():
             atoms.info = parameters
         elif data.get('calculator_parameters'):
             atoms.info = data.get('calculator_parameters')
+            del data['calculator_parameters']
+        elif atoms.info:
+            pass
         else:
             raise ValueError('Calculation parameters missing.')
-
-        # These will be stored in the atoms info.
-        del data['calculator_parameters']
 
         for k, v in data.items():
             if isinstance(v, np.ndarray):
@@ -88,18 +88,18 @@ class Laminar():
             args=[encoding])
 
         t1 = fireworks.PyTask(
-            func='catkit.flow.fw_ase.get_potential_energy',
+            func='catkit.flow.fwase.get_potential_energy',
             args=[self.calculator],
             stored_data_varname='trajectory')
+        tasks = [t0, t1]
 
         if spec is None:
             spec = {'keys': keys, 'data': data}
         else:
             spec.update({'keys': keys, 'data': data})
 
-        firework = fireworks.Firework(
-            [t0, t1], spec=spec,
-            name=calculation_name)
+        firework = fireworks.Firework(tasks, spec=spec,
+                                      name=calculation_name)
 
         workflow = fireworks.Workflow([firework])
         self.launchpad.add_wf(workflow)
