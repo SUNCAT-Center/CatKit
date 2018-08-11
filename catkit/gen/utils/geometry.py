@@ -86,7 +86,7 @@ def _branch_molecule(
     if len(nodes) == 0:
         return
 
-    radii = defaults.get('covalent_radii')
+    radii = defaults.get('radii')
     num = atoms.numbers[[root] + nodes]
     d = radii[num[0]] + radii[num[1:]]
     c0 = atoms[root].position

@@ -5,7 +5,7 @@ import itertools
 import networkx as nx
 import numpy as np
 import scipy
-radii = defaults.get('covalent_radii')
+radii = defaults.get('radii')
 
 
 class AdsorptionSites():

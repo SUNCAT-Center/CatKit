@@ -1,5 +1,6 @@
 from __future__ import division
 from catkit import Gratoms
+from . import defaults
 from . import utils
 from . import adsorption
 import numpy as np
@@ -500,7 +501,12 @@ class SlabGenerator(object):
                 metrics += [[d.sum(), angle, M]]
 
             if metrics:
-                matrix = sorted(metrics, key=lambda x: (x[0], x[1]))[0][-1]
+                if defaults.get('orthogonal'):
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[1], x[0]))[0][-1]
+                else:
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[0], x[1]))[0][-1]
                 supercell = transform_ab(supercell, matrix)
 
         elif isinstance(size, (list, tuple, np.ndarray)):
