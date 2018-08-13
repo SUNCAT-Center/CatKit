@@ -44,9 +44,6 @@ def get_potential_energy(
     if isinstance(calc, espresso.Espresso):
         # Patch for reading magmom of trajectory
         images = espresso.io.read(out_file, ':')
-        if 'magmoms' in calc.results:
-            calc.get_pdos(update_projections=True)
-            images[-1]._calc.results = calc.results.copy()
     else:
         images = ase.io.read(out_file, ':')
 
