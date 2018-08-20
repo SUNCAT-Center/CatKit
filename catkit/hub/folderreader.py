@@ -518,6 +518,7 @@ class FolderReader:
                 continue
 
             found = False
+            print(self.reaction_atoms)
             for key, mollist in self.reaction_atoms.items():
                 if found:
                     break
