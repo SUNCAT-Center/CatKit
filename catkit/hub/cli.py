@@ -37,7 +37,9 @@ def show_reactions(dbfile):
     default='anonymous',
     show_default=True,
     help='SLack or Github username. Alternatively your email adress.')
-@click.option('--debug', default=False)
+@click.option('--debug',
+              is_flag=True,
+              default=False)
 @click.option(
     '--skip-folders',
     default='',

@@ -552,6 +552,14 @@ class FolderReader:
                             self.ase_ids.update({species: ase_id})
                             found = True
                             break
+            if found == False:
+                message = "Adsorbate '{}' not found for any structure files in '{}'. Please check your adsorbate structures and the empty slab.".format(molecule, root)
+                if self.debug:
+                    self.stdout.write('ERROR: ' + message)
+                    self.stdout.write('\nSkipping this entry.\n')
+                    return
+                else:
+                    raise RuntimeError(message)
 
             if n_ads > 1:
                 for key1, values in prefactor_scale.items():
