@@ -45,15 +45,20 @@ def show_reactions(dbfile):
     default='',
     help="""subfolders not to read, given as the name of a single folder,
     or a string with names of more folders seperated by ', '""")
+@click.option(
+    '--energy-limit',
+    default=5,
+    help="""Limit for accepted absolute reaction energies""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
-def folder2db(folder_name, userhandle, debug, skip_folders, goto_reaction):
+def folder2db(folder_name, userhandle, debug, energy_limit, skip_folders,
+              goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
     skip = []
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
-    _folder2db.main(folder_name, debug,
+    _folder2db.main(folder_name, debug, energy_limit,
                     skip, userhandle, goto_reaction)
 
 
