@@ -37,15 +37,18 @@ class FolderReader:
         in spite of errors.
     update: bool
         Update data if allready present in database file. defalt is True
+    energy_limit: float
+        Limit for acceptable absolute reaction energies
     """
 
     def __init__(self, folder_name, debug=False, strict=True, verbose=False,
-                 update=True, stdin=sys.stdin,
+                 update=True, energy_limit=5, stdin=sys.stdin,
                  stdout=sys.stdout, userhandle=None):
         self.debug = debug
         self.strict = strict
         self.verbose = verbose
         self.update = update
+        self.energy_limit = energy_limit
 
         self.data_base, self.user, self.user_base \
             = get_bases(folder_name=folder_name)
@@ -336,11 +339,12 @@ class FolderReader:
         n_empty = len(empty_structures)
 
         if n_empty == 0:
-            self.stdout.write('Warning: No empty slab submitted at {root}'
+            self.stdout.write('Warning: No empty slab submitted at {root}\n'
                   .format(root=root))
+            self.empty = None
             return
         elif n_empty > 1:
-            self.stdout.write('Warning: more than one empty slab submitted at {root}'
+            self.stdout.write('Warning: more than one empty slab submitted at {root}\n'
                   .format(root=root))
             filename_collapse = ''.join([empty.info['filename']
                                          for empty in empty_structures])
@@ -445,6 +449,16 @@ class FolderReader:
             n_atoms = np.append(n_atoms, len(slab))
 
         empty = self.empty
+        if not empty:
+            reactant_entries = self.reaction['reactants'] + self.reaction['products']
+            if 'star' in reactant_entries:
+                message = 'Empty slab needed for reaction!'
+                self.raise_error(message)
+                return
+            else:
+                empty = slab_structures[0]
+                self.stdout.write("Warning: Using '{}' as a reference instead of empty slab\n"\
+                                  .format(empty.info['filename']))
         empty_atn = list(empty.get_atomic_numbers())
 
         prefactor_scale = copy.deepcopy(self.prefactors)
@@ -455,14 +469,13 @@ class FolderReader:
 
         key_value_pairs.update({'name':
                                 ase_tools.get_chemical_formula(empty),
-                                # 'site': self.sites,
                                 'facet': self.ase_facet,
-                                # 'layers': ase_tools.get_n_layers(empty),
                                 'state': 'star'})
 
         """ Match adsorbate structures with reaction entries"""
         for i, slab in enumerate(slab_structures):
             f = slab.info['filename']
+            print(f)
             atns = list(slab.get_atomic_numbers())
             if not (np.array(atns) > 8).any() and \
                (np.array(empty_atn) > 8).any():
@@ -480,6 +493,8 @@ class FolderReader:
             for atn in empty_atn * supercell_factor:
                 ads_atn.remove(atn)
             ads_atn = sorted(ads_atn)
+            if ads_atn == [] and 'star' in self.ase_ids:
+                del self.ase_ids['star']
 
             ase_id = None
             id, ase_id = ase_tools.check_in_ase(slab, self.cathub_db)
@@ -516,9 +531,7 @@ class FolderReader:
                                          **key_value_pairs)
                 self.ase_ids.update({'TSemptystar': ase_id})
                 continue
-
             found = False
-            print(self.reaction_atoms)
             for key, mollist in self.reaction_atoms.items():
                 if found:
                     break
@@ -528,8 +541,10 @@ class FolderReader:
                     molecule_atn = ase_tools.get_numbers_from_formula(molecule)
                     for n_ads in range(1, 5):
                         mol_atn = sorted(molecule_atn * n_ads)
-                        if ads_atn == mol_atn and \
+                        if (ads_atn == mol_atn or len(ads_atn)==0) and \
                            self.states[key][n] == 'star':
+                            if not self.structures[key][n] == '':
+                                continue
                             self.structures[key][n] = slab
                             species = clear_prefactor(
                                 self.reaction[key][n])
@@ -540,7 +555,7 @@ class FolderReader:
                                  clear_state(
                                      species),
                                  'n': n_ads,
-                                 'site': self.sites.get(species, '')})
+                                 'site': str(self.sites.get(species, ''))})
                             if ase_id is None:
                                 ase_id = ase_tools.write_ase(
                                     slab, self.cathub_db, self.stdout,
@@ -553,15 +568,12 @@ class FolderReader:
                             self.ase_ids.update({species: ase_id})
                             found = True
                             break
-            if found == False:
-                message = "Adsorbate '{}' not found for any structure files in '{}'. Please check your adsorbate structures and the empty slab.".format(molecule, root)
-                if self.debug:
-                    self.stdout.write('ERROR: ' + message)
-                    self.stdout.write('\nSkipping this entry.\n')
-                    return
-                else:
-                    raise RuntimeError(message)
 
+            if found == False:
+                message = "Adsorbate '{}' not found for any structure files in '{}'."\
+                    .format(molecule, root) + \
+                    "Please check your adsorbate structures and the empty slab.".
+                self.raise_error(message)
             if n_ads > 1:
                 for key1, values in prefactor_scale.items():
                     for mol_i in range(len(values)):
@@ -595,15 +607,10 @@ class FolderReader:
                     self.energy_corrections)
 
         except BaseException:
-            if self.debug:
-                self.stdout.write(
-                    'ERROR: reaction energy failed for files in: {}\n'
-                    .format(root))
-            else:
-                raise RuntimeError(
-                    'Reaction energy failed for files in: {}'.format(root))
+            message = "reaction energy failed for files in '{}'".format(root)
+            self.raise_error(message)
 
-        expr = -10 < reaction_energy < 10
+        expr = -self.energy_limit < reaction_energy < self.energy_limit
 
         if not ase_tools.debug_assert(
                 expr, 'reaction energy is wrong: {} eV: {}'
@@ -612,7 +619,7 @@ class FolderReader:
             return
 
         expr = activation_energy is None \
-            or reaction_energy < activation_energy < 5
+            or reaction_energy < activation_energy < self.energy_limit
         if not ase_tools.debug_assert(expr,
                                       'activation energy is wrong: {} eV: {}'
                                       .format(activation_energy, root),
@@ -627,7 +634,6 @@ class FolderReader:
             for i, r in enumerate(self.reaction[key]):
                 r = clear_prefactor(r)
                 reaction_info[key].update({r: self.prefactors[key][i]})
-
         self.key_value_pairs_reaction = {
             'chemical_composition': chemical_composition,
             'surface_composition': surface_composition,
@@ -646,3 +652,10 @@ class FolderReader:
             'ase_ids': self.ase_ids,
             'energy_corrections': self.energy_corrections,
             'username': self.user}
+
+
+    def raise_error(self, message):
+        if self.debug:
+            self.stdout.write('Error: ' + message + '\n')
+        else:
+            raise RuntimeError(message)
