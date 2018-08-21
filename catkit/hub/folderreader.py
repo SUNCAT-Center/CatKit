@@ -572,7 +572,7 @@ class FolderReader:
             if found == False:
                 message = "Adsorbate '{}' not found for any structure files in '{}'."\
                     .format(molecule, root) + \
-                    "Please check your adsorbate structures and the empty slab.".
+                    "Please check your adsorbate structures and the empty slab."
                 self.raise_error(message)
             if n_ads > 1:
                 for key1, values in prefactor_scale.items():
