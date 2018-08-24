@@ -186,6 +186,11 @@ class Gratoms(Atoms):
             # Make sure a list of booleans will work correctly and not be
             # interpreted at 0 and 1 indices.
             i = np.array(i)
+        elif isinstance(i, slice):
+            istart = i.start if i.start != None else 0
+            istop = i.stop if i.stop != None else len(self)
+            istep = i.step if i.step != None else 1
+            i = np.array([i for i in range(istart, istop, istep)])
 
         conadd = []
         # Constraints need to be deepcopied, but only the relevant ones.
