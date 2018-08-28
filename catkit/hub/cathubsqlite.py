@@ -194,6 +194,10 @@ class CathubSQLite:
 
         pid = self.get_last_id(cur, table='publication')
 
+        if self.connection is None:
+            con.commit()
+            con.close()
+
         return pid
 
     def write(self, values, data=None):
