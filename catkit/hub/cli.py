@@ -34,9 +34,13 @@ def show_reactions(dbfile):
 @cli.command()
 @click.option('--dbuser', default='catvisitor', type=str)
 @click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
+@click.option('--gui', default=False, show_default=True, is_flag=True,
+              help='show structures in ase gui')
 @click.option('--args', '-a', type=str,
               help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
-def ase(dbuser, dbpassword, args):
+
+def ase(dbuser, dbpassword, args, gui):
+    """Direct connection to the Catalysis-Hub server with ase db cli"""
     if dbuser == 'upload':
         dbpassword = 'cHyuuQH0'
     db = CathubPostgreSQL(user=dbuser, password=dbpassword)
@@ -44,6 +48,10 @@ def ase(dbuser, dbpassword, args):
     server_name = db.server_name
     subprocess.call(
         ('ase db {} {}'.format(server_name, args)).split())
+    if gui:
+        args = args.split('-')[0]
+        subprocess.call(
+        ('ase gui {}@{}'.format(server_name, args)).split())
 
 @cli.command()
 @click.argument('folder_name')
