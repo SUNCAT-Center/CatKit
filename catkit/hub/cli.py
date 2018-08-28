@@ -1,3 +1,12 @@
+import subprocess
+import os
+import yaml
+from yaml import Dumper
+import click
+import six
+import collections
+from ase.atoms import string2symbols
+from ase.cli import main
 from . import query
 from . import make_folders_template
 from . import psql_server_connect
@@ -6,14 +15,7 @@ from . import db2server as _db2server
 from . import organize as _organize
 from . import folderreader
 from .cathubsqlite import CathubSQLite
-from ase.atoms import string2symbols
-import os
-#import json
-import yaml
-from yaml import Dumper
-import click
-import six
-import collections
+from .postgresql import CathubPostgreSQL
 
 
 @click.group()
@@ -28,6 +30,20 @@ def show_reactions(dbfile):
     db = CathubSQLite(dbfile)
     db.print_summary()
 
+
+@cli.command()
+@click.option('--dbuser', default='catvisitor', type=str)
+@click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
+@click.option('--args', '-a', type=str,
+              help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
+def ase(dbuser, dbpassword, args):
+    if dbuser == 'upload':
+        dbpassword = 'cHyuuQH0'
+    db = CathubPostgreSQL(user=dbuser, password=dbpassword)
+    db._connect()
+    server_name = db.server_name
+    subprocess.call(
+        ('ase db {} {}'.format(server_name, args)).split())
 
 @cli.command()
 @click.argument('folder_name')
