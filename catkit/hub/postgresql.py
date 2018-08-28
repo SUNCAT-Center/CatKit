@@ -207,6 +207,12 @@ class CathubPostgreSQL:
         self.initialized = True
         return self
 
+    def get_ase_db(self):
+        if not self.connection:
+            self._connect()
+        print(self.server_name)
+        return ase.db.connect(self.server_name)
+
     def create_user(self, user, table_privileges=['ALL PRIVILEGES'],
                     schema_privileges=['ALL PRIVILEGES'],
                     row_limit=50000):
@@ -533,7 +539,6 @@ class CathubPostgreSQL:
         return id, pub_id
 
     def write(self, values, table='reaction'):
-
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
@@ -551,6 +556,52 @@ class CathubPostgreSQL:
             con.commit()
             con.close()
         return id
+
+    def write_reaction(self, value_dict):
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+
+        ase_ids = value_dict['ase_ids']
+        energy_corrections = value_dict.get('energy_corrections', {})
+
+        key_list = get_key_list(start_index=1)
+        values = [value_dict[key] for key in key_list]
+
+        key_str = get_key_str('reaction', start_index=1)
+        value_str = get_value_str(values)
+
+        insert_command = 'INSERT INTO reaction ({0}) VALUES ({1}) RETURNING id;'\
+            .format(key_str, value_str)
+
+        cur.execute(insert_command)
+        id = cur.fetchone()[0]
+
+        reaction_system_values = []
+
+        """ Write to reaction_system tables"""
+        for name, ase_id in ase_ids.items():
+            if name in energy_corrections:
+                energy_correction = energy_corrections[name]
+            else:
+                energy_correction = 0
+
+            reaction_system_values += [tuple([name, energy_correction,
+                                           ase_id, id])]
+
+        key_str = get_key_str('reaction_system')
+        insert_command = """INSERT INTO reaction_system
+        ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str)
+
+        execute_values(cur=cur, sql=insert_command,
+                       argslist=reaction_system_values, page_size=1000)
+        
+        if self.connection is None:
+            con.commit()
+            con.close()
+            
+        return id
+    
 
     def update(self, id, values, key_names='all'):
         con = self.connection or self._connect()
@@ -691,8 +742,9 @@ class CathubPostgreSQL:
                 rows = list(db.select('{}<id<{}'.format(b0, b1)))
 
                 with ase.db.connect(self.server_name, type='postgresql') as db2:
-                    for row in rows:
-                        db2.write(row)
+                    db2.write(rows)
+                    #for row in rows:
+                    #    db2.write(row)
 
                 nrows += len(rows)
                 t2 = time.time()
@@ -858,15 +910,18 @@ class CathubPostgreSQL:
         self.stdout.write('  reaction_system: {0}\n'.format(Ncatstruc))
 
     def check(self, pub_id, chemical_composition, reactants, products,
-              reaction_energy=None, strict=True):
+              sites=None, reaction_energy=None):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
         keys = 'pub_id, chemical_composition,  reactants, products'
         values = [pub_id, chemical_composition, reactants, products]
         placeholder = """'{}', '{}', '{}', '{}'"""
-        if strict:
-            assert reaction_energy is not None
+        if sites:
+            placeholder += ", '{}'"
+            keys += ', sites'
+            values.append(sites)
+        if reaction_energy:
             placeholder += ", {}"
             keys += ', reaction_energy'
             values.append(reaction_energy)
