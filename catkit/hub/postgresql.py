@@ -418,9 +418,14 @@ class CathubPostgreSQL:
             execute_values(cur=cur, sql=insert_command,
                            argslist=reaction_system_values, page_size=1000)
             self.stdout.write('Transfer complete\n')
+
+        if self.user == 'catroot':
+            self.delete_publication(pub_id, schema='upload')
+
         if self.connection is None:
             con.commit()
             con.close()
+
         return
 
     def get_pub_id_owner(self, pub_id):
@@ -444,8 +449,9 @@ class CathubPostgreSQL:
         elif schema == 'public':
             user = 'catroot'
 
-        assert self.user == user, \
-            "You don't have permission to perform this operation"
+        if not self.user == 'catroot':
+            assert self.user == user, \
+                "You don't have permission to perform this operation"
 
         con = self.connection or self._connect()
         cur = con.cursor()
@@ -742,9 +748,10 @@ class CathubPostgreSQL:
                 rows = list(db.select('{}<id<{}'.format(b0, b1)))
 
                 with ase.db.connect(self.server_name, type='postgresql') as db2:
-                    db2.write(rows)
-                    #for row in rows:
-                    #    db2.write(row)
+                    # write one row at the time until ase is updated
+                    # db2.write(rows)
+                    for row in rows:
+                        db2.write(row)
 
                 nrows += len(rows)
                 t2 = time.time()
