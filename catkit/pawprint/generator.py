@@ -107,12 +107,12 @@ class Fingerprinter():
 
                 if isinstance(operation, str):
                     operation = getattr(operations, operation)
-                
+
                 if all(isinstance(pl, list) for pl in parameters_list):
-                    atoms_parameters = self._get_atoms_parameters(atoms, 
+                    atoms_parameters = self._get_atoms_parameters(atoms,
                             parameters_list[j])
                 else:
-                    atoms_parameters = self._get_atoms_parameters(atoms, 
+                    atoms_parameters = self._get_atoms_parameters(atoms,
                             parameters_list)
 
                 fingerprint = _generate_fingerprint(

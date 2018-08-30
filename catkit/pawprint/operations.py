@@ -72,7 +72,7 @@ def layered_sum(
         atoms_parameters=None,
         connectivity=None):
     """Sum of the properties in a layer as indicated by catkit tags."""
-    tags = atoms.get_tags() 
+    tags = atoms.get_tags()
     tags -= min(tags)
     LS = np.array([np.bincount(tags, weights=ap) for ap in atoms_parameters])
     LS = LS[LS != 0]
@@ -85,13 +85,13 @@ def local_ads_metal_fp(
         atoms_parameters=None,
         connectivity=None,
         fuse=False):
-    """Sum of the differences in properties of the atoms in the 
+    """Sum of the differences in properties of the atoms in the
        metal-adsorbate interface"""
     bond_index = np.where(atoms.get_tags() == -1)[0]
     fp = np.empty([len(atoms_parameters), len(bond_index)])
     for i, bi in enumerate(bond_index):
         bonded_ap = atoms_parameters[:, np.where(connectivity[bi] == 1)[0]]
-        fp[:, i] = np.mean(bonded_ap - 
+        fp[:, i] = np.mean(bonded_ap -
                 atoms_parameters[:, bi].reshape(-1, 1), axis=1)
     if not fuse:
         return fp.reshape(-1)
@@ -109,17 +109,17 @@ def derived_fp(
         n_2=None,
         op=None):
     """
-    NOTE : This is a work in progress. I'll redesign the whole thing to allow 
+    NOTE : This is a work in progress. I'll redesign the whole thing to allow
            for arithmetic manipulation of two fingerprints.
-       Given two fingerprints vector, it will perform arithmetic operation to 
+       Given two fingerprints vector, it will perform arithmetic operation to
        design new fingerprints.
-       
-       Availabel operations:
-           add : adds two fingerprints of equal length raised to their given 
+
+       Available operations:
+           add : adds two fingerprints of equal length raised to their given
                  power.
-           subtract : subtracts two fingerprints of equal length raised to 
+           subtract : subtracts two fingerprints of equal length raised to
                       their given power.
-           mulltiply : multiply two fingerprints of equal length raised to 
+           mulltiply : multiply two fingerprints of equal length raised to
                        their given power.
            divide : divide two fingerprints of equal length raised to their
                     given power."""
