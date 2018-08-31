@@ -203,7 +203,6 @@ class Gratoms(Atoms):
 
             istep = i.step if i.step != None else 1
             i = np.array([i for i in range(istart, istop, istep)])
-
         conadd = []
         # Constraints need to be deepcopied, but only the relevant ones.
         for con in copy.deepcopy(self.constraints):
