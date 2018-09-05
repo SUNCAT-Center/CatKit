@@ -5,6 +5,7 @@ from yaml import Dumper
 import click
 import six
 import collections
+from tabulate import tabulate
 from ase.atoms import string2symbols
 from ase.cli import main
 from . import query
@@ -36,10 +37,10 @@ def show_reactions(dbfile):
 @click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
 @click.option('--gui', default=False, show_default=True, is_flag=True,
               help='show structures in ase gui')
-@click.option('--args', '-a', type=str,
+@click.option('--ase-args', '-a', default='', type=str,
               help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
 
-def ase(dbuser, dbpassword, args, gui):
+def ase(dbuser, dbpassword, ase_args, gui):
     """Direct connection to the Catalysis-Hub server with ase db cli"""
     if dbuser == 'upload':
         dbpassword = 'cHyuuQH0'
@@ -47,11 +48,11 @@ def ase(dbuser, dbpassword, args, gui):
     db._connect()
     server_name = db.server_name
     subprocess.call(
-        ('ase db {} {}'.format(server_name, args)).split())
+        ('ase db {} {}'.format(server_name, ase_args)).split())
     if gui:
-        args = args.split('-')[0]
+        ase_args = ase_args.split('-')[0]
         subprocess.call(
-        ('ase gui {}@{}'.format(server_name, args)).split())
+        ('ase gui {}@{}'.format(server_name, ase_args)).split())
 
 @cli.command()
 @click.argument('folder_name')
@@ -142,6 +143,7 @@ publication_columns = [
               show_default=True,
               multiple=True)
 @click.option('--n-results', '-n', default=10, show_default=True)
+@click.option('--write-db', '-w', is_flag=True, default=False, show_default=True)
 @click.option(
     '--queries',
     '-q',
@@ -152,9 +154,8 @@ publication_columns = [
     \n -q reactants=CO for reactions with CO as a reactants"""
     .format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
-def reactions(columns, n_results, queries):
+def reactions(columns, n_results, write_db, queries):
     """Search for reactions"""
-
     if not isinstance(queries, dict):
         query_dict = {}
         for q in queries:
@@ -169,12 +170,24 @@ def reactions(columns, n_results, queries):
             except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
-    query.query(
-        table='reactions',
-        columns=columns,
-        n_results=n_results,
-        queries=query_dict)
+    if write_db and n_results > 1000:
+        print("""Warning: You're attempting to write more than a 1000 rows
+        with geometries. This could take some time""")
+    data = query.get_reactions(columns=columns,
+                               n_results=n_results,
+                               write_db=write_db,
+                               **query_dict)
 
+    if write_db:
+        return
+    table = []
+    headers = []
+    for row in data['data']['reactions']['edges']:
+        table += [list(row['node'].values())]
+
+    headers = list(row['node'].keys())
+
+    print(tabulate(table, headers) + '\n')
 
 @cli.command()
 @click.option('--columns', '-c',
