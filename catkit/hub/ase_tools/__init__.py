@@ -272,24 +272,10 @@ def tag_atoms(atoms, types=None):
 
 
 def get_layers(atoms):
-    # WARNING: this function is defined twice
-    # with different parameter choices
-    tolerance = 0.2
-    d = atoms.positions[:, 2]
-    keys = np.argsort(d)
-    ikeys = np.argsort(keys)
-    mask = np.concatenate(([True], np.diff(d[keys]) > tolerance))
-    layer_i = np.cumsum(mask)[ikeys]
-
-    if layer_i.min() == 1:
-        layer_i -= 1
-    return layer_i
-
-
-def get_layers(atoms):
-    # WARNING: this function is defined twice
-    # with different parameter choices
-    tolerance = 0.01
+    """Wrapper for ase.geometry.get_layers with parameter choices."""
+    # Get Cordero covalent radii.
+    radii = [ase.data.covalent_radii[z] for z in atoms.numbers]
+    tolerance = np.mean(radii)
     d = atoms.positions[:, 2]
     keys = np.argsort(d)
     ikeys = np.argsort(keys)
