@@ -118,6 +118,7 @@ def fuzzy_match(structures, options):
 
         elif density < options.max_density_slab:
             structure.info['state'] = 'surface'
+            formula = get_chemical_formula(structure)
             surfaces.append(structure)
             if options.verbose:
                 print("           SURFACE", formula,
@@ -427,6 +428,16 @@ def fuzzy_match(structures, options):
 
     print("\n\nCollected Reaction Energies")
     print("===========================")
+    if len(collected_energies) == 0:
+        print("Warning: no energies collected. Some ways to fix this:")
+        print("  * raise the allowed maximum reaction energy (default: 10 eV)")
+        print("     --max-energy 50")
+        print("  * make sure you have gas phase molecules in the directory")
+        print("  * raise the maximum density for gas-phase molecule")
+        print("     --max-density-gas 0.004")
+        print("  * raise the maximum density for slab structures")
+        print("    --max-density-slab 0.03 ")
+
     for key, energy in collected_energies.items():
         print("{key:40s}: {energy:.3f} eV".format(
             key=key,
