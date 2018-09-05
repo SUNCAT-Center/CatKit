@@ -609,18 +609,39 @@ class CathubPostgreSQL:
         return id
     
 
-    def update(self, id, values, key_names='all'):
+    def update_reaction(self, id, ase_ids=None, energy_corrections={}, **kwargs):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
 
-        key_str = get_key_str(start_index=1)
-        value_str = get_value_str(values, start_index=1)
+        key_str = ', '.join(list(kwargs.keys()))#get_key_str(start_index=1)
+        value_str = get_value_str(values, start_index=0)
 
         update_command = 'UPDATE reaction SET ({0}) = ({1}) WHERE id = {2};'\
             .format(key_str, value_str, id)
 
         cur.execute(update_command)
+
+        if ase_ids:
+            delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+            cur.execute(delete_command)
+
+            """ Write to reaction_system tables"""
+            for name, ase_id in ase_ids.items():
+                if name in energy_corrections:
+                    energy_correction = energy_corrections[name]
+                else:
+                    energy_correction = 0
+
+                    reaction_system_values += [tuple([name, energy_correction,
+                                                      ase_id, id])]
+
+            key_str = get_key_str('reaction_system')
+            insert_command = """INSERT INTO reaction_system
+            ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str)
+
+            execute_values(cur=cur, sql=insert_command,
+                           argslist=reaction_system_values, page_size=1000)
 
         if self.connection is None:
             con.commit()
