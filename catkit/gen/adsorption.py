@@ -447,8 +447,8 @@ class Builder(AdsorptionSites):
         bonds : int or list of 2 int
             Index of adsorbate atoms to be bonded.
         index : int
-            Index of the site or edge to use as the adsorption position. A
-            value of -1 will return all possible structures.
+            Index of the site or edge to use as the adsorption position.
+            Passing a NoneType will return all possible structures.
 
         Returns
         -------
@@ -463,7 +463,7 @@ class Builder(AdsorptionSites):
             raise ValueError('Specify the index of atom to bond.')
 
         elif len(bonds) == 1:
-            if index is -1:
+            if index is None:
                 slab = []
                 for i, _ in enumerate(self.get_symmetric_sites()):
                     slab += [self._single_adsorption(adsorbate,
@@ -484,7 +484,7 @@ class Builder(AdsorptionSites):
                                                **kwargs)
 
         elif len(bonds) == 2:
-            if index == -1:
+            if index is None:
                 slab = []
                 edges = self.get_adsorption_edges()
                 for i, _ in enumerate(edges):
@@ -529,17 +529,33 @@ class Builder(AdsorptionSites):
 
         branches = nx.bfs_successors(atoms.graph, bond)
 
-        root = None
+        node_atoms = []
         for i, branch in enumerate(branches):
             utils._branch_molecule(
-                atoms, branch, root,
+                atoms, branch, bond,
                 adsorption=True,
             )
-            root = bond
+            node_atoms.append(branch[0])
 
+        # Move adsorbate base to site.
+        atoms.translate(-atoms.positions[bond])
         atoms.set_cell(slab.cell)
-        atoms.rotate([0, 0, 1], vector)
         atoms.translate(base_position)
+
+        # Rotate around the adsorption vector.
+        if len(self.index[u]) == 2:
+            site_bond_vectors = slab.get_positions()[self.index[u], :] - \
+                base_position
+            fragment_vectors = atoms.get_positions()[node_atoms, :] - \
+                base_position
+            site_bond_vectors[:, 2] = 0
+            fragment_vectors[:, 2] = 0
+            atoms.rotate(a=fragment_vectors[1, :], v=site_bond_vectors[0, :],
+                         center=base_position)
+            atoms.rotate(a=90, v=np.abs(vector),
+                         center=base_position)
+        else:
+            atoms.rotate([0, 0, 1], v=np.abs(vector))
 
         n = len(slab)
         slab += atoms

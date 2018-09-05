@@ -109,6 +109,9 @@ def _branch_molecule(
     else:
         c1 = atoms[base_root].position
 
+    if root == base_root:
+        c1 = atoms[base_root].position + np.array([0, 0, -0.01])
+
     n = len(nodes)
     if n == 1:
         if base_root is None and not adsorption:
