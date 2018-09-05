@@ -1,4 +1,5 @@
-git+https://gitlab.com/ase/ase.git
+ase>3.16.2
+git+https://gitlab.com/ase/ase.git@d441dd6a1c71a2e1a925043e6974a9b3ae961854#egg=ase-3.16.31b
 matplotlib>=2.2
 nose>=1.3.7
 numpy>=1.14
