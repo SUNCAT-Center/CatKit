@@ -44,7 +44,6 @@ def bonding_convolution(
     """Perform convolution of metal atoms with bonded adsorbates."""
     # This is a CatKit convention
     bond_index = np.where(atoms.get_tags() == -1)[0]
-
     V = np.dot(atoms_parameters, connectivity)[:, bond_index]
     P = np.dot(V, atoms_parameters[:, bond_index].T).diagonal()
     convolution = P / connectivity[bond_index].sum()
@@ -66,3 +65,69 @@ def autocorrelation(
     AC = np.dot(np.dot(atoms_parameters, S), atoms_parameters.T).diagonal()
 
     return AC
+
+
+def layered_sum(
+        atoms=None,
+        atoms_parameters=None,
+        connectivity=None):
+    """Sum of the properties in a layer as indicated by catkit tags."""
+    tags = atoms.get_tags()
+    tags -= min(tags)
+    LS = np.array([np.bincount(tags, weights=ap) for ap in atoms_parameters])
+    LS = LS[LS != 0]
+
+    return LS
+
+
+def local_ads_metal_fp(
+        atoms=None,
+        atoms_parameters=None,
+        connectivity=None,
+        fuse=False):
+    """Sum of the differences in properties of the atoms in the
+       metal-adsorbate interface"""
+    bond_index = np.where(atoms.get_tags() == -1)[0]
+    fp = np.empty([len(atoms_parameters), len(bond_index)])
+    for i, bi in enumerate(bond_index):
+        bonded_ap = atoms_parameters[:, np.where(connectivity[bi] == 1)[0]]
+        fp[:, i] = np.mean(bonded_ap -
+                atoms_parameters[:, bi].reshape(-1, 1), axis=1)
+    if not fuse:
+        return fp.reshape(-1)
+    else:
+       return fp.sum(axis=1)
+
+
+def derived_fp(
+        atoms=None,
+        atoms_parameters=None,
+        connectivity=None,
+        fp_1=None,
+        fp_2=None,
+        n_1=None,
+        n_2=None,
+        op=None):
+    """
+    NOTE : This is a work in progress. I'll redesign the whole thing to allow
+           for arithmetic manipulation of two fingerprints.
+       Given two fingerprints vector, it will perform arithmetic operation to
+       design new fingerprints.
+
+       Available operations:
+           add : adds two fingerprints of equal length raised to their given
+                 power.
+           subtract : subtracts two fingerprints of equal length raised to
+                      their given power.
+           mulltiply : multiply two fingerprints of equal length raised to
+                       their given power.
+           divide : divide two fingerprints of equal length raised to their
+                    given power."""
+    if op == 'add':
+        return fp_1 ** n_1 + fp_2 ** n_2
+    elif op == 'subtract':
+        return fp_1 ** n_1 - fp_2 ** n_2
+    elif op == 'divide':
+        return fp_1 ** n_1 / fp_2 ** n_2
+    elif op == 'multiply':
+        return fp_1 ** n_1 * fp_2 ** n_2

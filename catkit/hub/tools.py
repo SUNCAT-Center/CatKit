@@ -1,6 +1,20 @@
 import os
 
 
+def get_pub_id(title, authors, year):
+    "construct publication id"
+    if len(title.split(' ')) > 1 \
+       and title.split(' ')[0].lower() in ['the', 'a']:
+        _first_word = title.split(' ')[1].split('_')[0]
+    else:
+        _first_word = title.split(' ')[0].split('_')[0]
+
+    pub_id = authors[0].split(',')[0].split(' ')[0] + \
+                  _first_word + \
+                  str(year)
+    return pub_id
+
+
 def extract_atoms(molecule):
     """Return a string with all atoms in molecule"""
     if molecule == '':
@@ -91,6 +105,7 @@ def check_reaction(reactants, products):
 
 
 def get_catbase():
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
     if 'SHERLOCK' in os.environ:
         sherlock = os.environ['SHERLOCK']
         if sherlock == '1':
@@ -100,19 +115,72 @@ def get_catbase():
     elif 'SLAC_ENVIRON' in os.environ:
         catbase = '/nfs/slac/g/suncatfs/data_catapp/'
     else:
-        catbase = './'
+        catbase = ''
     return catbase
 
 
 def get_bases(folder_name):
-    catbase = get_catbase()
+    user = os.environ['USER']
+    data_base = folder_name + '/'
+    user_base = folder_name
+    return data_base, user, user_base
 
-    if os.environ['USER'] == 'winther':
-        data_base = catbase + 'winther/databases/'
-        user = folder_name
+def clear_state(name):
+    name = name.replace('*', '').replace('(g)', '')
+    name = name.replace('star', '').replace('gas', '')
+    return name
+
+
+def clear_prefactor(molecule):
+    if molecule == '':
+        return molecule
+    if not molecule[0].isalpha():
+        i = 0
+        while not molecule[i].isalpha():
+            i += 1
+        molecule = molecule[i:]
+    return molecule
+
+
+def get_atoms(molecule):
+    molecule = clear_state(molecule)
+    if molecule == '':
+        prefactor = 1
+        return molecule, prefactor
+    try:
+        return '', float(molecule)
+    except BaseException:
+        pass
+    if not molecule[0].isalpha():
+        i = 0
+        while not molecule[i].isalpha():
+            i += 1
+        prefactor = molecule[:i]
+        if prefactor == '-':
+            prefactor = -1
+        prefactor = float(prefactor)
+        molecule = molecule[i:]
     else:
-        user = os.environ['USER']
-        data_base = catbase + folder_name + '/'
+        prefactor = 1
 
-    user_base = catbase + folder_name
-    return catbase, data_base, user, user_base
+    temp = ''
+    for k in range(len(molecule)):
+        if molecule[k].isdigit():
+            for j in range(int(molecule[k]) - 1):
+                temp += molecule[k - 1]
+        else:
+            temp += molecule[k]
+
+    molecule = ''.join(sorted(temp))
+
+    return molecule, prefactor
+
+
+def get_state(name):
+    if '*' in name or 'star' in name:
+        state = 'star'
+    elif 'gas' in name:
+        state = 'gas'
+    else:
+        state = 'star'
+    return state
