@@ -41,10 +41,21 @@ class CommandLineTestCase(unittest.TestCase):
         runner.invoke(make_folders, ['--create-template', 'template'])
         runner.invoke(make_folders, ['template'])
 
-    def test_cli_read_folders(self):
+    def test1_cli_read_folders(self):
         from catkit.hub.cli import folder2db
         runner = CliRunner()
         runner.invoke(folder2db, ['aayush/'])
+
+    def test2_cli_db2server(self):
+        from catkit.hub.postgresql import CathubPostgreSQL
+        from catkit.hub.cli import db2server
+        db = CathubPostgreSQL(user='postgres')
+        con = db._connect()
+        db._initialize(con)
+        db.truncate_schema()
+        runner = CliRunner()
+        runner.invoke(db2server, ['--user=postgres',
+                                  'aayush/MontoyaChallenge2015.db'])
 
 
 if __name__ == '__main__':
