@@ -43,8 +43,8 @@ def query(table='reactions',
 
 
 def execute_graphQL(query_string):
-    root = 'http://catappdatabase2.herokuapp.com/graphql'
-    print('Connecting to database at http://catappdatabase2.herokuapp.com/graphql')
+    root = 'http://api.catalysis-hub.org/graphql'
+    print('Connecting to database at {root}'.format(root=root))
     print('')
     print('Executing query:')
     print('')

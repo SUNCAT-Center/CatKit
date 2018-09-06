@@ -1,6 +1,9 @@
+import sys
 from ase.db.sqlite import SQLite3Database
 import sqlite3
 import json
+from past.utils import PY2
+from tabulate import tabulate
 
 
 init_commands = [
@@ -84,13 +87,15 @@ class CathubSQLite:
         name of database file
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, stdin=sys.stdin, stdout=sys.stdout):
 
         assert filename.endswith('.db'), 'filename should have .db extension'
         self.filename = filename
         self.initialized = False
         self.default = 'NULL'
         self.connection = None
+        self.stdin = stdin
+        self.stdout = stdout
 
     def _connect(self):
         return sqlite3.connect(self.filename, timeout=600)
@@ -188,6 +193,10 @@ class CathubSQLite:
                     values)
 
         pid = self.get_last_id(cur, table='publication')
+
+        if self.connection is None:
+            con.commit()
+            con.close()
 
         return pid
 
@@ -452,6 +461,30 @@ class CathubSQLite:
             id = None
         return id
 
+    def print_summary(self):
+        self.stdout.write('------------------------------------------------\n')
+        self.stdout.write('Reaction Summary: \n')
+        self.stdout.write('------------------------------------------------\n')
+
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+        cur.execute("""
+        SELECT
+        surface_composition, reactants, products, reaction_energy,
+        activation_energy, sites
+        FROM
+        reaction;""")
+        rows = cur.fetchall()
+        table = []
+        for row in rows:
+            equation = get_equation(json.loads(row[1]), json.loads(row[2]))
+            table += [[row[0], equation, row[3], row[4], row[5]]]
+
+        headers = ['Surface Composition', 'Equation', 'Reaction Energy',
+                   'Activation Energy', 'Sites']
+        self.stdout.write(tabulate(table, headers) + '\n')
+
 
 def check_ase_ids(values, ase_ids):
     ase_values = ase_ids.values()
@@ -470,28 +503,6 @@ def check_ase_ids(values, ase_ids):
     return
 
 
-def get_key_value_str(values):
-    key_str = """chemical_composition, surface_composition, facet, sites,
-    reactants,products, reaction_energy, activation_energy, dft_code,
-    dft_functional, publication, doi, year, ase_ids, user"""
-    value_str = "'{}'".format(values[1])
-    for v in values[2:]:
-        try:
-            # Unicode in python2 - must be a better way of handling this.
-            if isinstance(v, unicode):
-                v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
-        if isinstance(v, str) or isinstance(v, dict):
-            value_str += ", '{}'".format(v)
-        elif v is None or v == '':
-            value_str += ", {}".format('NULL')
-        else:
-            value_str += ", {}".format(v)
-
-    return key_str, value_str
-
-
 def get_key_value_list(key_list, values, table='reaction'):
     total_keys = {'reaction': ['chemical_composition', 'surface_composition',
                                'facet', 'sites', 'coverages', 'reactants',
@@ -502,7 +513,7 @@ def get_key_value_list(key_list, values, table='reaction'):
                                   'volume', 'number', 'pages', 'year',
                                   'publisher', 'doi', 'tags'],
                   'reaction_system': ['name', 'energy_correction',
-                                      'ase_id', 'reaction_id'],
+                                      'ase_id', 'id'],
                   'publication_system': ['ase_id, pub_id']}
     total_key_list = total_keys[table]
 
@@ -519,12 +530,9 @@ def get_key_value_list(key_list, values, table='reaction'):
 def get_value_strlist(value_list):
     value_strlist = []
     for v in value_list:
-        try:
-            # Unicode in python2 - must be a better way of handling this.
+        if PY2:  # python 2
             if isinstance(v, unicode):
                 v = v.encode('ascii', 'ignore')
-        except NameError:
-            pass
         if isinstance(v, dict):
             v = json.dumps(v)
             value_strlist.append("'{}'".format(v))
@@ -536,3 +544,31 @@ def get_value_strlist(value_list):
             value_strlist.append("{}".format(v))
 
     return value_strlist
+
+
+def get_equation(reactants, products):
+    equation = ''
+    arrow = 0
+    for column in (reactants, products):
+        if arrow == 1:
+            equation += ' -> '
+        arrow += 1
+        i = 0
+        for key in sorted(column, key=len, reverse=True):
+            prefactor = column[key]
+            if 'gas' in key:
+                key = key.replace('gas', '(g)')
+            if 'star' in key:
+                key = key.replace('star', '*')
+            if not i == 0:
+                if prefactor > 0:
+                    equation += ' + '
+                else:
+                    equation += ' - '
+                    prefactor *= -1
+            if prefactor == 1:
+                prefactor = ''
+
+            equation += str(prefactor) + key
+            i += 1
+    return equation
