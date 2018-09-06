@@ -1,15 +1,21 @@
+import subprocess
+import os
+import yaml
+from yaml import Dumper
+import click
+import six
+import collections
+from ase.atoms import string2symbols
+from ase.cli import main
 from . import query
 from . import make_folders_template
 from . import psql_server_connect
 from . import folder2db as _folder2db
 from . import db2server as _db2server
 from . import organize as _organize
-from ase.atoms import string2symbols
-import os
-import json
-import click
-import six
-import collections
+from . import folderreader
+from .cathubsqlite import CathubSQLite
+from .postgresql import CathubPostgreSQL
 
 
 @click.group()
@@ -18,51 +24,87 @@ def cli():
 
 
 @cli.command()
+@click.argument('dbfile')
+def show_reactions(dbfile):
+    """Extract and print reactions from sqlite3 (.db) file"""
+    db = CathubSQLite(dbfile)
+    db.print_summary()
+
+
+@cli.command()
+@click.option('--dbuser', default='catvisitor', type=str)
+@click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
+@click.option('--gui', default=False, show_default=True, is_flag=True,
+              help='show structures in ase gui')
+@click.option('--args', '-a', type=str,
+              help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
+
+def ase(dbuser, dbpassword, args, gui):
+    """Direct connection to the Catalysis-Hub server with ase db cli"""
+    if dbuser == 'upload':
+        dbpassword = 'cHyuuQH0'
+    db = CathubPostgreSQL(user=dbuser, password=dbpassword)
+    db._connect()
+    server_name = db.server_name
+    subprocess.call(
+        ('ase db {} {}'.format(server_name, args)).split())
+    if gui:
+        args = args.split('-')[0]
+        subprocess.call(
+        ('ase gui {}@{}'.format(server_name, args)).split())
+
+@cli.command()
 @click.argument('folder_name')
-@click.option('--debug', default=False)
+@click.option(
+    '--userhandle',
+    type=str,
+    default='anonymous',
+    show_default=True,
+    help='SLack or Github username. Alternatively your email adress.')
+@click.option('--debug',
+              is_flag=True,
+              default=False)
 @click.option(
     '--skip-folders',
     default='',
     help="""subfolders not to read, given as the name of a single folder,
     or a string with names of more folders seperated by ', '""")
+@click.option(
+    '--energy-limit',
+    default=5,
+    help="""Limit for accepted absolute reaction energies""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
-@click.option('--old', default=False)
-def folder2db(folder_name, debug, skip_folders, goto_reaction, old):
+def folder2db(folder_name, userhandle, debug, energy_limit, skip_folders,
+              goto_reaction):
     """Read folders and collect data in local sqlite3 database"""
-    folder_name = folder_name.strip('/')
     skip = []
     for s in skip_folders.split(', '):
         for sk in s.split(','):
             skip.append(sk)
-    _folder2db.main(folder_name, debug,
-                    skip, goto_reaction, old)
+    _folder2db.main(folder_name, debug, energy_limit,
+                    skip, userhandle, goto_reaction)
 
 
 @cli.command()
 @click.argument('dbfile')
-@click.option('--start_id', default=1, type=int)
-@click.option('--write_reaction', default=True, type=bool)
-@click.option('--write_reaction_system', default=True, type=bool)
-@click.option('--write_ase', default=True, type=bool)
-@click.option('--write_publication', default=True, type=bool)
-@click.option('--block-size', default=1000, type=int)
-@click.option('--start-block', default=0, type=int)
-@click.option('--db_user', default='upload', type=str)
-@click.option('--db-password', type=str)
-def db2server(dbfile, start_id, write_reaction, write_ase, write_publication,
-              write_reaction_system, block_size, start_block, db_user,
-              db_password):
+@click.option('--block-size', default=1000, type=int,
+              help="Number of atomic structure to transfer per transaction",
+              show_default=True)
+@click.option('--dbuser', default='upload', type=str)
+@click.option('--dbpassword', default='cHyuuQH0', type=str)
+def db2server(dbfile, block_size, dbuser, dbpassword):
     """Transfer data from local database to Catalysis Hub server"""
 
-    _db2server.main(dbfile, start_id=start_id, write_reaction=write_reaction,
-                    write_ase=write_ase,
-                    write_publication=write_publication,
-                    write_reaction_system=write_reaction_system,
+    _db2server.main(dbfile,
+                    write_reaction=True,
+                    write_ase=True,
+                    write_publication=True,
+                    write_reaction_system=True,
                     block_size=block_size,
-                    start_block=start_block,
-                    db_user=db_user,
-                    db_password=db_password)
+                    start_block=0,
+                    user=dbuser,
+                    password=dbpassword)
 
 
 reaction_columns = [
@@ -97,16 +139,17 @@ publication_columns = [
 @click.option('--columns', '-c',
               default=('chemicalComposition', 'Equation', 'reactionEnergy'),
               type=click.Choice(reaction_columns),
+              show_default=True,
               multiple=True)
-@click.option('--n-results', '-n', default=10)
+@click.option('--n-results', '-n', default=10, show_default=True)
 @click.option(
     '--queries',
     '-q',
     default={},
     multiple='True',
     help="""Make a selection on one of the columns:
-    {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing
-    Pt \n -q reactants=CO for reactions with CO as a reactants"""
+    {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt
+    \n -q reactants=CO for reactions with CO as a reactants"""
     .format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
 def reactions(columns, n_results, queries):
@@ -137,6 +180,7 @@ def reactions(columns, n_results, queries):
 @click.option('--columns', '-c',
               default=('title', 'authors', 'journal', 'year'),
               type=click.Choice(publication_columns),
+              show_default=True,
               multiple=True)
 @click.option('--n-results', '-n', default=10)
 @click.option(
@@ -184,38 +228,42 @@ def make_folders(create_template, template, custom_base, diagnose):
     Dear all
 
     Use this command make the right structure for your folders
-    for submitting data for Catalysis Hub.
+    for submitting data for Catalysis Hub's Surface Reactions.
 
     Start by creating a template file by calling:
 
     $ cathub make_folders --create-template <template_name>
 
-    Then open the template and modify it to so that it contains the information
-    for you data. You will need to enter publication/dataset information,
+    Then open the template and modify it to so that it contains information
+    about your data. You will need to enter publication/dataset information,
     and specify the types of surfaces, facets and reactions.
 
-    The 'reactions' key is a list of dictionaries.
-    A new dictionary is required for each reaction, and should include two
-    lists, 'reactants' and 'products'. Remember to balance the equation and
-    include a minus sign in the name when relevant.
+    The 'reactions' entry should include two lists for each reaction;
+    'reactants' and 'products', corresponding to left- and right hand side of
+    each chemical equation respectively.
+    Remember to balance the equation by including a prefactor or minus sign
+    in the name when relevant. For example:
 
-    'reactions': [
-        {
-          'reactants': ['CCH3star@ontop'],
-          'products': ['Cstar@hollow', 'CH3star@ontop']
-        },
-        {
-           'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-           'products':  ['CH3star']
-        }
-     ]
+    reactions:
 
-    Also, include the phase and of the species as an extension:
-      'gas' for gas phase (i.e. CH4 -> CH4gas)
-      'star' for empty site or adsorbed phase. (i.e. OH -> OHstar)
+    -    reactants: ['CCH3star@ontop']
+
+         products: ['Cstar@hollow', 'CH3star@ontop']
+
+    -    reactants: ['CH4gas', '-0.5H2gas', 'star']
+
+         products:  ['CH3star']
+
+
+    Please include the phase of the species as an extension:
+
+        'gas' for gas phase (i.e. CH4 -> CH4gas)
+
+        'star' for empty slab or adsorbed phase. (i.e. OH -> OHstar)
 
     The site of adsorbed species is also included as an extension:
-      '@site' (i.e. OHstar in bridge-> OHstar@bridge)
+
+        '@site' (i.e. OHstar in bridge-> OHstar@bridge)
 
     Then, save the template and call:
 
@@ -226,12 +274,23 @@ def make_folders(create_template, template, custom_base, diagnose):
     You can create several templates and call make_folders again
     if you, for example, are using different functionals or are
     doing different reactions on different surfaces.
+
+    After creating your folders, add your output files from the
+    electronic structure calculations at the positions.
+    Accepted file formats include everything that can be read by ASE
+    and contains the total potential energy of the calculation, such
+    as .traj or .OUTCAR files.
     """
+
+    def dict_representer(dumper, data):
+        return dumper.represent_dict(data.items())
+
+    Dumper.add_representer(collections.OrderedDict, dict_representer)
 
     if custom_base is None:
         custom_base = os.path.abspath(os.path.curdir)
 
-    template_data = {
+    template_data = collections.OrderedDict({
         'title': 'Fancy title',
         'authors': ['Doe, John', 'Einstein, Albert'],
         'journal': 'JACS',
@@ -242,19 +301,19 @@ def make_folders(create_template, template, custom_base, diagnose):
         'publisher': 'ACS',
         'doi': '10.NNNN/....',
         'DFT_code': 'Quantum Espresso',
-        'DFT_functional': 'BEEF-vdW',
+        'DFT_functionals': ['BEEF-vdW', 'HSE06'],
         'reactions': [
-                {'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
-                 'products': ['OOHstar@top']},
-                {'reactants': ['CCH3star@bridge'],
-                 'products': ['Cstar@hollow', 'CH3star@ontop']},
-                {'reactants': ['CH4gas', '-0.5H2gas', 'star'],
-                 'products': ['CH3star@ontop']}
+            collections.OrderedDict({'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
+                                     'products': ['OOHstar@top']}),
+            collections.OrderedDict({'reactants': ['CCH3star@bridge'],
+                                     'products': ['Cstar@hollow', 'CH3star@ontop']}),
+            collections.OrderedDict({'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+                                     'products': ['CH3star@ontop']})
         ],
         'bulk_compositions': ['Pt'],
         'crystal_structures': ['fcc', 'hcp'],
         'facets': ['111']
-    }
+    })
     if template is not None:
         if create_template:
             if os.path.exists(template):
@@ -263,18 +322,15 @@ def make_folders(create_template, template, custom_base, diagnose):
                     .format(**locals()))
             with open(template, 'w') as outfile:
                 outfile.write(
-                    json.dumps(
+                    yaml.dump(
                         template_data,
                         indent=4,
-                        separators=(
-                            ',',
-                            ': '),
-                        sort_keys=True) +
+                        Dumper=Dumper) +
                     '\n')
                 return
         else:
             with open(template) as infile:
-                template_data = json.load(infile)
+                template_data = yaml.load(infile)
                 title = template_data['title']
                 authors = template_data['authors']
                 journal = template_data['journal']
@@ -285,7 +341,7 @@ def make_folders(create_template, template, custom_base, diagnose):
                 publisher = template_data['publisher']
                 doi = template_data['doi']
                 dft_code = template_data['DFT_code']
-                dft_functional = template_data['DFT_functional']
+                dft_functionals = template_data['DFT_functionals']
                 reactions = template_data['reactions']
                 crystal_structures = template_data['crystal_structures']
                 bulk_compositions = template_data['bulk_compositions']
@@ -303,7 +359,7 @@ def make_folders(create_template, template, custom_base, diagnose):
         publisher=publisher,
         doi=doi,
         DFT_code=dft_code,
-        DFT_functional=dft_functional,
+        DFT_functionals=dft_functionals,
         reactions=eval(reactions) if isinstance(
             reactions, six.string_types) else reactions,
         custom_base=custom_base,
@@ -329,7 +385,15 @@ def connect(user):
     type=str,
     default='',
     show_default=True,
-    help="Specify adsorbates that are to be included. E.g. -a CO,O,H )")
+    help="Specify adsorbates that are to be included. (E.g. -a CO,O,H )")
+@click.option(
+    '-c', '--dft-code',
+    default='',
+    type=str,
+    show_default=True,
+    help="Specify DFT Code used to calculate"
+    " If not specified it will be generated from"
+    " filetype the processed files.")
 @click.option(
     '-e', '--exclude-pattern',
     type=str,
@@ -358,18 +422,27 @@ def connect(user):
     help="Regular expression that matches"
          " only those files that are included.",)
 @click.option(
+    '-k', '--keep-all-energies',
+    type=bool,
+    is_flag=True,
+    help="When multiple energies for the same facet and adsorbate"
+    "are found keep all energies"
+    "not only the most stable."
+              )
+@click.option(
     '-m', '--max-energy',
     type=float,
     default=10.,
     show_default=True,
     help="Maximum absolute energy (in eV) that is considered.",)
-@click.option('-k', '--keep-all-energies',
-              type=bool,
-              is_flag=True,
-              help="When multiple energies for the same facet and adsorbate"
-              "are found keep all energies"
-              "not only the most stable."
-              )
+@click.option(
+    '-n', '--no-hydrogen',
+    type=bool,
+    is_flag=True,
+    help="By default hydrogen is included as a gas-phase species"
+         "to avoid using typically less accurate gas-phase references."
+         "Use this flag to avoid using hydrogen."
+             )
 @click.option(
     '-r', '--exclude-reference',
     type=str,
@@ -377,6 +450,14 @@ def connect(user):
     show_default=True,
     help="Gas phase reference molecules"
     " that should not be considered.")
+@click.option(
+    '-S', '--structure',
+    type=str,
+    default='structure',
+    show_default=True,
+    help='Bulk structure from which slabs where generated.'
+    'E.g. fcc or A_a_225 for the general case.'
+        )
 @click.option(
     '-s', '--max-density-slab',
     type=float,
@@ -398,6 +479,13 @@ def connect(user):
     default=False,
     show_default=True,
     help="Show more debugging messages.")
+@click.option(
+    '-x', '--xc-functional',
+    type=str,
+    default='XC_FUNCTIONAL',
+    show_default=True,
+    help="Set the DFT exchange-correlation functional"
+    " used to calculate total energies.")
 def organize(**kwargs):
     """Read reactions from non-organized folder"""
 
