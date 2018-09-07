@@ -15,8 +15,9 @@ class Defaults(MutableMapping, dict):
 
     def __init__(self):
         self.update({
-            'covalent_radii': covalent_radii.copy(),
+            'radii': covalent_radii.copy(),
             'radicals': radicals,
+            'orthogonal': False
         })
 
     def __setitem__(self, key, val):

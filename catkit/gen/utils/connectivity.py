@@ -75,7 +75,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    cov_radii = defaults.get('covalent_radii')
+    cov_radii = defaults.get('radii')
     numbers = atoms.numbers
     index, coords = coordinates.expand_cell(atoms, 4)[:2]
 
