@@ -27,11 +27,6 @@ before_script:
   - export MPLBACKEND=Agg
 
 before_install:
-    #- wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB
-    #- sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2019.PUB 
-    #- sudo sh -c 'echo deb https://apt.repos.intel.com/mkl all main > /etc/apt/sources.list.d/intel-mkl.list'
-    #- sudo apt -o Acquire::https::No-Cache=True -o Acquire::http::No-Cache=True update #  workaround for intel APT server
-    #- sudo apt-get install intel-mkl-2018.0-002
   - sudo apt-get update
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
