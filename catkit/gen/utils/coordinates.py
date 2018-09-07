@@ -1,18 +1,16 @@
 import numpy as np
 
 
-def expand_cell(atoms, r=6):
+def expand_cell(atoms):
     """Return Cartesian coordinates atoms within a supercell
-    which contains spheres of specified cutoff radius around
-    all atom positions.
+    which contains repetitions of the unit cell which contains
+    at least one neighboring atom.
 
     Parameters
     ----------
     atoms : Atoms object
         Atoms with the periodic boundary conditions and unit cell
         information to use.
-    r : float
-        Radius of the spheres to expand around each atom.
 
     Returns
     -------
@@ -20,22 +18,39 @@ def expand_cell(atoms, r=6):
         Indices associated with the original unit cell positions.
     coords : ndarray of (3,) array
         Cartesian coordinates associated with positions in the
-        super-cell.
+        supercell.
     """
-    cell = atoms.get_cell()
-    recp_len = np.diag(np.linalg.pinv(cell))
-    nmax = float(r) * recp_len + 0.01
+    cell = atoms.cell
+    pbc = atoms.pbc
+    pos = atoms.positions
 
-    pbc = atoms.get_pbc()
-    low = np.floor(-np.abs(nmax) * pbc)
-    high = np.ceil(np.abs(nmax) * pbc + 1)
+    diags = np.sqrt((
+        np.dot([[1, 1, 1],
+                [-1, 1, 1],
+                [1, -1, 1],
+                [-1, -1, 1]],
+               cell)**2).sum(1))
 
-    offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
+    dpos = (pos - pos[:, None]).reshape(-1, 3)
+    Dr = np.dot(dpos, np.linalg.inv(cell))
+    D = np.dot(Dr - np.round(Dr) * pbc, cell)
+    D_len = np.sqrt((D**2).sum(1))
+
+    cutoff = min(max(D_len), max(diags) / 2.)
+
+    latt_len = np.sqrt((cell**2).sum(1))
+    V = abs(np.linalg.det(cell))
+    n = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
+                               (V * latt_len)), dtype=int)
+
+    offsets = np.mgrid[
+        -n[0]:n[0] + 1,
+        -n[1]:n[1] + 1,
+        -n[2]:n[2] + 1].T
+    tvecs = np.dot(offsets, cell)
+    coords = pos[None, None, None, :, :] + tvecs[:, :, :, None, :]
 
     ncell = np.prod(offsets.shape[:-1])
-    cart = np.dot(offsets, atoms.cell)
-    coords = atoms.positions[None, None, None, :, :] + cart[:, :, :, None, :]
-
     index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
     coords = coords.reshape(np.prod(coords.shape[:-1]), 3)
     offsets = offsets.reshape(ncell, 3)

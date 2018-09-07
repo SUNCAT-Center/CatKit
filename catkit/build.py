@@ -1,9 +1,11 @@
 from .gen.surface import SlabGenerator
 from .gen.molecules import get_topologies
 from .gen import utils
+from .gen import defaults
 from ase.build import bulk as ase_bulk
 import networkx as nx
 from ase import Atoms
+import numpy as np
 
 
 def bulk(name, crystalstructure=None, primitive=False, **kwargs):
@@ -13,7 +15,7 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
 
     Parameters
     ----------
-    name : Atoms | str
+    name : Atoms object | str
         Chemical symbol or symbols as in 'MgO' or 'NaCl'.
     crystalstructure : str
         Must be one of sc, fcc, bcc, hcp, diamond, zincblende,
@@ -44,6 +46,7 @@ def surface(
         termination=0,
         fixed=0,
         vacuum=10,
+        orthogonal=False,
         **kwargs):
     """A helper function to return the surface associated with a
     given set of input parameters to the general surface generator.
@@ -66,6 +69,8 @@ def surface(
         Number of layers to constrain.
     vacuum : float
         Angstroms of vacuum to add to the unit cell.
+    orthogonal : bool
+        Force the slab generator to produce the most orthogonal slab.
 
     Returns
     -------
@@ -91,8 +96,13 @@ def surface(
 
     if len(size) == 2:
         size = size[0]
-    elif len(size) == 3:
+    elif len(size) == 3 and not orthogonal:
         size = size[:2]
+
+    if orthogonal:
+        defaults['orthogonal'] = True
+        if isinstance(size, (list, tuple)):
+            size = np.prod(size[:2])
 
     slab = gen.get_slab(size=size, iterm=termination)
 

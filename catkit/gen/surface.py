@@ -21,6 +21,49 @@ class SlabGenerator(object):
     Many surface operations rely upon / are made easier through the
     bulk basis cell they are created from. The SlabGenerator class
     is designed to house these operations.
+
+    Return the miller indices associated with the users requested
+    values. Follows the following steps:
+
+    - Convert Miller-Bravais notation into standard Miller index.
+    - (optional) Ensure the bulk cell is in its standard form.
+    - Convert the indices to the cell for the primitive lattice.
+    - Reduce the indices by their greatest common divisor.
+
+    Parameters
+    ----------
+    bulk : Atoms object
+        Bulk system to be converted into slab.
+    miller_index : list (3,) or (4,)
+        Miller index to construct surface from. If length 4, Miller-Bravais
+        notation is assumed.
+    layers : int
+        Number of layers to include in the slab. A slab layer is defined
+        as a unique z-coordinate.
+    vacuum : float
+        Angstroms of vacuum to apply to the slab.
+    fixed : int
+        Number of slab layers to constrain.
+    layer_type : 'angs', 'trim', 'stoich', or 'sym'
+        Determines how to perform slab layering.
+
+        'angs': Layers denotes the thickness of the slab in Angstroms.
+        'trim': The slab will be trimmed to a number of layers equal to the
+        exact number of unique z-coordinates. Useful for precision control.
+        'stoich' : Constraints any slab generated to have the same
+        stoichiometric ratio as the provided bulk.
+        'sym' : Return a slab which is inversion symmetric. i.e. The
+        same on both sides.
+    attach_graph : bool
+        Attach the connectivity graph generated from the bulk structure.
+        This is only necessary for fingerprinting and setting it to False
+        can save time. Surface atoms will be found regardless.
+    standardize_bulk : bool
+        Covert the bulk input to its standard form before and
+        produce the cleave from it. This is highly recommended as
+        Miller indices are not defined for non-standard cells.
+    tol : float
+        Tolerance for floating point rounding errors.
     """
 
     def __init__(self,
@@ -34,51 +77,6 @@ class SlabGenerator(object):
                  standardize_bulk=False,
                  primitive=True,
                  tol=1e-8):
-        """Generate a slab from a bulk atoms object.
-
-        Return the miller indices associated with the users requested
-        values. Follows the following steps:
-
-        - Convert Miller-Bravais notation into standard Miller index.
-        - (optional) Ensure the bulk cell is in its standard form.
-        - Convert the indices to the cell for the primitive lattice.
-        - Reduce the indices by their greatest common divisor.
-
-        Parameters
-        ----------
-        bulk : Atoms object
-            Bulk system to be converted into slab.
-        miller_index : list (3,) or (4,)
-            Miller index to construct surface from. If length 4, Miller-Bravais
-            notation is assumed.
-        layers : int
-            Number of layers to include in the slab. A slab layer is defined
-            as a unique z-coordinate.
-        vacuum : float
-            Angstroms of vacuum to apply to the slab.
-        fixed : int
-            Number of slab layers to constrain.
-        layer_type : 'angs', 'trim', 'stoich', or 'sym'
-            Determines how to perform slab layering.
-
-            'angs': Layers denotes the thickness of the slab in Angstroms.
-            'trim': The slab will be trimmed to a number of layers equal to the
-            exact number of unique z-coordinates. Useful for precision control.
-            'stoich' : Constraints any slab generated to have the same
-            stoichiometric ratio as the provided bulk.
-            'sym' : Return a slab which is inversion symmetric. i.e. The
-            same on both sides.
-        attach_graph : bool
-            Attach the connectivity graph generated from the bulk structure.
-            This is only necessary for fingerprinting and setting it to False
-            can save time. Surface atoms will be found regardless.
-        standardize_bulk : bool
-            Covert the bulk input to its standard form before and
-            produce the cleave from it. This is highly recommended as
-            Miller indices are not defined for non-standard cells.
-        tol : float
-            Tolerance for floating point rounding errors.
-        """
         self.layers = layers
         self.vacuum = vacuum
         self.fixed = fixed

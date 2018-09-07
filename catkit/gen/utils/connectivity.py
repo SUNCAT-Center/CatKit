@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 
 
-def get_voronoi_neighbors(atoms, r=4):
+def get_voronoi_neighbors(atoms):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
@@ -14,15 +14,13 @@ def get_voronoi_neighbors(atoms, r=4):
     atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-    r : float
-        Radius of the spheres to expand around each atom.
 
     Returns
     -------
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    index, coords, offsets = coordinates.expand_cell(atoms, r)
+    index, coords, offsets = coordinates.expand_cell(atoms)
 
     L = int(len(offsets) / 2)
     origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
