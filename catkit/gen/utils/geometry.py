@@ -125,7 +125,8 @@ def _branch_molecule(
             [c0, c1],
             distance=d[k],
             angle=angle + angle_mod,
-            dihedral=dihedral[k])
+            dihedral=dihedral[k],
+            basis=origin_basis)
         atoms[nodes[k]].position = c
 
     return root

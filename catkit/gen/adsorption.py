@@ -349,6 +349,7 @@ class AdsorptionSites():
 
         site_id = self.get_symmetric_sites(unique=False, screen=False)
         site_id = site_id + self.connectivity / 10
+        print(site_id)
         per = self.get_periodic_sites(screen=False)
 
         uper = self.get_periodic_sites()
@@ -478,8 +479,15 @@ class Builder(AdsorptionSites):
 
         return slab
 
-    def add_adsorbate(self, adsorbate, bonds=None, index=0, **kwargs):
-        """Add and adsorbate to a slab.
+    def add_adsorbate(
+            self,
+            adsorbate,
+            bonds=None,
+            index=0,
+            auto_construct=True,
+            **kwargs):
+        """Add and adsorbate to a slab. If the auto_constructor flag is False,
+        the atoms object provided will be attached at the active site.
 
         Parameters
         ----------
@@ -490,6 +498,9 @@ class Builder(AdsorptionSites):
         index : int
             Index of the site or edge to use as the adsorption position. A
             value of -1 will return all possible structures.
+        auto_construct : bool
+            Whether to automatically estimate the position of atoms in larger
+            molecules or use the provided structure.
 
         Returns
         -------
@@ -510,6 +521,7 @@ class Builder(AdsorptionSites):
                     slab += [self._single_adsorption(adsorbate,
                                                      bond=bonds[0],
                                                      site_index=i,
+                                                     auto_construct=auto_construct,
                                                      **kwargs)]
             elif isinstance(index, (list, np.ndarray)):
                 slab = []
@@ -517,11 +529,13 @@ class Builder(AdsorptionSites):
                     slab += [self._single_adsorption(adsorbate,
                                                      bond=bonds[0],
                                                      site_index=i,
+                                                     auto_construct=auto_construct,
                                                      **kwargs)]
             else:
                 slab = self._single_adsorption(adsorbate,
                                                bond=bonds[0],
                                                site_index=index,
+                                               auto_construct=auto_construct,
                                                **kwargs)
 
         elif len(bonds) == 2:
@@ -544,8 +558,14 @@ class Builder(AdsorptionSites):
 
         return slab
 
-    def _single_adsorption(self, adsorbate, bond, slab=None,
-                           site_index=0, symmetric=True):
+    def _single_adsorption(
+            self,
+            adsorbate,
+            bond,
+            slab=None,
+            site_index=0,
+            auto_construct=True,
+            symmetric=True):
         """Bond and adsorbate by a single atom."""
         if slab is None:
             slab = self.slab.copy()
@@ -569,21 +589,22 @@ class Builder(AdsorptionSites):
         base_position = utils.trilaterate(top_sites[u], r + R, vector)
 
         branches = nx.bfs_successors(atoms.graph, bond)
+        atoms.translate(-atoms.positions[bond])
 
-        root = None
-        for i, branch in enumerate(branches):
-            utils._branch_molecule(
-                atoms, branch, root,
-                adsorption=True,
-            )
-            root = bond
+        if auto_construct:
+            root = None
+            for i, branch in enumerate(branches):
+                utils._branch_molecule(
+                    atoms, branch, root,
+                    adsorption=True,
+                )
+                root = bond
+            atoms.rotate([0, 0, 1], vector)
 
-        atoms.set_cell(slab.cell)
-        atoms.rotate([0, 0, 1], vector)
         atoms.translate(base_position)
+        slab += atoms
 
         n = len(slab)
-        slab += atoms
         # Add graph connections
         for metal_index in self.index[u]:
             slab.graph.add_edge(metal_index, bond + n)
