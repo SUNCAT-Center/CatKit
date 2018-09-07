@@ -1,5 +1,6 @@
 from __future__ import division
 from catkit import Gratoms
+from . import defaults
 from . import utils
 from . import adsorption
 import numpy as np
@@ -440,10 +441,9 @@ class SlabGenerator(object):
 
         Returns
         -------
-        coordinates : ndarray (n,)
-            Coordinates of the adsorption sites
-        connectivity : ndarray (n,)
-            Connectivity of the adsorption sites
+        output : tuple (n, n) | (n, n, n)
+            Coordinates and connectivity of the adsorption sites.
+            The symmetry indices can also be returned.
         """
         output = adsorption.get_adsorption_sites(
             slab=slab, **kwargs)
@@ -477,8 +477,8 @@ class SlabGenerator(object):
         """
         supercell = slab
 
-        if isinstance(size, int):
-            a = max(int(size / 2), 1) + size % 2
+        if isinstance(size, (int, np.integer)):
+            a = max(int(size / 2), 1) + size % 2 + 1
             T = np.mgrid[-a:a + 1, -a:a + 1].reshape(2, -1).T
 
             metrics = []
@@ -489,8 +489,8 @@ class SlabGenerator(object):
                     continue
 
                 vector = np.dot(M.T, slab.cell[:2, :2])
-
                 d = np.linalg.norm(vector, axis=1)
+
                 angle = np.dot(vector[0], vector[1]) / np.prod(d)
                 diff = np.diff(d)[0]
 
@@ -501,7 +501,12 @@ class SlabGenerator(object):
                 metrics += [[d.sum(), angle, M]]
 
             if metrics:
-                matrix = sorted(metrics, key=lambda x: (x[0], x[1]))[0][-1]
+                if defaults.get('orthogonal'):
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[1], x[0]))[0][-1]
+                else:
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[0], x[1]))[0][-1]
                 supercell = transform_ab(supercell, matrix)
 
         elif isinstance(size, (list, tuple, np.ndarray)):
