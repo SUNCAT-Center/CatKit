@@ -33,13 +33,15 @@ def running_mean(array, N=5):
     return running_mean
 
 
-def to_gratoms(atoms):
+def to_gratoms(atoms, edges=None):
     """Convert and atom object to a gratoms object."""
     gratoms = Gratoms(
         numbers=atoms.numbers,
         positions=atoms.positions,
         pbc=atoms.pbc,
-        cell=atoms.cell)
+        cell=atoms.cell,
+        edges=edges
+    )
 
     if atoms.constraints:
         gratoms.set_constraint(atoms.constraints)

@@ -61,14 +61,26 @@ class TestGenerator(unittest.TestCase):
         ]
 
         operations = [
-            'bonding_convolution'
+            'bonding_convolution',
+            'layered_sum',
+            'local_ads_metal_fp'
         ]
 
         fp = Fingerprinter(atoms)
         fingerprints = fp.get_fp(parameters, operations)
 
         truth = np.array([276.0, 1.2467000000000001, 17406300.0,
-                          1.0147, np.nan, np.nan, 140.0, 10.0])
+                          1.0147, np.nan, np.nan, 140.0, 10.0,
+                          6.0000e+00, 1.8400e+02, 1.8400e+02, 1.8400e+02,
+                          9.1000e-01, 5.4800e+00, 5.4800e+00, 5.4800e+00,
+                          5.1000e+03, 1.3652e+04, 1.3652e+04, 1.3652e+04,
+                          7.3000e-01, 5.5600e+00, 5.5600e+00, 5.5600e+00,
+                              np.nan, 1.4896e+03, 1.4896e+03, 1.4896e+03,
+                              np.nan, 6.8960e+01, 6.8960e+01, 6.8960e+01,
+                          1.4000e+01, 4.0000e+01, 4.0000e+01, 4.0000e+01,
+                          2.0000e+00, 2.0000e+01, 2.0000e+01, 2.0000e+01,
+                          4.0000e+01, 4.6000e-01,-1.6870e+03, 6.6000e-01,
+                              np.nan,     np.nan,-4.0000e+00, 3.0000e+00])
 
         np.testing.assert_allclose(fingerprints[0], truth)
 
