@@ -53,13 +53,8 @@ def execute_graphQL(query_string):
     print('Getting data from server...')
     print('')
     data = requests.post(root, {'query': query_string})
-    print(data)
-    data = data.json()
+    data = data.json()['data']
     print('Data fetched!')
-    print('')
-    #print('Result:')
-    #print('')
-    #pprint.pprint(data)
     return data
 
 
@@ -72,7 +67,7 @@ def graphql_query(table='reactions',
                   queries={}):
 
     statement = '{'
-    statement += '{}(last: {}'.format(table, n_results)
+    statement += '{}(first: {}'.format(table, n_results)
     for key, value in queries.items():
         if isinstance(value, str):
             statement += ', {}: "{}"'.format(key, value)
@@ -161,7 +156,7 @@ def get_reactions(columns='all', n_results=20, write_db=False, **kwargs):
 
     print('Writing result to Reactions.db')
     unique_ids = []
-    for row in data['data']['reactions']['edges']:
+    for row in data['reactions']['edges']:
         with CathubSQLite('Reactions.db') as db:
             row = row['node']
             key_values = {}
