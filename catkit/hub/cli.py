@@ -43,7 +43,8 @@ def show_reactions(dbfile):
               To see possible ase db arguments
               run <cathub ase --args --help>""")
 def ase(dbuser, dbpassword, ase_args, gui):
-    """Direct connection to the Catalysis-Hub server with ase db cli"""
+    """Direct connection to atomic structures on the Catalysis-Hub
+       server with ase db cli"""
     if dbuser == 'upload':
         dbpassword = 'cHyuuQH0'
     db = CathubPostgreSQL(user=dbuser, password=dbpassword)
