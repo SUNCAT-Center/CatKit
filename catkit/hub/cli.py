@@ -38,8 +38,10 @@ def show_reactions(dbfile):
 @click.option('--gui', default=False, show_default=True, is_flag=True,
               help='show structures in ase gui')
 @click.option('--ase-args', '-a', default='', type=str,
-              help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
-
+              help="""Arguments to the ase db cli client in one string.
+              For example: <cathub ase --args 'formula=Ag6In6H -s energy'>.
+              To see possible ase db arguments
+              run <cathub ase --args --help>""")
 def ase(dbuser, dbpassword, ase_args, gui):
     """Direct connection to the Catalysis-Hub server with ase db cli"""
     if dbuser == 'upload':
@@ -52,7 +54,8 @@ def ase(dbuser, dbpassword, ase_args, gui):
     if gui:
         ase_args = ase_args.split('-')[0]
         subprocess.call(
-        ('ase gui {}@{}'.format(server_name, ase_args)).split())
+            ('ase gui {}@{}'.format(server_name, ase_args)).split())
+
 
 @cli.command()
 @click.argument('folder_name')
@@ -143,7 +146,8 @@ publication_columns = [
               show_default=True,
               multiple=True)
 @click.option('--n-results', '-n', default=10, show_default=True)
-@click.option('--write-db', '-w', is_flag=True, default=False, show_default=True)
+@click.option('--write-db', '-w', is_flag=True, default=False,
+              show_default=True)
 @click.option(
     '--queries',
     '-q',
@@ -182,16 +186,17 @@ def reactions(columns, n_results, write_db, queries):
         return
     table = []
     headers = []
-    for row in data['data']['reactions']['edges']:
+    for row in data['reactions']['edges']:
         table += [list(row['node'].values())]
 
     headers = list(row['node'].keys())
 
     print(tabulate(table, headers) + '\n')
 
+
 @cli.command()
 @click.option('--columns', '-c',
-              default=('title', 'authors', 'journal', 'year'),
+              default=('pubId', 'title', 'authors', 'journal', 'year'),
               type=click.Choice(publication_columns),
               show_default=True,
               multiple=True)
@@ -204,7 +209,6 @@ def reactions(columns, n_results, write_db, queries):
     help="""Make a selection on one of the columns:
     {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich
     \n year=2017""".format(publication_columns))
-# Keep {0} in string.format for python2.6 compatibility
 def publications(columns, n_results, queries):
     """Search for publications"""
     if not isinstance(queries, dict):
@@ -220,13 +224,35 @@ def publications(columns, n_results, queries):
                 query_dict.update({key: value})
             except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
-                # Keep {0} in string.format for python2.6 compatibility
+    if 'sort' not in query_dict:
+        query_dict.update({'order': '-year'})
+    data = query.query(table='publications',
+                       columns=columns,
+                       n_results=n_results,
+                       queries=query_dict)
+    table = []
+    headers = []
+    for row in data['publications']['edges']:
+        value = list(row['node'].values())
+        for n, v in enumerate(value):
+            if isinstance(v, str) and len(v) > 20:
+                splited = v.split(' ')
+                size = 0
+                sentence = ''
+                for word in splited:
+                    if size < 20:
+                        size += len(word)
+                        sentence += ' ' + word
+                    else:
+                        sentence += '\n' + word
+                        size = 0
+                sentence += '\n'
+                value[n] = sentence
 
-    query.query(
-        table='publications',
-        columns=columns,
-        n_results=n_results,
-        queries=query_dict)
+        table += [value]
+
+    headers = list(row['node'].keys())
+    print(tabulate(table, headers, tablefmt="grid") + '\n')
 
 
 @cli.command()
@@ -316,11 +342,14 @@ def make_folders(create_template, template, custom_base, diagnose):
         'DFT_code': 'Quantum Espresso',
         'DFT_functionals': ['BEEF-vdW', 'HSE06'],
         'reactions': [
-            collections.OrderedDict({'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
+            collections.OrderedDict({'reactants':
+                                     ['2.0H2Ogas', '-1.5H2gas', 'star'],
                                      'products': ['OOHstar@top']}),
             collections.OrderedDict({'reactants': ['CCH3star@bridge'],
-                                     'products': ['Cstar@hollow', 'CH3star@ontop']}),
-            collections.OrderedDict({'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+                                     'products':
+                                     ['Cstar@hollow', 'CH3star@ontop']}),
+            collections.OrderedDict({'reactants':
+                                     ['CH4gas', '-0.5H2gas', 'star'],
                                      'products': ['CH3star@ontop']})
         ],
         'bulk_compositions': ['Pt'],
