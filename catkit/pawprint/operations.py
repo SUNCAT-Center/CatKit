@@ -86,17 +86,20 @@ def local_ads_metal_fp(
         connectivity=None,
         fuse=False):
     """Sum of the differences in properties of the atoms in the
-       metal-adsorbate interface"""
+    metal-adsorbate interface
+    """
     bond_index = np.where(atoms.get_tags() == -1)[0]
     fp = np.empty([len(atoms_parameters), len(bond_index)])
+
     for i, bi in enumerate(bond_index):
         bonded_ap = atoms_parameters[:, np.where(connectivity[bi] == 1)[0]]
         fp[:, i] = np.mean(bonded_ap -
-                atoms_parameters[:, bi].reshape(-1, 1), axis=1)
+                           atoms_parameters[:, bi].reshape(-1, 1), axis=1)
+
     if not fuse:
         return fp.reshape(-1)
     else:
-       return fp.sum(axis=1)
+        return fp.sum(axis=1)
 
 
 def derived_fp(
@@ -108,21 +111,23 @@ def derived_fp(
         n_1=None,
         n_2=None,
         op=None):
-    """
-    NOTE : This is a work in progress. I'll redesign the whole thing to allow
-           for arithmetic manipulation of two fingerprints.
-       Given two fingerprints vector, it will perform arithmetic operation to
-       design new fingerprints.
+    """NOTE : This is a work in progress. I'll redesign the whole thing to allow
+    for arithmetic manipulation of two fingerprints.
 
-       Available operations:
-           add : adds two fingerprints of equal length raised to their given
-                 power.
-           subtract : subtracts two fingerprints of equal length raised to
-                      their given power.
-           mulltiply : multiply two fingerprints of equal length raised to
-                       their given power.
-           divide : divide two fingerprints of equal length raised to their
-                    given power."""
+    Given two fingerprints vector, it will perform arithmetic operation to
+    design new fingerprints.
+
+    Parameters
+    ----------
+    op : str ('add' | 'subtract' | 'divide' | 'multiply')
+        add - Adds two fingerprints of equal length raised to their given power
+        subtract - subtracts two fingerprints of equal length raised to
+                   their given power
+        mulltiply - multiply two fingerprints of equal length raised to
+                    their given power
+        divide - divide two fingerprints of equal length raised to their
+                 given power
+    """
     if op == 'add':
         return fp_1 ** n_1 + fp_2 ** n_2
     elif op == 'subtract':
