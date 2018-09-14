@@ -692,7 +692,7 @@ def get_unique_indices(bulk, max_index):
         if not symmetry:
             unique_millers += [miller]
 
-    unique_millers = np.array(unique_millers)
+    unique_millers = np.flip(unique_millers, axis=0)
 
     return unique_millers
 
@@ -720,21 +720,7 @@ def get_degenerate_indices(bulk, miller_index):
     affine_point = np.insert(miller_index, 3, 1)
     symmetric_indices = np.dot(affine_point, operations)[:, :3]
 
-    unique_indices = np.arange(symmetric_indices.shape[0])
-    for i, j in enumerate(unique_indices):
-        if i != j:
-            continue
-
-        index = symmetric_indices[i]
-        integers = [_.is_integer() for _ in index]
-        if not np.all(integers):
-            unique_indices[i] = -1
-            continue
-
-        matches = utils.matching_coordinates(index, symmetric_indices)
-        unique_indices[matches] = j
-
-    unique = np.where(np.unique(unique_indices) >= 0)
-    degenerate_indices = symmetric_indices[unique].astype(int)
+    degenerate_indices = np.unique(symmetric_indices, axis=0)
+    degenerate_indices = np.flip(degenerate_indices, axis=0).astype(int)
 
     return degenerate_indices

@@ -87,7 +87,8 @@ class Gratoms(Atoms):
 
     @property
     def connectivity(self):
-        connectivity = nx.to_numpy_matrix(self._graph).astype(int)
+        connectivity = nx.to_numpy_matrix(self._graph)
+        connectivity = np.array(connectivity, dtype=int)
         return connectivity
 
     def get_surface_atoms(self):
