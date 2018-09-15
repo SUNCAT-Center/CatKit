@@ -67,12 +67,14 @@ def ase(dbuser, dbpassword, args, gui):
 @click.option(
     '--skip-folders',
     default='',
+    show_default=True,
     help="""subfolders not to read, given as the name of a single folder,
     or a string with names of more folders seperated by ', '""")
 @click.option(
     '--energy-limit',
-    default=5,
-    help="""Limit for accepted absolute reaction energies""")
+    default=5.0,
+    show_default=True,
+    help="""Bounds for accepted absolute reaction energies in eV""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
 def folder2db(folder_name, userhandle, debug, energy_limit, skip_folders,
@@ -147,6 +149,7 @@ publication_columns = [
     '-q',
     default={},
     multiple='True',
+    show_default=True,
     help="""Make a selection on one of the columns:
     {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt
     \n -q reactants=CO for reactions with CO as a reactants"""
@@ -188,6 +191,7 @@ def reactions(columns, n_results, queries):
     '-q',
     default={},
     multiple=True,
+    show_default=True,
     help="""Make a selection on one of the columns:
     {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich
     \n year=2017""".format(publication_columns))
@@ -407,6 +411,14 @@ def connect(user):
     default='facet',
     help="Manually specify a facet names.")
 @click.option(
+    '-d', '--gas-dir',
+    type=str,
+    default='',
+    show_default=True,
+    help="Specify a folder where gas-phase molecules"
+    " for calculating adsorption energies are located."
+        )
+@click.option(
     '-g', '--max-density-gas',
     type=float,
     default=0.002,
@@ -432,7 +444,7 @@ def connect(user):
 @click.option(
     '-m', '--max-energy',
     type=float,
-    default=10.,
+    default=100.,
     show_default=True,
     help="Maximum absolute energy (in eV) that is considered.",)
 @click.option(
@@ -473,6 +485,15 @@ def connect(user):
     show_default=True,
     help="Store intermediate filetype as traj"
     "instead of json files")
+@click.option(
+    '-u', '--use-cache',
+    type=bool,
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="When set the script will structures"
+    " will be cached between runs in a file named"
+    " <FOLDER_NAME>.cache.pckl")
 @click.option(
     '-v', '--verbose',
     is_flag=True,
