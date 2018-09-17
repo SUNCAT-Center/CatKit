@@ -101,26 +101,6 @@ def convert(name):
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
-"""
-def sql_query(table='reactions',
-              subtables=[],
-              columns=['chemicalComposition',
-                       'reactants',
-                       'products'],
-              n_results=10,
-              queries={}):
-
-    db = CathubPosrgreSQL(user='catvisitor', password='eFjohbnD57WLYAJX')
-    con = db.connect()
-    cur = con.cursor()
-    what = ', '.join([convert(c) for c in columns])
-    selection = "SELECT {what} from reaction".format(what=what)
-    cur.execute(selection)
-    data = cur.fetchall()
-    
-    print(what)
-"""
-
 def get_reactions(columns='all', n_results=20, write_db=False, **kwargs):
     """
     Get reactions from server
