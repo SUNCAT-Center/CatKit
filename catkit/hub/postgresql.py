@@ -615,7 +615,7 @@ class CathubPostgreSQL:
         cur = con.cursor()
 
         key_str = ', '.join(list(kwargs.keys()))#get_key_str(start_index=1)
-        value_str = get_value_str(values, start_index=0)
+        value_str = get_value_str(list(kwargs.values()), start_index=0)
 
         update_command = 'UPDATE reaction SET ({0}) = ({1}) WHERE id = {2};'\
             .format(key_str, value_str, id)
@@ -627,6 +627,7 @@ class CathubPostgreSQL:
             cur.execute(delete_command)
 
             """ Write to reaction_system tables"""
+            reaction_system_values = []
             for name, ase_id in ase_ids.items():
                 if name in energy_corrections:
                     energy_correction = energy_corrections[name]
@@ -642,6 +643,22 @@ class CathubPostgreSQL:
 
             execute_values(cur=cur, sql=insert_command,
                            argslist=reaction_system_values, page_size=1000)
+
+        if self.connection is None:
+            con.commit()
+            con.close()
+        return id
+
+    def delete_reaction(self, id):
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+
+        delete_command = 'DELETE FROM reaction where id = {};'.format(id)
+        cur.execute(delete_command)
+
+        delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+        cur.execute(delete_command)
 
         if self.connection is None:
             con.commit()
