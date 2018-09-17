@@ -1,3 +1,5 @@
+from ..classify import get_modified_spin_symbols
+from ..classify import get_unmodified_spin_symbols
 from catkit import Gratoms
 import numpy as np
 import spglib
@@ -28,37 +30,23 @@ def get_spglib_cell(atoms, primitive=False, idealize=True, tol=1e-5):
     """
     lattice = atoms.cell
     positions = atoms.get_scaled_positions()
-    numbers = atoms.get_atomic_numbers()
-    magmoms = atoms.get_initial_magnetic_moments().astype(int)
+    numbers = atoms.numbers
+    magmoms = atoms.get_initial_magnetic_moments()
+    modified_numbers = get_modified_spin_symbols(numbers, magmoms)
 
-    if magmoms is not None:
-        sign = np.sign(magmoms)
-        numbers *= 100
-        numbers += np.abs(magmoms)
-        ind = np.where(sign)
-        numbers[ind] *= sign[ind]
-
-    cell = (lattice, positions, numbers)
+    cell = (lattice, positions, modified_numbers)
     cell = spglib.standardize_cell(
         cell, to_primitive=primitive, no_idealize=~idealize, symprec=tol)
 
     if cell is None:
         return atoms
 
-    _lattice, _positions, _numbers = cell
-
-    if magmoms is not None:
-        sign = np.sign(_numbers)
-        _numbers *= sign
-        _magmoms = _numbers % 100
-        _numbers -= _magmoms
-        _magmoms *= sign
-        _numbers //= 100
+    _lattice, _positions, _modified_numbers = cell
+    _numbers, _magmoms = get_unmodified_spin_symbols(_modified_numbers)
 
     atoms = Gratoms(symbols=_numbers, cell=_lattice, pbc=atoms.pbc)
     atoms.set_scaled_positions(_positions)
-    if magmoms is not None:
-        atoms.set_initial_magnetic_moments(_magmoms)
+    atoms.set_initial_magnetic_moments(_magmoms)
 
     return atoms
 
