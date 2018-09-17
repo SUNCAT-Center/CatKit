@@ -594,8 +594,8 @@ class FingerprintDB():
             psel = ','.join(np.array(params).astype(str))
 
         if ase_ids is None:
-            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
-            JOIN images on fingerprints.image_id = images.iid
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            fingerprints JOIN images on fingerprints.image_id = images.iid
             WHERE param_id IN ({})
             GROUP BY ase_id
             ORDER BY images.iid""".format(psel)
@@ -603,8 +603,8 @@ class FingerprintDB():
         else:
             asel = ','.join(np.array(ase_ids).astype(str))
 
-            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
-            JOIN images on fingerprints.image_id = images.iid
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            fingerprints JOIN images on fingerprints.image_id = images.iid
             WHERE param_id IN ({}) AND ase_id IN ({})
             GROUP BY ase_id""".format(psel, asel)
 
