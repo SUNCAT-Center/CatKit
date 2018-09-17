@@ -37,12 +37,12 @@ def show_reactions(dbfile):
 @click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
 @click.option('--gui', default=False, show_default=True, is_flag=True,
               help='show structures in ase gui')
-@click.option('--ase-args', '-a', default='', type=str,
+@click.option('--args', '-a', default='', type=str,
               help="""Arguments to the ase db cli client in one string.
               For example: <cathub ase --args 'formula=Ag6In6H -s energy'>.
               To see possible ase db arguments
               run <cathub ase --args --help>""")
-def ase(dbuser, dbpassword, ase_args, gui):
+def ase(dbuser, dbpassword, args, gui):
     """Direct connection to atomic structures on the Catalysis-Hub
        server with ase db cli"""
     if dbuser == 'upload':
@@ -51,11 +51,11 @@ def ase(dbuser, dbpassword, ase_args, gui):
     db._connect()
     server_name = db.server_name
     subprocess.call(
-        ('ase db {} {}'.format(server_name, ase_args)).split())
+        ('ase db {} {}'.format(server_name, args)).split())
     if gui:
-        ase_args = ase_args.split('-')[0]
+        args = args.split('-')[0]
         subprocess.call(
-            ('ase gui {}@{}'.format(server_name, ase_args)).split())
+            ('ase gui {}@{}'.format(server_name, args)).split())
 
 
 @cli.command()
