@@ -63,6 +63,7 @@ def ase(dbuser, dbpassword, args, gui):
     help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug',
               is_flag=True,
+              show_default=True,
               default=False)
 @click.option(
     '--skip-folders',
@@ -409,6 +410,7 @@ def connect(user):
     '-f', '--facet-name',
     type=str,
     default='facet',
+    show_default=True,
     help="Manually specify a facet names.")
 @click.option(
     '-d', '--gas-dir',
@@ -424,7 +426,7 @@ def connect(user):
     default=0.002,
     show_default=True,
     help="Specify the maximum density (#atoms/A^3)"
-    " at which the structures are"
+    " below which the structures are"
     " considered gas-phase molecules.")
 @click.option(
     '-i', '--include-pattern',
@@ -476,7 +478,7 @@ def connect(user):
     default=0.08,
     show_default=True,
     help="Specify the maximum density (#atoms/A^3) "
-    " at which the structure are considered slabs and not bulk")
+    " below which the structure are considered slabs and not bulk")
 @click.option(
     '-t', '--traj-format',
     type=bool,
@@ -491,8 +493,8 @@ def connect(user):
     is_flag=True,
     default=False,
     show_default=True,
-    help="When set the script will structures"
-    " will be cached between runs in a file named"
+    help="When set the script will cache"
+    " structures between runs in a file named"
     " <FOLDER_NAME>.cache.pckl")
 @click.option(
     '-v', '--verbose',
