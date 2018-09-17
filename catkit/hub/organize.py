@@ -3,6 +3,7 @@
 # builtin imports
 import pickle
 import re
+import pprint
 
 # A lot of functions from os.path
 # in python 2 moved to os. and changed
@@ -22,6 +23,7 @@ except (ImportError, AttributeError):
 # other library imports
 import Levenshtein
 import ase.atoms
+import ase.utils
 import ase.io
 import numpy as np
 
@@ -187,10 +189,6 @@ def fuzzy_match(structures, options):
 
         for i, surf1 in enumerate(surfaces):
             for j, surf2 in enumerate(surfaces):
-                # if options.verbose:
-                    # print(surf1)
-                    # print(surf2)
-
                 f1 = symbols(surf1)
                 formula1 = get_chemical_formula(surf1)
                 f2 = symbols(surf2)
@@ -281,7 +279,13 @@ def fuzzy_match(structures, options):
                                     adsorbates, references,
                                 )
                         else:
+                            adsorbates = map(lambda x: ase.utils.formula_hill(
+                                            catkit.hub.ase_tools.get_numbers_from_formula(x))
+                                    , adsorbates)
                             stoichiometry_factors = {}
+                            if options.verbose:
+                                print(" ADSORBATES " + str(adsorbates))
+                                print(" GP_CANDIDATES " + str(gas_phase_candidates))
                             for adsorbate in adsorbates:
                                 if adsorbate in gas_phase_candidates:
                                     stoichiometry_factors \
@@ -393,7 +397,9 @@ def fuzzy_match(structures, options):
                                     ), {}) \
                                 .setdefault(
                                         options.facet_name
-                                        or surf1.info['facet'], {}) \
+                                        if options.facet_name != 'facet'
+                                        else surf1.info['facet']
+                                        , {}) \
                                 .setdefault('empty_slab', surf1)
 
                             collected_energies[key] = energy
@@ -421,11 +427,16 @@ def fuzzy_match(structures, options):
                                     or 'structure'), {}
                                 ).setdefault(
                                 options.facet_name
-                                or surf1.info['facet'],
+                                if options.facet_name != 'facet'
+                                else surf1.info['facet'],
                                 {}) .setdefault(
                                 equation,
                                 {})[adsorbate] = surf2
 
+    print("\n\nCollected Reaction Energies Data")
+    print("====================================")
+    if options.verbose:
+        pprint.pprint(collected_structures)
     print("\n\nCollected Reaction Energies")
     print("===========================")
     if len(collected_energies) == 0:
@@ -475,14 +486,24 @@ def main(options):
     pickle_file = options.foldername.strip().rstrip(
         '/').strip('.').rstrip('/') + '.cache.pckl'
 
-    if Path(pickle_file).exists() and Path(pickle_file).stat().st_size:
+    if Path(pickle_file).exists() \
+            and Path(pickle_file).stat().st_size \
+            and options.use_cache:
         with open(pickle_file, 'rb') as infile:
             structures = pickle.load(infile)
     else:
         structures = collect_structures(options.foldername, options.verbose,
                                         level='**/*')
-        with open(pickle_file, 'wb') as outfile:
-            pickle.dump(structures, outfile)
+        if options.gas_dir:
+            structures.extend(
+                collect_structures(
+                    options.gas_dir,
+                    options.verbose,
+                    level='**/*')
+                    )
+        if options.use_cache:
+            with open(pickle_file, 'wb') as outfile:
+                pickle.dump(structures, outfile)
 
     if hasattr(catkit.hub.ase_tools, 'PUBLICATION_TEMPLATE') \
             and catkit.hub.ase_tools.PUBLICATION_TEMPLATE:
