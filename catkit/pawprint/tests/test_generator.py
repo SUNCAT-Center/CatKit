@@ -27,15 +27,17 @@ class TestGenerator(unittest.TestCase):
 
         operations = [
             'periodic_convolution',
-            ['periodic_convolution', {'d': 1}]
+            ['periodic_convolution', {'d': 1}],
+            'bimetal_fp'
         ]
 
         fp = Fingerprinter(images)
         fingerprints = fp.get_fp(parameters, operations)
 
         truth = np.array([
-            [12432.0, 7.562800000000001, 320.44, 136896.0, 90.7488, 3844.8],
-            [2028.0, 24.53879999999999, 1200.0, 20280.0, 245.388, 12000.0]])
+            [12432.0, 7.562800000000001, 320.44, 136896.0, 90.7488, 3844.8,
+             3.20000e+01, 2.00000e-02, 2.00000e-01], [2028.0, 24.5387999999999,
+             1200.0, 20280.0, 245.388, 12000.0, 0.00, 0.00, 0.00]])
 
         np.testing.assert_allclose(fingerprints, truth)
 
@@ -63,7 +65,7 @@ class TestGenerator(unittest.TestCase):
         operations = [
             'bonding_convolution',
             'layered_sum',
-            'local_ads_metal_fp'
+            'local_ads_metal_fp',
         ]
 
         fp = Fingerprinter(atoms)

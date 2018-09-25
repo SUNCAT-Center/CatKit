@@ -427,11 +427,29 @@ class FingerprintDB():
         description TEXT
         )""")
 
+        self.c.execute("""CREATE TABLE IF NOT EXISTS metadata_params(
+        pid INTEGER PRIMARY KEY AUTOINCREMENT,
+        symbol CHAR(10) UNIQUE NOT NULL,
+        description TEXT
+        )""")
+
         self.c.execute("""CREATE TABLE IF NOT EXISTS fingerprints(
         entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
         image_id INT NOT NULL,
         param_id INT NOT NULL,
         value REAL,
+        FOREIGN KEY(image_id) REFERENCES images(image_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+        FOREIGN KEY(param_id) REFERENCES parameters(param_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+        UNIQUE(image_id, param_id)
+        )""")
+
+        self.c.execute("""CREATE TABLE IF NOT EXISTS metadata(
+        entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image_id INT NOT NULL,
+        param_id INT NOT NULL,
+        value TEXT,
         FOREIGN KEY(image_id) REFERENCES images(image_id)
         ON DELETE CASCADE ON UPDATE CASCADE,
         FOREIGN KEY(param_id) REFERENCES parameters(param_id)
@@ -535,6 +553,72 @@ class FingerprintDB():
 
         return parameter_ids
 
+    def metadata_params_entry(self, symbol=None, description=None):
+        """Enters a unique metadata parameter into the database.
+
+        Parameters
+        ----------
+        symbol : str
+            A unique symbol the entry can be referenced by. If None,
+            the symbol will be the ID of the parameter
+            as a string.
+        description : str
+            A description of the parameter.
+        """
+        if not symbol:
+            self.c.execute("""SELECT MAX(pid) FROM metadata_params""")
+            symbol = str(int(self.c.fetchone()[0]) + 1)
+
+        # The symbol must be unique. If not, it will be skipped.
+        try:
+            self.c.execute("""INSERT INTO metadata_params (symbol, description)
+            VALUES(?, ?)""", (symbol, description))
+        except (IntegrityError):
+            if self.verbose:
+                print('Symbol already defined: {}'.format(symbol))
+
+        # Each instance needs to be commited to ensure no overwriting.
+        # This could potentially result in slowdown.
+        self.con.commit()
+
+    def get_metadata_params(self, selection=None, display=False):
+        """Get an array of integer values which correspond to the
+        metadata parameter IDs for a set of provided symbols.
+
+        Parameters
+        ----------
+        selection : list
+            Symbols in parameters table to be selected. If no selection
+            is made, return all parameters.
+        display : bool
+            Print parameter descriptions.
+
+        Returns
+        -------
+        metadata_params_ids : array (n,)
+            Integer values of selected parameters.
+        """
+        if not selection:
+            self.c.execute("""SELECT pid, symbol, description
+            FROM metadata_params""")
+            res = self.c.fetchall()
+        else:
+            res = []
+            for i, s in enumerate(selection):
+                self.c.execute("""SELECT pid, symbol, description
+                FROM metadata_params WHERE symbol = '{}'""".format(s))
+                res += [self.c.fetchone()]
+
+        if display:
+            print('[ID ]: key    - Description')
+            print('---------------------------')
+            for r in res:
+                print('[{0:^3}]: {1:<10} - {2}'.format(*r))
+
+        metadata_params_ids = np.array(res).T[0].astype(int)
+
+        return metadata_params_ids
+
     def fingerprint_entry(self, ase_id, param_id, value):
         """Enters a fingerprint value to the database for a given ase and
         parameter id.
@@ -594,8 +678,8 @@ class FingerprintDB():
             psel = ','.join(np.array(params).astype(str))
 
         if ase_ids is None:
-            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
-            JOIN images on fingerprints.image_id = images.iid
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            fingerprints JOIN images on fingerprints.image_id = images.iid
             WHERE param_id IN ({})
             GROUP BY ase_id
             ORDER BY images.iid""".format(psel)
@@ -603,8 +687,8 @@ class FingerprintDB():
         else:
             asel = ','.join(np.array(ase_ids).astype(str))
 
-            cmd = """SELECT GROUP_CONCAT(value) FROM fingerprints
-            JOIN images on fingerprints.image_id = images.iid
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            fingerprints JOIN images on fingerprints.image_id = images.iid
             WHERE param_id IN ({}) AND ase_id IN ({})
             GROUP BY ase_id""".format(psel, asel)
 
@@ -616,3 +700,86 @@ class FingerprintDB():
             fingerprint[i] = f[0].split(',')
 
         return fingerprint
+
+    def metadata_entry(self, ase_id, param_id, value):
+        """Enters a metadata value to the database for a given ase and
+        parameter id.
+
+        Parameters
+        ----------
+        ase_id : int
+            The unique id associated with an atoms object in the database.
+        param_id : int or str
+            The parameter ID or symbol associated with and entry in the
+            parameters table.
+        value : str
+            The value of the metadata for the atoms object.
+        """
+        # If parameter symbol is given, get the ID
+        if isinstance(param_id, str):
+            self.c.execute("""SELECT pid FROM metadata_params
+            WHERE symbol = '{}'""".format(param_id))
+            param_id = self.c.fetchone()
+
+            if param_id:
+                param_id = param_id[0]
+            else:
+                raise (KeyError, 'metadata symbol not found')
+
+        self.c.execute("""SELECT iid FROM images
+        WHERE ase_id = {}""".format(ase_id))
+        image_id = self.c.fetchone()[0]
+
+        self.c.execute("""INSERT INTO metadata (image_id, param_id, value)
+        VALUES(?, ?, ?)""", (int(image_id), int(param_id), value))
+
+    def get_metadata(self, ase_ids=None, params=[]):
+        """Get the array of values associated with the provided metadata
+        parameters for each ase_id.
+
+        Parameters
+        ----------
+        ase_id : list
+            The ase-id associated with an atoms object in the database.
+        params : list
+            List of symbols or int in metadata parameters table to be selected.
+
+        Returns
+        -------
+        metadata : array (n,)
+            An array of values associated with the given metadata parameters
+            for each ase_id.
+        """
+        if isinstance(params, np.ndarray):
+            params = params.tolist()
+
+        if not params or isinstance(params[0], str):
+            params = self.get_metadata_params(selection=params)
+            psel = ','.join(params.astype(str))
+        elif isinstance(params[0], int):
+            psel = ','.join(np.array(params).astype(str))
+
+        if ase_ids is None:
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            metadata JOIN images on metadata.image_id = images.iid
+            WHERE param_id IN ({})
+            GROUP BY ase_id
+            ORDER BY images.iid""".format(psel)
+
+        else:
+            asel = ','.join(np.array(ase_ids).astype(str))
+
+            cmd = """SELECT GROUP_CONCAT(IFNULL(value, 'nan')) FROM
+            metadata JOIN images on metadata.image_id = images.iid
+            WHERE param_id IN ({}) AND ase_id IN ({})
+            GROUP BY ase_id""".format(psel, asel)
+
+        self.c.execute(cmd)
+        fetch = self.c.fetchall()
+
+        metadata = []
+        for i, f in enumerate(fetch):
+            metadata += [f[0].split(',')]
+
+        return metadata
+
