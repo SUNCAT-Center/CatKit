@@ -144,7 +144,6 @@ def bimetal_fp(
                                   and binary metal system only.""")
     return fp
 
-
 def derived_fp(
         atoms=None,
         atoms_parameters=None,
@@ -154,21 +153,23 @@ def derived_fp(
         n_1=None,
         n_2=None,
         op=None):
-    """
-    NOTE : This is a work in progress. I'll redesign the whole thing to allow
-           for arithmetic manipulation of two fingerprints.
-       Given two fingerprints vector, it will perform arithmetic operation to
-       design new fingerprints.
+    """NOTE : This is a work in progress. I'll redesign the whole thing to allow
+    for arithmetic manipulation of two fingerprints.
 
-       Available operations:
-           add : adds two fingerprints of equal length raised to their given
-                 power.
-           subtract : subtracts two fingerprints of equal length raised to
-                      their given power.
-           mulltiply : multiply two fingerprints of equal length raised to
-                       their given power.
-           divide : divide two fingerprints of equal length raised to their
-                    given power."""
+    Given two fingerprints vector, it will perform arithmetic operation to
+    design new fingerprints.
+
+    Parameters
+    ----------
+    op : str ('add' | 'subtract' | 'divide' | 'multiply')
+        add - Adds two fingerprints of equal length raised to their given power
+        subtract - subtracts two fingerprints of equal length raised to
+                   their given power
+        mulltiply - multiply two fingerprints of equal length raised to
+                    their given power
+        divide - divide two fingerprints of equal length raised to their
+                 given power
+    """
     if op == 'add':
         return fp_1 ** n_1 + fp_2 ** n_2
     elif op == 'subtract':

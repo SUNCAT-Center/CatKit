@@ -49,15 +49,15 @@ class Fingerprinter():
 
         Parameters
         ----------
-        atoms : object
+        atoms : Atoms object
             Structure to return parameters for, contains n atoms.
-        parameters : list of str (m,)
+        parameters : list of str (M,)
             Seed parameters to use for atom specific parameter
             generation.
 
         Returns
         -------
-        atoms_parameters : ndarray (m, n)
+        atoms_parameters : ndarray (M, N)
             General chemical properties specific to this atoms object
             and list of seed parameters.
         """
@@ -72,19 +72,22 @@ class Fingerprinter():
 
     def get_fp(self, parameters, operation_list):
         """Return the fingerprints for a list of images of single atoms
-        object for the given parameters.
+        object for the given parameters. Convolutions will be performed for
+        specific operations if the parameters is provided as a list of lists.
 
         Parameters
         ----------
-        parameters : list of str
+        parameters : list of str | list of lists (M,)
             Names of seeding parameters available in the parameters
-            database.
-        operation_list : list of functions
+            database. If a list lists is provided, the number of lists
+            must be equal to the number of operations.
+        operation_list : list of func | str (M,)
             A list of operation functions to produce the fingerprints from.
+            The names (str) of operations functions can also be used.
 
         Returns
         -------
-        fingerprints : ndarray (n, m)
+        fingerprints : ndarray (N, X)
             Fingerprints for the images produced from the provided
             seed parameters.
         """
@@ -109,11 +112,11 @@ class Fingerprinter():
                     operation = getattr(operations, operation)
 
                 if all(isinstance(pl, list) for pl in parameters):
-                    atoms_parameters = self._get_atoms_parameters(atoms,
-                            parameters[j])
+                    atoms_parameters = self._get_atoms_parameters(
+                        atoms, parameters[j])
                 else:
-                    atoms_parameters = self._get_atoms_parameters(atoms,
-                            parameters)
+                    atoms_parameters = self._get_atoms_parameters(
+                        atoms, parameters)
 
                 fingerprint = _generate_fingerprint(
                     operation,
@@ -145,16 +148,16 @@ def _generate_fingerprint(
         A list of operation functions to produce the fingerprints from.
     atoms : object
         Atomic structure to generate fingerprint for.
-    atoms_parameters : ndarray (n, m)
+    atoms_parameters : ndarray (N, M)
         General chemical properties specific to this atoms object
         and list of seed parameters.
-    connectivity : ndarray (n, n)
+    connectivity : ndarray (N, N)
         Estimated connectivity matrix where n is the number
         of atoms in the atoms-object.
 
     Returns
     -------
-    fingerprint : ndarray (m,)
+    fingerprint : ndarray (M,)
         Fingerprint produced from a given operation and seed parameters.
     """
     fingerprint = operation(
@@ -182,7 +185,7 @@ def get_connectivity(atoms, method=None):
 
     Returns
     -------
-    connectivity : ndarray (n, n)
+    connectivity : ndarray (N, N)
         Estimated connectivity matrix where n is the number
         of atoms in the atoms-object.
     """

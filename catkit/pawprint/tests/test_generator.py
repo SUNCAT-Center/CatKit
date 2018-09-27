@@ -65,7 +65,7 @@ class TestGenerator(unittest.TestCase):
         operations = [
             'bonding_convolution',
             'layered_sum',
-            'local_ads_metal_fp',
+            'local_ads_metal_fp'
         ]
 
         fp = Fingerprinter(atoms)
