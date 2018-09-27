@@ -1,6 +1,7 @@
 from ..classify import get_modified_spin_symbols
 from ..classify import get_unmodified_spin_symbols
 from catkit import Gratoms
+from ase.geometry.cell import cellpar_to_cell
 import numpy as np
 import spglib
 
@@ -201,6 +202,9 @@ class Symmetry():
                 sort = np.argsort(abc)
                 transform[[0, 1, 2], sort] = 1
                 abc = abc[sort]
+            parameters = np.concatenate([abc, [90, 90, 90]])
+            lattice = cellpar_to_cell(parameters)
+
             # latt = Lattice.orthorhombic(a, b, c)
 
         elif lattice_name == 'tetragonal':
@@ -210,9 +214,12 @@ class Symmetry():
             if abs(abc[1] - abc[2]) < self.tol and \
                abs(abc[0] - abc[2]) > self.tol:
                 abc[[0, 2], :] = abc[[2, 0], :]
-                transform = np.dot([[0, 0, 1], [0, 1, 0], [1, 0, 0]],
-                                   transform)
-            latt = Lattice.tetragonal(a, c)
+                transform = np.dot(
+                    [[0, 0, 1], [0, 1, 0], [1, 0, 0]],
+                    transform)
+            parameters = np.concatenate([abc, [90, 90, 90]])
+            lattice = cellpar_to_cell(parameters)
+            lattice = Lattice.tetragonal(a, c)
 
         elif lattice_name in ['hexagonal', 'rhombohedral']:
             # check first if we have the refined structure shows a rhombohedral
