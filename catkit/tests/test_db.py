@@ -1,5 +1,5 @@
 import unittest
-from catkit.db import FingerprintDB
+from catkit.pawprint.db import FingerprintDB
 from ase.db import connect
 import networkx as nx
 import numpy as np

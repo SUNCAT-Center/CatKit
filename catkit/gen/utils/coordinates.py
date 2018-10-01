@@ -156,3 +156,73 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
     xyz_coords = np.delete(xyz_coords, xy_copies, axis=0)
 
     return xyz_coords
+
+
+def matching_coordinates(position, comparators, tol=1e-8):
+    """Get the indices of all points in a comparator list that are
+    equal to a given position (with a tolerance), taking into
+    account periodic boundary conditions (adaptation from Pymatgen).
+
+    This will only accept a Cartesian coordinate scheme.
+    TODO: merge this with matching_sites.
+
+    Parameters
+    ----------
+    position : list (3,)
+        Fractional coordinate to compare to list.
+    comparators : list (3, N)
+        Fractional coordinates to compare against.
+    tol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    match : list (N,)
+        Indices of matches.
+    """
+    if len(comparators) == 0:
+        return []
+
+    fdist = comparators - position[None, :]
+    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+
+    return match
+
+
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
+    """Return unique coordinate values of a given atoms object
+    for a specified axis.
+
+    Parameters
+    ----------
+    atoms : object
+        Atoms object to search for unique values along.
+    axis : int (0, 1, or 2)
+        Look for unique values along the x, y, or z axis.
+    tag : bool
+        Assign ASE-like tags to each layer of the slab.
+    tol : float
+        The tolerance to search for unique values within.
+
+    Returns
+    -------
+    values : ndarray (n,)
+        Array of unique positions in fractional coordinates.
+    """
+    positions = (atoms.get_scaled_positions()[:, axis] + tol) % 1
+    positions -= tol
+
+    values = [positions[0]]
+    for d in positions[1:]:
+        if not np.isclose(d, values, atol=tol, rtol=tol).any():
+            values += [d]
+    values = np.sort(values)
+
+    if tag:
+        tags = []
+        for p in positions:
+            close = np.isclose(p, values[::-1], atol=tol, rtol=tol)
+            tags += [np.where(close)[0][0] + 1]
+        atoms.set_tags(tags)
+
+    return values

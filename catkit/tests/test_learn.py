@@ -3,7 +3,7 @@ from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.gaussian_process.kernels import DotProduct, WhiteKernel
 from sklearn.model_selection import train_test_split
 from catkit.learn import online_learning
-from catkit.db import FingerprintDB
+from catkit.pawprint.db import FingerprintDB
 from catkit.learn import optimizer
 import numpy as np
 from glob import glob

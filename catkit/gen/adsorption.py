@@ -1,5 +1,6 @@
 from . import defaults
 from . import utils
+from . import symmetry
 import matplotlib.pyplot as plt
 import itertools
 import networkx as nx
@@ -11,7 +12,7 @@ radii = defaults.get('radii')
 class AdsorptionSites():
     """Adsorption site object."""
 
-    def __init__(self, slab, surface_atoms=None, r=6, tol=1e-5):
+    def __init__(self, slab, surface_atoms=None, tol=1e-5):
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
@@ -20,13 +21,10 @@ class AdsorptionSites():
         slab : Gatoms object
             The slab associated with the adsorption site network to be
             attached.
-        r : float
-            Minimum basis vector length in Angstroms for creating extended
-            unit cell.
         tol : float
             Absolute tolerance for floating point errors.
         """
-        index, coords, offsets = utils.expand_cell(slab, r)
+        index, coords, offsets = utils.expand_cell(slab)
         if surface_atoms is None:
             surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
@@ -260,8 +258,9 @@ class AdsorptionSites():
         symmetry_match = self._symmetric_sites
 
         if symmetry_match is None:
-            rotations, translations = utils.get_symmetry(
-                self.slab, tol=self.tol)
+            sym = symmetry.Symmetry(self.slab, tol=self.tol)
+
+            rotations, translations = sym.get_symmetry_operations(affine=False)
             rotations = np.swapaxes(rotations, 1, 2)
             affine = np.append(rotations, translations[:, None], axis=1)
 

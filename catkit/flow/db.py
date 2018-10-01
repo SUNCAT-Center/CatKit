@@ -11,20 +11,11 @@ class Calculator(Base):
     id = sqa.Column(sqa.Integer, primary_key=True)
 
     name = sqa.Column(sqa.String)
-    kpoints = sqa.Column(sqa.ARRAY(sqa.Integer), nullable=False)
     parameters = sqa.Column(JSONB)
 
     def __init__(self, name, parameters=None):
         self.name = name
-        self.parameters = parameters
-        if isinstance(parameters, dict) and 'kpts' in parameters:
-            self.kpoints = parameters.get('kpts')
-            del parameters['kpts']
-            if isinstance(self.kpoints, np.ndarray):
-                self.kpoints = self.kpoints.tolist()
-            self.parameters = json.dumps(parameters)
-        else:
-            self.kpoints = [1, 1, 1]
+        self.parameters = json.dumps(parameters)
 
 
 class Structure(Base):
@@ -97,6 +88,7 @@ class Bulk(Base):
     composition = sqa.Column(sqa.String, nullable=False)
     spacegroup = sqa.Column(sqa.Integer, nullable=False)
     wyckoff_positions = sqa.Column(sqa.String, nullable=False)
+    prototype_id = sqa.Column(sqa.String, nullable=False)
 
     structure_id = sqa.Column(sqa.Integer, sqa.ForeignKey('structure.id'))
     structure = sqa.orm.relationship('Structure', uselist=False)
@@ -105,15 +97,13 @@ class Bulk(Base):
     sqa.UniqueConstraint(
         composition, spacegroup, wyckoff_positions, structure_id)
 
-    def __init__(
-            self,
-            composition,
-            spacegroup,
-            wyckoff_positions,
-            structure=None):
-        self.composition = composition
-        self.spacegroup = spacegroup
-        self.wyckoff_positions = wyckoff_positions
+    def __init__(self, prototype_id, structure=None):
+        self.prototype_id = prototype_id
+
+        details = prototype_id.split('_')
+        self.spacegroup = details[0]
+        self.wyckoff_positions = details[1]
+        self.composition = details[2]
         self.structure = structure
 
 

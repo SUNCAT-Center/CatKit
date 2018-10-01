@@ -1,6 +1,7 @@
 from __future__ import division
 from catkit import Gratoms
 from . import defaults
+from . import symmetry
 from . import utils
 from . import adsorption
 import numpy as np
@@ -100,7 +101,7 @@ class SlabGenerator(object):
         self.miller_index = miller_index
 
         if standardize_bulk:
-            bulk = utils.get_spglib_cell(bulk, tol=1e-2)
+            bulk = symmetry.get_standardized_cell(bulk, tol=1e-2)
         else:
             warnings.warn(
                 ("Not using a standardized bulk will result in an arbitrary "
@@ -108,7 +109,7 @@ class SlabGenerator(object):
                  "miller index, use standardize_bulk=True"))
 
         if primitive:
-            primitive_bulk = utils.get_spglib_cell(
+            primitive_bulk = symmetry.get_standardized_cell(
                 bulk, primitive=True, tol=1e-2)
             miller_index = convert_miller_index(
                 miller_index, bulk, primitive_bulk)
@@ -215,8 +216,8 @@ class SlabGenerator(object):
             zdiff = np.cumsum(np.diff(zcoords))
             zdiff = np.floor(zdiff * itol) / itol
 
-            rotations, translations = utils.get_symmetry(
-                self._bulk, tol=self.tol)
+            sym = symmetry.Symmetry(self._bulk, self.tol)
+            rotations, translations = sym.get_symmetry_operations(affine=False)
 
             # Find all symmetries which are rotations about the z-axis
             zsym = np.abs(rotations)
@@ -534,7 +535,8 @@ class SlabGenerator(object):
         """Returns a symmetric slab. Note, this will trim the slab potentially
         resulting in loss of stoichiometry.
         """
-        inversion_symmetric = utils.get_point_group(slab)[1]
+        sym = symmetry.Symmetry(slab)
+        inversion_symmetric = sym.get_point_group(check_laue=True)[1]
 
         # Trim the cell until it is symmetric
         while not inversion_symmetric:
@@ -542,7 +544,8 @@ class SlabGenerator(object):
             bottom_layer = np.max(tags)
             del slab[tags == bottom_layer]
 
-            inversion_symmetric = utils.get_point_group(slab)[1]
+            sym = symmetry.Symmetry(slab)
+            inversion_symmetric = sym.get_point_group(check_laue=True)[1]
 
             if len(slab) <= len(self._bulk):
                 warnings.warn('Too many sites removed, please use a larger '
@@ -673,23 +676,24 @@ def get_unique_indices(bulk, max_index):
     unique_millers : ndarray (n, 3)
         Symmetrically distinct miller indices for a given bulk.
     """
-    operations = utils.get_affine_operations(bulk)
+    sym = symmetry.Symmetry(bulk)
+    operations = sym.get_symmetry_operations()
     unique_index = generate_indices(max_index)
 
     unique_millers = []
     for i, miller in enumerate(unique_index):
         affine_point = np.insert(miller, 3, 1)
 
-        symmetry = False
+        symmetric = False
         for affine_matrix in operations:
             operation = np.dot(affine_matrix, affine_point)[:3]
 
             match = utils.matching_coordinates(operation, unique_millers)
             if len(match) > 0:
-                symmetry = True
+                symmetric = True
                 break
 
-        if not symmetry:
+        if not symmetric:
             unique_millers += [miller]
 
     unique_millers = np.flip(unique_millers, axis=0)
@@ -716,9 +720,10 @@ def get_degenerate_indices(bulk, miller_index):
     miller_index = np.asarray(miller_index)
     miller_index = np.divide(miller_index, utils.list_gcd(miller_index))
 
-    operations = utils.get_affine_operations(bulk)
+    sym = symmetry.Symmetry(bulk)
+    affine_matrix = sym.get_symmetry_operations()
     affine_point = np.insert(miller_index, 3, 1)
-    symmetric_indices = np.dot(affine_point, operations)[:, :3]
+    symmetric_indices = np.dot(affine_point, affine_matrix)[:, :3]
 
     degenerate_indices = np.unique(symmetric_indices, axis=0)
     degenerate_indices = np.flip(degenerate_indices, axis=0).astype(int)

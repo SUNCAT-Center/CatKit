@@ -1,5 +1,6 @@
 from .gen.surface import SlabGenerator
 from .gen.molecules import get_topologies
+from .gen.symmetry import get_standardized_cell
 from .gen import utils
 from .gen import defaults
 from ase.build import bulk as ase_bulk
@@ -33,7 +34,7 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
         atoms = ase_bulk(name, crystalstructure, **kwargs)
     else:
         atoms = name
-    standardized_bulk = utils.get_spglib_cell(atoms, primitive=primitive)
+    standardized_bulk = get_standardized_cell(atoms, primitive=primitive)
 
     return standardized_bulk
 

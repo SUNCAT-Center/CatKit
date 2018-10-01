@@ -75,7 +75,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     """
     cov_radii = defaults.get('radii')
     numbers = atoms.numbers
-    index, coords = coordinates.expand_cell(atoms, 4)[:2]
+    index, coords = coordinates.expand_cell(atoms)[:2]
 
     if cutoff is None:
         radii = cov_radii[numbers]
