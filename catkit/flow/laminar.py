@@ -16,7 +16,7 @@ class Laminar():
             username=None,
             name=None,
             password=None,
-            calculator='espresso.Espresso'
+            calculator='decaf.Espresso'
     ):
         """Initialize a fireworks instance."""
         if username is None or name is None or password is None:

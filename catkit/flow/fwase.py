@@ -1,16 +1,10 @@
 from . import fwio
-import functools
+from . import utils
 import ase
-import sys
 try:
-    import espresso
+    import decaf
 except(ImportError):
     pass
-
-
-def str_to_class(classname):
-    return functools.reduce(
-        getattr, classname.split('.'), sys.modules[__name__])
 
 
 def get_potential_energy(
@@ -35,15 +29,15 @@ def get_potential_energy(
     atoms = ase.io.read(in_file)
 
     # Setting up the calculator
-    calculator = str_to_class(calculator)
+    calculator = utils.str_to_class(calculator)
     calc = calculator(atoms, **atoms.info)
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
 
-    if isinstance(calc, espresso.Espresso):
+    if calc.__name__ == 'Espresso':
         # Patch for reading magmom of trajectory
-        images = espresso.io.read(out_file, ':')
+        images = decaf.io.read(out_file, ':')
     else:
         images = ase.io.read(out_file, ':')
 

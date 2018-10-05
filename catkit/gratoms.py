@@ -188,21 +188,21 @@ class Gratoms(Atoms):
             # interpreted at 0 and 1 indices.
             i = np.array(i)
         elif isinstance(i, slice):
-            if i.start == None:
+            if i.start is None:
                 istart = 0
             elif i.start < 0:
                 istart = i.start + len(self)
             else:
                 istart = i.start
 
-            if i.stop == None:
+            if i.stop is None:
                 istop = len(self)
             elif i.stop < 0:
                 istop = i.stop + len(self)
             else:
                 istop = i.stop
 
-            istep = i.step if i.step != None else 1
+            istep = i.step if i.step is not None else 1
             i = np.array([i for i in range(istart, istop, istep)])
         conadd = []
         # Constraints need to be deepcopied, but only the relevant ones.
