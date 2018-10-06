@@ -1,6 +1,6 @@
 from catkit import Gratoms
-from ase.data import chemical_symbols as sym
 import numpy as np
+import ase
 import re
 try:
     from math import gcd
@@ -78,7 +78,8 @@ def get_atomic_numbers(formula, return_count=False):
             else:
                 values[e] += 1
 
-    numbers = np.array([sym.index(k) for k in values.keys()])
+    numbers = np.array([
+        ase.data.chemical_symbols.index(k) for k in values.keys()])
     srt = np.argsort(numbers)
     numbers = numbers[srt]
 

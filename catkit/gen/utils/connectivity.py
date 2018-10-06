@@ -1,8 +1,8 @@
 from .. import defaults
 from . import coordinates
-from scipy.spatial import Voronoi
-import warnings
 import numpy as np
+import scipy
+import warnings
 
 
 def get_voronoi_neighbors(atoms):
@@ -25,7 +25,7 @@ def get_voronoi_neighbors(atoms):
     L = int(len(offsets) / 2)
     origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
 
-    voronoi = Voronoi(coords, qhull_options='QbB Qc Qs')
+    voronoi = scipy.spatial.Voronoi(coords, qhull_options='QbB Qc Qs')
     points = voronoi.ridge_points
 
     connectivity = np.zeros((len(atoms), len(atoms)))
