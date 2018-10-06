@@ -3,8 +3,8 @@
 """Catalysis Generator."""
 
 from collections import MutableMapping
-from ase.data import covalent_radii
 import numpy as np
+import ase
 
 radicals = np.ones(92)
 radicals[[6, 7, 8, 9, 15, 16]] = [4, 3, 2, 1, 3, 2]
@@ -15,7 +15,7 @@ class Defaults(MutableMapping, dict):
 
     def __init__(self):
         self.update({
-            'radii': covalent_radii.copy(),
+            'radii': ase.data.covalent_radii.copy(),
             'radicals': radicals,
             'orthogonal': False
         })

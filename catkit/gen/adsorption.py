@@ -517,40 +517,45 @@ class Builder(AdsorptionSites):
             if index is -1:
                 slab = []
                 for i, _ in enumerate(self.get_symmetric_sites()):
-                    slab += [self._single_adsorption(adsorbate,
-                                                     bond=bonds[0],
-                                                     site_index=i,
-                                                     auto_construct=auto_construct,
-                                                     **kwargs)]
+                    slab += [self._single_adsorption(
+                        adsorbate,
+                        bond=bonds[0],
+                        site_index=i,
+                        auto_construct=auto_construct,
+                        **kwargs)]
             elif isinstance(index, (list, np.ndarray)):
                 slab = []
                 for i in index:
-                    slab += [self._single_adsorption(adsorbate,
-                                                     bond=bonds[0],
-                                                     site_index=i,
-                                                     auto_construct=auto_construct,
-                                                     **kwargs)]
+                    slab += [self._single_adsorption(
+                        adsorbate,
+                        bond=bonds[0],
+                        site_index=i,
+                        auto_construct=auto_construct,
+                        **kwargs)]
             else:
-                slab = self._single_adsorption(adsorbate,
-                                               bond=bonds[0],
-                                               site_index=index,
-                                               auto_construct=auto_construct,
-                                               **kwargs)
+                slab = self._single_adsorption(
+                    adsorbate,
+                    bond=bonds[0],
+                    site_index=index,
+                    auto_construct=auto_construct,
+                    **kwargs)
 
         elif len(bonds) == 2:
             if index == -1:
                 slab = []
                 edges = self.get_adsorption_edges()
                 for i, _ in enumerate(edges):
-                    slab += [self._double_adsorption(adsorbate,
-                                                     bonds=bonds,
-                                                     edge_index=i,
-                                                     **kwargs)]
+                    slab += [self._double_adsorption(
+                        adsorbate,
+                        bonds=bonds,
+                        edge_index=i,
+                        **kwargs)]
             else:
-                slab = self._double_adsorption(adsorbate,
-                                               bonds=bonds,
-                                               edge_index=index,
-                                               **kwargs)
+                slab = self._double_adsorption(
+                    adsorbate,
+                    bonds=bonds,
+                    edge_index=index,
+                    **kwargs)
 
         else:
             raise ValueError('Only mono- and bidentate adsorption supported.')
@@ -593,11 +598,10 @@ class Builder(AdsorptionSites):
         if auto_construct:
             root = None
             for i, branch in enumerate(branches):
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True,
-                )
-                root = bond
+                root = utils._branch_molecule(
+                    atoms, branch, root, adsorption=True)
+
+            # Align with the adsorption vector
             atoms.rotate([0, 0, 1], vector)
 
         atoms.translate(base_position)

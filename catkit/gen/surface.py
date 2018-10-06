@@ -1,15 +1,14 @@
 from __future__ import division
-from catkit import Gratoms
+from .. import Gratoms
 from . import defaults
 from . import symmetry
 from . import utils
 from . import adsorption
 import numpy as np
-from ase.build import rotate
-from ase.constraints import FixAtoms
 import itertools
 import warnings
 import scipy
+import ase
 try:
     from math import gcd
 except ImportError:
@@ -183,7 +182,7 @@ class SlabGenerator(object):
             new_bulk.cell[[0, 1]] = new_bulk.cell[[1, 0]]
         a = new_bulk.cell[0]
         a3 = np.cross(a, new_bulk.cell[1]) / np.max(d)
-        rotate(new_bulk, a3, (0, 0, 1), a, (1, 0, 0))
+        ase.build.rotate(new_bulk, a3, (0, 0, 1), a, (1, 0, 0))
 
         # Ensure the remaining basis vectors are positive in their
         # corresponding axis
@@ -422,7 +421,8 @@ class SlabGenerator(object):
 
         if self.fixed:
             tags = slab.get_tags()
-            constraints = FixAtoms(mask=tags > (tags.max() - self.fixed))
+            constraints = ase.constraints.FixAtoms(
+                mask=tags > (tags.max() - self.fixed))
             slab.set_constraint(constraints)
 
         self.slab = slab

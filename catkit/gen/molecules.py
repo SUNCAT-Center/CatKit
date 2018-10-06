@@ -1,13 +1,14 @@
-from catkit import Gratoms
+from .. import Gratoms
 from . import utils
 from . import defaults
+import networkx as nx
 import itertools
 import numpy as np
 
 
 def bin_hydrogen(hydrogens=1, bins=1):
     """Recursive function for determining distributions of
-    hydrogens across bins
+    hydrogens across bins.
     """
     if bins == 1:
         yield [hydrogens]
@@ -41,7 +42,7 @@ def hydrogenate(atoms, bins, copy=True):
 
 
 def get_topologies(symbols, saturate=False):
-    """Return the possible topologies of a given chemical species
+    """Return the possible topologies of a given chemical species.
 
     Parameters
     ----------
@@ -53,6 +54,9 @@ def get_topologies(symbols, saturate=False):
 
     Returns
     -------
+    molecules : list (N,)
+        Gratoms objects with unique connectivity matrix attached.
+        No 3D positions will be provided for these structures.
     """
     num, cnt = utils.get_atomic_numbers(symbols, True)
     mcnt = cnt[num != 1]
@@ -100,8 +104,9 @@ def get_topologies(symbols, saturate=False):
 
         degree = connectivity.sum(axis=0)
 
-        # Not fully connected (cyclical subgraph)
-        if np.any(degree == 0):
+        # Not fully connected (subgraph)
+        if np.any(degree == 0) or not \
+           nx.is_connected(nx.from_numpy_matrix(connectivity)):
             continue
 
         # Overbonded atoms.
@@ -146,3 +151,125 @@ def get_topologies(symbols, saturate=False):
                     molecules += [hatoms]
 
     return molecules
+
+
+def get_3D_positions(atoms, bond_index=None):
+    """Return an estimation of the 3D structure of a Gratoms object
+    based on its graph.
+
+    WARNING: This function operates on the atoms object in-place.
+
+    Parameters
+    ----------
+    atoms : Gratoms object
+        Structure with connectivity matrix to provide a 3D structure.
+    bond_index : int
+        Index of the atoms to consider as the origin of a surface
+        bonding site.
+
+    Returns
+    -------
+    atoms : Gratoms object
+        Structure with updated 3D positions.
+    """
+    branches = nx.dfs_successors(atoms.graph, bond_index)
+
+    complete = []
+    for i, branch in enumerate(branches.items()):
+        root, nodes = branch
+
+        if len(nodes) == 0:
+            continue
+
+        c0 = atoms[root].position
+        if i == 0:
+            basis = utils.get_basis_vectors([c0, [0, 0, -1]])
+        else:
+            bond_index = None
+            for j, base_root in enumerate(complete):
+                if root in branches[base_root]:
+                    c1 = atoms[base_root].position
+                    # Flip the basis for every alternate step down the chain.
+                    basis = utils.get_basis_vectors([c0, c1])
+                    if (i - j) % 2 != 0:
+                        basis[2] *= -1
+                    break
+        complete.insert(0, root)
+
+        positions = _branch_molecule(atoms, branch, basis, bond_index)
+        atoms.positions[nodes] = positions
+
+    return atoms
+
+
+def _branch_molecule(
+        atoms,
+        branch,
+        basis,
+        adsorption=None):
+    """Return the positions of a Gratoms object for a segment of its
+    attached graph. This function is mean to be iterated over by a depth
+    first search form Networkx.
+
+    Parameters
+    ----------
+    atoms : Gratoms object
+        Gratoms object to be iterated over. Will have its positions
+        altered in-place.
+    branch : tuple (1, [N,])
+        A single entry from the output of nx.bfs_successors. The
+        first entry is the root node and the following list is the
+        nodes branching from the root.
+    basis : ndarray (3, 3)
+        The basis vectors to use for this step of the branching.
+    adsorption : bool
+        If True, will construct the molecule as though there is a
+        surface normal to the negative z-axis. Must be None for
+        all but the first index in the depth first search.
+
+    Returns
+    -------
+    positions : ndarray (N, 3)
+        Estimated positions for the branch nodes.
+    """
+    root, nodes = branch
+    root_position = atoms[root].position
+
+    radii = defaults.get('radii')
+    atomic_numbers = atoms.numbers[[root] + nodes]
+    atomic_radii = radii[atomic_numbers]
+    dist = (atomic_radii[0] + atomic_radii[1:])[:, None]
+
+    angles = np.array([109.47, 109.47, 109.47, 0])
+    dihedral = np.array([0, 120, -120, 0])
+
+    if adsorption:
+        # Move adsorption structures away from surface
+        angles += 15
+
+    # Tetrahedral bond arrangement by default
+    n = len(nodes)
+    if n == 1:
+        # Linear bond arrangement
+        angles[0] = 180
+    elif n == 2:
+        # Trigonal-planer bond arrangement
+        angles[:2] = 120
+        dihedral[1] = 180
+
+    # Place the atoms of this segment of the branch
+    basis = np.repeat(basis[None, :, :], len(dist), axis=0)
+
+    ang = np.deg2rad(angles)[:len(dist), None]
+    tor = np.deg2rad(dihedral)[:len(dist), None]
+
+    basis[:, 1] *= -np.sin(tor)
+    basis[:, 2] *= np.cos(tor)
+
+    vectors = basis[:, 1] + basis[:, 2]
+    vectors *= dist * np.sin(ang)
+    basis[:, 0] *= dist * np.cos(ang)
+
+    positions = vectors + root_position - basis[:, 0]
+
+    return positions

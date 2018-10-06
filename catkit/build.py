@@ -1,12 +1,6 @@
-from .gen.surface import SlabGenerator
-from .gen.molecules import get_topologies
-from .gen.symmetry import get_standardized_cell
-from .gen import utils
-from .gen import defaults
-from ase.build import bulk as ase_bulk
-import networkx as nx
-from ase import Atoms
+from . import gen
 import numpy as np
+import ase
 
 
 def bulk(name, crystalstructure=None, primitive=False, **kwargs):
@@ -31,10 +25,11 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
         The conventional standard or primitive bulk structure.
     """
     if isinstance(name, str):
-        atoms = ase_bulk(name, crystalstructure, **kwargs)
+        atoms = ase.build.bulk(name, crystalstructure, **kwargs)
     else:
         atoms = name
-    standardized_bulk = get_standardized_cell(atoms, primitive=primitive)
+    standardized_bulk = gen.symmetry.get_standardized_cell(
+        atoms, primitive=primitive)
 
     return standardized_bulk
 
@@ -78,12 +73,12 @@ def surface(
     slab : Gratoms object
         Return a slab generated from the specified bulk structure.
     """
-    if isinstance(elements, Atoms):
+    if isinstance(elements, ase.Atoms):
         atoms = elements
     else:
-        atoms = ase_bulk(elements, crystal, cubic=True, **kwargs)
+        atoms = ase.build.bulk(elements, crystal, cubic=True, **kwargs)
 
-    gen = SlabGenerator(
+    generator = gen.surface.SlabGenerator(
         bulk=atoms,
         miller_index=miller,
         layers=size[-1],
@@ -101,63 +96,39 @@ def surface(
         size = size[:2]
 
     if orthogonal:
-        defaults['orthogonal'] = True
+        gen.defaults['orthogonal'] = True
         if isinstance(size, (list, tuple)):
             size = np.prod(size[:2])
 
-    slab = gen.get_slab(size=size, iterm=termination)
+    slab = generator.get_slab(size=size, iterm=termination)
 
     return slab
 
 
-def add_adsorbate(atoms):
-    """Add an adsorbate to a surface."""
-
-    return atoms
-
-
-def molecule(
-        species,
-        topology=None,
-        adsorption=False,
-        vacuum=0):
-    """Return gas-phase molecule structures based on species and
-    topology.
+def molecule(species, bond_index=None, vacuum=0):
+    """Return list of enumerated gas-phase molecule structures based
+    on species and topology.
 
     Parameters
     ----------
     species : str
         The chemical symbols to construct a molecule from.
-    topology : int, str, or slice
-        The indices for the distinct topology produced by the generator.
-    adsorption : bool
+    bond_index : int
         Construct the molecule as though it were adsorbed to a surface
-        parallel to the z-axis.
+        parallel to the z-axis. Will bond by the atom index given.
     vacuum : float
-        Angstroms of vacuum to pad the molecule with.
+        Angstroms of vacuum to pad the molecules with.
 
     Returns
     -------
-    images : list of objects
+    images : list of Gratoms objects
         3D structures of the requested chemical species and topologies.
     """
-    molecule_graphs = get_topologies(species)
-
-    if len(molecule_graphs) > 1:
-        _slice = utils.parse_slice(topology)
-        molecule_graphs = molecule_graphs[_slice]
+    molecule_graphs = gen.molecules.get_topologies(species)
 
     images = []
     for atoms in molecule_graphs:
-        branches = nx.bfs_successors(atoms.graph, 0)
-
-        root = None
-        for i, branch in enumerate(branches):
-            utils._branch_molecule(atoms, branch, root, adsorption)
-            root = 0
-
-        if vacuum:
-            atoms.center(vacuum=vacuum)
+        atoms = gen.molecules.get_3D_positions(atoms, bond_index)
         images += [atoms]
 
     return images

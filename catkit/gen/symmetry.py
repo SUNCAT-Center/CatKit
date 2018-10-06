@@ -1,4 +1,4 @@
-from catkit import Gratoms
+from .. import Gratoms
 import numpy as np
 import spglib
 

@@ -1,10 +1,6 @@
 import networkx as nx
-from networkx import Graph, MultiGraph
-from ase import Atoms, Atom
-from ase.constraints import FixConstraint, FixBondLengths
-from ase.data import chemical_symbols
-import networkx.algorithms.isomorphism as iso
 import numpy as np
+import ase
 import copy
 import warnings
 try:
@@ -12,12 +8,12 @@ try:
 except(ImportError):
     from __builtin__ import super
 
-sym = np.array(chemical_symbols)
-em = iso.numerical_edge_match('bonds', 1)
-nm = iso.numerical_node_match('number', 1)
+sym = np.array(ase.data.chemical_symbols)
+em = nx.algorithms.isomorphism.numerical_edge_match('bonds', 1)
+nm = nx.algorithms.isomorphism.numerical_node_match('number', 1)
 
 
-class Gratoms(Atoms):
+class Gratoms(ase.Atoms):
     """Graph based atoms object.
 
     An Integrated class for an ASE atoms object with a corresponding
@@ -48,14 +44,14 @@ class Gratoms(Atoms):
 
         if isinstance(edges, np.ndarray):
             if self.pbc.any():
-                self._graph = MultiGraph(edges)
+                self._graph = nx.MultiGraph(edges)
             else:
-                self._graph = Graph(edges)
+                self._graph = nx.Graph(edges)
         else:
             if self.pbc.any():
-                self._graph = MultiGraph()
+                self._graph = nx.MultiGraph()
             else:
-                self._graph = Graph()
+                self._graph = nx.Graph()
 
         nodes = [[i, {'number': n}]
                  for i, n in enumerate(self.arrays['numbers'])]
@@ -182,7 +178,7 @@ class Gratoms(Atoms):
             if i < -natoms or i >= natoms:
                 raise IndexError('Index out of range.')
 
-            return Atom(atoms=self, index=i)
+            return ase.Atom(atoms=self, index=i)
         elif isinstance(i, list) and len(i) > 0:
             # Make sure a list of booleans will work correctly and not be
             # interpreted at 0 and 1 indices.
@@ -207,7 +203,9 @@ class Gratoms(Atoms):
         conadd = []
         # Constraints need to be deepcopied, but only the relevant ones.
         for con in copy.deepcopy(self.constraints):
-            if isinstance(con, (FixConstraint, FixBondLengths)):
+            if isinstance(con, (
+                    ase.constraints.FixConstraint,
+                    ase.constraints.FixBondLengths)):
                 try:
                     con.index_shuffle(self, i)
                     conadd.append(con)
@@ -238,7 +236,7 @@ class Gratoms(Atoms):
 
     def __iadd__(self, other):
         """Extend atoms object by appending atoms from *other*."""
-        if isinstance(other, Atom):
+        if isinstance(other, ase.Atom):
             other = self.__class__([other])
 
         n1 = len(self)
