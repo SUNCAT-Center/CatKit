@@ -836,6 +836,7 @@ class CathubPostgreSQL:
                 value_list = get_value_list(values)
                 publication_system_values += [tuple(value_list)]
 
+            # Insert into publication_system table
             key_str = get_key_str(table='publication_system')
             insert_command = """INSERT INTO publication_system ({0})
             VALUES %s ON CONFLICT DO NOTHING;"""\
@@ -843,6 +844,14 @@ class CathubPostgreSQL:
 
             execute_values(cur=cur, sql=insert_command,
                            argslist=publication_system_values, page_size=1000)
+
+            # Write pub_id to systems table
+            cur.execute("""UPDATE systems SET
+            key_value_pairs=jsonb_set(key_value_pairs, '{{"pub_id"}}', '"{pub_id}"')
+            WHERE unique_id IN
+            (SELECT ase_id from publication_system WHERE pub_id='{pub_id}')"""\
+                        .format(pub_id=pub_id))
+
             con.commit()
             self.stdout.write('  Completed transfer of publications\n')
 
