@@ -92,6 +92,13 @@ class UploadTestCase(unittest.TestCase):
         if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'.format(path=path)):
             os.remove('{path}/aayush/MontoyaChallenge2015.db'.format(path=path))
 
+    def test3_create_user(self):
+        db = CathubPostgreSQL(user='postgres')
+        db.create_user('viggo', row_limit=None)
+
+    def test4_delete_user(self):
+        db = CathubPostgreSQL(user='postgres')
+        db.delete_user('viggo')
 
 if __name__ == '__main__':
     unittest.main()
