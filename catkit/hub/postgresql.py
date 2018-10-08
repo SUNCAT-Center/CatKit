@@ -306,7 +306,7 @@ class CathubPostgreSQL:
 
     def delete_user(self, user):
         """ Delete user and all data"""
-        assert self.user == 'catroot'
+        assert self.user == 'catroot' or self.user == 'postgres'
         assert not user == 'public'
         con = self.connection or self._connect()
         cur = con.cursor()
