@@ -255,42 +255,43 @@ class CathubPostgreSQL:
             .format(user=user))
         con.commit()
 
-        """ Limit number of rows"""
-        for table in ['reaction', 'publication', 'systems', 'reaction_system',
-                      'publication_system', 'information']:
-            table_factor = 1
-            if table in [ 'reaction_system', 'publication_system']:
-                table_factor = 15
-            elif table == 'publication':
-                table_factor = 1 / 100
-            elif table == 'information':
-                table_factor = 1 / 100
+        if row_limit:
+            """ Limit number of rows"""
+            for table in ['reaction', 'publication', 'systems', 'reaction_system',
+                          'publication_system', 'information']:
+                table_factor = 1
+                if table in [ 'reaction_system', 'publication_system']:
+                    table_factor = 15
+                elif table == 'publication':
+                    table_factor = 1 / 100
+                elif table == 'information':
+                    table_factor = 1 / 100
 
-            trigger_function = """
-            CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
-            RETURNS TRIGGER AS
-            $BODY$
-            BEGIN
-                IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
-                THEN
-                    RAISE EXCEPTION 
-                        'INSERT statement exceeding maximum number of rows';
-                END IF;
-                RETURN NEW;
-            END;
-            $BODY$
-            LANGUAGE plpgsql""".format(user=user, table=table,
-                                       row_limit=row_limit * table_factor)
-            cur.execute(trigger_function)
+                trigger_function = """
+                CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
+                RETURNS TRIGGER AS
+                $BODY$
+                BEGIN
+                    IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
+                    THEN
+                        RAISE EXCEPTION
+                            'INSERT statement exceeding maximum number of rows';
+                    END IF;
+                    RETURN NEW;
+                END;
+                $BODY$
+                LANGUAGE plpgsql""".format(user=user, table=table,
+                                           row_limit=row_limit * table_factor)
+                cur.execute(trigger_function)
 
-            trigger="""
-            DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
-                on {user}.{table};
-            CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
-            BEFORE INSERT ON {user}.systems
-            FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
-            """.format(user=user, table=table)
-            cur.execute(trigger)
+                trigger="""
+                DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
+                    on {user}.{table};
+                CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
+                BEFORE INSERT ON {user}.systems
+                FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
+                """.format(user=user, table=table)
+                cur.execute(trigger)
 
         self.schema = old_schema
         set_schema = 'ALTER ROLE {user} SET search_path TO {schema};'\
