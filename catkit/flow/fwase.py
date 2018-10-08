@@ -1,6 +1,7 @@
 from . import fwio
 from . import utils
 from . import db
+import numpy as np
 import ase
 try:
     import decaf
@@ -37,7 +38,7 @@ def get_potential_energy(
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
 
-    if calc.__name__ == 'Espresso':
+    if isinstance(calc, decaf.Espresso):
         # Patch for reading magmom of trajectory
         images = decaf.io.read(out_file, ':')
     else:
@@ -51,7 +52,7 @@ def get_potential_energy(
     return fwio.atoms_to_encode(images)
 
 
-def catflow_relaxation(calculator):
+def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
     """Performs a relaxation of an arbitrary structure in a manor
     consistent with catflow database conventions.
 
@@ -63,32 +64,40 @@ def catflow_relaxation(calculator):
     calculator : str
         String representation of a calculator import.
         This currently only supports an Espresso calculator (ASE or decaf).
+    parameters : dict
+        Calculation parameters to use.
     """
-    atoms = ase.io.read('input.traj')
-    parameters = atoms.info['calculator_parameters']
+    if atoms is None:
+        atoms = ase.io.read('input.traj')
+    if parameters is None:
+        parameters = atoms.info['calculator_parameters']
+    if calculator_name is None:
+        calculator_name = parameters.pop('calculator_name')
     data = atoms.info.copy()
 
     # Setting up the calculator
-    calculator = utils.str_to_class(calculator)
-    calc = calculator(atoms, **parameters)
+    calculator = utils.str_to_class(calculator_name)
+    calc = calculator(atoms, **parameters, calc_file='pw0.pwi')
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
 
     if np.all(atoms.pbc):
         # If bulk, we need to resymmeterize and perform a final scf
-        tag, atoms = ckutil.aflow.get_prototype_tag(atoms, tol=1e-2)
+        tag, atoms = ckutil.aflow.get_prototype_tag(calc.atoms, tol=1e-2)
         parameters['calculation'] = 'scf'
-        calc = calculator(atoms, **parameters)
+        calc = calculator(atoms, **parameters, calc_file='pw1.pwi')
         atoms.get_potential_energy()
 
-    if calc.__name__ == 'Espresso':
+    if isinstance(calc, decaf.Espresso):
         # Patch for reading magmom of trajectory
-        images = decaf.io.read('pw.pwo', ':')
+        images = decaf.io.read('pw0.pwo', ':')
+        images[0].info = data
         if np.all(atoms.pbc):
             images += [atoms]
     else:
-        images = ase.io.read('pw.pwo', ':')
+        images = ase.io.read('pw0.pwo', ':')
+        images[0].info = data
         if np.all(atoms.pbc):
             images += [atoms]
 
@@ -97,13 +106,7 @@ def catflow_relaxation(calculator):
         image.constraints = atoms.constraints
         image._pbc = atoms.pbc
 
+    with db.Connect() as dbflow:
+        dbflow.update_bulk_entry(images)
+
     return fwio.atoms_to_encode(images)
-
-
-def upload_relaxation():
-    """Uploads a completed relaxation calculation to the Catflow database.
-    This will require CATFLOW_DB to be specified on each calculation node
-    running Fireworks.
-    """
-    with Connect() as db:
-        db.

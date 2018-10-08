@@ -16,8 +16,7 @@ class Laminar():
             username=None,
             name=None,
             password=None,
-            calculator='decaf.Espresso'
-    ):
+            calculator='decaf.Espresso'):
         """Initialize a fireworks instance."""
         if username is None or name is None or password is None:
             username, name, password = netrc().authenticators(host)
@@ -126,7 +125,6 @@ class Laminar():
             self,
             atoms,
             parameters,
-            additional_tasks=None,
             spec=None):
         """Run a relaxation of a given DB entry or atoms object. If a
         database object is used, the calculation will automatically store
@@ -143,8 +141,6 @@ class Laminar():
             Calculation parameters to use.
         workflow_name : str
             Name of the fireworks calculation to be used.
-        additional_tasks : list of PyTask
-            Additional Pytasks to perform after relaxation.
         spec : dict
             Additional fireworks specifications to pass to the database.
         """
@@ -157,23 +153,15 @@ class Laminar():
 
         t1 = fireworks.PyTask(
             func='catkit.flow.fwase.catflow_relaxation',
-            args=[self.calculator],
-            stored_data_varname='trajectory')
-
-        t2 = fireworks.PyTask(
-            func='catkit.flow.fwase.upload_relaxation',
-            args=[self.calculator],
             stored_data_varname='trajectory')
 
         tasks = [t0, t1]
-        if additional_tasks:
-            tasks += additional_tasks
 
         if spec is None:
-            spec = {'keys': keys, 'data': data}
-        else:
-            spec.update({'keys': keys, 'data': data})
+            spec = {}
 
         firework = fireworks.Firework(tasks, spec=spec)
         workflow = fireworks.Workflow([firework], name='bulk_relaxation')
-        self.launchpad.add_wf(workflow)
+        workflow_id = self.launchpad.add_wf(workflow)[-1]
+
+        return workflow_id

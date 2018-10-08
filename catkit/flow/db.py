@@ -1,14 +1,17 @@
 from .. import Gratoms
 from .. import gen
+from . import Laminar
 from . import utils
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sqa
+import numpy as np
 import passlib.apps
+import datetime
 import operator
 import warnings
-import numpy as np
 import json
+import ase
 import os
 try:
     from ckutil.aflow import get_prototype_tag
@@ -38,6 +41,7 @@ class Connect():
         self.session = sqa.orm.sessionmaker(bind=self.engine)
         self.meta = Base.metadata
         self.meta.create_all(self.engine)
+
         self.user = user
 
     def __enter__(self):
@@ -52,6 +56,38 @@ class Connect():
         """Upon exiting the 'with' statement, __exit__ is called."""
         self.cursor.commit()
         self.cursor.close()
+
+    def register_user(self, first_name, last_name,
+                      host, name, username, password):
+        """Register a users workflow credentials to the database.
+        TODO: 2-way encryption for password protection.
+
+        Currently, only Fireworks credentials are supported for automatic
+        workflow submission.
+
+        Parameters
+        ----------
+        first_name : str
+            Users first name, for identification purposes.
+        last_name : str
+            Users last name, for identification purposes.
+        host : str
+            Server name of the fireworks database.
+        name : str
+            Table name of the fireowrks database.
+        username : str
+            Username of the fireworks database.
+        password : str
+            Password to access the fireworks database with.
+        """
+        user = User(first_name=first_name,
+                    last_name=last_name,
+                    host=host,
+                    name=name,
+                    username=username,
+                    password=password)
+        self.cursor.add(user)
+        self.cursor.commit()
 
     def _reset(self, safety=False):
         """Drop the entire database schema.
@@ -278,6 +314,8 @@ class Connect():
             # calculator match as a good initial guess here.
 
             # B.1) Submit calculation.
+            self.submit_bulk_entry(atoms, parameters)
+            return
 
         # A.2) We need a prototype tag to match against the database.
         if isinstance(atoms, str):
@@ -289,24 +327,26 @@ class Connect():
         # A.3) Query for all similar structures with matching calculator
         query = self.cursor.query(Bulk.id, Bulk.prototype_tag, Structure).\
                     filter(Bulk.initial_prototype_tag == tag).\
-                    join(Structure, Bulk.structure_id == Structure.id).\
+                    join(Structure, Bulk.initial_structure_id == Structure.id).\
                     filter(Structure.calculator_id == calculator.id)
 
         # A.4) If multiple structures exist, there could be multiple minima
         # User intervention will likely be required.
         # For now, lets assume there is one minima at most.
         previous_structure = query.one_or_none()
+
         if previous_structure is None:
             if not auto_submit:
                 raise CalculationRequired('No bulk structure match')
 
             # B.1) Submit calculation.
+            self.submit_bulk_entry(atoms, parameters)
             return
         elif previous_structure[1] is None:
             # A.5) No final structure. This calculation has already been submitted.
             # Print the current status.
             bulk_id, _, workflow, user = self.cursor.query(
-                Bulk.id, Structure.worflow_id, Workflow, User).\
+                Bulk.id, Structure.workflow_id, Workflow, User).\
                 filter(Bulk.id == previous_structure[0]).\
                 join(Structure, Bulk.initial_structure_id == Structure.id).\
                 join(Workflow).join(User).one()
@@ -339,11 +379,13 @@ class Connect():
             calculator = Calculator(parameters)
             self.cursor.add(calculator)
 
-        user = self.cursor.query(User).filter(User.username = self.user)
+        user = self.cursor.query(User).\
+            filter(User.username == self.user).one_or_none()
         if user is None:
-            raise RuntimeError('No workflow username match for {}. '.format(self.user)
-                               'Please provide a user to Connect(). '
-                               'New users must register with Connect().register_user()')
+            raise RuntimeError(
+                'No workflow username match for {}. Please provide a user '
+                'to Connect(). New users must register with Connect().'
+                'register_user()'.format(self.user))
 
         # If the tag exists, assume the system is standardized
         tag = atoms.info.get('prototype_tag')
@@ -351,82 +393,88 @@ class Connect():
             tag, atoms = get_prototype_tag(atoms, tol=1e-2)
 
         initial_structure = Structure(atoms, calculator=calculator)
-        # Needed to resolve IDs
-        self.cursor.commit()
+        self.cursor.add(initial_structure)
 
-        # Now Laminar
+        bulk_prototype = Bulk(tag, initial_structure)
+        self.cursor.add(bulk_prototype)
+        self.cursor.commit()
+        atoms.info['structure_id'] = initial_structure.id
+        atoms.info['bulk_id'] = bulk_prototype.id
+
+        # Now Laminar submission
+        flow = Laminar(
+            host=user.host,
+            name=user.name,
+            username=user.username,
+            password=user.password_hash)
+        workflow_id = flow.bulk_relaxation(atoms, parameters)
 
         # Need to submit the firework next and collect its ID
         workflow = Workflow(
             user, workflow_id, workflow_name='bulk_relaxation')
 
-        initial_structure.update().values(workflow=workflow)
+        initial_structure.workflow = workflow
+        self.cursor.add(initial_structure)
+        self.cursor.commit()
 
-    def update_bulk_entry(self, trajectory, parameters, bulk_id, structure_id):
-        """Add a bulk relaxation trajectory to the database. This requires
-        the calculator parameters, the calculator being used, and the
-        images from the trajectory.
+    def update_bulk_entry(self, trajectory, bulk_id=None, prototype_tag=None):
+        """Update a bulk calcualtion which has been submitted with
+        submit_bulk_entry(). This involves updating the information for an
+        existing bulk entry.
 
         Parameters
         ----------
         trajectory : list of Atoms object
             Relaxation trajectory for a bulk calculation given in
             correct relaxation order.
-        parameters : dict
-            Calculator parameters required to match for relaxed structure.
+        bulk_id : int
+            Bulk entry to be updated.
+        prototype_tag : str
+            Prototype tag classification for the final structure.
         """
-        try:
-            atoms = self.request_bulk_entry(trajectory[0], parameters)
-            warnings.warn('Matching calculation found, aborting')
-            return
-        except(CalculationRequired):
-            pass
+        if bulk_id is None:
+            bulk_id = trajectory[0].info['bulk_id']
 
-        calculator = self.get_matching_calculator(parameters)
-        if calculator is None:
-            calculator = Calculator(parameters)
-            self.cursor.add(calculator)
+        bulk, initial_structure, workflow, calculator = self.cursor.\
+            query(Bulk, Structure, Workflow, Calculator).\
+            filter(Bulk.id == bulk_id).\
+            join(Structure, Bulk.initial_structure_id == Structure.id).\
+            join(Workflow).join(Calculator).one()
 
-        init_prototype_tag, standard_atoms = get_prototype_tag(
-            trajectory[0], tol=1e-2)
-        initial_structure = Structure(
-            standard_atoms,
-            calculator=calculator,
-            results=trajectory[0].calc.results)
-        self.cursor.add(initial_structure)
+        for parameter in utils.supported_properties:
+            result = trajectory[0].calc.results.get(parameter)
+            if isinstance(result, np.ndarray):
+                result = result.tolist()
+            setattr(initial_structure, parameter, result)
 
         for i, atoms in enumerate(trajectory[1:-1]):
             structure = Structure(
-                atoms, calculator=calculator,
-                parent=structure if i > 0 else initial_structure)
+                atoms,
+                calculator=calculator,
+                parent=structure if i > 0 else initial_structure,
+                workflow=workflow)
             self.cursor.add(structure)
 
-        tag, standard_atoms = get_prototype_tag(trajectory[-1], tol=1e-2)
         structure = Structure(
-            standard_atoms,
+            atoms,
             calculator=calculator,
             parent=structure,
-            results=trajectory[-1].calc.results)
+            workflow=workflow)
         self.cursor.add(structure)
 
-        if tag != init_prototype_tag:
-            # TODO: Need to do a difference check here to ensure structure
-            # is the same. For now, lets assume any prototype match is
-            # for an identical minima.
-            query = self.cursor.query(Bulk.prototype_tag, Structure).\
-                        filter(Bulk.prototype_tag == tag).join(Structure).\
-                        filter(Structure.calculator_id == calculator.id)
-            previous_structure = query.one_or_none()
+        if prototype_tag is None:
+            prototype_tag = trajectory[-1].info['prototype_tag']
 
-            if previous_structure is not None:
-                # We have converged to a new prototype, need to
-                # point to the previous relaxed structure.
-                structure = previous_structure[-1]
+        bulk.prototype_tag = prototype_tag
+        bulk.structure = structure
 
-        bulk_prototype = Bulk(
-            init_prototype_tag, initial_structure, tag, structure=structure)
+        details = prototype_tag.split('_')
+        bulk.spacegroup = details[0]
+        bulk.wyckoff_positions = details[1]
+        bulk.composition = details[2]
 
-        self.cursor.add(bulk_prototype)
+        workflow.status = 'Completed'
+        self.cursor.commit()
 
     def _add_bulk_entry(self, trajectory, parameters):
         """Add a bulk relaxation trajectory to the database. This requires
@@ -481,20 +529,6 @@ class Connect():
             results=trajectory[-1].calc.results)
         self.cursor.add(structure)
 
-        if tag != init_prototype_tag:
-            # TODO: Need to do a difference check here to ensure structure
-            # is the same. For now, lets assume any prototype match is
-            # for an identical minima.
-            query = self.cursor.query(Bulk.prototype_tag, Structure).\
-                        filter(Bulk.prototype_tag == tag).join(Structure).\
-                        filter(Structure.calculator_id == calculator.id)
-            previous_structure = query.one_or_none()
-
-            if previous_structure is not None:
-                # We have converged to a new prototype, need to
-                # point to the previous relaxed structure.
-                structure = previous_structure[-1]
-
         bulk_prototype = Bulk(
             init_prototype_tag, initial_structure, tag, structure=structure)
 
@@ -515,15 +549,22 @@ class User(Base):
 
     sqa.UniqueConstraint(host, name, username)
 
-    def __init__(self, host, name, username, password
+    def __init__(self, host, name, username, password,
                  first_name, last_name):
         self.name = name
         self.host = host
         self.username = username
-        self.password_hash = password_hash
+        self.password_hash = password
 
         self.first_name = first_name
         self.last_name = last_name
+
+    def __repr__(self):
+        prompt = 'User: ({}) {} {}\n'.format(
+            self.id, self.first_name, self.last_name)
+        prompt += 'server: {}@{}/{}'.format(
+            self.username, self.host, self.name)
+        return prompt
 
 
 class Workflow(Base):
@@ -534,13 +575,27 @@ class Workflow(Base):
     user = sqa.orm.relationship('User', uselist=False)
     workflow_id = sqa.Column(sqa.Integer, nullable=False)
     workflow_name = sqa.Column(sqa.String, nullable=False)
+    status = sqa.Column(sqa.String, nullable=False)
+    submission_date = sqa.Column(sqa.DateTime, nullable=False)
 
     sqa.UniqueConstraint(user_id, workflow_id)
 
-    def __init__(self, user, worflow_name, workflow_id):
+    def __init__(self, user, workflow_id, workflow_name):
         self.user = user
         self.workflow_name = workflow_name
         self.workflow_id = workflow_id
+        self.status = 'Submitted'
+        self.submission_date = datetime.datetime.now().\
+            strftime("%Y-%m-%d %H:%M:%S")
+
+    def __repr__(self):
+        prompt = 'Workflow: ({}) {}\n'.format(self.id, self.workflow_name)
+        prompt += 'Status - {}'.format(self.status)
+        if self.status == 'Submitted':
+            prompt += '\n{}\n'.format(self.submission_date)
+            prompt += '\n{}'.format(self.user)
+        return prompt
+
 
 
 class Calculator(Base):
@@ -645,15 +700,43 @@ class Structure(Base):
         # Read results
         if results is None and atoms.calc:
             results = atoms.calc.results
-        for parameter in utils.supported_properties:
-            result = results.get(parameter)
-            if isinstance(result, np.ndarray):
-                result = result.tolist()
-            setattr(self, parameter, result)
+
+        if results:
+            for parameter in utils.supported_properties:
+                result = results.get(parameter)
+                if isinstance(result, np.ndarray):
+                    result = result.tolist()
+                setattr(self, parameter, result)
 
         self.calculator = calculator
         self.parent = parent
         self.workflow = workflow
+
+    def __repr__(self):
+        cid, pid, wid = 'None', 'None', 'None'
+        if self.calculator:
+            cid = self.calculator.id
+        if self.parent:
+            pid = self.parent.id
+        if self.workflow:
+            wid = self.workflow.id
+        prompt = 'Structure : ({:<4})  Calculator: ({:<4})\n'.format(self.id, cid)
+        prompt += 'Parent    : ({:<4})  Workflow  : ({:<4})\n\n'.format(pid, wid)
+
+        cell = np.round(self.cell, 3)
+        prompt += '| {:^20} | {:^10} \n |-\n'.format('Cell', 'pbc')
+        for i in range(3):
+            prompt += '| {:<8} {:<8} {:<8} | {} |\n'.format(*cell[i], self.pbc[i])
+
+        prompt += '\n| Sym | {:^26} |\n'.format('Positions')
+        prompt += '|-----|' + '-' * 28 + '|\n'
+
+        symbols = np.array(ase.data.chemical_symbols)[self.numbers]
+        positions = np.round(self.positions, 4)
+        for i, n in enumerate(symbols):
+            prompt += '|{:>4} |'.format(n)
+            prompt += ' {:<8} {:<8} {:<8} |'.format(*positions[i])
+        return prompt
 
 
 class Bulk(Base):
@@ -691,6 +774,19 @@ class Bulk(Base):
             self.wyckoff_positions = details[1]
             self.composition = details[2]
             self.structure = structure
+
+    def __repr__(self):
+        iid, fid = 'None', 'None'
+        if self.initial_structure:
+            iid = self.initial_structure.id
+        if self.structure:
+            fid = self.structure.id 
+        prompt = 'Bulk: ({})\n'.format(self.id)
+        prompt += 'Initial structure: ({:<4}) {}\n'.format(
+            iid, self.initial_prototype_tag)
+        prompt += 'Final structure:   ({:<4}) {}'.format(
+            fid, self.prototype_tag)
+        return prompt
 
 
 class Surface(Base):
