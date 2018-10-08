@@ -1,4 +1,5 @@
 import os
+import json
 import unittest
 import shutil
 from catkit.hub.postgresql import CathubPostgreSQL
@@ -11,12 +12,6 @@ class UploadTestCase(unittest.TestCase):
         """Set up a temp file."""
         if not os.path.exists('temp'):
             os.makedirs('temp')
-
-        """Ensure postgres database is empty"""
-        db = CathubPostgreSQL(user='postgres')
-        con = db._connect()
-        db._initialize(con)
-        db.truncate_schema()
 
     def tearDown(self):
         """Clear temporary files."""
@@ -87,6 +82,14 @@ class UploadTestCase(unittest.TestCase):
         folder2db.main('{path}/aayush/'.format(path=path))
 
     def test2_upload(self):
+        """Ensure postgres database is empty"""
+        db = CathubPostgreSQL(user='postgres')
+        con = db._connect()
+        db._initialize(con)
+        db.truncate_schema()
+        con.commit()
+        con.close()
+
         db2server.main('{path}/aayush/MontoyaChallenge2015.db'.format(path=path),
                        user='postgres')
         if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'.format(path=path)):
@@ -99,6 +102,16 @@ class UploadTestCase(unittest.TestCase):
     def test4_delete_user(self):
         db = CathubPostgreSQL(user='postgres')
         db.delete_user('viggo')
+
+    def test5_modify_reaction(self):
+        db = CathubPostgreSQL(user='postgres')
+        id = db.check(pub_id='MontoyaChallenge2015',
+                      chemical_composition='Pt16',
+                      reactants=json.dumps({'N2gas': 0.5, 'star': 1.0}),
+                      products=json.dumps({'Nstar': 1.0}))
+
+        db.update_reaction(id, reaction_energy=10)
+        db.delete_reaction(id)
 
 if __name__ == '__main__':
     unittest.main()
