@@ -53,8 +53,11 @@ def execute_graphQL(query_string):
     print('Getting data from server...')
     print('')
     data = requests.post(root, {'query': query_string})
-    data = data.json()['data']
-    print('Data fetched!')
+    try:
+        data = data.json()['data']
+        print('Data fetched!')
+    except BaseException:
+        print(data)
     return data
 
 
@@ -67,7 +70,9 @@ def graphql_query(table='reactions',
                   queries={}):
 
     statement = '{'
-    statement += '{}(first: {}'.format(table, n_results)
+    statement += '{}('.format(table)
+    if n_results != 'all':
+        statement += 'first: {}'.format(n_results)
     for key, value in queries.items():
         if isinstance(value, str):
             statement += ', {}: "{}"'.format(key, value)
@@ -116,10 +121,9 @@ def get_reactions(columns='all', n_results=20, write_db=False, **kwargs):
             if value in [True, 'True', 'true']:
                 queries.update({key: True})
                 continue
-        try:
-            value = int(value)
+        if isinstance(value, int) or isinstance(value, float):
             queries.update({key: value})
-        except BaseException:
+        else:
             queries.update({key: '{0}'.format(value)})
 
     subtables = []
