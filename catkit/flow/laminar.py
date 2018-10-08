@@ -36,7 +36,7 @@ class Laminar():
     def submit_relaxation(
             self,
             image,
-            calculation_name,
+            workflow_name,
             parameters=None,
             spec=None):
         """Run a relaxation of a given DB entry or atoms object. If a
@@ -50,7 +50,7 @@ class Laminar():
         ----------
         images : Atoms object | AtomsRow object
             ASE database entry or atoms object to relax.
-        calculation_name : str
+        workflow_name : str
             Name of the fireworks calculation to be used.
         parameters : dict
             Calculation parameters to use. Will be pulled from
@@ -68,11 +68,11 @@ class Laminar():
             atoms = image
 
         if parameters is not None:
-            atoms.info = parameters
+            atoms.info['calculator_parameters'] = parameters
         elif data.get('calculator_parameters'):
-            atoms.info = data.get('calculator_parameters')
+            atoms.info['calculator_parameters'] = data.get('calculator_parameters')
             del data['calculator_parameters']
-        elif atoms.info:
+        elif atoms.info.get('calculator_parameters'):
             pass
         else:
             raise ValueError('Calculation parameters missing.')
@@ -98,11 +98,10 @@ class Laminar():
         else:
             spec.update({'keys': keys, 'data': data})
 
-        firework = fireworks.Firework(tasks, spec=spec,
-                                      name=calculation_name)
-
-        workflow = fireworks.Workflow([firework])
+        firework = fireworks.Firework(tasks, spec=spec)
+        workflow = fireworks.Workflow([firework], name=workflow_name)
         self.launchpad.add_wf(workflow)
+
 
     def submit_relaxation_db(self, database, spec=None):
         """Submit each entry of an ASE database for relaxation.
@@ -122,3 +121,59 @@ class Laminar():
         for d in db.select():
             self.submit_relaxation(
                 d, calculation_name=filename, spec=spec)
+
+    def bulk_relaxation(
+            self,
+            atoms,
+            parameters,
+            additional_tasks=None,
+            spec=None):
+        """Run a relaxation of a given DB entry or atoms object. If a
+        database object is used, the calculation will automatically store
+        the keys and data for later retrieval.
+
+        The entries uuid will also be stored and `data.calculator_parameters`
+        will be used as the calculation parameters.
+
+        Parameter:
+        ----------
+        images : Atoms object
+            Initial atoms to perform workflow on.
+        parameters : dict
+            Calculation parameters to use.
+        workflow_name : str
+            Name of the fireworks calculation to be used.
+        additional_tasks : list of PyTask
+            Additional Pytasks to perform after relaxation.
+        spec : dict
+            Additional fireworks specifications to pass to the database.
+        """
+        atoms.info['calculator_parameters'] = parameters
+
+        encoding = fwio.atoms_to_encode(atoms)
+        t0 = fireworks.PyTask(
+            func='catkit.flow.fwio.encode_to_atoms',
+            args=[encoding])
+
+        t1 = fireworks.PyTask(
+            func='catkit.flow.fwase.catflow_relaxation',
+            args=[self.calculator],
+            stored_data_varname='trajectory')
+
+        t2 = fireworks.PyTask(
+            func='catkit.flow.fwase.upload_relaxation',
+            args=[self.calculator],
+            stored_data_varname='trajectory')
+
+        tasks = [t0, t1]
+        if additional_tasks:
+            tasks += additional_tasks
+
+        if spec is None:
+            spec = {'keys': keys, 'data': data}
+        else:
+            spec.update({'keys': keys, 'data': data})
+
+        firework = fireworks.Firework(tasks, spec=spec)
+        workflow = fireworks.Workflow([firework], name='bulk_relaxation')
+        self.launchpad.add_wf(workflow)

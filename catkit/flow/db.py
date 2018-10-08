@@ -1,9 +1,10 @@
-from catkit.gen.symmetry import get_standardized_cell
 from .. import Gratoms
+from .. import gen
 from . import utils
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sqa
+import passlib.apps
 import operator
 import warnings
 import numpy as np
@@ -29,18 +30,20 @@ class Connect():
         (Perform operation here)
     """
 
-    def __init__(self, engine=None):
+    def __init__(self, engine=None, user=None):
         """Initialize the database."""
         if engine is None:
             engine = os.environ.get('CATFLOW_DB')
         self.engine = sqa.create_engine(engine)
         self.session = sqa.orm.sessionmaker(bind=self.engine)
+        self.meta = Base.metadata
+        self.meta.create_all(self.engine)
+        self.user = user
 
     def __enter__(self):
         """This function is automatically called whenever the class
         is used together with a 'with' statement.
         """
-        Base.metadata.create_all(self.engine)
         self.cursor = self.session()
 
         return self
@@ -50,10 +53,26 @@ class Connect():
         self.cursor.commit()
         self.cursor.close()
 
+    def _reset(self, safety=False):
+        """Drop the entire database schema.
+        WARNING: This will remove all existing data from the database.
+
+        Parameters
+        ----------
+        safety : bool
+            A flag to prevent accidental deletion.
+        """
+        if safety:
+            self.meta.drop_all(self.engine)
+            print('Database reset')
+        else:
+            warnings.warn('You are about to reset the entire database! '
+                          'This will delete all existing information. '
+                          'If this is correct, set safety=True.')
+
     def structure_to_atoms(
             self,
             structure,
-            calculator_name=None,
             parameters=None):
         """Return an atoms object for a given structure from the
         database.
@@ -62,9 +81,6 @@ class Connect():
         ----------
         structure : Structure object
             A structure from the CatFlow database.
-        calculator_name : str
-            Name of the calculator used to perform the calculation.
-            If None, it will be retrieved from the database.
         parameters : dict
             Parameters used to perform the calculation. If None, they
             will be retrieved from the database.
@@ -74,10 +90,12 @@ class Connect():
         atoms : Gratoms object
             Atomic structure.
         """
-        if calculator_name is None or parameters is None:
+        if parameters is None:
             calculator_name, parameters = self.cursor.query(
                 Calculator.name, Calculator.parameters).\
                 filter(Calculator.id == structure.calculator_id).one()
+        else:
+            calculator_name = parameters.pop('calculator_name')
         calculator = utils.str_to_class(calculator_name)
 
         atoms = Gratoms(
@@ -145,15 +163,13 @@ class Connect():
 
         return trajectory
 
-    def get_matching_calculator(self, name, parameters=None, ignored=None):
+    def get_matching_calculator(self, parameters, ignored=None):
         """Search for a calculator which matches a set of calculator
         parameters. This will raise an exception if more than one
         calculator is found.
 
         Parameters
         ----------
-        name : str
-            Calculator name to search for match against the database.
         parameters : dict
             Calculator input parameters to look for match.
 
@@ -162,9 +178,8 @@ class Connect():
         calculator : Calculator object
             Catflow calculator which matches the requested parameters.
         """
-        if parameters is None:
-            parameters = {}
-
+        parameters = parameters.copy()
+        name = parameters.pop('calculator_name')
         query = self.cursor.query(Calculator)\
                            .filter(Calculator.name == name)\
                            .filter(Calculator.parameters.contains(parameters))\
@@ -195,6 +210,8 @@ class Connect():
             Catflow calculators with higher convergence criteria than then
             those provided.
         """
+        parameters = parameters.copy()
+        parameters.pop('calculator_name', None)
         convergence_criteria = [
             'kspacing', 'ecutwfc', 'conv_thr',
             'forc_conv_thr', 'press_conv_thr']
@@ -230,7 +247,7 @@ class Connect():
 
         return calculators
 
-    def request_bulk_entry(self, atoms, calculator_name, parameters):
+    def request_bulk_entry(self, atoms, parameters, auto_submit=False):
         """Requests a bulk entry which matches a given atomic structures
         symmetry and set of calculator parameters. If a minimum structure
         is found, return it. Otherwise, prepare for a submission step.
@@ -240,10 +257,11 @@ class Connect():
         atoms : Atoms object | str
             Initial guess of atomic structure to search for a symmetry match
             for. Will also search for matching prototype tag.
-        calculator_name : str
-            Name of the requested calculator.
         parameters : dict
             Calculator parameters required to match for relaxed structure.
+        auto_submit : bool
+            Automatically perform a calculation submission if the requested
+            structure is not preasent.
 
         Returns
         -------
@@ -251,28 +269,27 @@ class Connect():
             A matching relaxed bulk structure from the database.
         """
         # A.1) We need to know if this calculator exists.
-        calculator = self.get_matching_calculator(
-            calculator_name, parameters)
+        calculator = self.get_matching_calculator(parameters)
 
         if calculator is None:
-            # If no matching calculation exists, there can be no structure
-            # match.
+            if not auto_submit or isinstance(atoms, str):
+                raise CalculationRequired('No bulk structure match')
             # TODO: a more intellegent framework might use a different
             # calculator match as a good initial guess here.
 
             # B.1) Submit calculation.
-            raise CalculationRequired('No bulk structure match')
 
         # A.2) We need a prototype tag to match against the database.
         if isinstance(atoms, str):
             tag = atoms
         else:
             tag, atoms = get_prototype_tag(atoms, tol=1e-2)
+            atoms.info['prototype_tag'] = tag
 
         # A.3) Query for all similar structures with matching calculator
-        query = self.cursor.query(Bulk.prototype_tag, Structure).\
+        query = self.cursor.query(Bulk.id, Bulk.prototype_tag, Structure).\
                     filter(Bulk.initial_prototype_tag == tag).\
-                    join(Structure).\
+                    join(Structure, Bulk.structure_id == Structure.id).\
                     filter(Structure.calculator_id == calculator.id)
 
         # A.4) If multiple structures exist, there could be multiple minima
@@ -280,66 +297,108 @@ class Connect():
         # For now, lets assume there is one minima at most.
         previous_structure = query.one_or_none()
         if previous_structure is None:
-            # B.1) Submit calculation.
-            raise CalculationRequired('No bulk structure match')
+            if not auto_submit:
+                raise CalculationRequired('No bulk structure match')
 
-        # A.5) If found, return the atoms object
+            # B.1) Submit calculation.
+            return
+        elif previous_structure[1] is None:
+            # A.5) No final structure. This calculation has already been submitted.
+            # Print the current status.
+            bulk_id, _, workflow, user = self.cursor.query(
+                Bulk.id, Structure.worflow_id, Workflow, User).\
+                filter(Bulk.id == previous_structure[0]).\
+                join(Structure, Bulk.initial_structure_id == Structure.id).\
+                join(Workflow).join(User).one()
+            print(workflow)
+            return workflow
+
+        # A.6) If found, return the atoms object
         tag, structure = previous_structure
         atoms = self.structure_to_atoms(structure)
 
         return atoms
 
-    def add_bulk_entry(self, trajectory, calculator_name, parameters):
+    def submit_bulk_entry(self, atoms, parameters):
+        """Submit a workflow to an external workflow management software.
+        Updates the CatFlow database with initial entries to indicate submission.
+
+        Only integration with Fireworks is currently supported.
+
+        Parameters
+        ----------
+        atoms : Atoms object
+            The initial configuration of atoms to use for relaxation.
+        parameters : dict
+            The calculator parameters to use for the relaxation.
+        """
+        # Redundent for safety
+        calculator = self.get_matching_calculator(parameters)
+
+        if calculator is None:
+            calculator = Calculator(parameters)
+            self.cursor.add(calculator)
+
+        user = self.cursor.query(User).filter(User.username = self.user)
+        if user is None:
+            raise RuntimeError('No workflow username match for {}. '.format(self.user)
+                               'Please provide a user to Connect(). '
+                               'New users must register with Connect().register_user()')
+
+        # If the tag exists, assume the system is standardized
+        tag = atoms.info.get('prototype_tag')
+        if not tag:
+            tag, atoms = get_prototype_tag(atoms, tol=1e-2)
+
+        initial_structure = Structure(atoms, calculator=calculator)
+        # Needed to resolve IDs
+        self.cursor.commit()
+
+        # Now Laminar
+
+        # Need to submit the firework next and collect its ID
+        workflow = Workflow(
+            user, workflow_id, workflow_name='bulk_relaxation')
+
+        initial_structure.update().values(workflow=workflow)
+
+    def update_bulk_entry(self, trajectory, parameters, bulk_id, structure_id):
         """Add a bulk relaxation trajectory to the database. This requires
         the calculator parameters, the calculator being used, and the
         images from the trajectory.
-
-        Before being entered into the database, the structures will be
-        standardized and the prototype tags recalculated.
 
         Parameters
         ----------
         trajectory : list of Atoms object
             Relaxation trajectory for a bulk calculation given in
             correct relaxation order.
-        calculator_name : str
-            Name of the calculator executable.
         parameters : dict
             Calculator parameters required to match for relaxed structure.
         """
         try:
-            atoms = self.request_bulk_entry(
-                trajectory[0], calculator_name, parameters)
+            atoms = self.request_bulk_entry(trajectory[0], parameters)
             warnings.warn('Matching calculation found, aborting')
             return
         except(CalculationRequired):
             pass
 
-        calculator = self.get_matching_calculator(
-            calculator_name, parameters)
-
+        calculator = self.get_matching_calculator(parameters)
         if calculator is None:
-            calculator = Calculator(
-                name=calculator_name,
-                parameters=parameters)
+            calculator = Calculator(parameters)
             self.cursor.add(calculator)
 
         init_prototype_tag, standard_atoms = get_prototype_tag(
-            trajectory[-1], tol=1e-2)
-        structure = Structure(
+            trajectory[0], tol=1e-2)
+        initial_structure = Structure(
             standard_atoms,
             calculator=calculator,
             results=trajectory[0].calc.results)
-        self.cursor.add(structure)
+        self.cursor.add(initial_structure)
 
-        for atoms in trajectory[1:-1]:
-            standard_atoms = get_standardized_cell(
-                atoms, primitive=True, tol=1e-2)
+        for i, atoms in enumerate(trajectory[1:-1]):
             structure = Structure(
-                standard_atoms,
-                calculator=calculator,
-                parent=structure,
-                results=atoms.calc.results)
+                atoms, calculator=calculator,
+                parent=structure if i > 0 else initial_structure)
             self.cursor.add(structure)
 
         tag, standard_atoms = get_prototype_tag(trajectory[-1], tol=1e-2)
@@ -364,9 +423,124 @@ class Connect():
                 # point to the previous relaxed structure.
                 structure = previous_structure[-1]
 
-        bulk_prototype = Bulk(tag, init_prototype_tag, structure=structure)
+        bulk_prototype = Bulk(
+            init_prototype_tag, initial_structure, tag, structure=structure)
 
         self.cursor.add(bulk_prototype)
+
+    def _add_bulk_entry(self, trajectory, parameters):
+        """Add a bulk relaxation trajectory to the database. This requires
+        the calculator parameters, the calculator being used, and the
+        images from the trajectory.
+
+        WARNING: Before being entered into the database, the structures will be
+        standardized and the prototype tags recalculated. This is potentially
+        quite dangerous as it assumes the structure is mostly unchanged. This
+        is a very bad assumption, so this should only be used for testing.
+
+        Parameters
+        ----------
+        trajectory : list of Atoms object
+            Relaxation trajectory for a bulk calculation given in
+            correct relaxation order.
+        parameters : dict
+            Calculator parameters required to match for relaxed structure.
+        """
+        try:
+            atoms = self.request_bulk_entry(trajectory[0], parameters)
+            warnings.warn('Matching calculation found, aborting')
+            return
+        except(CalculationRequired):
+            pass
+
+        calculator = self.get_matching_calculator(parameters)
+
+        if calculator is None:
+            calculator = Calculator(parameters)
+            self.cursor.add(calculator)
+
+        init_prototype_tag, standard_atoms = get_prototype_tag(
+            trajectory[0], tol=1e-2)
+        initial_structure = Structure(
+            standard_atoms,
+            calculator=calculator,
+            results=trajectory[0].calc.results)
+        self.cursor.add(initial_structure)
+
+        for i, atoms in enumerate(trajectory[1:-1]):
+            structure = Structure(
+                atoms, calculator=calculator,
+                parent=structure if i > 0 else initial_structure)
+            self.cursor.add(structure)
+
+        tag, standard_atoms = get_prototype_tag(trajectory[-1], tol=1e-2)
+        structure = Structure(
+            standard_atoms,
+            calculator=calculator,
+            parent=structure,
+            results=trajectory[-1].calc.results)
+        self.cursor.add(structure)
+
+        if tag != init_prototype_tag:
+            # TODO: Need to do a difference check here to ensure structure
+            # is the same. For now, lets assume any prototype match is
+            # for an identical minima.
+            query = self.cursor.query(Bulk.prototype_tag, Structure).\
+                        filter(Bulk.prototype_tag == tag).join(Structure).\
+                        filter(Structure.calculator_id == calculator.id)
+            previous_structure = query.one_or_none()
+
+            if previous_structure is not None:
+                # We have converged to a new prototype, need to
+                # point to the previous relaxed structure.
+                structure = previous_structure[-1]
+
+        bulk_prototype = Bulk(
+            init_prototype_tag, initial_structure, tag, structure=structure)
+
+        self.cursor.add(bulk_prototype)
+
+
+class User(Base):
+    __tablename__ = 'user'
+    id = sqa.Column(sqa.Integer, primary_key=True)
+
+    first_name = sqa.Column(sqa.String, nullable=False)
+    last_name = sqa.Column(sqa.String, nullable=False)
+
+    host = sqa.Column(sqa.String, nullable=False)
+    name = sqa.Column(sqa.String, nullable=False)
+    username = sqa.Column(sqa.String, nullable=False)
+    password_hash = sqa.Column(sqa.String, nullable=False)
+
+    sqa.UniqueConstraint(host, name, username)
+
+    def __init__(self, host, name, username, password
+                 first_name, last_name):
+        self.name = name
+        self.host = host
+        self.username = username
+        self.password_hash = password_hash
+
+        self.first_name = first_name
+        self.last_name = last_name
+
+
+class Workflow(Base):
+    __tablename__ = 'workflow'
+    id = sqa.Column(sqa.Integer, primary_key=True)
+
+    user_id = sqa.Column(sqa.Integer, sqa.ForeignKey('user.id'))
+    user = sqa.orm.relationship('User', uselist=False)
+    workflow_id = sqa.Column(sqa.Integer, nullable=False)
+    workflow_name = sqa.Column(sqa.String, nullable=False)
+
+    sqa.UniqueConstraint(user_id, workflow_id)
+
+    def __init__(self, user, worflow_name, workflow_id):
+        self.user = user
+        self.workflow_name = workflow_name
+        self.workflow_id = workflow_id
 
 
 class Calculator(Base):
@@ -381,7 +555,12 @@ class Calculator(Base):
     stress_convergence = sqa.Column(sqa.Float)
     parameters = sqa.Column(JSONB)
 
-    def __init__(self, name, parameters=None):
+    def __init__(self, parameters):
+        parameters = parameters.copy()
+        name =  parameters.pop('calculator_name', None)
+        if not name:
+            raise ValueError("parameters must contain 'calculator_name'")
+
         self.name = name
 
         # Special kwargs support for decaf-espresso
@@ -397,7 +576,7 @@ class Calculator(Base):
         self.parameters = parameters
 
     def __repr__(self):
-        prompt = 'Calculator: {}\n'.format(self.name)
+        prompt = 'Calculator: ({}) {}\n'.format(self.id, self.name)
         prompt += json.dumps(self.parameters,
                              separators=(',', ': '),
                              indent=4, sort_keys=True)
@@ -426,13 +605,22 @@ class Structure(Base):
     magmoms = sqa.Column(sqa.ARRAY(sqa.Float))
 
     calculator_id = sqa.Column(sqa.Integer, sqa.ForeignKey('calculator.id'))
-    calculator = sqa.orm.relationship('Calculator')
+    calculator = sqa.orm.relationship('Calculator', uselist=False)
     parent_id = sqa.Column(sqa.Integer, sqa.ForeignKey('structure.id'))
     parent = sqa.orm.relationship(
         'Structure', uselist=False, remote_side=[id],
         cascade="all, delete-orphan", single_parent=True)
 
-    def __init__(self, atoms, calculator=None, parent=None, results=None):
+    workflow_id = sqa.Column(sqa.Integer, sqa.ForeignKey('workflow.id'))
+    workflow = sqa.orm.relationship('Workflow', uselist=False)
+
+    def __init__(
+            self,
+            atoms,
+            calculator=None,
+            parent=None,
+            workflow=None,
+            results=None):
         self.numbers = atoms.numbers.tolist()
         self.positions = atoms.positions.tolist()
         self.cell = atoms.cell.tolist()
@@ -465,38 +653,44 @@ class Structure(Base):
 
         self.calculator = calculator
         self.parent = parent
+        self.workflow = workflow
 
 
 class Bulk(Base):
     __tablename__ = 'bulk'
     id = sqa.Column(sqa.Integer, primary_key=True)
 
-    spacegroup = sqa.Column(sqa.Integer, nullable=False)
-    wyckoff_positions = sqa.Column(sqa.String, nullable=False)
-    composition = sqa.Column(sqa.String, nullable=False)
-    prototype_tag = sqa.Column(sqa.String, nullable=False)
     initial_prototype_tag = sqa.Column(sqa.String, nullable=False)
+    initial_structure_id = sqa.Column(sqa.Integer, sqa.ForeignKey('structure.id'))
+    initial_structure = sqa.orm.relationship(
+        'Structure', uselist=False, foreign_keys=initial_structure_id)
 
+    # Final state
+    prototype_tag = sqa.Column(sqa.String)
     structure_id = sqa.Column(sqa.Integer, sqa.ForeignKey('structure.id'))
-    structure = sqa.orm.relationship('Structure', uselist=False)
+    structure = sqa.orm.relationship(
+        'Structure', uselist=False, foreign_keys=structure_id)
 
-    # There can be multiple structures based on different calculators
-    sqa.UniqueConstraint(
-        composition, spacegroup, wyckoff_positions, structure_id)
+    spacegroup = sqa.Column(sqa.Integer)
+    wyckoff_positions = sqa.Column(sqa.String)
+    composition = sqa.Column(sqa.String)
 
     def __init__(
             self,
-            prototype_tag,
             initial_prototype_tag,
+            initial_structure=None,
+            prototype_tag=None,
             structure=None):
-        self.prototype_tag = prototype_tag
         self.initial_prototype_tag = initial_prototype_tag
+        self.initial_structure = initial_structure
 
-        details = prototype_tag.split('_')
-        self.spacegroup = details[0]
-        self.wyckoff_positions = details[1]
-        self.composition = details[2]
-        self.structure = structure
+        self.prototype_tag = prototype_tag
+        if prototype_tag:
+            details = prototype_tag.split('_')
+            self.spacegroup = details[0]
+            self.wyckoff_positions = details[1]
+            self.composition = details[2]
+            self.structure = structure
 
 
 class Surface(Base):
