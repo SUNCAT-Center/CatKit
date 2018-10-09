@@ -235,11 +235,6 @@ def get_atomsrow_by_id(unique_id):
     row = db.get('unique_id={}'.format(unique_id))
     return row
 
-# def get_atomsrow_by_ids(unique_ids):
-#    db = get_ase_db()
-#    con = db._connect()
-#    cur = con.cursor()
-
 
 def get_atoms_by_id(unique_id):
     row = get_atomsrow_by_id(unique_id)
