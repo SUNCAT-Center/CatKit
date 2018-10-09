@@ -255,42 +255,43 @@ class CathubPostgreSQL:
             .format(user=user))
         con.commit()
 
-        """ Limit number of rows"""
-        for table in ['reaction', 'publication', 'systems', 'reaction_system',
-                      'publication_system', 'information']:
-            table_factor = 1
-            if table in [ 'reaction_system', 'publication_system']:
-                table_factor = 15
-            elif table == 'publication':
-                table_factor = 1 / 100
-            elif table == 'information':
-                table_factor = 1 / 100
+        if row_limit:
+            """ Limit number of rows"""
+            for table in ['reaction', 'publication', 'systems', 'reaction_system',
+                          'publication_system', 'information']:
+                table_factor = 1
+                if table in [ 'reaction_system', 'publication_system']:
+                    table_factor = 15
+                elif table == 'publication':
+                    table_factor = 1 / 100
+                elif table == 'information':
+                    table_factor = 1 / 100
 
-            trigger_function = """
-            CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
-            RETURNS TRIGGER AS
-            $BODY$
-            BEGIN
-                IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
-                THEN
-                    RAISE EXCEPTION 
-                        'INSERT statement exceeding maximum number of rows';
-                END IF;
-                RETURN NEW;
-            END;
-            $BODY$
-            LANGUAGE plpgsql""".format(user=user, table=table,
-                                       row_limit=row_limit * table_factor)
-            cur.execute(trigger_function)
+                trigger_function = """
+                CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
+                RETURNS TRIGGER AS
+                $BODY$
+                BEGIN
+                    IF (SELECT count(*) FROM {user}.{table}) > {row_limit}
+                    THEN
+                        RAISE EXCEPTION
+                            'INSERT statement exceeding maximum number of rows';
+                    END IF;
+                    RETURN NEW;
+                END;
+                $BODY$
+                LANGUAGE plpgsql""".format(user=user, table=table,
+                                           row_limit=row_limit * table_factor)
+                cur.execute(trigger_function)
 
-            trigger="""
-            DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
-                on {user}.{table};
-            CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
-            BEFORE INSERT ON {user}.systems
-            FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
-            """.format(user=user, table=table)
-            cur.execute(trigger)
+                trigger="""
+                DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
+                    on {user}.{table};
+                CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
+                BEFORE INSERT ON {user}.systems
+                FOR EACH ROW EXECUTE PROCEDURE check_number_of_rows_{user}_{table}();
+                """.format(user=user, table=table)
+                cur.execute(trigger)
 
         self.schema = old_schema
         set_schema = 'ALTER ROLE {user} SET search_path TO {schema};'\
@@ -305,7 +306,7 @@ class CathubPostgreSQL:
 
     def delete_user(self, user):
         """ Delete user and all data"""
-        assert self.user == 'catroot'
+        assert self.user == 'catroot' or self.user == 'postgres'
         assert not user == 'public'
         con = self.connection or self._connect()
         cur = con.cursor()
@@ -609,18 +610,56 @@ class CathubPostgreSQL:
         return id
     
 
-    def update(self, id, values, key_names='all'):
+    def update_reaction(self, id, ase_ids=None, energy_corrections={}, **kwargs):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
 
-        key_str = get_key_str(start_index=1)
-        value_str = get_value_str(values, start_index=1)
+        key_str = ', '.join(list(kwargs.keys()))#get_key_str(start_index=1)
+        value_str = get_value_str(list(kwargs.values()), start_index=0)
 
         update_command = 'UPDATE reaction SET ({0}) = ({1}) WHERE id = {2};'\
             .format(key_str, value_str, id)
 
         cur.execute(update_command)
+
+        if ase_ids:
+            delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+            cur.execute(delete_command)
+
+            """ Write to reaction_system tables"""
+            reaction_system_values = []
+            for name, ase_id in ase_ids.items():
+                if name in energy_corrections:
+                    energy_correction = energy_corrections[name]
+                else:
+                    energy_correction = 0
+
+                    reaction_system_values += [tuple([name, energy_correction,
+                                                      ase_id, id])]
+
+            key_str = get_key_str('reaction_system')
+            insert_command = """INSERT INTO reaction_system
+            ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str)
+
+            execute_values(cur=cur, sql=insert_command,
+                           argslist=reaction_system_values, page_size=1000)
+
+        if self.connection is None:
+            con.commit()
+            con.close()
+        return id
+
+    def delete_reaction(self, id):
+        con = self.connection or self._connect()
+        self._initialize(con)
+        cur = con.cursor()
+
+        delete_command = 'DELETE FROM reaction where id = {};'.format(id)
+        cur.execute(delete_command)
+
+        delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+        cur.execute(delete_command)
 
         if self.connection is None:
             con.commit()
@@ -797,6 +836,7 @@ class CathubPostgreSQL:
                 value_list = get_value_list(values)
                 publication_system_values += [tuple(value_list)]
 
+            # Insert into publication_system table
             key_str = get_key_str(table='publication_system')
             insert_command = """INSERT INTO publication_system ({0})
             VALUES %s ON CONFLICT DO NOTHING;"""\
@@ -804,6 +844,14 @@ class CathubPostgreSQL:
 
             execute_values(cur=cur, sql=insert_command,
                            argslist=publication_system_values, page_size=1000)
+
+            # Write pub_id to systems table
+            cur.execute("""UPDATE systems SET
+            key_value_pairs=jsonb_set(key_value_pairs, '{{"pub_id"}}', '"{pub_id}"')
+            WHERE unique_id IN
+            (SELECT ase_id from publication_system WHERE pub_id='{pub_id}')"""\
+                        .format(pub_id=pub_id))
+
             con.commit()
             self.stdout.write('  Completed transfer of publications\n')
 

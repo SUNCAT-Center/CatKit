@@ -28,3 +28,12 @@ class MaintainPostgres(CathubPostgreSQL):
 
         con.commit()
         con.close()
+
+    def update_index(self, schema='public', table='reaction'):
+        con = self.connection or self._connect()
+        cur = con.cursor()
+        cur.execute(
+            "SELECT setval('schema.{table}_id_seq', (SELECT MAX(id) FROM {schema}.{table}));"\
+            .format(schema=schema, table=table))
+        con.commit()
+        con.close()

@@ -197,35 +197,6 @@ def get_reaction_energy(structures, reaction, reaction_atoms, states,
 
     return reaction_energy, activation_energy
 
-
-def tag_atoms(atoms, types=None):
-    non_metals = ['H', 'He', 'B', 'C', 'N', 'O', 'F', 'Ne',
-                  'Si', 'P', 'S', 'Cl', 'Ar',
-                  'Ge', 'As', 'Se', 'Br', 'Kr',
-                  'Sb', 'Te', 'I', 'Xe',
-                  'Po', 'At', 'Rn']
-
-    layer_i = get_layers(atoms)
-    top_layer_i = np.max(layer_i)
-    i = 0
-
-    for i in range(0, top_layer_i + 1):
-        atoms_i = np.where(layer_i == top_layer_i - i)[0]
-        if len(np.where(layer_i == top_layer_i - i)[0]) == 1 and i < 4:
-            atom = atoms[atoms_i[0]]
-            if types is not None:
-                if atom.symbol in types:
-                    atom.tag = 0
-            elif types is None:
-                if atom.symbol in non_metals:
-                    atom.tag = 0
-        else:
-            for l in atoms_i:
-                atoms[l].tag = i + 1
-
-    return atoms
-
-
 def get_layers(atoms):
     tolerance = 0.01
     d = atoms.positions[:, 2]
@@ -319,7 +290,6 @@ def _normalize_key_value_pairs_inplace(data):
 
 def write_ase(atoms, db_file, stdout=sys.stdout, user=None, data=None, **key_value_pairs):
     """Connect to ASE db"""
-    atoms = tag_atoms(atoms)
     db_ase = ase.db.connect(db_file)
     _normalize_key_value_pairs_inplace(key_value_pairs)
     id = db_ase.write(atoms, data=data, **key_value_pairs)
