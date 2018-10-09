@@ -116,10 +116,7 @@ class UploadTestCase(unittest.TestCase):
         db.delete_reaction(id)
 
     def test6_get_reactions(self):
-        data = get_reactions(n_results=1, write_db=True, reactants='CO', products='C')
-        db = CathubSQLite('Reactions.db')
-        db.print_summary()
-
+        data = get_reactions(n_results=1, write_db=False, reactants='CO', products='C')
 
 if __name__ == '__main__':
     unittest.main()
