@@ -3,6 +3,8 @@ import json
 import unittest
 import shutil
 from catkit.hub.postgresql import CathubPostgreSQL
+from catkit.hub.cathubsqlite import CathubSQLite
+from catkit.hub.query import get_reactions
 from catkit.hub import db2server, make_folders_template, folder2db
 
 path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -112,6 +114,12 @@ class UploadTestCase(unittest.TestCase):
 
         db.update_reaction(id, reaction_energy=10)
         db.delete_reaction(id)
+
+    def test6_get_reactions(self):
+        data = get_reactions(n_results=1, write_db=True, reactants='CO', products='C')
+        db = CathubSQLite('Reactions.db')
+        db.print_summary()
+
 
 if __name__ == '__main__':
     unittest.main()
