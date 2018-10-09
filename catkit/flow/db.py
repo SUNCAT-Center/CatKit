@@ -6,7 +6,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.dialects.postgresql import JSONB
 import sqlalchemy as sqa
 import numpy as np
-import passlib.apps
 import datetime
 import operator
 import warnings

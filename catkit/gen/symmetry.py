@@ -51,7 +51,7 @@ def get_standardized_cell(atoms, primitive=False, tol=1e-5):
 class Symmetry():
     """Wrapper for the spglib package."""
 
-    def __init__(self, atoms, tol=1e-5):
+    def __init__(self, atoms, tol=1e-5, ang_tol=-1):
         """Atoms object interface with spglib symmetry finder:
         https://atztogo.github.io/spglib/python-spglib.html#python-spglib
 
@@ -71,7 +71,8 @@ class Symmetry():
         self.tol = tol
 
         cell = (self.lattice, self.positions, self.modified_numbers)
-        self.data = spglib.get_symmetry_dataset(cell, symprec=tol)
+        self.data = spglib.get_symmetry_dataset(
+            cell, symprec=tol, angle_tolerance=ang_tol)
 
     def get_symmetry_operations(self, affine=True):
         """Return the symmetry operations for a given atomic structure.

@@ -1,3 +1,6 @@
+from .gen.molecules import get_topologies, get_3D_positions
+from .gen.surface import SlabGenerator
+from .gen.symmetry import get_standardized_cell
 import catkit
 import numpy as np
 import ase.build
@@ -29,7 +32,7 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
         atoms = ase.build.bulk(name, crystalstructure, **kwargs)
     else:
         atoms = name
-    standardized_bulk = catkit.gen.symmetry.get_standardized_cell(
+    standardized_bulk = get_standardized_cell(
         atoms, primitive=primitive)
 
     return standardized_bulk
@@ -79,7 +82,7 @@ def surface(
     else:
         atoms = ase.build.bulk(elements, crystal, cubic=True, **kwargs)
 
-    generator = catkit.gen.surface.SlabGenerator(
+    generator = SlabGenerator(
         bulk=atoms,
         miller_index=miller,
         layers=size[-1],
@@ -125,11 +128,11 @@ def molecule(species, bond_index=None, vacuum=0):
     images : list of Gratoms objects
         3D structures of the requested chemical species and topologies.
     """
-    molecule_graphs = catkit.gen.molecules.get_topologies(species)
+    molecule_graphs = get_topologies(species)
 
     images = []
     for atoms in molecule_graphs:
-        atoms = catkit.gen.molecules.get_3D_positions(atoms, bond_index)
+        atoms = get_3D_positions(atoms, bond_index)
         images += [atoms]
 
     return images

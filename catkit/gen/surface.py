@@ -1,6 +1,6 @@
 from __future__ import division
 from .. import Gratoms
-from . import defaults
+from catkit.gen import defaults
 from . import symmetry
 from . import utils
 from . import adsorption
