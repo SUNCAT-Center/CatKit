@@ -3,6 +3,7 @@
 """Catalysis Generator."""
 
 from collections import MutableMapping
+from . import molecules
 import numpy as np
 import ase
 

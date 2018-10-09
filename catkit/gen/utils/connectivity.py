@@ -1,4 +1,4 @@
-from .. import defaults
+import catkit
 from . import coordinates
 import numpy as np
 import scipy
@@ -73,7 +73,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    cov_radii = defaults.get('radii')
+    cov_radii = catkit.gen.defaults.get('radii')
     numbers = atoms.numbers
     index, coords = coordinates.expand_cell(atoms)[:2]
 

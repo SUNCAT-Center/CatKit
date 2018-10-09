@@ -1,6 +1,4 @@
-from .. import Gratoms
-from . import utils
-from . import defaults
+import catkit
 import networkx as nx
 import itertools
 import numpy as np
@@ -35,7 +33,7 @@ def hydrogenate(atoms, bins, copy=True):
 
     if copy:
         atoms = atoms.copy()
-    atoms += Gratoms('H{}'.format(sum(bins)))
+    atoms += catkit.Gratoms('H{}'.format(sum(bins)))
     atoms.graph.add_edges_from(edges)
 
     return atoms
@@ -58,7 +56,7 @@ def get_topologies(symbols, saturate=False):
         Gratoms objects with unique connectivity matrix attached.
         No 3D positions will be provided for these structures.
     """
-    num, cnt = utils.get_atomic_numbers(symbols, True)
+    num, cnt = catkit.gen.utils.get_atomic_numbers(symbols, True)
     mcnt = cnt[num != 1]
     mnum = num[num != 1]
 
@@ -68,7 +66,7 @@ def get_topologies(symbols, saturate=False):
         hcnt = 0
 
     elements = np.repeat(mnum, mcnt)
-    max_degree = defaults.get('radicals')[elements]
+    max_degree = catkit.gen.defaults.get('radicals')[elements]
     n = mcnt.sum()
 
     hmax = int(max_degree.sum() - (n - 1) * 2)
@@ -79,11 +77,11 @@ def get_topologies(symbols, saturate=False):
         hcnt = hmax
 
     if n == 1:
-        atoms = Gratoms(elements, cell=[1, 1, 1])
+        atoms = catkit.Gratoms(elements, cell=[1, 1, 1])
         hatoms = hydrogenate(atoms, np.array([hcnt]))
         return [hatoms]
     elif n == 0:
-        hatoms = Gratoms('H{}'.format(hcnt))
+        hatoms = catkit.Gratoms('H{}'.format(hcnt))
         if hcnt == 2:
             hatoms.graph.add_edge(0, 1, bonds=1)
         return [hatoms]
@@ -114,7 +112,7 @@ def get_topologies(symbols, saturate=False):
         if np.any(remaining_bonds < 0):
             continue
 
-        atoms = Gratoms(
+        atoms = catkit.Gratoms(
             numbers=elements,
             edges=connectivity,
             cell=[1, 1, 1])
@@ -183,14 +181,14 @@ def get_3D_positions(atoms, bond_index=None):
 
         c0 = atoms[root].position
         if i == 0:
-            basis = utils.get_basis_vectors([c0, [0, 0, -1]])
+            basis = catkit.gen.utils.get_basis_vectors([c0, [0, 0, -1]])
         else:
             bond_index = None
             for j, base_root in enumerate(complete):
                 if root in branches[base_root]:
                     c1 = atoms[base_root].position
                     # Flip the basis for every alternate step down the chain.
-                    basis = utils.get_basis_vectors([c0, c1])
+                    basis = catkit.gen.utils.get_basis_vectors([c0, c1])
                     if (i - j) % 2 != 0:
                         basis[2] *= -1
                     break
@@ -205,11 +203,11 @@ def get_3D_positions(atoms, bond_index=None):
 def _branch_molecule(
         atoms,
         branch,
-        basis,
+        basis=None,
         adsorption=None):
     """Return the positions of a Gratoms object for a segment of its
     attached graph. This function is mean to be iterated over by a depth
-    first search form Networkx.
+    first search form NetworkX.
 
     Parameters
     ----------
@@ -235,7 +233,7 @@ def _branch_molecule(
     root, nodes = branch
     root_position = atoms[root].position
 
-    radii = defaults.get('radii')
+    radii = catkit.gen.defaults.get('radii')
     atomic_numbers = atoms.numbers[[root] + nodes]
     atomic_radii = radii[atomic_numbers]
     dist = (atomic_radii[0] + atomic_radii[1:])[:, None]
@@ -258,6 +256,9 @@ def _branch_molecule(
         dihedral[1] = 180
 
     # Place the atoms of this segment of the branch
+    if basis is None:
+        basis = catkit.gen.utils.get_basis_vectors(
+            [root_position, [0, 0, -1]])
     basis = np.repeat(basis[None, :, :], len(dist), axis=0)
 
     ang = np.deg2rad(angles)[:len(dist), None]

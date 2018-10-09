@@ -1,5 +1,6 @@
-from . import gen
+import catkit
 import numpy as np
+import ase.build
 import ase
 
 
@@ -28,7 +29,7 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
         atoms = ase.build.bulk(name, crystalstructure, **kwargs)
     else:
         atoms = name
-    standardized_bulk = gen.symmetry.get_standardized_cell(
+    standardized_bulk = catkit.gen.symmetry.get_standardized_cell(
         atoms, primitive=primitive)
 
     return standardized_bulk
@@ -78,7 +79,7 @@ def surface(
     else:
         atoms = ase.build.bulk(elements, crystal, cubic=True, **kwargs)
 
-    generator = gen.surface.SlabGenerator(
+    generator = catkit.gen.surface.SlabGenerator(
         bulk=atoms,
         miller_index=miller,
         layers=size[-1],
@@ -96,7 +97,7 @@ def surface(
         size = size[:2]
 
     if orthogonal:
-        gen.defaults['orthogonal'] = True
+        catkit.gen.defaults['orthogonal'] = True
         if isinstance(size, (list, tuple)):
             size = np.prod(size[:2])
 
@@ -124,11 +125,11 @@ def molecule(species, bond_index=None, vacuum=0):
     images : list of Gratoms objects
         3D structures of the requested chemical species and topologies.
     """
-    molecule_graphs = gen.molecules.get_topologies(species)
+    molecule_graphs = catkit.gen.molecules.get_topologies(species)
 
     images = []
     for atoms in molecule_graphs:
-        atoms = gen.molecules.get_3D_positions(atoms, bond_index)
+        atoms = catkit.gen.molecules.get_3D_positions(atoms, bond_index)
         images += [atoms]
 
     return images

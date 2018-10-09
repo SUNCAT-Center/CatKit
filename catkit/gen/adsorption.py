@@ -1,6 +1,7 @@
 from . import defaults
 from . import utils
 from . import symmetry
+import catkit
 import matplotlib.pyplot as plt
 import itertools
 import networkx as nx
@@ -348,7 +349,6 @@ class AdsorptionSites():
 
         site_id = self.get_symmetric_sites(unique=False, screen=False)
         site_id = site_id + self.connectivity / 10
-        print(site_id)
         per = self.get_periodic_sites(screen=False)
 
         uper = self.get_periodic_sites()
@@ -598,7 +598,7 @@ class Builder(AdsorptionSites):
         if auto_construct:
             root = None
             for i, branch in enumerate(branches):
-                root = utils._branch_molecule(
+                root = catkit.gen.molecules._branch_molecule(
                     atoms, branch, root, adsorption=True)
 
             # Align with the adsorption vector
@@ -658,21 +658,17 @@ class Builder(AdsorptionSites):
         if len(branches0[0][1]) != 0:
             uvec = [-uvec0, uvec1[0], uvec2[0]]
             self._branch_bidentate(atoms, uvec, branches0[0])
-            root = branches0[0][0]
             for branch in branches0[1:]:
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True)
+                catkit.gen.molecules._branch_molecule(
+                    atoms, branch, adsorption=True)
 
         branches1 = list(nx.bfs_successors(atoms.graph, bonds[1]))
         if len(branches1[0][1]) != 0:
             uvec = [uvec0, uvec1[0], uvec2[0]]
             self._branch_bidentate(atoms, uvec, branches1[0])
-            root = branches1[0][0]
             for branch in branches1[1:]:
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True)
+                catkit.gen.molecules._branch_molecule(
+                    atoms, branch, adsorption=True)
 
         n = len(slab)
         slab += atoms
