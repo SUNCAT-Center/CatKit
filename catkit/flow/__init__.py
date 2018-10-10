@@ -3,5 +3,7 @@
 """Catalysis WorkFlow."""
 
 from .laminar import Laminar
+from .db import Connect
+from . import db
 
-__all__ = ['Laminar']
+__all__ = ['Laminar', 'Connect', 'db']

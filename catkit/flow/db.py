@@ -307,14 +307,17 @@ class Connect():
         calculator = self.get_matching_calculator(parameters)
 
         if calculator is None:
-            if not auto_submit or isinstance(atoms, str):
+            if not auto_submit:
                 raise CalculationRequired('No bulk structure match')
+            if isinstance(atoms, str):
+                raise CalculationRequired('Auto submission requires an atoms '
+                                          'object for initial guess.')
             # TODO: a more intellegent framework might use a different
             # calculator match as a good initial guess here.
 
             # B.1) Submit calculation.
-            self.submit_bulk_entry(atoms, parameters)
-            return
+            workflow = self.submit_bulk_entry(atoms, parameters)
+            return workflow
 
         # A.2) We need a prototype tag to match against the database.
         if isinstance(atoms, str):
@@ -324,36 +327,36 @@ class Connect():
             atoms.info['prototype_tag'] = tag
 
         # A.3) Query for all similar structures with matching calculator
-        query = self.cursor.query(Bulk.id, Bulk.prototype_tag, Structure).\
-                    filter(Bulk.initial_prototype_tag == tag).\
-                    join(Structure, Bulk.initial_structure_id == Structure.id).\
-                    filter(Structure.calculator_id == calculator.id)
-
-        # A.4) If multiple structures exist, there could be multiple minima
+        # If multiple structures exist, there could be multiple minima
         # User intervention will likely be required.
         # For now, lets assume there is one minima at most.
-        previous_structure = query.one_or_none()
+        query = self.cursor.query(Bulk.id, Bulk.structure_id).\
+                    filter(Bulk.initial_prototype_tag == tag).\
+                    join(Structure, Bulk.initial_structure_id == Structure.id).\
+                    filter(Structure.calculator_id == calculator.id).one_or_none()
 
-        if previous_structure is None:
+        if query is None:
             if not auto_submit:
                 raise CalculationRequired('No bulk structure match')
+            if isinstance(atoms, str):
+                raise CalculationRequired('Auto submission requires an atoms '
+                                          'object for initial guess.')
 
             # B.1) Submit calculation.
-            self.submit_bulk_entry(atoms, parameters)
-            return
-        elif previous_structure[1] is None:
-            # A.5) No final structure. This calculation has already been submitted.
-            # Print the current status.
-            bulk_id, _, workflow, user = self.cursor.query(
-                Bulk.id, Structure.workflow_id, Workflow, User).\
-                filter(Bulk.id == previous_structure[0]).\
-                join(Structure, Bulk.initial_structure_id == Structure.id).\
-                join(Workflow).join(User).one()
-            print(workflow)
+            workflow = self.submit_bulk_entry(atoms, parameters)
             return workflow
 
-        # A.6) If found, return the atoms object
-        tag, structure = previous_structure
+        elif query[1] is None:
+            # A.5) No final structure. This calculation has already been submitted.
+            bulk_id, _, workflow, user = self.cursor.query(
+                Bulk.id, Structure.workflow_id, Workflow, User).\
+                filter(Bulk.id == query[0]).\
+                join(Structure, Bulk.initial_structure_id == Structure.id).\
+                join(Workflow).join(User).one()
+            return workflow
+
+        structure = self.cursor.query(Structure).\
+            filter(Structure.id == query[1]).one()
         atoms = self.structure_to_atoms(structure)
 
         return atoms
@@ -415,6 +418,8 @@ class Connect():
         initial_structure.workflow = workflow
         self.cursor.add(initial_structure)
         self.cursor.commit()
+
+        return workflow
 
     def update_bulk_entry(self, trajectory, bulk_id=None, prototype_tag=None):
         """Update a bulk calcualtion which has been submitted with
@@ -734,7 +739,7 @@ class Structure(Base):
         positions = np.round(self.positions, 4)
         for i, n in enumerate(symbols):
             prompt += '|{:>4} |'.format(n)
-            prompt += ' {:<8} {:<8} {:<8} |'.format(*positions[i])
+            prompt += ' {:<8} {:<8} {:<8} |\n'.format(*positions[i])
         return prompt
 
 

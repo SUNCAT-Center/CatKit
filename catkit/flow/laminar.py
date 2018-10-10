@@ -15,8 +15,7 @@ class Laminar():
             host,
             username=None,
             name=None,
-            password=None,
-            calculator='decaf.Espresso'):
+            password=None):
         """Initialize a fireworks instance."""
         if username is None or name is None or password is None:
             username, name, password = netrc().authenticators(host)
@@ -30,7 +29,6 @@ class Laminar():
             password=password)
 
         self.launchpad = launchpad
-        self.calculator = calculator
 
     def submit_relaxation(
             self,
@@ -45,7 +43,7 @@ class Laminar():
         The entries uuid will also be stored and `data.calculator_parameters`
         will be used as the calculation parameters.
 
-        Parameter:
+        Parameters
         ----------
         images : Atoms object | AtomsRow object
             ASE database entry or atoms object to relax.
@@ -65,6 +63,10 @@ class Laminar():
             data.update(image.data)
         else:
             atoms = image
+
+        calculator = parameters.pop('calculator_name', None)
+        if calculator is None:
+            raise ValueError("'calculator_name' missing from parameters.")
 
         if parameters is not None:
             atoms.info['calculator_parameters'] = parameters
@@ -88,7 +90,7 @@ class Laminar():
 
         t1 = fireworks.PyTask(
             func='catkit.flow.fwase.get_potential_energy',
-            args=[self.calculator],
+            args=[calculator],
             stored_data_varname='trajectory')
         tasks = [t0, t1]
 
@@ -107,7 +109,7 @@ class Laminar():
         This requires that the calculation parameters be stored in
         the data under `data.calculator_parameters`.
 
-        Parameter:
+        Parameters
         ----------
         database : str
             Path to ASE database to be looped over for relaxation.
@@ -133,7 +135,7 @@ class Laminar():
         The entries uuid will also be stored and `data.calculator_parameters`
         will be used as the calculation parameters.
 
-        Parameter:
+        Parameters
         ----------
         images : Atoms object
             Initial atoms to perform workflow on.
