@@ -1,3 +1,4 @@
+from . import defaults
 from . import utils
 from . import symmetry
 import catkit
@@ -6,7 +7,7 @@ import itertools
 import networkx as nx
 import numpy as np
 import scipy
-radii = catkit.gen.defaults.get('radii')
+radii = defaults.get('radii')
 
 
 class AdsorptionSites():

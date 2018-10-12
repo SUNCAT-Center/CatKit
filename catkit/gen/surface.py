@@ -1,9 +1,9 @@
 from __future__ import division
 from .. import Gratoms
-from catkit.gen import defaults
 from . import symmetry
 from . import utils
 from . import adsorption
+from . import defaults
 import numpy as np
 import itertools
 import warnings
@@ -552,8 +552,8 @@ class SlabGenerator(object):
                               'slab size.')
                 break
 
-        return slab
 
+        return slab
 
 def transform_ab(slab, matrix, tol=1e-5):
     """Transform the slab basis vectors parallel to the z-plane
