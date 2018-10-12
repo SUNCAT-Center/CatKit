@@ -1,4 +1,3 @@
-# from . import defaults
 from . import utils
 from . import symmetry
 import catkit

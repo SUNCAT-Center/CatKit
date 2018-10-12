@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def expand_cell(atoms):
+def expand_cell(atoms, padding=None):
     """Return Cartesian coordinates atoms within a supercell
     which contains repetitions of the unit cell which contains
     at least one neighboring atom.
@@ -11,42 +11,51 @@ def expand_cell(atoms):
     atoms : Atoms object
         Atoms with the periodic boundary conditions and unit cell
         information to use.
+    padding : ndarray (3,)
+        Padding of repetition of the unit cell in the x, y, z
+        directions. e.g. [1, 0, 1].
 
     Returns
     -------
-    index : ndarray of int
+    index : ndarray (N,)
         Indices associated with the original unit cell positions.
-    coords : ndarray of (3,) array
+    coords : ndarray (N, 3)
         Cartesian coordinates associated with positions in the
         supercell.
+    offsets : ndarray (M, 3)
+        Integer offsets of each unit cell.
     """
     cell = atoms.cell
     pbc = atoms.pbc
     pos = atoms.positions
 
-    diags = np.sqrt((
-        np.dot([[1, 1, 1],
-                [-1, 1, 1],
-                [1, -1, 1],
-                [-1, -1, 1]],
-               cell)**2).sum(1))
+    if padding is None:
+        diags = np.sqrt((
+            np.dot([[1, 1, 1],
+                    [-1, 1, 1],
+                    [1, -1, 1],
+                    [-1, -1, 1]],
+                   cell)**2).sum(1))
 
-    dpos = (pos - pos[:, None]).reshape(-1, 3)
-    Dr = np.dot(dpos, np.linalg.inv(cell))
-    D = np.dot(Dr - np.round(Dr) * pbc, cell)
-    D_len = np.sqrt((D**2).sum(1))
+        if pos.shape[0] == 1:
+            cutoff = max(diags) / 2.
+        else:
+            dpos = (pos - pos[:, None]).reshape(-1, 3)
+            Dr = np.dot(dpos, np.linalg.inv(cell))
+            D = np.dot(Dr - np.round(Dr) * pbc, cell)
+            D_len = np.sqrt((D**2).sum(1))
 
-    cutoff = min(max(D_len), max(diags) / 2.)
+            cutoff = min(max(D_len), max(diags) / 2.)
 
-    latt_len = np.sqrt((cell**2).sum(1))
-    V = abs(np.linalg.det(cell))
-    n = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
-                               (V * latt_len)), dtype=int)
+        latt_len = np.sqrt((cell**2).sum(1))
+        V = abs(np.linalg.det(cell))
+        padding = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
+                                         (V * latt_len)), dtype=int)
 
     offsets = np.mgrid[
-        -n[0]:n[0] + 1,
-        -n[1]:n[1] + 1,
-        -n[2]:n[2] + 1].T
+        -padding[0]:padding[0] + 1,
+        -padding[1]:padding[1] + 1,
+        -padding[2]:padding[2] + 1].T
     tvecs = np.dot(offsets, cell)
     coords = pos[None, None, None, :, :] + tvecs[:, :, :, None, :]
 
