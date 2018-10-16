@@ -215,7 +215,7 @@ def fuzzy_match(structures, options):
                     try:
                         subtractions = ''.join(
                             sorted(
-                                ase.atoms.string2symbols(
+                                ase.symbols.string2symbols(
                                     subtractions)))
                     except Exception as e:
                         if options.verbose:
@@ -224,7 +224,7 @@ def fuzzy_match(structures, options):
                     try:
                         additions = ''.join(
                             sorted(
-                                    ase.atoms.string2symbols(
+                                    ase.symbols.string2symbols(
                                         additions)))
                     except Exception as e:
                         if options.verbose:
