@@ -1,4 +1,4 @@
-git+https://gitlab.com/ase/ase.git@d441dd6a1c71a2e1a925043e6974a9b3ae961854
+git+https://gitlab.com/ase/ase.git@9f1e944260bbd4bc04db35670f84a69a270451a6
 matplotlib>=2.2
 numpy>=1.14
 spglib>=1.10
