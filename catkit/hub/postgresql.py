@@ -6,6 +6,7 @@ import random
 import psycopg2
 from psycopg2.extras import execute_values
 import ase.db
+from ase.db.core import now
 from ase.db.postgresql import PostgreSQLDatabase
 from past.utils import PY2
 
@@ -351,6 +352,17 @@ class CathubPostgreSQL:
         for pub_id in pub_ids:
             self.stdout.write('Releasing publication: {pub_id} to public\n'\
                          .format(pub_id=pub_id))
+
+            mtime = now()
+            cur.execute(
+                """UPDATE upload.systems SET
+                mtime = {}
+                WHERE unique_id in
+                  (SELECT distinct ase_id
+                   FROM upload.publication_system
+                   WHERE pub_id = '{pub_id}')"""\
+                .format(mtime))
+
             columns = get_key_str('systems', start_index=1)
             cur.execute(
                 """INSERT INTO {schema}.systems ({columns})
