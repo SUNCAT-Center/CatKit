@@ -86,21 +86,63 @@ def local_ads_metal_fp(
         connectivity=None,
         fuse=False):
     """Sum of the differences in properties of the atoms in the
-    metal-adsorbate interface
+       metal-adsorbate interface
+
+       Parameters
+       ----------
+       atoms : ase Atoms or catkit gratoms object.
+       atoms_parameters : ndarray(n, )
+           a list of chemical properties to construct the fingerprints.
+       connectivity : ndarray (n,)
+           Connectivity of the adsorption sites
+       weigthed : boolean
+           fingerprints are weightd by the stoichiometric ratio of
+           the bimetals.
     """
     bond_index = np.where(atoms.get_tags() == -1)[0]
     fp = np.empty([len(atoms_parameters), len(bond_index)])
-
     for i, bi in enumerate(bond_index):
         bonded_ap = atoms_parameters[:, np.where(connectivity[bi] == 1)[0]]
         fp[:, i] = np.mean(bonded_ap -
-                           atoms_parameters[:, bi].reshape(-1, 1), axis=1)
-
+                atoms_parameters[:, bi].reshape(-1, 1), axis=1)
     if not fuse:
         return fp.reshape(-1)
     else:
-        return fp.sum(axis=1)
+       return fp.sum(axis=1)
 
+def bimetal_fp(
+        atoms=None,
+        atoms_parameters=None,
+        connectivity=None):
+    """The differences in properties of the atoms in the
+       metal-adsorbate interface
+
+       Parameters
+       ----------
+       atoms : ase Atoms or catkit gratoms object.
+       atoms_parameters : ndarray(n, )
+           a list of chemical properties to construct the fingerprints.
+    """
+    fp = np.zeros([len(atoms_parameters)])
+    metals = set(atoms.get_chemical_symbols())
+    uap = []
+    for ap in atoms_parameters:
+        if not  np.isnan(ap).any():
+            uap += [np.unique(np.round(ap, 3)).tolist()]
+        else:
+            uap += [[np.nan, np.nan]]
+    for i, ap in enumerate(uap):
+        if len(ap) == 1:
+            uap[i] = [ap[0], ap[0]]
+
+    if len(metals) == 1:
+        fp = fp.reshape(-1)
+    elif len(metals) == 2:
+        fp = np.diff(uap).reshape(-1)
+    else:
+        raise NotImplementedError("""This operation is restricted to single
+                                  and binary metal system only.""")
+    return fp
 
 def derived_fp(
         atoms=None,

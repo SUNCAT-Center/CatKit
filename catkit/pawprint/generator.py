@@ -125,7 +125,10 @@ class Fingerprinter():
                     connectivity,
                     **kwargs)
                 fingerprints[i] += [fingerprint]
-        fingerprints = np.block(fingerprints)
+        try:
+            fingerprints = np.block(fingerprints)
+        except ValueError:
+            fingerprints = 'I\'m outta here.'
 
         return fingerprints
 
