@@ -94,7 +94,7 @@ def get_topologies(symbols, saturate=False):
     for c in combos:
         # Construct the connectivity matrix
         ltm = np.zeros(ln)
-        ltm[[c]] = 1
+        ltm[np.atleast_2d(c)] = 1
 
         connectivity = np.zeros((n, n))
         connectivity[il] = ltm
