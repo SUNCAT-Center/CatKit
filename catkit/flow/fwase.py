@@ -77,7 +77,7 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
 
     # Setting up the calculator
     calculator = utils.str_to_class(calculator_name)
-    calc = calculator(atoms, **parameters, calc_file='pw0.pwi')
+    calc = calculator(atoms, calc_file='pw0.pwi', **parameters)
 
     # Perform the calculation and write trajectory from log.
     atoms.get_potential_energy()
@@ -86,7 +86,7 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
         # If bulk, we need to resymmeterize and perform a final scf
         tag, atoms = ckutil.aflow.get_prototype_tag(calc.atoms, tol=1e-2)
         parameters['calculation'] = 'scf'
-        calc = calculator(atoms, **parameters, calc_file='pw1.pwi')
+        calc = calculator(atoms, calc_file='pw1.pwi', **parameters)
         atoms.get_potential_energy()
 
     if isinstance(calc, decaf.Espresso):

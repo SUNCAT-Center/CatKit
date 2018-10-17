@@ -730,7 +730,8 @@ class Structure(Base):
         cell = np.round(self.cell, 3)
         prompt += '| {:^20} | {:^10} \n |-\n'.format('Cell', 'pbc')
         for i in range(3):
-            prompt += '| {:<8} {:<8} {:<8} | {} |\n'.format(*cell[i], self.pbc[i])
+            lcell = cell[i]
+            prompt += '| {:<8} {:<8} {:<8} | {} |\n'.format(lcell, self.pbc[i])
 
         prompt += '\n| Sym | {:^26} |\n'.format('Positions')
         prompt += '|-----|' + '-' * 28 + '|\n'
