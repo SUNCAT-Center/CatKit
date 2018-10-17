@@ -128,8 +128,8 @@ def molecule(species, bond_index=None, vacuum=0):
     molecule_graphs = catkit.gen.molecules.get_topologies(species)
 
     images = []
-    for atoms in catkit.gen.molecules.molecule_graphs:
-        atoms = get_3D_positions(atoms, bond_index)
+    for atoms in molecule_graphs:
+        atoms = catkit.gen.molecules.get_3D_positions(atoms, bond_index)
         images += [atoms]
 
     return images
