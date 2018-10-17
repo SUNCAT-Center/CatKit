@@ -43,6 +43,8 @@ def test_file_organization_module():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': True,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 
@@ -67,6 +69,8 @@ def test_file_organization_module_non_keep():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': False,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 
@@ -90,6 +94,8 @@ def test_file_organization_module_collect_only():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': False,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 

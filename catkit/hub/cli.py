@@ -5,6 +5,7 @@ from yaml import Dumper
 import click
 import six
 import collections
+from tabulate import tabulate
 from ase.atoms import string2symbols
 from ase.cli import main
 from . import query
@@ -36,11 +37,14 @@ def show_reactions(dbfile):
 @click.option('--dbpassword', default='eFjohbnD57WLYAJX', type=str)
 @click.option('--gui', default=False, show_default=True, is_flag=True,
               help='show structures in ase gui')
-@click.option('--args', '-a', type=str,
-              help="Arguments to the ase db cli client in one string. For example: <cathub ase --args 'formula=Ag6In6H -s energy'>. To see possible ase db arguments run  <cathub ase --args --help>")
-
+@click.option('--args', '-a', default='', type=str,
+              help="""Arguments to the ase db cli client in one string.
+              For example: <cathub ase --args 'formula=Ag6In6H -s energy'>.
+              To see possible ase db arguments
+              run <cathub ase --args --help>""")
 def ase(dbuser, dbpassword, args, gui):
-    """Direct connection to the Catalysis-Hub server with ase db cli"""
+    """Direct connection to atomic structures on the Catalysis-Hub
+       server with ase db cli"""
     if dbuser == 'upload':
         dbpassword = 'cHyuuQH0'
     db = CathubPostgreSQL(user=dbuser, password=dbpassword)
@@ -51,7 +55,8 @@ def ase(dbuser, dbpassword, args, gui):
     if gui:
         args = args.split('-')[0]
         subprocess.call(
-        ('ase gui {}@{}'.format(server_name, args)).split())
+            ('ase gui {}@{}'.format(server_name, args)).split())
+
 
 @cli.command()
 @click.argument('folder_name')
@@ -63,16 +68,19 @@ def ase(dbuser, dbpassword, args, gui):
     help='SLack or Github username. Alternatively your email adress.')
 @click.option('--debug',
               is_flag=True,
+              show_default=True,
               default=False)
 @click.option(
     '--skip-folders',
     default='',
+    show_default=True,
     help="""subfolders not to read, given as the name of a single folder,
     or a string with names of more folders seperated by ', '""")
 @click.option(
     '--energy-limit',
-    default=5,
-    help="""Limit for accepted absolute reaction energies""")
+    default=5.0,
+    show_default=True,
+    help="""Bounds for accepted absolute reaction energies in eV""")
 @click.option('--goto-reaction',
               help="""name of reaction folder to skip ahead to""")
 def folder2db(folder_name, userhandle, debug, energy_limit, skip_folders,
@@ -142,19 +150,21 @@ publication_columns = [
               show_default=True,
               multiple=True)
 @click.option('--n-results', '-n', default=10, show_default=True)
+@click.option('--write-db', '-w', is_flag=True, default=False,
+              show_default=True)
 @click.option(
     '--queries',
     '-q',
     default={},
     multiple='True',
+    show_default=True,
     help="""Make a selection on one of the columns:
     {0}\n Examples: \n -q chemicalComposition=~Pt for surfaces containing Pt
     \n -q reactants=CO for reactions with CO as a reactants"""
     .format(reaction_columns))
 # Keep {0} in string.format for python2.6 compatibility
-def reactions(columns, n_results, queries):
+def reactions(columns, n_results, write_db, queries):
     """Search for reactions"""
-
     if not isinstance(queries, dict):
         query_dict = {}
         for q in queries:
@@ -169,16 +179,29 @@ def reactions(columns, n_results, queries):
             except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
                 # Keep {0} in string.format for python2.6 compatibility
-    query.query(
-        table='reactions',
-        columns=columns,
-        n_results=n_results,
-        queries=query_dict)
+    if write_db and n_results > 1000:
+        print("""Warning: You're attempting to write more than a 1000 rows
+        with geometries. This could take some time""")
+    data = query.get_reactions(columns=columns,
+                               n_results=n_results,
+                               write_db=write_db,
+                               **query_dict)
+
+    if write_db:
+        return
+    table = []
+    headers = []
+    for row in data['reactions']['edges']:
+        table += [list(row['node'].values())]
+
+    headers = list(row['node'].keys())
+
+    print(tabulate(table, headers) + '\n')
 
 
 @cli.command()
 @click.option('--columns', '-c',
-              default=('title', 'authors', 'journal', 'year'),
+              default=('pubId', 'title', 'authors', 'journal', 'year'),
               type=click.Choice(publication_columns),
               show_default=True,
               multiple=True)
@@ -188,10 +211,10 @@ def reactions(columns, n_results, queries):
     '-q',
     default={},
     multiple=True,
+    show_default=True,
     help="""Make a selection on one of the columns:
     {0}\n Examples: \n -q: \n title=~Evolution \n authors=~bajdich
     \n year=2017""".format(publication_columns))
-# Keep {0} in string.format for python2.6 compatibility
 def publications(columns, n_results, queries):
     """Search for publications"""
     if not isinstance(queries, dict):
@@ -207,13 +230,35 @@ def publications(columns, n_results, queries):
                 query_dict.update({key: value})
             except BaseException:
                 query_dict.update({key: '{0}'.format(value)})
-                # Keep {0} in string.format for python2.6 compatibility
+    if 'sort' not in query_dict:
+        query_dict.update({'order': '-year'})
+    data = query.query(table='publications',
+                       columns=columns,
+                       n_results=n_results,
+                       queries=query_dict)
+    table = []
+    headers = []
+    for row in data['publications']['edges']:
+        value = list(row['node'].values())
+        for n, v in enumerate(value):
+            if isinstance(v, str) and len(v) > 20:
+                splited = v.split(' ')
+                size = 0
+                sentence = ''
+                for word in splited:
+                    if size < 20:
+                        size += len(word)
+                        sentence += ' ' + word
+                    else:
+                        sentence += '\n' + word
+                        size = 0
+                sentence += '\n'
+                value[n] = sentence
 
-    query.query(
-        table='publications',
-        columns=columns,
-        n_results=n_results,
-        queries=query_dict)
+        table += [value]
+
+    headers = list(row['node'].keys())
+    print(tabulate(table, headers, tablefmt="grid") + '\n')
 
 
 @cli.command()
@@ -303,11 +348,14 @@ def make_folders(create_template, template, custom_base, diagnose):
         'DFT_code': 'Quantum Espresso',
         'DFT_functionals': ['BEEF-vdW', 'HSE06'],
         'reactions': [
-            collections.OrderedDict({'reactants': ['2.0H2Ogas', '-1.5H2gas', 'star'],
+            collections.OrderedDict({'reactants':
+                                     ['2.0H2Ogas', '-1.5H2gas', 'star'],
                                      'products': ['OOHstar@top']}),
             collections.OrderedDict({'reactants': ['CCH3star@bridge'],
-                                     'products': ['Cstar@hollow', 'CH3star@ontop']}),
-            collections.OrderedDict({'reactants': ['CH4gas', '-0.5H2gas', 'star'],
+                                     'products':
+                                     ['Cstar@hollow', 'CH3star@ontop']}),
+            collections.OrderedDict({'reactants':
+                                     ['CH4gas', '-0.5H2gas', 'star'],
                                      'products': ['CH3star@ontop']})
         ],
         'bulk_compositions': ['Pt'],
@@ -405,14 +453,23 @@ def connect(user):
     '-f', '--facet-name',
     type=str,
     default='facet',
+    show_default=True,
     help="Manually specify a facet names.")
+@click.option(
+    '-d', '--gas-dir',
+    type=str,
+    default='',
+    show_default=True,
+    help="Specify a folder where gas-phase molecules"
+    " for calculating adsorption energies are located."
+        )
 @click.option(
     '-g', '--max-density-gas',
     type=float,
     default=0.002,
     show_default=True,
     help="Specify the maximum density (#atoms/A^3)"
-    " at which the structures are"
+    " below which the structures are"
     " considered gas-phase molecules.")
 @click.option(
     '-i', '--include-pattern',
@@ -432,7 +489,7 @@ def connect(user):
 @click.option(
     '-m', '--max-energy',
     type=float,
-    default=10.,
+    default=100.,
     show_default=True,
     help="Maximum absolute energy (in eV) that is considered.",)
 @click.option(
@@ -464,7 +521,7 @@ def connect(user):
     default=0.08,
     show_default=True,
     help="Specify the maximum density (#atoms/A^3) "
-    " at which the structure are considered slabs and not bulk")
+    " below which the structure are considered slabs and not bulk")
 @click.option(
     '-t', '--traj-format',
     type=bool,
@@ -473,6 +530,15 @@ def connect(user):
     show_default=True,
     help="Store intermediate filetype as traj"
     "instead of json files")
+@click.option(
+    '-u', '--use-cache',
+    type=bool,
+    is_flag=True,
+    default=False,
+    show_default=True,
+    help="When set the script will cache"
+    " structures between runs in a file named"
+    " <FOLDER_NAME>.cache.pckl")
 @click.option(
     '-v', '--verbose',
     is_flag=True,
