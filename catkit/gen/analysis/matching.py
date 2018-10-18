@@ -1,8 +1,6 @@
-import numpy as np
 import networkx as nx
-import networkx.algorithms.isomorphism as iso
-from ase.geometry import get_distances
-from ase.build import sort
+import numpy as np
+import ase
 
 
 def reactant_indices(R1, R2, P, broken_bond):
@@ -28,8 +26,8 @@ def reactant_indices(R1, R2, P, broken_bond):
         the reactants indices.
     """
     GM = nx.algorithms.isomorphism.GraphMatcher
-    em = iso.numerical_edge_match('bonds', 1)
-    nm = iso.numerical_node_match('number', 1)
+    em = nx.algorithms.isomorphism.numerical_edge_match('bonds', 1)
+    nm = nx.algorithms.isomorphism.numerical_node_match('number', 1)
 
     Pgraph = P.copy()
     u, v = broken_bond
@@ -57,9 +55,10 @@ def slab_indices(slab0, slab1, mask=None):
     ipos = slab0.positions[mask]
     fpos = slab1.positions[mask]
 
-    d = get_distances(ipos, fpos, cell=slab0.cell, pbc=slab0.pbc)[1]
+    d = ase.geometry.get_distances(
+        ipos, fpos, cell=slab0.cell, pbc=slab0.pbc)[1]
 
     matching[mask] = np.argmin(d, axis=1)
-    atoms = sort(slab0, matching)
+    atoms = ase.build.sort(slab0, matching)
 
     return atoms

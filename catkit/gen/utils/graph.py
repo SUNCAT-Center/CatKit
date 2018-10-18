@@ -1,4 +1,3 @@
-import networkx.algorithms.isomorphism as iso
 import networkx as nx
 import numpy as np
 
@@ -21,8 +20,8 @@ def connectivity_to_edges(connectivity, indices=None):
 
 def isomorphic_molecules(graph0, graph1):
     """Check whether two molecule graphs are isomorphic."""
-    em = iso.numerical_edge_match('bonds', 1)
-    nm = iso.numerical_node_match('number', 1)
+    em = nx.algorithms.isomorphism.numerical_edge_match('bonds', 1)
+    nm = nx.algorithms.isomorphism.numerical_node_match('number', 1)
 
     isomorphic = nx.is_isomorphic(graph0, graph1, edge_match=em, node_match=nm)
 

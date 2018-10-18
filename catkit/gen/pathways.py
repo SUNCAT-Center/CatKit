@@ -1,10 +1,9 @@
-from catkit import Gratoms
+from .. import Gratoms
 import sqlite3
 import numpy as np
 import networkx as nx
-from ase import Atom
-from ase.data import chemical_symbols
 import matplotlib.pyplot as plt
+import ase
 
 
 class ReactionNetwork():
@@ -157,7 +156,7 @@ class ReactionNetwork():
         """
         numbers = np.zeros(len(self.base_valence))
         for k, v in element_pool.items():
-            numbers[chemical_symbols.index(k)] = v
+            numbers[ase.data.chemical_symbols.index(k)] = v
 
         self.element_pool = numbers
         self.multiple_bond_search = multiple_bond_search
@@ -239,7 +238,7 @@ class ReactionNetwork():
                 node_index = len(G)
 
                 G.nodes[base_node]['valence'] -= 1
-                G += Atom(el)
+                G += ase.Atom(el)
                 G.nodes[node_index]['valence'] = self.base_valence[el] - 1
                 G.graph.add_edge(base_node, node_index, bonds=1)
 

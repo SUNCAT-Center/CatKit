@@ -1,8 +1,8 @@
 from catkit import Gratoms
 from .. import utils
-from ase import Atoms
 import networkx as nx
 import numpy as np
+import ase
 
 
 class Classifier():
@@ -159,7 +159,7 @@ class Classifier():
             for k in np.linspace(2, 3, 10):
                 wall = screen.copy() + [0, 0, k]
 
-                atm = Atoms(['X'] * m, positions=wall)
+                atm = ase.Atoms(['X'] * m, positions=wall)
                 test_atoms = atoms + atm
 
                 con = utils.get_voronoi_neighbors(test_atoms)
