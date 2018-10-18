@@ -1,6 +1,5 @@
-from .gen.surface import SlabGenerator
-from .gen.surface import get_unique_indices
-from .gen import utils
+from .gen.surface import get_unique_indices, SlabGenerator
+from .gen.symmetry import get_standardized_cell
 import numpy as np
 
 
@@ -53,10 +52,11 @@ def surfaces(
     slabs : list of Gratoms objects
         Return a list of enumerated slab structures.
     """
-    standardized_bulk = utils.get_spglib_cell(bulk, tol=5e-3)
+    standardized_bulk = get_standardized_cell(bulk, tol=5e-3)
 
     if isinstance(miller_indices, int):
-        miller_indices = get_unique_indices(standardized_bulk, miller_indices)
+        miller_indices = get_unique_indices(
+            standardized_bulk, miller_indices)
     elif isinstance(miller_indices, (list, np.ndarray)):
         miller_indices = np.atleast_2d(miller_indices)
 
@@ -67,7 +67,7 @@ def surfaces(
 
     slabs = []
     for miller in miller_indices:
-        gen = SlabGenerator(
+        generator = SlabGenerator(
             bulk=standardized_bulk,
             miller_index=miller,
             layers=width,
@@ -79,14 +79,14 @@ def surfaces(
         if terminations is None:
             iterms = np.zeros(1)
         elif terminations == -1:
-            zshifts = gen.get_unique_terminations()
+            zshifts = generator.get_unique_terminations()
             iterms = np.arange(len(zshifts))
         else:
             iterms = terminations
 
         for i in iterms:
             for size in sizes:
-                slab = gen.get_slab(size=int(size), iterm=i)
+                slab = generator.get_slab(size=int(size), iterm=i)
                 slab.info['miller'] = miller
                 slabs += [slab]
 
