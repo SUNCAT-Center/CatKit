@@ -605,9 +605,9 @@ class Builder(AdsorptionSites):
             atoms.rotate([0, 0, 1], vector)
 
         atoms.translate(base_position)
+        n = len(slab)
         slab += atoms
 
-        n = len(slab)
         # Add graph connections
         for metal_index in self.index[u]:
             slab.graph.add_edge(metal_index, bond + n)
