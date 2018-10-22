@@ -9,6 +9,7 @@ from catkit.hub import db2server, make_folders_template, folder2db
 
 path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 
+
 class UploadTestCase(unittest.TestCase):
     def setUp(self):
         """Set up a temp file."""
@@ -92,20 +93,27 @@ class UploadTestCase(unittest.TestCase):
         con.commit()
         con.close()
 
-        db2server.main('{path}/aayush/MontoyaChallenge2015.db'.format(path=path),
-                       user='postgres')
-        if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'.format(path=path)):
-            os.remove('{path}/aayush/MontoyaChallenge2015.db'.format(path=path))
+        db2server.main('{path}/aayush/MontoyaChallenge2015.db'
+                       .format(path=path), user='postgres')
+        if os.path.exists('{path}/aayush/MontoyaChallenge2015.db'
+                          .format(path=path)):
+            os.remove('{path}/aayush/MontoyaChallenge2015.db'
+                      .format(path=path))
 
     def test3_create_user(self):
-        db = CathubPostgreSQL(user='postgres')
-        db.create_user('viggo', row_limit=None)
+        with CathubPostgreSQL(user='postgres') as db:
+            db.create_user('viggo', row_limit=None)
 
-    def test4_delete_user(self):
+    def test4_release(self):
+        with CathubPostgreSQL(user='postgres') as db:
+            db.release(['MontoyaChallenge2015'], from_schema='public',
+                       to_schema='viggo')
+
+    def test5_delete_user(self):
         db = CathubPostgreSQL(user='postgres')
         db.delete_user('viggo')
 
-    def test5_modify_reaction(self):
+    def test6_modify_reaction(self):
         db = CathubPostgreSQL(user='postgres')
         id = db.check(pub_id='MontoyaChallenge2015',
                       chemical_composition='Pt16',
@@ -115,8 +123,10 @@ class UploadTestCase(unittest.TestCase):
         db.update_reaction(id, reaction_energy=10)
         db.delete_reaction(id)
 
-    def test6_get_reactions(self):
-        data = get_reactions(n_results=1, write_db=False, reactants='CO', products='C')
+    def test7_get_reactions(self):
+        data = get_reactions(n_results=1, write_db=False,
+                             reactants='CO', products='C')
+
 
 if __name__ == '__main__':
     unittest.main()
