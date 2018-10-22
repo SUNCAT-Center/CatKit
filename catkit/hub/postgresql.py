@@ -165,7 +165,7 @@ class CathubPostgreSQL:
         self.connection = self._connect()
         return self
 
-    def __exit__(self, exc_type):
+    def __exit__(self, exc_type, exc_value, tb):
         if exc_type is None:
             self.connection.commit()
         else:
@@ -180,10 +180,13 @@ class CathubPostgreSQL:
 
         self.stdout.write("_initialize start\n")
 
-        set_schema = 'ALTER ROLE {0} SET search_path TO {1};'\
-                     .format(self.user, self.schema)
+        set_schema = 'SET search_path TO {0};'\
+                     .format(self.schema)
         cur.execute(set_schema)
         con.commit()
+
+        cur.execute("show search_path;")
+        schema = cur.fetchone()[0].split(', ')
 
         self.stdout.write(
             "_initialize set schema to {self.schema}\n".format(**locals()))
@@ -228,11 +231,14 @@ class CathubPostgreSQL:
             .format(user=user, password=password))
 
         """ Grant SELECT on public schema """
-        cur.execute('GRANT USAGE ON SCHEMA public TO {user};'.format(user=user))
+        cur.execute('GRANT USAGE ON SCHEMA public TO {user};'
+                    .format(user=user))
         cur.execute(
-            'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};'.format(user=user))
+            'GRANT SELECT ON ALL TABLES IN SCHEMA public TO {user};'
+            .format(user=user))
         cur.execute(
-            'ALTER ROLE {user} SET search_path TO {user};'.format(user=user))
+            'ALTER ROLE {user} SET search_path TO {user};'
+            .format(user=user))
 
         self.stdout.write(
             'CREATED USER {user} WITH PASSWORD {password}\n'
@@ -240,7 +246,7 @@ class CathubPostgreSQL:
 
         """ initialize user-schema """
         old_schema = self.schema
-        self.initialized=False
+        self.initialized = False
         self.schema = user
         self._initialize(con)
 
@@ -258,10 +264,11 @@ class CathubPostgreSQL:
 
         if row_limit:
             """ Limit number of rows"""
-            for table in ['reaction', 'publication', 'systems', 'reaction_system',
-                          'publication_system', 'information']:
+            for table in ['reaction', 'publication', 'systems',
+                          'reaction_system', 'publication_system',
+                          'information']:
                 table_factor = 1
-                if table in [ 'reaction_system', 'publication_system']:
+                if table in ['reaction_system', 'publication_system']:
                     table_factor = 15
                 elif table == 'publication':
                     table_factor = 1 / 100
@@ -269,7 +276,8 @@ class CathubPostgreSQL:
                     table_factor = 1 / 100
 
                 trigger_function = """
-                CREATE OR REPLACE FUNCTION check_number_of_rows_{user}_{table}()
+                CREATE OR REPLACE FUNCTION
+                check_number_of_rows_{user}_{table}()
                 RETURNS TRIGGER AS
                 $BODY$
                 BEGIN
@@ -285,7 +293,7 @@ class CathubPostgreSQL:
                                            row_limit=row_limit * table_factor)
                 cur.execute(trigger_function)
 
-                trigger="""
+                trigger = """
                 DROP TRIGGER IF EXISTS tr_check_number_of_rows_{user}_{table}
                     on {user}.{table};
                 CREATE TRIGGER tr_check_number_of_rows_{user}_{table}
@@ -303,7 +311,7 @@ class CathubPostgreSQL:
             con.commit()
             con.close()
 
-        return self
+        return password
 
     def delete_user(self, user):
         """ Delete user and all data"""
@@ -312,7 +320,8 @@ class CathubPostgreSQL:
         con = self.connection or self._connect()
         cur = con.cursor()
         cur.execute('DROP SCHEMA {user} CASCADE;'.format(user=user))
-        cur.execute('REVOKE USAGE ON SCHEMA public FROM {user};'.format(user=user))
+        cur.execute('REVOKE USAGE ON SCHEMA public FROM {user};'
+                    .format(user=user))
         cur.execute(
             'REVOKE SELECT ON ALL TABLES IN SCHEMA public FROM {user};'
             .format(user=user))
@@ -327,8 +336,9 @@ class CathubPostgreSQL:
 
         return self
 
-    def release(self, pub_ids=None, userhandle=None):
-        """ Transfer dataset from upload to public schema on the server"""
+    def release(self, pub_ids=None, userhandle=None, from_schema='upload',
+                to_schema='public'):
+        """ Transfer dataset from one schema to another"""
 
         assert pub_ids or userhandle,\
             "Specify either pub_ids or userhandle"
@@ -337,84 +347,95 @@ class CathubPostgreSQL:
 
         con = self.connection or self._connect()
         cur = con.cursor()
-        assert self.user == 'release' or self.user == 'catroot', \
+        assert self.user in ['release', 'catroot', 'postgres'], \
             "You don't have permission to perform this operation"
 
         if userhandle:
             cur.execute(
                 """SELECT distinct pub_id
-                FROM upload.reaction
-                WHERE username = '{}'""".format(userhandle))
+                FROM {from_schema}.reaction
+                WHERE username = '{username}'"""
+                .format(from_schema=from_schema,
+                        username=userhandle))
 
             pub_ids = [id[0] for id in cur.fetchall()]
 
-        schema = 'public'
         for pub_id in pub_ids:
-            self.stdout.write('Releasing publication: {pub_id} to public\n'\
-                         .format(pub_id=pub_id))
+            self.stdout.write(
+                """Releasing publication {pub_id} from
+                {from_schema} to {schema} \n"""
+                .format(pub_id=pub_id, from_schema=from_schema,
+                        schema=to_schema))
 
             mtime = now()
             cur.execute(
-                """UPDATE upload.systems SET
-                mtime = {}
+                """UPDATE {from_schema}.systems SET
+                mtime = {mtime}
                 WHERE unique_id in
                   (SELECT distinct ase_id
-                   FROM upload.publication_system
-                   WHERE pub_id = '{pub_id}')"""\
-                .format(mtime))
+                   FROM {from_schema}.publication_system
+                   WHERE pub_id = '{pub_id}')"""
+                .format(from_schema=from_schema,
+                        mtime=mtime, pub_id=pub_id))
 
             columns = get_key_str('systems', start_index=1)
             cur.execute(
                 """INSERT INTO {schema}.systems ({columns})
                 SELECT {columns}
-                FROM upload.systems
+                FROM {from_schema}.systems
                 WHERE unique_id in
                   (SELECT distinct ase_id
-                   FROM upload.publication_system
-                   WHERE pub_id = '{pub_id}')"""\
-                .format(schema=schema,
+                   FROM {from_schema}.publication_system
+                   WHERE pub_id = '{pub_id}')"""
+                .format(from_schema=from_schema,
+                        schema=to_schema,
                         columns=columns,
                         pub_id=pub_id))
 
             columns = get_key_str('publication', start_index=1)  # new id
             cur.execute(
-                 """INSERT INTO {schema}.publication ({columns})
-                 SELECT {columns}
-                 FROM upload.publication
-                 WHERE pub_id = '{pub_id}'"""\
-                .format(schema=schema, columns=columns, pub_id=pub_id))
+                """INSERT INTO {schema}.publication ({columns})
+                SELECT {columns}
+                FROM {from_schema}.publication
+                WHERE pub_id = '{pub_id}'"""
+                .format(from_schema=from_schema,
+                        schema=to_schema, columns=columns,
+                        pub_id=pub_id))
             cur.execute(
-                 """INSERT INTO {schema}.publication_system
-                 SELECT *
-                 FROM upload.publication_system
-                 WHERE pub_id = '{pub_id}'"""\
-                .format(schema=schema, columns=columns, pub_id=pub_id))
+                """INSERT INTO {schema}.publication_system
+                SELECT *
+                FROM {from_schema}.publication_system
+                WHERE pub_id = '{pub_id}'"""
+                .format(from_schema=from_schema,
+                        schema=to_schema, columns=columns, pub_id=pub_id))
 
             columns = get_key_str('reaction', start_index=1)  # new id
 
             cur.execute(
                 """INSERT INTO {schema}.reaction ({columns})
                 SELECT {columns}
-                FROM upload.reaction
+                FROM {from_schema}.reaction
                 WHERE pub_id = '{pub_id}'
-                ORDER BY upload.reaction.id
-                RETURNING id"""\
-                .format(schema=schema, columns=columns, pub_id=pub_id))
+                ORDER BY {from_schema}.reaction.id
+                RETURNING id"""
+                .format(from_schema=from_schema,
+                        schema=to_schema, columns=columns, pub_id=pub_id))
 
-            new_ids =  [id[0] for id in cur.fetchall()]
+            new_ids = [id[0] for id in cur.fetchall()]
 
             cur.execute(
-                """SELECT * from upload.reaction_system
+                """SELECT * from {from_schema}.reaction_system
                 WHERE ase_id in
                 (SELECT distinct ase_id
-                FROM upload.publication_system
-                WHERE pub_id = '{pub_id}') ORDER BY id"""\
-                .format(pub_id=pub_id))
+                FROM {from_schema}.publication_system
+                WHERE pub_id = '{pub_id}') ORDER BY id"""
+                .format(from_schema=from_schema,
+                        pub_id=pub_id))
 
             reaction_system0 = cur.fetchall()
             reaction_system_values = []
             id0 = reaction_system0[0][3]
-            i=0
+            i = 0
             for row in reaction_system0:
                 row = list(row)
                 if not id0 == row[3]:
@@ -426,7 +447,7 @@ class CathubPostgreSQL:
             insert_command = """
             INSERT INTO {schema}.reaction_system ({key_str})
             VALUES %s ON CONFLICT DO NOTHING;"""\
-                .format(schema=schema, key_str=key_str)
+            .format(schema=to_schema, key_str=key_str)
 
             execute_values(cur=cur, sql=insert_command,
                            argslist=reaction_system_values, page_size=1000)
@@ -448,7 +469,7 @@ class CathubPostgreSQL:
 
         cur.execute(
             """SELECT distinct username from upload.reaction
-            WHERE pub_id = '{pub_id}'"""\
+            WHERE pub_id = '{pub_id}'"""
             .format(pub_id=pub_id))
 
         username = cur.fetchall()[0][0]
@@ -469,15 +490,16 @@ class CathubPostgreSQL:
         con = self.connection or self._connect()
         cur = con.cursor()
 
-        self.stdout.write('Deleting publication: {pub_id} from {schema}\n'\
+        self.stdout.write('Deleting publication: {pub_id} from {schema}\n'
                           .format(pub_id=pub_id, schema=schema))
 
         cur.execute("""SELECT to_regclass('keys');""")
-        if cur.fetchone()[0] is not  None:  # remove data from old tables
-            old_tables = ['text_key_values', 'number_key_values', 'species', 'keys']
+        if cur.fetchone()[0] is not None:  # remove data from old tables
+            old_tables = ['text_key_values', 'number_key_values',
+                          'species', 'keys']
             for table in old_tables:
                 cur.execute(
-                    """DELETE FROM {schema}.{table}"""\
+                    """DELETE FROM {schema}.{table}"""
                     .format(schema=schema,
                             table=table))
 
@@ -486,13 +508,13 @@ class CathubPostgreSQL:
             WHERE unique_id in
             (SELECT distinct ase_id
             FROM {schema}.publication_system
-            WHERE pub_id = '{pub_id}')"""\
+            WHERE pub_id = '{pub_id}')"""
             .format(schema=schema,
                     pub_id=pub_id))
 
         cur.execute(
             """ DELETE FROM {schema}.publication
-            WHERE pub_id = '{pub_id}'"""\
+            WHERE pub_id = '{pub_id}'"""
             .format(schema=schema,
                     pub_id=pub_id))
 
@@ -538,7 +560,8 @@ class CathubPostgreSQL:
         # pub_id = pub_values[1].encode('ascii','ignore')
         pub_id = pub_values[1]
         cur.execute(
-            """SELECT id from publication where pub_id='{pub_id}'""".format(pub_id=pub_id))
+            """SELECT id from publication where pub_id='{pub_id}'"""
+            .format(pub_id=pub_id))
         row = cur.fetchone()
         if row is not None:  # len(row) > 0:
             id = row  # [0]
@@ -590,7 +613,9 @@ class CathubPostgreSQL:
         key_str = get_key_str('reaction', start_index=1)
         value_str = get_value_str(values)
 
-        insert_command = 'INSERT INTO reaction ({0}) VALUES ({1}) RETURNING id;'\
+        insert_command = \
+            """INSERT INTO reaction ({0})
+            VALUES ({1}) RETURNING id;"""\
             .format(key_str, value_str)
 
         cur.execute(insert_command)
@@ -606,7 +631,7 @@ class CathubPostgreSQL:
                 energy_correction = 0
 
             reaction_system_values += [tuple([name, energy_correction,
-                                           ase_id, id])]
+                                              ase_id, id])]
 
         key_str = get_key_str('reaction_system')
         insert_command = """INSERT INTO reaction_system
@@ -614,20 +639,20 @@ class CathubPostgreSQL:
 
         execute_values(cur=cur, sql=insert_command,
                        argslist=reaction_system_values, page_size=1000)
-        
+
         if self.connection is None:
             con.commit()
             con.close()
-            
-        return id
-    
 
-    def update_reaction(self, id, ase_ids=None, energy_corrections={}, **kwargs):
+        return id
+
+    def update_reaction(self, id, ase_ids=None, energy_corrections={},
+                        **kwargs):
         con = self.connection or self._connect()
         self._initialize(con)
         cur = con.cursor()
 
-        key_str = ', '.join(list(kwargs.keys()))#get_key_str(start_index=1)
+        key_str = ', '.join(list(kwargs.keys()))
         value_str = get_value_str(list(kwargs.values()), start_index=0)
 
         update_command = 'UPDATE reaction SET ({0}) = ({1}) WHERE id = {2};'\
@@ -636,7 +661,8 @@ class CathubPostgreSQL:
         cur.execute(update_command)
 
         if ase_ids:
-            delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+            delete_command = 'DELETE from reaction_system where id = {};'\
+                .format(id)
             cur.execute(delete_command)
 
             """ Write to reaction_system tables"""
@@ -670,7 +696,8 @@ class CathubPostgreSQL:
         delete_command = 'DELETE FROM reaction where id = {};'.format(id)
         cur.execute(delete_command)
 
-        delete_command = 'DELETE from reaction_system where id = {};'.format(id)
+        delete_command = 'DELETE from reaction_system where id = {};'\
+            .format(id)
         cur.execute(delete_command)
 
         if self.connection is None:
@@ -861,7 +888,7 @@ class CathubPostgreSQL:
             cur.execute("""UPDATE systems SET
             key_value_pairs=jsonb_set(key_value_pairs, '{{"pub_id"}}', '"{pub_id}"')
             WHERE unique_id IN
-            (SELECT ase_id from publication_system WHERE pub_id='{pub_id}')"""\
+            (SELECT ase_id from publication_system WHERE pub_id='{pub_id}')"""
                         .format(pub_id=pub_id))
 
             con.commit()
@@ -898,14 +925,13 @@ class CathubPostgreSQL:
                         continue
                     values = row[0]
 
-                    # id = self.check(values[13], values[1], values[6], values[7],
-                    #                values[8], strict=True)
                     id = None
                     update_rs = False
                     if id is not None:
                         id = self.update(id, values)
                         self.stdout.write(
-                            'Updated reaction db with row id = {}\n'.format(id))
+                            'Updated reaction db with row id = {}\n'
+                            .format(id))
                         update_rs = True
                     else:
                         ID += 1
@@ -936,7 +962,8 @@ class CathubPostgreSQL:
                 insert_command = """INSERT INTO reaction
                 ({0}) VALUES %s;""".format(key_str)
 
-                execute_values(cur=cur, sql=insert_command, argslist=reaction_values,
+                execute_values(cur=cur, sql=insert_command,
+                               argslist=reaction_values,
                                template=q, page_size=block_size)
 
                 key_str = get_key_str('reaction_system')
@@ -944,7 +971,8 @@ class CathubPostgreSQL:
                 ({0}) VALUES %s ON CONFLICT DO NOTHING;""".format(key_str)
 
                 execute_values(cur=cur, sql=insert_command,
-                               argslist=reaction_system_values, page_size=1000)
+                               argslist=reaction_system_values,
+                               page_size=1000)
                 con.commit()
 
                 t2 = time.time()
@@ -957,8 +985,8 @@ class CathubPostgreSQL:
                 self.stdout.write(
                     '    Completed transfer of {0} reactions. \n'
                     .format(Ncat - Ncat0))
-                self.stdout.write('    Estimated time left: {0} sec \n'.format(
-                    t_av * (n_blocks - block_id - 1)))
+                self.stdout.write('    Estimated time left: {0} sec \n'
+                                  .format(t_av * (n_blocks - block_id - 1)))
 
             self.stdout.write('  Completed transfer of reactions\n')
 
@@ -1031,7 +1059,8 @@ class CathubPostgreSQL:
 
 
 def get_key_list(table='reaction', start_index=0):
-    key_list = {'reaction': ['id', 'chemical_composition', 'surface_composition',
+    key_list = {'reaction': ['id', 'chemical_composition',
+                             'surface_composition',
                              'facet', 'sites', 'coverages', 'reactants',
                              'products', 'reaction_energy',
                              'activation_energy', 'dft_code',
