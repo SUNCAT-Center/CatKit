@@ -1,41 +1,65 @@
 import numpy as np
 
 
-def expand_cell(atoms, r=6):
+def expand_cell(atoms, padding=None):
     """Return Cartesian coordinates atoms within a supercell
-    which contains spheres of specified cutoff radius around
-    all atom positions.
+    which contains repetitions of the unit cell which contains
+    at least one neighboring atom.
 
     Parameters
     ----------
     atoms : Atoms object
         Atoms with the periodic boundary conditions and unit cell
         information to use.
-    r : float
-        Radius of the spheres to expand around each atom.
+    padding : ndarray (3,)
+        Padding of repetition of the unit cell in the x, y, z
+        directions. e.g. [1, 0, 1].
 
     Returns
     -------
-    index : ndarray of int
+    index : ndarray (N,)
         Indices associated with the original unit cell positions.
-    coords : ndarray of (3,) array
+    coords : ndarray (N, 3)
         Cartesian coordinates associated with positions in the
-        super-cell.
+        supercell.
+    offsets : ndarray (M, 3)
+        Integer offsets of each unit cell.
     """
-    cell = atoms.get_cell()
-    recp_len = np.diag(np.linalg.pinv(cell))
-    nmax = float(r) * recp_len + 0.01
+    cell = atoms.cell
+    pbc = atoms.pbc
+    pos = atoms.positions
 
-    pbc = atoms.get_pbc()
-    low = np.floor(-np.abs(nmax) * pbc)
-    high = np.ceil(np.abs(nmax) * pbc + 1)
+    if padding is None:
+        diags = np.sqrt((
+            np.dot([[1, 1, 1],
+                    [-1, 1, 1],
+                    [1, -1, 1],
+                    [-1, -1, 1]],
+                   cell)**2).sum(1))
 
-    offsets = np.mgrid[low[0]:high[0], low[1]:high[1], low[2]:high[2]].T
+        if pos.shape[0] == 1:
+            cutoff = max(diags) / 2.
+        else:
+            dpos = (pos - pos[:, None]).reshape(-1, 3)
+            Dr = np.dot(dpos, np.linalg.inv(cell))
+            D = np.dot(Dr - np.round(Dr) * pbc, cell)
+            D_len = np.sqrt((D**2).sum(1))
+
+            cutoff = min(max(D_len), max(diags) / 2.)
+
+        latt_len = np.sqrt((cell**2).sum(1))
+        V = abs(np.linalg.det(cell))
+        padding = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
+                                         (V * latt_len)), dtype=int)
+
+    offsets = np.mgrid[
+        -padding[0]:padding[0] + 1,
+        -padding[1]:padding[1] + 1,
+        -padding[2]:padding[2] + 1].T
+    tvecs = np.dot(offsets, cell)
+    coords = pos[None, None, None, :, :] + tvecs[:, :, :, None, :]
 
     ncell = np.prod(offsets.shape[:-1])
-    cart = np.dot(offsets, atoms.cell)
-    coords = atoms.positions[None, None, None, :, :] + cart[:, :, :, None, :]
-
     index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
     coords = coords.reshape(np.prod(coords.shape[:-1]), 3)
     offsets = offsets.reshape(ncell, 3)
@@ -141,3 +165,104 @@ def get_unique_xy(xyz_coords, cutoff=0.1):
     xyz_coords = np.delete(xyz_coords, xy_copies, axis=0)
 
     return xyz_coords
+
+
+def matching_sites(position, comparators, tol=1e-8):
+    """Get the indices of all points in a comparator list that are
+    equal to a given position (with a tolerance), taking into
+    account periodic boundary conditions (adaptation from Pymatgen).
+
+    This will only accept a fractional coordinate scheme.
+
+    Parameters
+    ----------
+    position : list (3,)
+        Fractional coordinate to compare to list.
+    comparators : list (3, n)
+        Fractional coordinates to compare against.
+    tol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    match : list (n,)
+        Indices of matches.
+    """
+    if len(comparators) == 0:
+        return []
+
+    fdist = comparators - position
+    fdist -= np.round(fdist)
+    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+
+    return match
+
+
+def matching_coordinates(position, comparators, tol=1e-8):
+    """Get the indices of all points in a comparator list that are
+    equal to a given position (with a tolerance), taking into
+    account periodic boundary conditions (adaptation from Pymatgen).
+
+    This will only accept a Cartesian coordinate scheme.
+    TODO: merge this with matching_sites.
+
+    Parameters
+    ----------
+    position : list (3,)
+        Fractional coordinate to compare to list.
+    comparators : list (3, N)
+        Fractional coordinates to compare against.
+    tol : float
+        Absolute tolerance.
+
+    Returns
+    -------
+    match : list (N,)
+        Indices of matches.
+    """
+    if len(comparators) == 0:
+        return []
+
+    fdist = comparators - position[None, :]
+    match = np.where((np.abs(fdist) < tol).all(axis=1))[0]
+
+    return match
+
+
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
+    """Return unique coordinate values of a given atoms object
+    for a specified axis.
+
+    Parameters
+    ----------
+    atoms : object
+        Atoms object to search for unique values along.
+    axis : int (0, 1, or 2)
+        Look for unique values along the x, y, or z axis.
+    tag : bool
+        Assign ASE-like tags to each layer of the slab.
+    tol : float
+        The tolerance to search for unique values within.
+
+    Returns
+    -------
+    values : ndarray (n,)
+        Array of unique positions in fractional coordinates.
+    """
+    positions = (atoms.get_scaled_positions()[:, axis] + tol) % 1
+    positions -= tol
+
+    values = [positions[0]]
+    for d in positions[1:]:
+        if not np.isclose(d, values, atol=tol, rtol=tol).any():
+            values += [d]
+    values = np.sort(values)
+
+    if tag:
+        tags = []
+        for p in positions:
+            close = np.isclose(p, values[::-1], atol=tol, rtol=tol)
+            tags += [np.where(close)[0][0] + 1]
+        atoms.set_tags(tags)
+
+    return values

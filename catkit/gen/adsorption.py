@@ -1,5 +1,7 @@
 from . import defaults
 from . import utils
+from . import symmetry
+import catkit
 import matplotlib.pyplot as plt
 import itertools
 import networkx as nx
@@ -11,7 +13,7 @@ radii = defaults.get('radii')
 class AdsorptionSites():
     """Adsorption site object."""
 
-    def __init__(self, slab, surface_atoms=None, r=6, tol=1e-5):
+    def __init__(self, slab, surface_atoms=None, tol=1e-5):
         """Create an extended unit cell of the surface sites for
         use in identifying other sites.
 
@@ -20,13 +22,10 @@ class AdsorptionSites():
         slab : Gatoms object
             The slab associated with the adsorption site network to be
             attached.
-        r : float
-            Minimum basis vector length in Angstroms for creating extended
-            unit cell.
         tol : float
             Absolute tolerance for floating point errors.
         """
-        index, coords, offsets = utils.expand_cell(slab, r)
+        index, coords, offsets = utils.expand_cell(slab)
         if surface_atoms is None:
             surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
@@ -260,8 +259,9 @@ class AdsorptionSites():
         symmetry_match = self._symmetric_sites
 
         if symmetry_match is None:
-            rotations, translations = utils.get_symmetry(
-                self.slab, tol=self.tol)
+            sym = symmetry.Symmetry(self.slab, tol=self.tol)
+
+            rotations, translations = sym.get_symmetry_operations(affine=False)
             rotations = np.swapaxes(rotations, 1, 2)
             affine = np.append(rotations, translations[:, None], axis=1)
 
@@ -349,7 +349,6 @@ class AdsorptionSites():
 
         site_id = self.get_symmetric_sites(unique=False, screen=False)
         site_id = site_id + self.connectivity / 10
-        print(site_id)
         per = self.get_periodic_sites(screen=False)
 
         uper = self.get_periodic_sites()
@@ -518,40 +517,45 @@ class Builder(AdsorptionSites):
             if index is -1:
                 slab = []
                 for i, _ in enumerate(self.get_symmetric_sites()):
-                    slab += [self._single_adsorption(adsorbate,
-                                                     bond=bonds[0],
-                                                     site_index=i,
-                                                     auto_construct=auto_construct,
-                                                     **kwargs)]
+                    slab += [self._single_adsorption(
+                        adsorbate,
+                        bond=bonds[0],
+                        site_index=i,
+                        auto_construct=auto_construct,
+                        **kwargs)]
             elif isinstance(index, (list, np.ndarray)):
                 slab = []
                 for i in index:
-                    slab += [self._single_adsorption(adsorbate,
-                                                     bond=bonds[0],
-                                                     site_index=i,
-                                                     auto_construct=auto_construct,
-                                                     **kwargs)]
+                    slab += [self._single_adsorption(
+                        adsorbate,
+                        bond=bonds[0],
+                        site_index=i,
+                        auto_construct=auto_construct,
+                        **kwargs)]
             else:
-                slab = self._single_adsorption(adsorbate,
-                                               bond=bonds[0],
-                                               site_index=index,
-                                               auto_construct=auto_construct,
-                                               **kwargs)
+                slab = self._single_adsorption(
+                    adsorbate,
+                    bond=bonds[0],
+                    site_index=index,
+                    auto_construct=auto_construct,
+                    **kwargs)
 
         elif len(bonds) == 2:
             if index == -1:
                 slab = []
                 edges = self.get_adsorption_edges()
                 for i, _ in enumerate(edges):
-                    slab += [self._double_adsorption(adsorbate,
-                                                     bonds=bonds,
-                                                     edge_index=i,
-                                                     **kwargs)]
+                    slab += [self._double_adsorption(
+                        adsorbate,
+                        bonds=bonds,
+                        edge_index=i,
+                        **kwargs)]
             else:
-                slab = self._double_adsorption(adsorbate,
-                                               bonds=bonds,
-                                               edge_index=index,
-                                               **kwargs)
+                slab = self._double_adsorption(
+                    adsorbate,
+                    bonds=bonds,
+                    edge_index=index,
+                    **kwargs)
 
         else:
             raise ValueError('Only mono- and bidentate adsorption supported.')
@@ -594,17 +598,16 @@ class Builder(AdsorptionSites):
         if auto_construct:
             root = None
             for i, branch in enumerate(branches):
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True,
-                )
-                root = bond
+                root = catkit.gen.molecules._branch_molecule(
+                    atoms, branch, root, adsorption=True)
+
+            # Align with the adsorption vector
             atoms.rotate([0, 0, 1], vector)
 
         atoms.translate(base_position)
+        n = len(slab)
         slab += atoms
 
-        n = len(slab)
         # Add graph connections
         for metal_index in self.index[u]:
             slab.graph.add_edge(metal_index, bond + n)
@@ -655,21 +658,17 @@ class Builder(AdsorptionSites):
         if len(branches0[0][1]) != 0:
             uvec = [-uvec0, uvec1[0], uvec2[0]]
             self._branch_bidentate(atoms, uvec, branches0[0])
-            root = branches0[0][0]
             for branch in branches0[1:]:
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True)
+                catkit.gen.molecules._branch_molecule(
+                    atoms, branch, adsorption=True)
 
         branches1 = list(nx.bfs_successors(atoms.graph, bonds[1]))
         if len(branches1[0][1]) != 0:
             uvec = [uvec0, uvec1[0], uvec2[0]]
             self._branch_bidentate(atoms, uvec, branches1[0])
-            root = branches1[0][0]
             for branch in branches1[1:]:
-                utils._branch_molecule(
-                    atoms, branch, root,
-                    adsorption=True)
+                catkit.gen.molecules._branch_molecule(
+                    atoms, branch, adsorption=True)
 
         n = len(slab)
         slab += atoms
