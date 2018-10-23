@@ -1,4 +1,4 @@
-git+https://gitlab.com/ase/ase.git@9f1e944260bbd4bc04db35670f84a69a270451a6#egg=ase-3.16.3
+ase>=3.16.2
 numpy>=1.14
 networkx>=2.1
 spglib>=1.10
@@ -12,4 +12,3 @@ click>=6.7
 psycopg2-binary>=2
 python-Levenshtein>=0.12
 pathlib2>=2.3
-tabulate>=0.8.2
