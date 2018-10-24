@@ -500,12 +500,13 @@ class SlabGenerator(object):
                 metrics += [[d.sum(), angle, M]]
 
             if metrics:
+                order = [0, 1]
                 if defaults.get('orthogonal'):
-                    matrix = sorted(metrics,
-                                    key=lambda x: (x[1], x[0]))[0][-1]
-                else:
-                    matrix = sorted(metrics,
-                                    key=lambda x: (x[0], x[1]))[0][-1]
+                    order = [1, 0]
+
+                matrix = sorted(metrics,
+                                key=lambda x: (
+                                    x[order[0]], x[order[1]]))[0][-1]
                 supercell = transform_ab(supercell, matrix)
 
         elif isinstance(size, (list, tuple, np.ndarray)):
