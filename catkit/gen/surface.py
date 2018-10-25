@@ -1,13 +1,14 @@
 from __future__ import division
-from catkit import Gratoms
+from .. import Gratoms
+from . import symmetry
 from . import utils
 from . import adsorption
+from . import defaults
 import numpy as np
-from ase.build import rotate
-from ase.constraints import FixAtoms
 import itertools
 import warnings
 import scipy
+import ase
 try:
     from math import gcd
 except ImportError:
@@ -20,6 +21,49 @@ class SlabGenerator(object):
     Many surface operations rely upon / are made easier through the
     bulk basis cell they are created from. The SlabGenerator class
     is designed to house these operations.
+
+    Return the miller indices associated with the users requested
+    values. Follows the following steps:
+
+    - Convert Miller-Bravais notation into standard Miller index.
+    - (optional) Ensure the bulk cell is in its standard form.
+    - Convert the indices to the cell for the primitive lattice.
+    - Reduce the indices by their greatest common divisor.
+
+    Parameters
+    ----------
+    bulk : Atoms object
+        Bulk system to be converted into slab.
+    miller_index : list (3,) or (4,)
+        Miller index to construct surface from. If length 4, Miller-Bravais
+        notation is assumed.
+    layers : int
+        Number of layers to include in the slab. A slab layer is defined
+        as a unique z-coordinate.
+    vacuum : float
+        Angstroms of vacuum to apply to the slab.
+    fixed : int
+        Number of slab layers to constrain.
+    layer_type : 'angs', 'trim', 'stoich', or 'sym'
+        Determines how to perform slab layering.
+
+        'angs': Layers denotes the thickness of the slab in Angstroms.
+        'trim': The slab will be trimmed to a number of layers equal to the
+        exact number of unique z-coordinates. Useful for precision control.
+        'stoich' : Constraints any slab generated to have the same
+        stoichiometric ratio as the provided bulk.
+        'sym' : Return a slab which is inversion symmetric. i.e. The
+        same on both sides.
+    attach_graph : bool
+        Attach the connectivity graph generated from the bulk structure.
+        This is only necessary for fingerprinting and setting it to False
+        can save time. Surface atoms will be found regardless.
+    standardize_bulk : bool
+        Covert the bulk input to its standard form before and
+        produce the cleave from it. This is highly recommended as
+        Miller indices are not defined for non-standard cells.
+    tol : float
+        Tolerance for floating point rounding errors.
     """
 
     def __init__(self,
@@ -31,58 +75,15 @@ class SlabGenerator(object):
                  layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=False,
+                 primitive=True,
                  tol=1e-8):
-        """Generate a slab from a bulk atoms object.
-
-        Return the miller indices associated with the users requested
-        values. Follows the following steps:
-
-        - Convert Miller-Bravais notation into standard Miller index.
-        - (optional) Ensure the bulk cell is in its standard form.
-        - Convert the indices to the cell for the primitive lattice.
-        - Reduce the indices by their greatest common divisor.
-
-        Parameters
-        ----------
-        bulk : Atoms object
-            Bulk system to be converted into slab.
-        miller_index : list (3,) or (4,)
-            Miller index to construct surface from. If length 4, Miller-Bravais
-            notation is assumed.
-        layers : int
-            Number of layers to include in the slab. A slab layer is defined
-            as a unique z-coordinate.
-        vacuum : float
-            Angstroms of vacuum to apply to the slab.
-        fixed : int
-            Number of slab layers to constrain.
-        layer_type : 'angs', 'trim', 'stoich', or 'sym'
-            Determines how to perform slab layering.
-
-            'angs': Layers denotes the thickness of the slab in Angstroms.
-            'trim': The slab will be trimmed to a number of layers equal to the
-            exact number of unique z-coordinates. Useful for precision control.
-            'stoich' : Constraints any slab generated to have the same
-            stoichiometric ratio as the provided bulk.
-            'sym' : Return a slab which is inversion symmetric. i.e. The
-            same on both sides.
-        attach_graph : bool
-            Attach the connectivity graph generated from the bulk structure.
-            This is only necessary for fingerprinting and setting it to False
-            can save time. Surface atoms will be found regardless.
-        standardize_bulk : bool
-            Covert the bulk input to its standard form before and
-            produce the cleave from it. This is highly recommended as
-            Miller indices are not defined for non-standard cells.
-        tol : float
-            Tolerance for floating point rounding errors.
-        """
         self.layers = layers
         self.vacuum = vacuum
         self.fixed = fixed
         self.tol = tol
         self.layer_type = layer_type
         self.standardized = standardize_bulk
+        self.primitive = primitive
         self.attach_graph = attach_graph
         self.unique_terminations = None
         self.slab_basis = None
@@ -99,16 +100,20 @@ class SlabGenerator(object):
         self.miller_index = miller_index
 
         if standardize_bulk:
-            bulk = utils.get_spglib_cell(bulk, tol=1e-2)
+            bulk = symmetry.get_standardized_cell(bulk, tol=1e-2)
         else:
             warnings.warn(
                 ("Not using a standardized bulk will result in an arbitrary "
                  "Miller index. To get ensure you are using the correct "
                  "miller index, use standardize_bulk=True"))
 
-        primitive_bulk = utils.get_spglib_cell(
-            bulk, primitive=True, tol=1e-2)
-        miller_index = convert_miller_index(miller_index, bulk, primitive_bulk)
+        if primitive:
+            primitive_bulk = symmetry.get_standardized_cell(
+                bulk, primitive=True, tol=1e-2)
+            miller_index = convert_miller_index(
+                miller_index, bulk, primitive_bulk)
+        else:
+            primitive_bulk = bulk
 
         self._bulk = self.align_crystal(primitive_bulk, miller_index)
 
@@ -162,6 +167,7 @@ class SlabGenerator(object):
         new_bulk = Gratoms(
             positions=bulk.positions,
             numbers=bulk.get_atomic_numbers(),
+            magmoms=bulk.get_initial_magnetic_moments(),
             pbc=True)
 
         if not self.attach_graph:
@@ -176,7 +182,7 @@ class SlabGenerator(object):
             new_bulk.cell[[0, 1]] = new_bulk.cell[[1, 0]]
         a = new_bulk.cell[0]
         a3 = np.cross(a, new_bulk.cell[1]) / np.max(d)
-        rotate(new_bulk, a3, (0, 0, 1), a, (1, 0, 0))
+        ase.build.rotate(new_bulk, a3, (0, 0, 1), a, (1, 0, 0))
 
         # Ensure the remaining basis vectors are positive in their
         # corresponding axis
@@ -209,8 +215,8 @@ class SlabGenerator(object):
             zdiff = np.cumsum(np.diff(zcoords))
             zdiff = np.floor(zdiff * itol) / itol
 
-            rotations, translations = utils.get_symmetry(
-                self._bulk, tol=self.tol)
+            sym = symmetry.Symmetry(self._bulk, self.tol)
+            rotations, translations = sym.get_symmetry_operations(affine=False)
 
             # Find all symmetries which are rotations about the z-axis
             zsym = np.abs(rotations)
@@ -289,6 +295,8 @@ class SlabGenerator(object):
         # value of the 2nd component (+/- 2 for safety)
         div = ibasis.cell[2][1] / ibasis.cell[1][1]
         sign = -np.sign(div)
+        if sign == 0:
+            sign = 1
         m = np.ceil(np.abs(div)) + 1
 
         # Try to be smart and only search a limited space
@@ -413,7 +421,8 @@ class SlabGenerator(object):
 
         if self.fixed:
             tags = slab.get_tags()
-            constraints = FixAtoms(mask=tags > (tags.max() - self.fixed))
+            constraints = ase.constraints.FixAtoms(
+                mask=tags > (tags.max() - self.fixed))
             slab.set_constraint(constraints)
 
         self.slab = slab
@@ -431,10 +440,9 @@ class SlabGenerator(object):
 
         Returns
         -------
-        coordinates : ndarray (n,)
-            Coordinates of the adsorption sites
-        connectivity : ndarray (n,)
-            Connectivity of the adsorption sites
+        output : tuple (n, n) | (n, n, n)
+            Coordinates and connectivity of the adsorption sites.
+            The symmetry indices can also be returned.
         """
         output = adsorption.get_adsorption_sites(
             slab=slab, **kwargs)
@@ -468,8 +476,8 @@ class SlabGenerator(object):
         """
         supercell = slab
 
-        if isinstance(size, int):
-            a = max(int(size / 2), 1) + size % 2
+        if isinstance(size, (int, np.integer)):
+            a = max(int(size / 2), 1) + size % 2 + 1
             T = np.mgrid[-a:a + 1, -a:a + 1].reshape(2, -1).T
 
             metrics = []
@@ -480,8 +488,8 @@ class SlabGenerator(object):
                     continue
 
                 vector = np.dot(M.T, slab.cell[:2, :2])
-
                 d = np.linalg.norm(vector, axis=1)
+
                 angle = np.dot(vector[0], vector[1]) / np.prod(d)
                 diff = np.diff(d)[0]
 
@@ -492,7 +500,12 @@ class SlabGenerator(object):
                 metrics += [[d.sum(), angle, M]]
 
             if metrics:
-                matrix = sorted(metrics, key=lambda x: (x[0], x[1]))[0][-1]
+                if defaults.get('orthogonal'):
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[1], x[0]))[0][-1]
+                else:
+                    matrix = sorted(metrics,
+                                    key=lambda x: (x[0], x[1]))[0][-1]
                 supercell = transform_ab(supercell, matrix)
 
         elif isinstance(size, (list, tuple, np.ndarray)):
@@ -522,7 +535,8 @@ class SlabGenerator(object):
         """Returns a symmetric slab. Note, this will trim the slab potentially
         resulting in loss of stoichiometry.
         """
-        inversion_symmetric = utils.get_point_group(slab)[1]
+        sym = symmetry.Symmetry(slab)
+        inversion_symmetric = sym.get_point_group(check_laue=True)[1]
 
         # Trim the cell until it is symmetric
         while not inversion_symmetric:
@@ -530,15 +544,16 @@ class SlabGenerator(object):
             bottom_layer = np.max(tags)
             del slab[tags == bottom_layer]
 
-            inversion_symmetric = utils.get_point_group(slab)[1]
+            sym = symmetry.Symmetry(slab)
+            inversion_symmetric = sym.get_point_group(check_laue=True)[1]
 
             if len(slab) <= len(self._bulk):
                 warnings.warn('Too many sites removed, please use a larger '
                               'slab size.')
                 break
 
-        return slab
 
+        return slab
 
 def transform_ab(slab, matrix, tol=1e-5):
     """Transform the slab basis vectors parallel to the z-plane
@@ -564,16 +579,12 @@ def transform_ab(slab, matrix, tol=1e-5):
     M[:2, :2] = np.array(matrix).T
     newcell = np.dot(M, slab.cell)
 
-    M[:2, :2] = np.array(matrix).T
-    newcell = np.dot(M, slab.cell)
-
     scorners_newcell = np.array([
-        [0, 0], [0, 0],
+        [0, 0], [1, 0],
         [0, 1], [1, 1]])
 
     corners = np.dot(scorners_newcell, newcell[:2, :2])
     scorners = np.linalg.solve(slab.cell[:2, :2].T, corners.T).T
-
     rep = np.ceil(scorners.ptp(axis=0)).astype(int)
 
     slab *= (rep[0], rep[1], 1)
@@ -665,26 +676,27 @@ def get_unique_indices(bulk, max_index):
     unique_millers : ndarray (n, 3)
         Symmetrically distinct miller indices for a given bulk.
     """
-    operations = utils.get_affine_operations(bulk)
+    sym = symmetry.Symmetry(bulk)
+    operations = sym.get_symmetry_operations()
     unique_index = generate_indices(max_index)
 
     unique_millers = []
     for i, miller in enumerate(unique_index):
         affine_point = np.insert(miller, 3, 1)
 
-        symmetry = False
+        symmetric = False
         for affine_matrix in operations:
             operation = np.dot(affine_matrix, affine_point)[:3]
 
             match = utils.matching_coordinates(operation, unique_millers)
             if len(match) > 0:
-                symmetry = True
+                symmetric = True
                 break
 
-        if not symmetry:
+        if not symmetric:
             unique_millers += [miller]
 
-    unique_millers = np.array(unique_millers)
+    unique_millers = np.flip(unique_millers, axis=0)
 
     return unique_millers
 
@@ -708,25 +720,12 @@ def get_degenerate_indices(bulk, miller_index):
     miller_index = np.asarray(miller_index)
     miller_index = np.divide(miller_index, utils.list_gcd(miller_index))
 
-    operations = utils.get_affine_operations(bulk)
+    sym = symmetry.Symmetry(bulk)
+    affine_matrix = sym.get_symmetry_operations()
     affine_point = np.insert(miller_index, 3, 1)
-    symmetric_indices = np.dot(affine_point, operations)[:, :3]
+    symmetric_indices = np.dot(affine_point, affine_matrix)[:, :3]
 
-    unique_indices = np.arange(symmetric_indices.shape[0])
-    for i, j in enumerate(unique_indices):
-        if i != j:
-            continue
-
-        index = symmetric_indices[i]
-        integers = [_.is_integer() for _ in index]
-        if not np.all(integers):
-            unique_indices[i] = -1
-            continue
-
-        matches = utils.matching_coordinates(index, symmetric_indices)
-        unique_indices[matches] = j
-
-    unique = np.where(np.unique(unique_indices) >= 0)
-    degenerate_indices = symmetric_indices[unique].astype(int)
+    degenerate_indices = np.unique(symmetric_indices, axis=0)
+    degenerate_indices = np.flip(degenerate_indices, axis=0).astype(int)
 
     return degenerate_indices

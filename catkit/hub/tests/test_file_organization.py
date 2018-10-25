@@ -33,6 +33,9 @@ def test_file_organization_module():
         'foldername': '{path}/unorganized'.format(path=path),
         'verbose': True,
         'include_pattern': '.',
+        'dft_code': '',
+        'structure': '',
+        'xc_functional': '',
         'exclude_pattern': '%%$^#$',
         'facet_name': '111',
         'max_density_gas': 0.002,
@@ -40,6 +43,8 @@ def test_file_organization_module():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': True,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 
@@ -53,6 +58,9 @@ def test_file_organization_module_non_keep():
         'adsorbates': 'O,H2',
         'foldername': '{path}/unorganized'.format(path=path),
         'verbose': True,
+        'dft_code': '',
+        'structure': '',
+        'xc_functional': '',
         'include_pattern': '.',
         'exclude_pattern': '%%$^#$',
         'facet_name': '111',
@@ -61,6 +69,8 @@ def test_file_organization_module_non_keep():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': False,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 
@@ -73,6 +83,9 @@ def test_file_organization_module_collect_only():
         'adsorbates': 'O,H2',
         'foldername': '{path}/unorganized'.format(path=path),
         'verbose': True,
+        'dft_code': '',
+        'structure': '',
+        'xc_functional': '',
         'include_pattern': '.',
         'exclude_pattern': '%%$^#$',
         'facet_name': '111',
@@ -81,6 +94,8 @@ def test_file_organization_module_collect_only():
         'exclude_reference': '',
         'max_energy': 10,
         'keep_all_energies': False,
+        'gas_dir': '',
+        'use_cache': False,
 
     })
 

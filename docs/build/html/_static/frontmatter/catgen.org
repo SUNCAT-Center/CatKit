@@ -41,7 +41,7 @@ atoms[3].symbol = 'Cu'
 gen = SlabGenerator(
     atoms,
     miller_index=(2, 1, 1),
-    layers=9,
+    layers=6,
     fixed=5,
     vacuum=4)
 
@@ -55,7 +55,7 @@ for i, t in enumerate(terminations):
         img_name,
         slab,
         show_unit_cell=2,
-        rotation='-90x',
+        rotation='-90x, -90y',
         run_povray=True,
     )
 
@@ -85,7 +85,7 @@ atoms[3].symbol = 'Cu'
 gen = SlabGenerator(
     atoms,
     miller_index=(2, 1, 1),
-    layers=9,
+    layers=6,
     fixed=5,
     vacuum=4)
 
@@ -208,7 +208,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 1),
-    layers=3,
+    layers=6,
     vacuum=10)
 
 atoms = gen.get_slab()
@@ -234,7 +234,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 1),
-    layers=3,
+    layers=6,
     vacuum=10)
 
 atoms = gen.get_slab()
@@ -281,7 +281,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 1),
-    layers=3,
+    layers=6,
     vacuum=4)
 
 atoms = gen.get_slab()
@@ -307,7 +307,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(1, 1, 1),
-    layers=3,
+    layers=6,
     vacuum=4)
 
 atoms = gen.get_slab()
@@ -340,7 +340,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(3, 2, 1),
-    layers=13,
+    layers=8,
     vacuum=5)
 
 atoms = gen.get_slab(size=1)
@@ -378,32 +378,32 @@ atoms.edit()
 #+RESULTS:
 :RESULTS:
 Coordinates:
- [[ 0.          0.         10.34522484]
- [ 8.66025404  9.258201   11.68153105]
- [ 1.44337567  0.19287919 11.3474545 ]
- [ 4.33012702  6.36501319 10.67930139]
- [ 7.21687836  8.48668425 12.34968415]
- [ 7.21687836  5.59349644 11.3474545 ]
- [ 5.77350269  3.66470456 10.67930139]
- [ 7.21687836  0.96439594 10.67930139]
- [ 3.84900179  5.52920337 11.01337794]
- [ 7.69800359  7.58658137 12.34968415]
- [ 6.73575314  0.12858612 11.01337794]
- [ 7.21687836  3.85758375 11.68153105]] 
+ [[ 5.77350269  3.086067    9.67707173]
+ [ 8.66025404  6.94365075 11.01337794]
+ [ 7.21687836  9.64395937 11.01337794]
+ [ 4.33012702  9.83683856 12.0156076 ]
+ [ 7.21687836  4.43622131 12.0156076 ]
+ [ 7.21687836  3.27894619 10.67930139]
+ [ 4.33012702  4.05046294 10.01114829]
+ [ 4.33012702  2.31455025 10.34522484]
+ [ 4.81125224 10.67264837 11.68153105]
+ [ 6.73575314  7.07223687 11.68153105]
+ [ 4.81125224  1.41444737 10.34522484]
+ [ 7.21687836  1.5430335  11.01337794]] 
 
 Connectivity:
  [1 1 2 2 2 2 2 2 3 3 3 4] 
 
 Topology:
- [array([16]) array([21]) array([16, 22]) array([17, 19]) array([21, 25])
- array([17, 23]) array([17, 18]) array([18, 16]) array([20, 17, 19])
- array([25, 23, 21]) array([18, 21, 16]) array([17, 24, 18, 23])] 
+ [array([14]) array([19]) array([17, 21]) array([21, 22]) array([20, 23])
+ array([14, 20]) array([14, 16]) array([14, 18]) array([22, 21, 18])
+ array([19, 21, 23]) array([14, 18, 17]) array([14, 22, 17, 20])] 
 
 Sites by periodicity:
- [ 40  45  98 141 146 224 229 234 343 376 381 447] 
+ [ 40  45 197 209 256 261 296 303 372 398 421 450] 
 
 Sites by symmetry:
- [ 40  45  98 141 146 224 229 234 343 376 381 447]
+ [ 40  45 197 209 256 261 296 303 372 398 421 450]
 :END:
 
 #+BEGIN_SRC python :results output org drawer :exports results
@@ -420,7 +420,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(3, 2, 1),
-    layers=13,
+    layers=8,
     vacuum=5)
 
 atoms = gen.get_slab(size=1)
@@ -482,19 +482,19 @@ write(
 :RESULTS:
 Coordinates:
 #+attr_latex: :mode math :environment matrix
-|     x |     y |      z |
-|   0.0 |   0.0 | 10.345 |
-|  8.66 | 9.258 | 11.682 |
-| 1.443 | 0.193 | 11.347 |
-|  4.33 | 6.365 | 10.679 |
-| 7.217 | 8.487 |  12.35 |
-| 7.217 | 5.593 | 11.347 |
-| 5.774 | 3.665 | 10.679 |
-| 7.217 | 0.964 | 10.679 |
-| 3.849 | 5.529 | 11.013 |
-| 7.698 | 7.587 |  12.35 |
-| 6.736 | 0.129 | 11.013 |
-| 7.217 | 3.858 | 11.682 |
+|     x |      y |      z |
+| 5.774 |  3.086 |  9.677 |
+|  8.66 |  6.944 | 11.013 |
+| 7.217 |  9.644 | 11.013 |
+|  4.33 |  9.837 | 12.016 |
+| 7.217 |  4.436 | 12.016 |
+| 7.217 |  3.279 | 10.679 |
+|  4.33 |   4.05 | 10.011 |
+|  4.33 |  2.315 | 10.345 |
+| 4.811 | 10.673 | 11.682 |
+| 6.736 |  7.072 | 11.682 |
+| 4.811 |  1.414 | 10.345 |
+| 7.217 |  1.543 | 11.013 |
 
 Connectivity:
 #+attr_latex: :mode math :environment matrix
@@ -502,24 +502,24 @@ Connectivity:
 
 Topology:
 #+attr_latex: :mode math :environment matrix
-| [16]             |
-| [21]             |
-| [16, 22]         |
-| [17, 19]         |
-| [21, 25]         |
-| [17, 23]         |
-| [17, 18]         |
-| [18, 16]         |
-| [20, 17, 19]     |
-| [25, 23, 21]     |
-| [18, 21, 16]     |
-| [17, 24, 18, 23] |
+| [14]             |
+| [19]             |
+| [17, 21]         |
+| [21, 22]         |
+| [20, 23]         |
+| [14, 20]         |
+| [14, 16]         |
+| [14, 18]         |
+| [22, 21, 18]     |
+| [19, 21, 23]     |
+| [14, 18, 17]     |
+| [14, 22, 17, 20] |
 
 Sites by periodicity:
-| 40 | 45 | 98 | 141 | 146 | 224 | 229 | 234 | 343 | 376 | 381 | 447 |
+| 40 | 45 | 197 | 209 | 256 | 261 | 296 | 303 | 372 | 398 | 421 | 450 |
 
 Sites by symmetry:
-| 40 | 45 | 98 | 141 | 146 | 224 | 229 | 234 | 343 | 376 | 381 | 447 |
+| 40 | 45 | 197 | 209 | 256 | 261 | 296 | 303 | 372 | 398 | 421 | 450 |
 :END:
 
 When we call =get_periodic_sites()=, we see that some indices are repeated. This is to indicate that these sites are identical in the context of periodic boundaries. If we set =screen= to True, we will only be given the sites within the original unit cell (between 0-1 in fractional coordinates) and all indices will be unique.
@@ -547,7 +547,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(2, 1, 1),
-    layers=10,
+    layers=8,
     vacuum=5)
 
 atoms = gen.get_slab()
@@ -566,7 +566,7 @@ write(
     '../adsorption-vectors.pov',
     atoms * (2, 2, 1),
     show_unit_cell=2,
-    rotation='90x, -39y, -160z',
+    rotation='-90x, -90y, 20z',
     run_povray=True
 )
 #+END_SRC
@@ -587,7 +587,7 @@ bulk[3].symbol = 'Cu'
 gen = SlabGenerator(
     bulk,
     miller_index=(2, 1, 1),
-    layers=10,
+    layers=8,
     vacuum=5)
 
 atoms = gen.get_slab()
@@ -623,6 +623,7 @@ gen = SlabGenerator(
     atoms,
     miller_index=(1, 1, 1),
     layers=4,
+    layer_type='trim',
     fixed=2,
     vacuum=10)
 
@@ -658,6 +659,7 @@ gen = SlabGenerator(
     atoms,
     miller_index=(1, 1, 1),
     layers=4,
+    layer_type='trim',
     vacuum=4)
 
 slab = gen.get_slab()
@@ -701,6 +703,7 @@ gen = SlabGenerator(
     atoms,
     miller_index=(1, 1, 1),
     layers=4,
+    layer_type='trim',
     vacuum=4)
 
 slab = gen.get_slab()
@@ -733,13 +736,14 @@ gen = SlabGenerator(
     atoms,
     miller_index=(1, 1, 1),
     layers=4,
+    layer_type='trim',
     vacuum=4)
 
 slab = gen.get_slab()
 adsorbate = molecule('C2H3')[1]
 
 builder = Builder(slab)
-ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=6)
+ads_slab = builder.add_adsorbate(adsorbate, bonds=[0, 1], index=10)
 
 img_name = '../CH2CH-ads.pov'
 write(
@@ -775,6 +779,7 @@ gen = SlabGenerator(
     atoms,
     miller_index=(1, 1, 1),
     layers=4,
+    layer_type='trim',
     vacuum=4)
 
 slab = gen.get_slab()

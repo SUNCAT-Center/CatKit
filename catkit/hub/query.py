@@ -43,8 +43,8 @@ def query(table='reactions',
 
 
 def execute_graphQL(query_string):
-    root = 'http://catappdatabase2.herokuapp.com/graphql'
-    print('Connecting to database at http://catappdatabase2.herokuapp.com/graphql')
+    root = 'http://api.catalysis-hub.org/graphql'
+    print('Connecting to database at {root}'.format(root=root))
     print('')
     print('Executing query:')
     print('')
@@ -52,10 +52,12 @@ def execute_graphQL(query_string):
     print('')
     print('Getting data from server...')
     print('')
-    data = requests.post(root, {'query': query_string}).json()
-    print('Result:')
-    print('')
-    pprint.pprint(data)
+    data = requests.post(root, {'query': query_string})
+    try:
+        data = data.json()['data']
+        print('Data fetched!')
+    except BaseException:
+        print(data)
     return data
 
 
@@ -68,7 +70,9 @@ def graphql_query(table='reactions',
                   queries={}):
 
     statement = '{'
-    statement += '{}(first: {}'.format(table, n_results)
+    statement += '{}('.format(table)
+    if n_results != 'all':
+        statement += 'first: {}'.format(n_results)
     for key, value in queries.items():
         if isinstance(value, str):
             statement += ', {}: "{}"'.format(key, value)
@@ -97,25 +101,29 @@ def graphql_query(table='reactions',
 
     return statement
 
+def convert(name):
+    import re
+    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
-def get_reactions(n_results=20, write_db=False, **kwargs):
+def get_reactions(columns='all', n_results=20, write_db=False, **kwargs):
     """
     Get reactions from server
 
     Give key value strings as arguments
     """
+    if write_db or columns=='all':
+        columns = all_columns['reactions']
     queries = {}
     for key, value in kwargs.items():
         key = map_column_names(key)
         if key == 'distinct':
-            if value in ['True', 'true']:
-                # WARNING: undefined variable name 'query_dict'
-                query_dict.update({key: True})
+            if value in [True, 'True', 'true']:
+                queries.update({key: True})
                 continue
-        try:
-            value = int(value)
+        if isinstance(value, int) or isinstance(value, float):
             queries.update({key: value})
-        except BaseException:
+        else:
             queries.update({key: '{0}'.format(value)})
 
     subtables = []
@@ -124,14 +132,15 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
     else:
         subtables = []
     data = query(table='reactions', subtables=subtables,
-                 columns=all_columns['reactions'],
+                 columns=columns,
                  n_results=n_results, queries=queries)
 
     if not write_db:
         return data
 
     print('Writing result to Reactions.db')
-    for row in data['data']['reactions']['edges']:
+    unique_ids = []
+    for row in data['reactions']['edges']:
         with CathubSQLite('Reactions.db') as db:
             row = row['node']
             key_values = {}
@@ -156,6 +165,8 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
             if not ase_ids:
                 ase_ids = None
                 energy_corrections = None
+            else:
+                unique_ids += ase_ids.values()
             key_values['ase_ids'] = ase_ids
             key_values['energy_corrections'] = ase_ids
 
@@ -173,13 +184,22 @@ def get_reactions(n_results=20, write_db=False, **kwargs):
                 id = db.write(key_values)
             else:
                 db.update(id, key_values)
-        if ase_ids is not None:
-            # Ase structures
-            with ase.db.connect('Reactions.db') as ase_db:
-                for unique_id in ase_ids.values():
-                    if ase_db.count('unique_id={}'.format(unique_id)) == 0:
-                        atomsrow = get_atomsrow_by_id(unique_id)
-                        ase_db.write(atomsrow)
+
+    if ase_ids is not None:
+        # Ase structures
+        with ase.db.connect('Reactions.db') as ase_db:
+            con = ase_db.connection
+            cur = con.cursor()
+            cur.execute('SELECT unique_id from systems;')
+            unique_ids0 = cur.fetchall()
+            unique_ids0 = [un[0] for un in unique_ids0]
+            unique_ids = [un for un in unique_ids if un not in unique_ids0]
+            for unique_id in list(set(unique_ids)):
+                #if ase_db.count('unique_id={}'.format(unique_id)) == 0:
+                atomsrow = get_atomsrow_by_id(unique_id)
+                ase_db.write(atomsrow)
+
+    print('Writing complete!')
 
     return data
 
@@ -214,11 +234,6 @@ def get_atomsrow_by_id(unique_id):
     db = get_ase_db()
     row = db.get('unique_id={}'.format(unique_id))
     return row
-
-# def get_atomsrow_by_ids(unique_ids):
-#    db = get_ase_db()
-#    con = db._connect()
-#    cur = con.cursor()
 
 
 def get_atoms_by_id(unique_id):

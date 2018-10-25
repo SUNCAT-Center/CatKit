@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" /> 
@@ -179,8 +178,8 @@
     <span class="k">if</span> <span class="n">add_hydrogen</span> <span class="ow">and</span> <span class="s1">&#39;H&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
         <span class="n">symbols</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">symbols</span></div>
-
+    <span class="k">return</span> <span class="n">symbols</span>
+</div>
 
 <div class="viewcode-block" id="construct_reference_system"><a class="viewcode-back" href="../../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.construct_reference_system">[docs]</a><span class="k">def</span> <span class="nf">construct_reference_system</span><span class="p">(</span>
     <span class="n">symbols</span><span class="p">,</span>
@@ -218,8 +217,8 @@
 
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">references</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">_x</span><span class="p">:</span> <span class="n">ase</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">atomic_numbers</span><span class="p">[</span><span class="n">_x</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-                  <span class="p">)</span></div>
-
+                  <span class="p">)</span>
+</div>
 
 <div class="viewcode-block" id="get_atomic_stoichiometry"><a class="viewcode-back" href="../../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.get_atomic_stoichiometry">[docs]</a><span class="k">def</span> <span class="nf">get_atomic_stoichiometry</span><span class="p">(</span><span class="n">references</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Given a list of references (tuples of (symbol, molecule))</span>
@@ -250,8 +249,8 @@
             <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
                 <span class="n">stoichiometry</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">*=</span> <span class="n">stoichiometry</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
 
-    <span class="k">return</span> <span class="n">stoichiometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span></div>
-
+    <span class="k">return</span> <span class="n">stoichiometry</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</div>
 
 <div class="viewcode-block" id="get_stoichiometry_factors"><a class="viewcode-back" href="../../../../modules/catkit.hub.ase_tools.html#catkit.hub.ase_tools.gas_phase_references.get_stoichiometry_factors">[docs]</a><span class="k">def</span> <span class="nf">get_stoichiometry_factors</span><span class="p">(</span><span class="n">adsorbates</span><span class="p">,</span> <span class="n">references</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Take a list of adsorabtes and a corresponding reference</span>
@@ -282,8 +281,8 @@
                 <span class="n">nonzero_factors</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="n">stoichiometry_factors</span><span class="p">[</span><span class="n">adsorbate</span><span class="p">]</span> <span class="o">=</span> <span class="n">nonzero_factors</span>
 
-    <span class="k">return</span> <span class="n">stoichiometry_factors</span></div>
-
+    <span class="k">return</span> <span class="n">stoichiometry_factors</span>
+</div>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
@@ -551,7 +550,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -588,10 +587,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

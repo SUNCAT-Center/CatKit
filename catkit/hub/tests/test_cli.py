@@ -41,11 +41,40 @@ class CommandLineTestCase(unittest.TestCase):
         runner.invoke(make_folders, ['--create-template', 'template'])
         runner.invoke(make_folders, ['template'])
 
-    def test_cli_read_folders(self):
+    def test1_cli_read_folders(self):
         from catkit.hub.cli import folder2db
         runner = CliRunner()
         runner.invoke(folder2db, ['aayush/'])
 
+    def test2_cli_db2server(self):
+        from catkit.hub.postgresql import CathubPostgreSQL
+        from catkit.hub.cli import db2server
+        db = CathubPostgreSQL(user='postgres')
+        con = db._connect()
+        db._initialize(con)
+        db.truncate_schema()
+        runner = CliRunner()
+        runner.invoke(db2server, ['--dbuser=postgres',
+                                  'aayush/MontoyaChallenge2015.db'])
+    def test3_cli_asedb(self):
+        from catkit.hub.cli import ase
+        runner = CliRunner()
+        runner.invoke(ase, ['--dbuser=postgres', '--dbpassword=None'])
+
+    def test4_show_reactions(self):
+        from catkit.hub.cli import show_reactions
+        runner = CliRunner()
+        runner.invoke(show_reactions, ['aayush/MontoyaChallenge2015.db'])
+
+    def test_reactions(self):
+        from catkit.hub.cli import reactions
+        runner = CliRunner()
+        runner.invoke(reactions, ['-q chemicalComposition=~Co', '-q reactants=H'])
+
+    def test_publications(self):
+        from catkit.hub.cli import publications
+        runner = CliRunner()
+        runner.invoke(publications)
 
 if __name__ == '__main__':
     unittest.main()

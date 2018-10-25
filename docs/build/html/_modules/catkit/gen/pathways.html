@@ -24,8 +24,7 @@
 
   
 
-  
-    <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
@@ -294,8 +293,8 @@
 <span class="s2">        energy REAL NOT NULL,</span>
 <span class="s2">        calculator CHAR,</span>
 <span class="s2">        FOREIGN KEY(molecule_id) REFERENCES molecules(molecule_pid)</span>
-<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span></div>
-
+<span class="s2">        )&quot;&quot;&quot;</span><span class="p">)</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.molecule_search"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.molecule_search">[docs]</a>    <span class="k">def</span> <span class="nf">molecule_search</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                         <span class="n">element_pool</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;C&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
                         <span class="n">load_molecules</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -346,8 +345,8 @@
 
             <span class="n">search_molecules</span> <span class="o">+=</span> <span class="n">new_molecules</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_molecules</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span></div>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_molecules</span><span class="p">(</span><span class="n">molecules</span><span class="p">)</span>
+</div>
     <span class="k">def</span> <span class="nf">_branch_molecule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Construct all the molecules one atom larger from a given</span>
 <span class="sd">        molecule and add the unique ones to a dictionary.</span>
@@ -506,8 +505,8 @@
 
         <span class="k">if</span> <span class="n">substitution</span><span class="p">:</span>
             <span class="n">sub_pathways</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_substitution_paths</span><span class="p">(</span><span class="n">molecules</span><span class="p">,</span> <span class="n">pathways</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">save_pathways</span><span class="p">(</span><span class="n">sub_pathways</span><span class="p">)</span></div>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_pathways</span><span class="p">(</span><span class="n">sub_pathways</span><span class="p">)</span>
+</div>
     <span class="k">def</span> <span class="nf">_get_addition_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">molecules</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;TODO: I can haz documentation?&quot;&quot;&quot;</span>
         <span class="n">disjoints</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
@@ -743,8 +742,8 @@
                             <span class="sd">&quot;&quot;&quot;INSERT INTO atoms</span>
 <span class="sd">                            (molecule_id, node_id, atom_num, valence)</span>
 <span class="sd">                            VALUES(?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
-                            <span class="p">(</span><span class="n">molecule_pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">number</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">valence</span><span class="p">)))</span></div>
-
+                            <span class="p">(</span><span class="n">molecule_pid</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">node</span><span class="p">),</span> <span class="n">number</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">valence</span><span class="p">)))</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.save_pathways"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">save_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathways</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
@@ -774,8 +773,8 @@
 <span class="s2">                    VALUES(?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span>
                                <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">P1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">P2</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">R1</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">R2</span><span class="p">),</span> <span class="n">bbond</span><span class="p">))</span>
             <span class="k">except</span> <span class="p">(</span><span class="n">sqlite3</span><span class="o">.</span><span class="n">IntegrityError</span><span class="p">):</span>
-                <span class="k">pass</span></div>
-
+                <span class="k">pass</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.load_molecules"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_molecules">[docs]</a>    <span class="k">def</span> <span class="nf">load_molecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">binned</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Load 2D molecule graphs from the database.</span>
 
@@ -855,8 +854,8 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">molecules</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">molecule</span>
 
-        <span class="k">return</span> <span class="n">molecules</span></div>
-
+        <span class="k">return</span> <span class="n">molecules</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.load_pathways"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_pathways">[docs]</a>    <span class="k">def</span> <span class="nf">load_pathways</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">broken_bonds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save enumerated pathways the ReactionNetwork database.</span>
 <span class="sd">        More than two reactants or two products is not supported.</span>
@@ -904,8 +903,8 @@
 
         <span class="n">pathways</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">pathways</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">pathways</span></div>
-
+        <span class="k">return</span> <span class="n">pathways</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.save_3d_structure"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.save_3d_structure">[docs]</a>    <span class="k">def</span> <span class="nf">save_3d_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gratoms</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save Cartesian coordinates into the ReactionNetwork database.</span>
 
@@ -951,8 +950,8 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;INSERT INTO positions</span>
 <span class="s2">                (molecule_id, atom_id, x_coord, y_coord, z_coord, symbol)</span>
-<span class="s2">                VALUES(?, ?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">symbol</span><span class="p">))</span></div>
-
+<span class="s2">                VALUES(?, ?, ?, ?, ?, ?)&quot;&quot;&quot;</span><span class="p">,</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">symbol</span><span class="p">))</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.load_3d_structures"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.load_3d_structures">[docs]</a>    <span class="k">def</span> <span class="nf">load_3d_structures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return Gratoms objects from the ReactionNetwork database.</span>
 
@@ -1017,8 +1016,8 @@
             <span class="n">gratoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
             <span class="n">gratoms</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ids</span><span class="p">)</span>
 
-            <span class="k">return</span> <span class="n">gratoms</span></div>
-
+            <span class="k">return</span> <span class="n">gratoms</span>
+</div>
 <div class="viewcode-block" id="ReactionNetwork.plot_reaction_network"><a class="viewcode-back" href="../../../modules/catkit.gen.html#catkit.gen.pathways.ReactionNetwork.plot_reaction_network">[docs]</a>    <span class="k">def</span> <span class="nf">plot_reaction_network</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Plot the reaction network present in the database.&quot;&quot;&quot;</span>
 
@@ -1039,8 +1038,8 @@
 
         <span class="k">if</span> <span class="n">file_name</span><span class="p">:</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
-        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
-
+        <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</div>
     <span class="k">def</span> <span class="nf">_maximum_bond_limit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">molecule</span><span class="p">,</span> <span class="n">n1</span><span class="p">,</span> <span class="n">n2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return whether a maximum bonding limit has been met.&quot;&quot;&quot;</span>
         <span class="n">el1</span> <span class="o">=</span> <span class="n">molecule</span><span class="o">.</span><span class="n">nodes</span><span class="p">[</span><span class="n">n1</span><span class="p">][</span><span class="s1">&#39;number&#39;</span><span class="p">]</span>
@@ -1053,8 +1052,8 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nbond_limits</span><span class="p">[</span><span class="n">el1</span><span class="p">][</span><span class="n">el2</span><span class="p">]</span> <span class="o">==</span> <span class="n">bonds</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-        <span class="k">return</span> <span class="kc">False</span></div>
-</pre></div>
+        <span class="k">return</span> <span class="kc">False</span>
+</pre></div></div>
 
            </div>
            
@@ -1067,7 +1066,7 @@
   <div role="contentinfo">
     <p>
         &copy; Copyright 2018, CatKit-developers.
-      Last updated on Mon, 18 Jun 2018 18:49:23.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
 
     </p>
   </div>
@@ -1104,10 +1103,7 @@
 
   
 
-  
-  
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
-  
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
 
   <script type="text/javascript">
       jQuery(function () {

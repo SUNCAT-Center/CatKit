@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>catkit.gen.utils.symmetry &mdash; CatKit 0.5.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> CatKit
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.5
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../index.html">About</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catkit.html">CatKit</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catgen.html">CatGen</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/cathub.html">CatHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://catkit-jboes.readthedocs.io/en/latest/_static/frontmatter/catflow.html">CatFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/catkit.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">CatKit</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+          <li><a href="../../gen.html">catkit.gen</a> &raquo;</li>
+        
+          <li><a href="../utils.html">catkit.gen.utils</a> &raquo;</li>
+        
+      <li>catkit.gen.utils.symmetry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for catkit.gen.utils.symmetry</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">catkit</span> <span class="k">import</span> <span class="n">Gratoms</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">spglib</span>
+
+
+<div class="viewcode-block" id="get_spglib_cell"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_spglib_cell">[docs]</a><span class="k">def</span> <span class="nf">get_spglib_cell</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">primitive</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">idealize</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib primitive cell finder:</span>
+<span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atoms : object</span>
+<span class="sd">        Atoms object to search for a primitive unit cell.</span>
+<span class="sd">    primitive : bool</span>
+<span class="sd">        Reduce the atoms object into a primitive form.</span>
+<span class="sd">    idealize : bool</span>
+<span class="sd">        Convert the cell into the spglib standardized form.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        Tolerance for floating point rounding errors.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    primitive cell : object</span>
+<span class="sd">        The primitive unit cell returned by spglib if one is found.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">()</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
+
+    <span class="n">cell</span> <span class="o">=</span> <span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
+    <span class="n">cell</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">standardize_cell</span><span class="p">(</span>
+        <span class="n">cell</span><span class="p">,</span> <span class="n">to_primitive</span><span class="o">=</span><span class="n">primitive</span><span class="p">,</span> <span class="n">no_idealize</span><span class="o">=~</span><span class="n">idealize</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cell</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">atoms</span>
+
+    <span class="n">_lattice</span><span class="p">,</span> <span class="n">_positions</span><span class="p">,</span> <span class="n">_numbers</span> <span class="o">=</span> <span class="n">cell</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="n">Gratoms</span><span class="p">(</span><span class="n">symbols</span><span class="o">=</span><span class="n">_numbers</span><span class="p">,</span> <span class="n">cell</span><span class="o">=</span><span class="n">_lattice</span><span class="p">,</span> <span class="n">pbc</span><span class="o">=</span><span class="n">atoms</span><span class="o">.</span><span class="n">pbc</span><span class="p">)</span>
+    <span class="n">atoms</span><span class="o">.</span><span class="n">set_scaled_positions</span><span class="p">(</span><span class="n">_positions</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">atoms</span></div>
+
+
+<div class="viewcode-block" id="get_point_group"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_point_group">[docs]</a><span class="k">def</span> <span class="nf">get_point_group</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the point group operations of a systems.&quot;&quot;&quot;</span>
+    <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span> <span class="o">=</span> <span class="n">get_symmetry</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+    <span class="n">point_group</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_pointgroup</span><span class="p">(</span><span class="n">rotations</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+    <span class="n">laue</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-1&#39;</span><span class="p">,</span> <span class="s1">&#39;2/m&#39;</span><span class="p">,</span> <span class="s1">&#39;mmm&#39;</span><span class="p">,</span> <span class="s1">&#39;4/m&#39;</span><span class="p">,</span> <span class="s1">&#39;4/mmm&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;-3&#39;</span><span class="p">,</span> <span class="s1">&#39;-3m&#39;</span><span class="p">,</span> <span class="s1">&#39;6/m&#39;</span><span class="p">,</span> <span class="s1">&#39;6/mmm&#39;</span><span class="p">,</span> <span class="s1">&#39;m-3&#39;</span><span class="p">,</span> <span class="s1">&#39;m-3m&#39;</span><span class="p">]</span>
+
+    <span class="n">is_laue</span> <span class="o">=</span> <span class="n">point_group</span> <span class="ow">in</span> <span class="n">laue</span>
+
+    <span class="k">return</span> <span class="n">point_group</span><span class="p">,</span> <span class="n">is_laue</span></div>
+
+
+<div class="viewcode-block" id="get_symmetry"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_symmetry">[docs]</a><span class="k">def</span> <span class="nf">get_symmetry</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-5</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Atoms object interface with spglib symmetry finder:</span>
+<span class="sd">    https://atztogo.github.io/spglib/python-spglib.html#python-spglib</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atoms : object</span>
+<span class="sd">        Atoms object to search for symmetric structures of.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        Tolerance for floating point rounding errors.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    symmetry operations: ndarray (n, n)</span>
+<span class="sd">        Symmetry operations from spglib.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lattice</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">cell</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">()</span>
+    <span class="n">numbers</span> <span class="o">=</span> <span class="n">atoms</span><span class="o">.</span><span class="n">get_atomic_numbers</span><span class="p">()</span>
+
+    <span class="n">cell</span> <span class="o">=</span> <span class="p">(</span><span class="n">lattice</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">numbers</span><span class="p">)</span>
+
+    <span class="n">symmetry</span> <span class="o">=</span> <span class="n">spglib</span><span class="o">.</span><span class="n">get_symmetry</span><span class="p">(</span><span class="n">cell</span><span class="p">,</span> <span class="n">symprec</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+
+    <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span> <span class="o">=</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;rotations&#39;</span><span class="p">],</span> <span class="n">symmetry</span><span class="p">[</span><span class="s1">&#39;translations&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span></div>
+
+
+<div class="viewcode-block" id="matching_coordinates"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.matching_coordinates">[docs]</a><span class="k">def</span> <span class="nf">matching_coordinates</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">comparators</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-8</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get the indices of all points in a comparator list that are</span>
+<span class="sd">    equal to a given position (with a tolerance), taking into</span>
+<span class="sd">    account periodic boundary conditions (adaptation from Pymatgen).</span>
+
+<span class="sd">    This will only accept a Cartesian coordinate scheme.</span>
+<span class="sd">    TODO: merge this with matching_sites.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    position : list (3,)</span>
+<span class="sd">        Fractional coordinate to compare to list.</span>
+<span class="sd">    comparators : list (3, n)</span>
+<span class="sd">        Fractional coordinates to compare against.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        Absolute tolerance.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    match : list (n,)</span>
+<span class="sd">        Indices of matches.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comparators</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="n">fdist</span> <span class="o">=</span> <span class="n">comparators</span> <span class="o">-</span> <span class="n">position</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">match</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">fdist</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">match</span></div>
+
+
+<div class="viewcode-block" id="get_unique_coordinates"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_unique_coordinates">[docs]</a><span class="k">def</span> <span class="nf">get_unique_coordinates</span><span class="p">(</span><span class="n">atoms</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">tag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return unique coordinate values of a given atoms object</span>
+<span class="sd">    for a specified axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    atoms : object</span>
+<span class="sd">        Atoms object to search for unique values along.</span>
+<span class="sd">    axis : int (0, 1, or 2)</span>
+<span class="sd">        Look for unique values along the x, y, or z axis.</span>
+<span class="sd">    tag : bool</span>
+<span class="sd">        Assign ASE-like tags to each layer of the slab.</span>
+<span class="sd">    tol : float</span>
+<span class="sd">        The tolerance to search for unique values within.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    values : ndarray (n,)</span>
+<span class="sd">        Array of unique positions in fractional coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">(</span><span class="n">atoms</span><span class="o">.</span><span class="n">get_scaled_positions</span><span class="p">()[:,</span> <span class="n">axis</span><span class="p">]</span> <span class="o">+</span> <span class="n">tol</span><span class="p">)</span> <span class="o">%</span> <span class="mi">1</span>
+    <span class="n">positions</span> <span class="o">-=</span> <span class="n">tol</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">atol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">values</span> <span class="o">+=</span> <span class="p">[</span><span class="n">d</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tag</span><span class="p">:</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">positions</span><span class="p">:</span>
+            <span class="n">close</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">values</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">atol</span><span class="o">=</span><span class="n">tol</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">tol</span><span class="p">)</span>
+            <span class="n">tags</span> <span class="o">+=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">close</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">atoms</span><span class="o">.</span><span class="n">set_tags</span><span class="p">(</span><span class="n">tags</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">values</span></div>
+
+
+<div class="viewcode-block" id="get_affine_operations"><a class="viewcode-back" href="../../../../modules/catkit.gen.html#catkit.gen.utils.get_affine_operations">[docs]</a><span class="k">def</span> <span class="nf">get_affine_operations</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return the affine operations of a unit cell.&quot;&quot;&quot;</span>
+    <span class="n">rotations</span><span class="p">,</span> <span class="n">translations</span> <span class="o">=</span> <span class="n">get_symmetry</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
+
+    <span class="n">operations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rotations</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rot</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rotations</span><span class="p">):</span>
+        <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">rot</span>
+        <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">translations</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">operations</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">operations</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, CatKit-developers.
+      Last updated on Mon, 23 Jul 2018 14:00:36.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../../',
+            VERSION:'0.5.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
