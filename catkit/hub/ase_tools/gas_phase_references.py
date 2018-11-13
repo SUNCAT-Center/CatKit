@@ -3,6 +3,7 @@ import ase.data
 import numpy as np
 import optparse
 import pprint
+from ase.symbols import string2symbols
 
 
 def molecules2symbols(molecules, add_hydrogen=True):
@@ -11,10 +12,10 @@ def molecules2symbols(molecules, add_hydrogen=True):
     """
     symbols = sorted(
         list(set(
-            ase.atoms.string2symbols(''.join(
+            string2symbols(''.join(
                 map(
                     lambda _x:
-                    ''.join(ase.atoms.string2symbols(_x)), molecules)
+                    ''.join(string2symbols(_x)), molecules)
             ))
         )),
         key=lambda _y: ase.data.atomic_numbers[_y])
@@ -61,7 +62,7 @@ def construct_reference_system(
     for symbol in symbols:
         added_symbols.append(symbol)
         for candidate in candidates:
-            _symbols = ase.atoms.string2symbols(candidate)
+            _symbols = string2symbols(candidate)
 
             # Add partial adsorbate species
             # is subset of reference species
@@ -93,7 +94,7 @@ def construct_reference_system(
     # only adds one one additional species in each step
     while references:
         for i, reference in enumerate(references):
-            if len(set(ase.atoms.string2symbols(reference[1])) -
+            if len(set(string2symbols(reference[1])) -
                     set(x[0] for x in sorted_references)) == 1:
                 sorted_references.append(references.pop(i))
                 break
@@ -116,7 +117,7 @@ def get_atomic_stoichiometry(references):
         species = species.split('_')[0]
 
         key_index[key] = i
-        composition = ase.atoms.string2symbols(species)
+        composition = string2symbols(species)
         for j, symbol in enumerate(composition):
             stoichiometry[i, key_index[symbol]] += 1
     istoichiometry = np.linalg.inv(stoichiometry)
@@ -133,7 +134,7 @@ def get_stoichiometry_factors(adsorbates, references):
     stoichiometry = get_atomic_stoichiometry(references)
     stoichiometry_factors = {}
     for adsorbate in adsorbates:
-        for symbol in ase.atoms.string2symbols(adsorbate):
+        for symbol in string2symbols(adsorbate):
             symbol_index = list(
                 map(lambda _x: _x[0], references)).index(symbol)
 
