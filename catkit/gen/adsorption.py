@@ -596,10 +596,7 @@ class Builder(AdsorptionSites):
         atoms.translate(-atoms.positions[bond])
 
         if auto_construct:
-            root = None
-            for i, branch in enumerate(branches):
-                root = catkit.gen.molecules._branch_molecule(
-                    atoms, branch, root, adsorption=True)
+            atoms = catkit.gen.molecules.get_3D_positions(atoms, bond)
 
             # Align with the adsorption vector
             atoms.rotate([0, 0, 1], vector)

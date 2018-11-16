@@ -6,7 +6,7 @@ import click
 import six
 import collections
 from tabulate import tabulate
-from ase.atoms import string2symbols
+from ase.symbols import string2symbols
 from ase.cli import main
 from . import query
 from . import make_folders_template

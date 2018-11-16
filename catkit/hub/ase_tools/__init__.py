@@ -37,7 +37,7 @@ def get_chemical_formula(atoms, mode='metal'):
 
 def symbols(atoms):
     formula = get_chemical_formula(atoms)
-    symbols = ase.atoms.string2symbols(formula)
+    symbols = ase.symbols.string2symbols(formula)
     return ''.join(symbols)
 
 
