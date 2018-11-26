@@ -1,70 +1,63 @@
 import numpy as np
 
 
-def expand_cell(atoms, padding=None):
+def expand_cell(
+        coordinates,
+        cell,
+        pbc=True,
+        centers=None,
+        cutoff=6.0):
     """Return Cartesian coordinates atoms within a supercell
-    which contains repetitions of the unit cell which contains
-    at least one neighboring atom.
+    which contains spheres of a given cutoff radius. One sphere
+    for each atom inside of the given unit cell.
 
     Parameters
     ----------
-    atoms : Atoms object
-        Atoms with the periodic boundary conditions and unit cell
-        information to use.
-    padding : ndarray (3,)
-        Padding of repetition of the unit cell in the x, y, z
-        directions. e.g. [1, 0, 1].
+    coordinates : ndarray (N, 3)
+        Cartesian coordinates of atomic positions.
+    cell : ndarray (3, 3)
+        Unit cell dimensions
+    pbc : bool | array_like (3,)
+        Periodic boundary conditions.
+    cutoff : float
+        Radius of the spheres to use for expanding the unit cell.
 
     Returns
     -------
-    index : ndarray (N,)
-        Indices associated with the original unit cell positions.
-    coords : ndarray (N, 3)
+    indices : ndarray (M,)
+        Indices associated with the original unit cell atom index.
+    positions : ndarray (M, 3)
         Cartesian coordinates associated with positions in the
         supercell.
     offsets : ndarray (M, 3)
         Integer offsets of each unit cell.
     """
-    cell = atoms.cell
-    pbc = atoms.pbc
-    pos = atoms.positions
+    pbc = np.asarray(pbc, dtype=bool)
+    if centers is None:
+        centers = np.linalg.solve(cell.T, coordinates.T).T
 
-    if padding is None:
-        diags = np.sqrt((
-            np.dot([[1, 1, 1],
-                    [-1, 1, 1],
-                    [1, -1, 1],
-                    [-1, -1, 1]],
-                   cell)**2).sum(1))
+    basis_lengths = np.linalg.norm(cell, axis=1)
+    reciprocal_cell = np.linalg.inv(cell).T
+    reciprocal_lengths = np.linalg.norm(reciprocal_cell, axis=1)
 
-        if pos.shape[0] == 1:
-            cutoff = max(diags) / 2.
-        else:
-            dpos = (pos - pos[:, None]).reshape(-1, 3)
-            Dr = np.dot(dpos, np.linalg.inv(cell))
-            D = np.dot(Dr - np.round(Dr) * pbc, cell)
-            D_len = np.sqrt((D**2).sum(1))
+    lengths = pbc * cutoff * reciprocal_lengths + 0.01
+    min_pad = np.floor(centers - lengths).min(axis=0)
+    max_pad = np.ceil(centers + lengths).max(axis=0)
+    padding = np.array([min_pad.astype(int), max_pad.astype(int)]).T
 
-            cutoff = min(max(D_len), max(diags) / 2.)
-
-        latt_len = np.sqrt((cell**2).sum(1))
-        V = abs(np.linalg.det(cell))
-        padding = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
-                                         (V * latt_len)), dtype=int)
-
-    offsets = np.mgrid[
-        -padding[0]:padding[0] + 1,
-        -padding[1]:padding[1] + 1,
-        -padding[2]:padding[2] + 1].T
-    tvecs = np.dot(offsets, cell)
-    coords = pos[None, None, None, :, :] + tvecs[:, :, :, None, :]
+    offsets = np.mgrid[[slice(*_) for _ in padding]].T
 
     ncell = np.prod(offsets.shape[:-1])
-    index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
-    coords = coords.reshape(np.prod(coords.shape[:-1]), 3)
-    offsets = offsets.reshape(ncell, 3)
+    indices = np.tile(np.arange(len(coordinates)), ncell)
 
-    return index, coords, offsets
+    cartesian_cells = np.dot(offsets, cell)
+    positions = cartesian_cells[:, :, :, None, :] + \
+        coordinates[None, None, None, :, :]
+    positions = positions.reshape(-1, 3)
+
+    offsets = np.tile(offsets, len(coordinates)).reshape(-1, 3)
+
+    return indices, positions, offsets
 
 
 def trilaterate(centers, r, zvector=None):
@@ -266,3 +259,29 @@ def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
         atoms.set_tags(tags)
 
     return values
+
+
+def get_integer_enumeration(N=3, span=[0, 2]):
+    """Return the enumerated array of a span of integer values.
+    These enumerations are limited to the length N.
+
+    For the default span of [0, 2], the enumeration equates to
+    the corners of an N-dimensional hypercube.
+
+    Parameters
+    ----------
+    N : int
+        Length of enumerated lists to produce.
+    span : list | slice
+        The range of integers to be considered for enumeration.
+
+    Returns
+    -------
+    enumeration : ndarray (M, N)
+        Enumeration of the requested integers.
+    """
+    if not isinstance(span, slice):
+        span = slice(*span)
+    enumeration = np.mgrid[[span] * N].reshape(N, -1).T
+
+    return enumeration

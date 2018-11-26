@@ -64,19 +64,20 @@ class Laminar():
         else:
             atoms = image
 
+        if parameters is None:
+            if data.get('calculator_parameters'):
+                parameters = data.get('calculator_parameters')
+                del data['calculator_parameters']
+            elif atoms.info.get('calculator_parameters'):
+                parameters = atoms.info.get('calculator_parameters')
+            else:
+                raise ValueError('Calculation parameters missing.')
+
         calculator = parameters.pop('calculator_name', None)
         if calculator is None:
             raise ValueError("'calculator_name' missing from parameters.")
 
-        if parameters is not None:
-            atoms.info['calculator_parameters'] = parameters
-        elif data.get('calculator_parameters'):
-            atoms.info['calculator_parameters'] = data.get('calculator_parameters')
-            del data['calculator_parameters']
-        elif atoms.info.get('calculator_parameters'):
-            pass
-        else:
-            raise ValueError('Calculation parameters missing.')
+        atoms.info['calculator_parameters'] = parameters
 
         for k, v in data.items():
             if isinstance(v, np.ndarray):
@@ -121,7 +122,7 @@ class Laminar():
         db = connect(database)
         for d in db.select():
             self.submit_relaxation(
-                d, calculation_name=filename, spec=spec)
+                d, workflow_name=filename, spec=spec)
 
     def bulk_relaxation(
             self,

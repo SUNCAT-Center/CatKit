@@ -8,6 +8,7 @@ import networkx as nx
 import numpy as np
 import scipy
 radii = defaults.get('radii')
+from ase import Atom, Atoms
 
 
 class AdsorptionSites():
@@ -25,7 +26,8 @@ class AdsorptionSites():
         tol : float
             Absolute tolerance for floating point errors.
         """
-        index, coords, offsets = utils.expand_cell(slab)
+        index, coords, offsets = utils.expand_cell(
+            slab.positions, slab.cell, slab.pbc)
         if surface_atoms is None:
             surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
@@ -263,8 +265,8 @@ class AdsorptionSites():
 
             rotations, translations = sym.get_symmetry_operations(affine=False)
             rotations = np.swapaxes(rotations, 1, 2)
-            affine = np.append(rotations, translations[:, None], axis=1)
 
+            affine = np.append(rotations, translations[:, None], axis=1)
             points = self.frac_coords
             true_index = self.get_periodic_sites(False)
 
@@ -878,3 +880,50 @@ def _get_adsorption_sites(surface_positions, tol=1e-5):
     r2topology = np.array([j for i in r2topology for j in i])
 
     return positions, r1topology, r2topology
+
+
+def symmetry_equivalent_points(
+        fractional_coordinates, atoms, tol=1e-5):
+    """Return the symmetrically equivalent points from a list of
+    provided fractional coordinates.
+
+    Parameters
+    ----------
+    fractional_coordinates : ndarray (N ,3)
+        Fractional coordinates to find symmetrical equivalence
+        between.
+    atoms : Atoms object
+        Atoms object to use the unit cell, positions, and pbc of.
+    tol : float
+        Float point precision tolerance.
+
+    Returns
+    -------
+    symmetry_match : ndarray (N,)
+        Indices of fractional coordinates which are unique or
+        matching.
+    """
+    sym = symmetry.Symmetry(atoms, tol=1e-2)
+    affine_matrices = sym.get_symmetry_operations()
+    affine_matrices = np.swapaxes(affine_matrices, 1, 2)
+
+    pbc = ~np.array(atoms.pbc.tolist() + [True])
+    nt = np.isclose(affine_matrices[:, pbc, 3], 0).any(axis=1)
+    nt &= np.isclose(affine_matrices[:, pbc, 2], 1).any(axis=1)
+    affine_matrices = affine_matrices[nt]
+
+    affine_points = np.insert(fractional_coordinates, 3, 1, axis=1)
+    operations = np.dot(affine_points, affine_matrices)[:, :, :3]
+
+    periodic_match = np.arange(fractional_coordinates.shape[0])
+    symmetry_match = periodic_match.copy()
+    for i, j in enumerate(symmetry_match):
+        if i != j:
+            continue
+
+        d = operations[i, :, None] - fractional_coordinates
+        d -= np.round(d)
+        dind = np.where((np.abs(d) < tol).all(axis=2))[-1]
+        symmetry_match[np.unique(dind)] = periodic_match[i]
+
+    return symmetry_match

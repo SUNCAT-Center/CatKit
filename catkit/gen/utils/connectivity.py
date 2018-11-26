@@ -3,6 +3,7 @@ from . import coordinates
 import numpy as np
 import scipy
 import warnings
+from ase import Atom, Atoms
 
 
 def get_voronoi_neighbors(atoms):
@@ -20,10 +21,9 @@ def get_voronoi_neighbors(atoms):
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    index, coords, offsets = coordinates.expand_cell(atoms)
-
-    L = int(len(offsets) / 2)
-    origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
+    index, coords, offsets = coordinates.expand_cell(
+        atoms.positions, atoms.cell, atoms.pbc)
+    origional_indices = np.where(np.all(offsets == 0, axis=1))[0]
 
     voronoi = scipy.spatial.Voronoi(coords, qhull_options='QbB Qc Qs')
     points = voronoi.ridge_points
