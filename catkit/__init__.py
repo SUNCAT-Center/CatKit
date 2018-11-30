@@ -7,4 +7,4 @@ from . import gen
 from . import build
 
 __all__ = ['Gratoms', 'gen', 'build']
-__version__ = '0.5.3'
+__version__ = '0.5.4'
