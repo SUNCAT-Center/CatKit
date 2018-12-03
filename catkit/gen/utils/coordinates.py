@@ -1,63 +1,70 @@
 import numpy as np
 
 
-def expand_cell(
-        coordinates,
-        cell,
-        pbc=True,
-        centers=None,
-        cutoff=6.0):
+def expand_cell(atoms, padding=None):
     """Return Cartesian coordinates atoms within a supercell
-    which contains spheres of a given cutoff radius. One sphere
-    for each atom inside of the given unit cell.
+    which contains repetitions of the unit cell which contains
+    at least one neighboring atom.
 
     Parameters
     ----------
-    coordinates : ndarray (N, 3)
-        Cartesian coordinates of atomic positions.
-    cell : ndarray (3, 3)
-        Unit cell dimensions
-    pbc : bool | array_like (3,)
-        Periodic boundary conditions.
-    cutoff : float
-        Radius of the spheres to use for expanding the unit cell.
+    atoms : Atoms object
+        Atoms with the periodic boundary conditions and unit cell
+        information to use.
+    padding : ndarray (3,)
+        Padding of repetition of the unit cell in the x, y, z
+        directions. e.g. [1, 0, 1].
 
     Returns
     -------
-    indices : ndarray (M,)
-        Indices associated with the original unit cell atom index.
-    positions : ndarray (M, 3)
+    index : ndarray (N,)
+        Indices associated with the original unit cell positions.
+    coords : ndarray (N, 3)
         Cartesian coordinates associated with positions in the
         supercell.
     offsets : ndarray (M, 3)
         Integer offsets of each unit cell.
     """
-    pbc = np.asarray(pbc, dtype=bool)
-    if centers is None:
-        centers = np.linalg.solve(cell.T, coordinates.T).T
+    cell = atoms.cell
+    pbc = atoms.pbc
+    pos = atoms.positions
 
-    basis_lengths = np.linalg.norm(cell, axis=1)
-    reciprocal_cell = np.linalg.inv(cell).T
-    reciprocal_lengths = np.linalg.norm(reciprocal_cell, axis=1)
+    if padding is None:
+        diags = np.sqrt((
+            np.dot([[1, 1, 1],
+                    [-1, 1, 1],
+                    [1, -1, 1],
+                    [-1, -1, 1]],
+                   cell)**2).sum(1))
 
-    lengths = pbc * cutoff * reciprocal_lengths + 0.01
-    min_pad = np.floor(centers - lengths).min(axis=0)
-    max_pad = np.ceil(centers + lengths).max(axis=0)
-    padding = np.array([min_pad.astype(int), max_pad.astype(int)]).T
+        if pos.shape[0] == 1:
+            cutoff = max(diags) / 2.
+        else:
+            dpos = (pos - pos[:, None]).reshape(-1, 3)
+            Dr = np.dot(dpos, np.linalg.inv(cell))
+            D = np.dot(Dr - np.round(Dr) * pbc, cell)
+            D_len = np.sqrt((D**2).sum(1))
 
-    offsets = np.mgrid[[slice(*_) for _ in padding]].T
+            cutoff = min(max(D_len), max(diags) / 2.)
+
+        latt_len = np.sqrt((cell**2).sum(1))
+        V = abs(np.linalg.det(cell))
+        padding = pbc * np.array(np.ceil(cutoff * np.prod(latt_len) /
+                                         (V * latt_len)), dtype=int)
+
+    offsets = np.mgrid[
+        -padding[0]:padding[0] + 1,
+        -padding[1]:padding[1] + 1,
+        -padding[2]:padding[2] + 1].T
+    tvecs = np.dot(offsets, cell)
+    coords = pos[None, None, None, :, :] + tvecs[:, :, :, None, :]
 
     ncell = np.prod(offsets.shape[:-1])
-    indices = np.tile(np.arange(len(coordinates)), ncell)
+    index = np.arange(len(atoms))[None, :].repeat(ncell, axis=0).flatten()
+    coords = coords.reshape(np.prod(coords.shape[:-1]), 3)
+    offsets = offsets.reshape(ncell, 3)
 
-    cartesian_cells = np.dot(offsets, cell)
-    positions = cartesian_cells[:, :, :, None, :] + \
-        coordinates[None, None, None, :, :]
-    positions = positions.reshape(-1, 3)
-
-    offsets = np.tile(offsets, len(coordinates)).reshape(-1, 3)
-
-    return indices, positions, offsets
+    return index, coords, offsets
 
 
 def trilaterate(centers, r, zvector=None):
