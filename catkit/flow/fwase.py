@@ -110,3 +110,66 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
         dbflow.update_bulk_entry(images)
 
     return fwio.atoms_to_encode(images)
+
+
+def run_mlneb(
+        start_file='input.traj',
+        end_file='final.traj',
+        out_file='ML-NEB.traj',
+        n_images=11,
+        interpolation='idpp',
+        restart=False):
+    """Performs a MLNEB call with a compatible ase calculator.
+    Keywords are defined inside the atoms object information.
+
+    Parameters
+    ----------
+    start_file : str
+        Name of the input file of the starting point of the NEB path
+        to load from the local directory.
+    end_file : str
+        Name of the input file of the final point of the NEB path
+        to load from the local directory.
+    out_file: str
+        Name of the file to store output.
+    n_images : int
+        Number of interpolated images along the reaction coordinate.
+    interpolation: str
+        Name of the interpolation scheme to be used to form the
+        reaction coordinate.
+    restart: bool
+        Whether to restart from a previous run or create a new run from
+        the scratch.
+    """
+
+    atoms = ase.io.read(start_file)
+    # Setting up the NEB calculator
+    calculator = utils.str_to_class('catlearn.optimize.mlneb.MLNEB')
+    neb_catlearn = calculator(start=start_file,
+                              end=end_file,
+                              ase_calc=atoms.info,
+                              n_images=n_images,
+                              interpolation=interpolation,
+                              restart=restart)
+
+    fmax = atoms.info['fmax']
+    # Perform the calculation and write trajectory from log.
+    neb_catlearn.run(fmax=0.05, trajectory=out_file)
+
+    # run_mlneb will always use decaf.Espresso
+    images = decaf.io.read(out_file, ':')
+    '''
+    if isinstance(calc, decaf.Espresso):
+        # Patch for reading magmom of trajectory
+        images = decaf.io.read(out_file, ':')
+    else:
+        images = ase.io.read(out_file, ':')
+    '''
+
+    # Moneky patch for constraints and pbc conservation.
+    for image in images:
+        image.constraints = atoms.constraints
+        image._pbc = atoms.pbc
+
+    return fwio.atoms_to_encode(images)
+
