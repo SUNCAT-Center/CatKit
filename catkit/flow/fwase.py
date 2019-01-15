@@ -113,63 +113,35 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
 
 
 def run_mlneb(
-        start_file='input.traj',
-        end_file='final.traj',
-        out_file='ML-NEB.traj',
-        n_images=11,
-        interpolation='idpp',
-        restart=False):
+        images='input.traj',
+        out_file='neb.traj'):
     """Performs a MLNEB call with a compatible ase calculator.
     Keywords are defined inside the atoms object information.
 
     Parameters
     ----------
-    start_file : str
-        Name of the input file of the starting point of the NEB path
-        to load from the local directory.
-    end_file : str
-        Name of the input file of the final point of the NEB path
-        to load from the local directory.
+    images: list of Atoms objects | str
+        User provided iniital guess for the NEB pathway. Parameters for
+        the calculator should be placed into the first image.
     out_file: str
         Name of the file to store output.
-    n_images : int
-        Number of interpolated images along the reaction coordinate.
-    interpolation: str
-        Name of the interpolation scheme to be used to form the
-        reaction coordinate.
-    restart: bool
-        Whether to restart from a previous run or create a new run from
-        the scratch.
     """
+    if isinstance(images, str):
+        images = ase.io.read(images, ':')
 
-    atoms = ase.io.read(start_file)
-    # Setting up the NEB calculator
+    parameters = images[0].info['calculator_parameters']
     calculator = utils.str_to_class('catlearn.optimize.mlneb.MLNEB')
-    neb_catlearn = calculator(start=start_file,
-                              end=end_file,
-                              ase_calc=atoms.info,
-                              n_images=n_images,
-                              interpolation=interpolation,
-                              restart=restart)
+    neb_catlearn = calculator(
+        ase_calc=parameters,
+        interpolation=images
+    )
 
-    fmax = atoms.info['fmax']
     # Perform the calculation and write trajectory from log.
-    neb_catlearn.run(fmax=0.05, trajectory=out_file)
+    fmax = parameters.get('fmax', 0.05)
+    neb_catlearn.run(fmax=fmax, trajectory=out_file)
 
     # run_mlneb will always use decaf.Espresso
-    images = decaf.io.read(out_file, ':')
-    '''
-    if isinstance(calc, decaf.Espresso):
-        # Patch for reading magmom of trajectory
-        images = decaf.io.read(out_file, ':')
-    else:
-        images = ase.io.read(out_file, ':')
-    '''
-
-    # Moneky patch for constraints and pbc conservation.
-    for image in images:
-        image.constraints = atoms.constraints
-        image._pbc = atoms.pbc
+    images = ase.io.read(out_file, ':')
+    images[0].info = parameters
 
     return fwio.atoms_to_encode(images)
-
