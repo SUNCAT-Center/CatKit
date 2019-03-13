@@ -13,7 +13,6 @@ before_script:
   - export MPLBACKEND=Agg
 
 install:
-  - pip install -r requirements.txt
   - pip install .
   - pip install python-coveralls
   - pip install nose

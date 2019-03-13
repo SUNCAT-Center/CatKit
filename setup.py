@@ -27,10 +27,6 @@ setuptools.setup(
         'catkit.flow',
     ],
     package_dir={'catkit': 'catkit'},
-    entry_points='''
-         [console_scripts]
-         cathub=catkit.hub.cli:cli
-      ''',
     install_requires=requirements,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
 
