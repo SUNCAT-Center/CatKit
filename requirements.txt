@@ -1,4 +1,4 @@
-ase>=3.18
+ase>=3.17
 cathub>=0.1.0
 numpy>=1.14
 networkx>=2.1
