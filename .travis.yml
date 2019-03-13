@@ -1,43 +1,19 @@
-sudo: required
 language: python
 python:
   - "2.7"
   - "3.5"
   - "3.6"
-  - "3.7"
-
-env:
-    - DB_PASSWORD=''
+  - "3.7-dev"
 
 notifications:
   email: false
 
-cache:
-    apt: true
-    pip: true
 
 before_script:
   - export MPLBACKEND=Agg
 
-before_install:
-  - sudo apt-get update
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
-    else
-      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-    fi
-  - chmod +x miniconda.sh
-  - ./miniconda.sh -b -p $HOME/miniconda
-  - export PATH=/home/travis/miniconda/bin:$PATH
-  - conda update --yes conda
-  - conda create --yes -n condaenv python=$TRAVIS_PYTHON_VERSION
-  - conda install --yes -n condaenv pip
-  - source activate condaenv
-
 install:
-  - conda info -a
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -y
-  - source activate test-environment
+  - pip install -r requirements.txt
   - pip install .
   - pip install python-coveralls
   - pip install nose
