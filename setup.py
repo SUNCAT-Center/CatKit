@@ -2,8 +2,6 @@ import setuptools
 
 with open('requirements.txt', 'r') as f:
     requirements = f.readlines()
-    requirements = [f for f in requirements if 'git' not in f]
-    requirements += ['ase>=3.16.2']
 
 with open('readme.org', 'r') as f:
     readme = f.read()
@@ -27,8 +25,6 @@ setuptools.setup(
         'catkit.gen.analysis',
         'catkit.gen.utils',
         'catkit.flow',
-        'catkit.hub',
-        'catkit.hub.ase_tools'
     ],
     package_dir={'catkit': 'catkit'},
     entry_points='''
@@ -37,9 +33,6 @@ setuptools.setup(
       ''',
     install_requires=requirements,
     python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4',
-    dependency_links=[
-        'git+https://gitlab.com/ase/ase.git@d441dd6a1c71a2e1a925043e6974a9b3ae961854#egg=ase-3.16.3'
-    ],
 
     classifiers=[
         'Development Status :: 4 - Beta',
