@@ -46,7 +46,7 @@ install:
 
   - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION -y
   - source activate test-environment
-  - pip install . --process-dependency-links
+  - pip install .
   - pip install python-coveralls
   - pip install nose
 

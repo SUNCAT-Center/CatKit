@@ -1,4 +1,4 @@
-git+https://gitlab.com/ase/ase.git@d441dd6a1c71a2e1a925043e6974a9b3ae961854
+ase>=3.18
 cathub>=0.1.0
 numpy>=1.14
 networkx>=2.1
