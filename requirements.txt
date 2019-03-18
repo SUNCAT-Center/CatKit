@@ -1,5 +1,4 @@
-git+https://gitlab.com/ase/ase.git@d441dd6a1c71a2e1a925043e6974a9b3ae961854
-cathub>=0.1.0
+ase>=3.17
 numpy>=1.14
 networkx>=2.1
 spglib>=1.10
@@ -9,8 +8,3 @@ matplotlib>=2.2
 future>=0.16
 fireworks>=1.7
 sqlalchemy>=1.2
-click>=6.7
-psycopg2-binary>=2
-python-Levenshtein>=0.12
-pathlib2>=2.3
-tabulate>=0.8.2

@@ -224,7 +224,7 @@ class SlabGenerator(object):
             zsym = zsym[:, [0, 1, 2, 2, 2], [2, 2, 2, 0, 1]]
             zsym = np.argwhere(zsym.sum(axis=1) == 0)
 
-            ztranslations = np.floor(translations[zsym, -1] * itol) / itol
+            ztranslations = translations[zsym, -1] % 1
             z_symmetry = np.unique(ztranslations)
 
             if len(z_symmetry) > 1:
