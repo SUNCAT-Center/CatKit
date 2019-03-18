@@ -133,6 +133,7 @@ def molecule(species, bond_index=None, vacuum=0):
     images = []
     for atoms in molecule_graphs:
         atoms = catkit.gen.molecules.get_3D_positions(atoms, bond_index)
+        atoms.center(vacuum)
         images += [atoms]
 
     return images
