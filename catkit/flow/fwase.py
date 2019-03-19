@@ -137,6 +137,9 @@ def get_bayesian_neb(
         images = ase.io.read(images, ':')
 
     parameters = images[0].info['calculator_parameters']
+    parameters['calculation'] = 'scf'
+    parameters['tprnfor'] = True
+
     calculator = utils.str_to_class(calculator)
     neb_class = utils.str_to_class(neb_class)
 
