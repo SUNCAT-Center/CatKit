@@ -113,14 +113,20 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
     return fwio.atoms_to_encode(images)
 
 
-def run_mlneb(
+def get_bayesian_neb(
+        calculator,
+        neb_class,
         images='input.traj',
-        out_file='neb.traj'):
-    """Performs a MLNEB call with a compatible ase calculator.
+        out_file='neb.json'):
+    """Performs a Bayesian NEB with a compatible ASE calculator.
     Keywords are defined inside the atoms object information.
 
     Parameters
     ----------
+    calculator : str
+        Import name of the calculator to use.
+    neb_class : str
+        Import name of the Bayesian optimizer to use.
     images: list of Atoms objects | str
         User provided iniital guess for the NEB pathway. Parameters for
         the calculator should be placed into the first image.
@@ -131,17 +137,17 @@ def run_mlneb(
         images = ase.io.read(images, ':')
 
     parameters = images[0].info['calculator_parameters']
-    calculator = utils.str_to_class('catlearn.optimize.mlneb.MLNEB')
-    neb_catlearn = calculator(
-        ase_calc=parameters,
-        interpolation=images
+    calculator = utils.str_to_class(calculator)
+    neb_class = utils.str_to_class(neb_class)
+
+    neb = neb_class(
+        trajectory=images,
+        calculator=calculator(**parameters),
     )
 
-    # Perform the calculation and write trajectory from log.
     fmax = parameters.get('fmax', 0.05)
-    neb_catlearn.run(fmax=fmax, trajectory=out_file)
+    neb.run(fmax=fmax)
 
-    # run_mlneb will always use decaf.Espresso
     images = ase.io.read(out_file, ':')
     images[0].info = parameters
 
