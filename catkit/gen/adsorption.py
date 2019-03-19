@@ -8,7 +8,6 @@ import networkx as nx
 import numpy as np
 import scipy
 radii = defaults.get('radii')
-from ase import Atom, Atoms
 
 
 class AdsorptionSites():
