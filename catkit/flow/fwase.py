@@ -152,6 +152,6 @@ def get_bayesian_neb(
     neb.run(fmax=fmax)
 
     images = ase.io.read(out_file, ':')
-    images[0].info = parameters
+    images[0].info['calculator_parameters'] = parameters
 
     return fwio.atoms_to_encode(images)
