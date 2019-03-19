@@ -38,7 +38,6 @@ def bulk(name, crystalstructure=None, primitive=False, **kwargs):
 def surface(
         elements,
         size,
-        crystal='fcc',
         miller=(1, 1, 1),
         termination=0,
         fixed=0,
@@ -55,8 +54,6 @@ def surface(
         or an atoms object representing the bulk structure to use.
     size : list (3,)
         Number of time to expand the x, y, and z primitive cell.
-    crystal : str
-        The bulk crystal structure to pass to the ase bulk builder.
     miller : list (3,) or (4,)
         The miller index to cleave the surface structure from. If 4 values
         are used, assume Miller-Bravis convention.
@@ -77,7 +74,13 @@ def surface(
     if isinstance(elements, ase.Atoms):
         atoms = elements
     else:
-        atoms = ase.build.bulk(elements, crystal, cubic=True, **kwargs)
+        bkwargs = kwargs.copy()
+        keys = ['crystalstructure', 'a', 'c', 'covera',
+                'u', 'orthorhombic', 'cubic']
+        for key in kwargs:
+            if key not in keys:
+                del bkwargs[key]
+        atoms = ase.build.bulk(elements, **bkwargs)
 
     generator = catkit.gen.surface.SlabGenerator(
         bulk=atoms,
@@ -130,6 +133,7 @@ def molecule(species, bond_index=None, vacuum=0):
     images = []
     for atoms in molecule_graphs:
         atoms = catkit.gen.molecules.get_3D_positions(atoms, bond_index)
+        atoms.center(vacuum)
         images += [atoms]
 
     return images

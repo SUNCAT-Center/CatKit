@@ -266,3 +266,29 @@ def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
         atoms.set_tags(tags)
 
     return values
+
+
+def get_integer_enumeration(N=3, span=[0, 2]):
+    """Return the enumerated array of a span of integer values.
+    These enumerations are limited to the length N.
+
+    For the default span of [0, 2], the enumeration equates to
+    the corners of an N-dimensional hypercube.
+
+    Parameters
+    ----------
+    N : int
+        Length of enumerated lists to produce.
+    span : list | slice
+        The range of integers to be considered for enumeration.
+
+    Returns
+    -------
+    enumeration : ndarray (M, N)
+        Enumeration of the requested integers.
+    """
+    if not isinstance(span, slice):
+        span = slice(*span)
+    enumeration = np.mgrid[[span] * N].reshape(N, -1).T
+
+    return enumeration

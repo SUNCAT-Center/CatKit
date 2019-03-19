@@ -224,7 +224,7 @@ class SlabGenerator(object):
             zsym = zsym[:, [0, 1, 2, 2, 2], [2, 2, 2, 0, 1]]
             zsym = np.argwhere(zsym.sum(axis=1) == 0)
 
-            ztranslations = np.floor(translations[zsym, -1] * itol) / itol
+            ztranslations = translations[zsym, -1] % 1
             z_symmetry = np.unique(ztranslations)
 
             if len(z_symmetry) > 1:
@@ -413,10 +413,7 @@ class SlabGenerator(object):
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
 
-        ind = np.lexsort(
-            (slab.positions[:, 0],
-             slab.positions[:, 1],
-             slab.positions[:, 2]))
+        ind = np.lexsort(slab.positions.T)
         slab = slab[ind]
 
         if self.fixed:
@@ -500,12 +497,13 @@ class SlabGenerator(object):
                 metrics += [[d.sum(), angle, M]]
 
             if metrics:
+                order = [0, 1]
                 if defaults.get('orthogonal'):
-                    matrix = sorted(metrics,
-                                    key=lambda x: (x[1], x[0]))[0][-1]
-                else:
-                    matrix = sorted(metrics,
-                                    key=lambda x: (x[0], x[1]))[0][-1]
+                    order = [1, 0]
+
+                matrix = sorted(metrics,
+                                key=lambda x: (
+                                    x[order[0]], x[order[1]]))[0][-1]
                 supercell = transform_ab(supercell, matrix)
 
         elif isinstance(size, (list, tuple, np.ndarray)):

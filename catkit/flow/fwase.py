@@ -45,6 +45,7 @@ def get_potential_energy(
         images = ase.io.read(out_file, ':')
 
     # Moneky patch for constraints and pbc conservation.
+    images[0].info = atoms.info
     for image in images:
         image.constraints = atoms.constraints
         image._pbc = atoms.pbc

@@ -1,7 +1,7 @@
 from ase.calculators.singlepoint import SinglePointCalculator as SPC
+from ase.constraints import dict2constraint
 from ase.io import write
 from ase import Atoms
-from ase.constraints import dict2constraint
 import numpy as np
 import json
 supported_properties = ['energy', 'forces', 'stress', 'magmoms', 'magmom']
@@ -13,6 +13,7 @@ def array_to_list(data):
     """
     if isinstance(data, list):
         for i, v in enumerate(data):
+            print(i, v)
             if isinstance(v, np.ndarray):
                 data[i] = v.tolist()
 
@@ -43,7 +44,7 @@ def encode_to_atoms(encode, out_file='input.traj'):
         data['trajectory']['0']['positions'],
         cell=data['trajectory']['0']['cell'],
         pbc=data['pbc'])
-    atoms.info = data['calculator_parameters']
+    atoms.info['calculator_parameters'] = data['calculator_parameters']
     atoms.set_constraint([dict2constraint(_) for _ in data['constraints']])
     initial_magmoms = data.get('initial_magmoms')
     if initial_magmoms:
@@ -99,10 +100,8 @@ def atoms_to_encode(images):
                 constraints[i]['kwargs'][k] = v.tolist()
 
     # Convert any arrays from the parameter settings into lists
-    keys = images[0].info
-    for k, v in list(keys.items()):
-        if isinstance(v, np.ndarray):
-            keys[k] = v.tolist()
+    keys = images[0].info['calculator_parameters']
+    array_to_list(keys)
 
     data = {'trajectory': {}}
     # Assemble the compressed dictionary of results
@@ -155,4 +154,6 @@ def atoms_to_encode(images):
                 results.items()) if v is not None}
 
     # Return the reduced results in JSON compression
-    return json.dumps(data)
+    encoding = json.dumps(data)
+
+    return encoding

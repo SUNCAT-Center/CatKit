@@ -8,6 +8,7 @@ import networkx as nx
 import numpy as np
 import scipy
 radii = defaults.get('radii')
+from ase import Atom, Atoms
 
 
 class AdsorptionSites():
@@ -25,7 +26,8 @@ class AdsorptionSites():
         tol : float
             Absolute tolerance for floating point errors.
         """
-        index, coords, offsets = utils.expand_cell(slab)
+        index, coords, offsets = utils.expand_cell(
+            slab.positions, slab.cell, slab.pbc)
         if surface_atoms is None:
             surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
@@ -263,8 +265,8 @@ class AdsorptionSites():
 
             rotations, translations = sym.get_symmetry_operations(affine=False)
             rotations = np.swapaxes(rotations, 1, 2)
-            affine = np.append(rotations, translations[:, None], axis=1)
 
+            affine = np.append(rotations, translations[:, None], axis=1)
             points = self.frac_coords
             true_index = self.get_periodic_sites(False)
 
@@ -596,10 +598,7 @@ class Builder(AdsorptionSites):
         atoms.translate(-atoms.positions[bond])
 
         if auto_construct:
-            root = None
-            for i, branch in enumerate(branches):
-                root = catkit.gen.molecules._branch_molecule(
-                    atoms, branch, root, adsorption=True)
+            atoms = catkit.gen.molecules.get_3D_positions(atoms, bond)
 
             # Align with the adsorption vector
             atoms.rotate([0, 0, 1], vector)
@@ -763,3 +762,168 @@ def get_adsorption_sites(slab,
     symmetry_index = np.arange(len(unique)).repeat(counts)
 
     return coordinates, connectivity, symmetry_index
+
+
+def _get_adsorption_sites(surface_positions, tol=1e-5):
+    """Return the positions and topology of adsorption sites based on the
+    provided 3D positions of surface atoms for a structure.
+    
+    This function is intended for internal use only as will likely not
+    perform correctly if the 
+
+    Parameters
+    ----------
+    surface_positions : ndarray (N, 3)
+        Cartesian coordinates for the surface atoms of a structure.
+    tol : float
+        Float point precision tolerance.
+
+    Returns
+    -------
+    positions : ndarray (M, 3)
+        Cartesian coordinates for the identifed adsorption sites. This is
+        a superset which contrains the surface atoms positions.
+    r1topology : list of lists (M, X)
+        First nearest-neighbors of each of the adsorption sites associated
+        with the positions.
+    r2topology : list of lists (M, Y)
+        Second nearest-neighbors of each of the adsorption sites associated
+        with the positions.
+    """
+    positions = [surface_positions, [], [], []]
+    r1topology = [[[i] for i, _ in enumerate(surface_positions)], [], [], []]
+    r2topology = [[[] for _ in surface_positions], [], [], []]
+
+    dt = scipy.spatial.Delaunay(positions[0][:, :2])
+    neighbors = dt.neighbors
+    simplices = dt.simplices
+
+    for i, corners in enumerate(simplices):
+        cir = scipy.linalg.circulant(corners)
+        edges = cir[:, 1:]
+
+        # Inner angle of each triangle corner
+        vec = positions[0][edges.T] - positions[0][corners]
+        uvec = vec.T / np.linalg.norm(vec, axis=2).T
+        angles = np.sum(uvec.T[0] * uvec.T[1], axis=1)
+
+        # Angle types
+        right = np.isclose(angles, 0)
+        obtuse = (angles < -tol)
+
+        rh_corner = corners[right]
+        edge_neighbors = neighbors[i]
+
+        bridge = np.sum(positions[0][edges], axis=1) / 2
+
+        # Looping through corners allows for elimination of
+        # redundant points, identification of 4-fold hollows,
+        # and collection of bridge neighbors.
+        for j, c in enumerate(corners):
+            edge = sorted(edges[j])
+
+            if edge in r1topology[1]:
+                continue
+
+            # Get the bridge neighbors (for adsorption vector)
+            neighbor_simplex = simplices[edge_neighbors[j]]
+            oc = list(set(neighbor_simplex) - set(edge))[0]
+
+            # Right angles potentially indicate 4-fold hollow
+            potential_hollow = edge + sorted([c, oc])
+            if c in rh_corner:
+
+                if potential_hollow in r1topology[3]:
+                    continue
+
+                # Assumption: If not 4-fold, this suggests
+                # no hollow OR bridge site is present.
+                ovec = positions[0][edge] - positions[0][oc]
+                ouvec = ovec / np.linalg.norm(ovec)
+                oangle = np.dot(*ouvec)
+                oright = np.isclose(oangle, 0)
+                if oright:
+                    positions[3] += [bridge[j]]
+                    r1topology[3] += [potential_hollow]
+                    r2topology[3] += []
+                    r2topology[0][c] += [oc]
+            else:
+                positions[1] += [bridge[j]]
+                r1topology[1] += [edge]
+                r2topology[1] += [[c, oc]]
+
+            r2topology[0][edge[0]] += [edge[1]]
+            r2topology[0][edge[1]] += [edge[0]]
+
+        if not right.any() and not obtuse.any():
+            hollow = np.average(positions[0][corners], axis=0)
+            positions[2] += [hollow]
+            r1topology[2] += [corners.tolist()]
+            r2topology[2] += []
+
+    # For collecting missed bridge neighbors
+    for s in r1topology[3]:
+
+        edges = itertools.product(s[:2], s[2:])
+        for edge in edges:
+            edge = sorted(edge)
+            i = r1topology[1].index(edge)
+            n, m = r1topology[1][i], r2topology[1][i]
+            nn = list(set(s) - set(n + m))
+
+            if len(nn) == 0:
+                continue
+            r2topology[1][i] += [nn[0]]
+
+    positions = np.array([j for i in positions for j in i])
+    r1topology = np.array([j for i in r1topology for j in i])
+    r2topology = np.array([j for i in r2topology for j in i])
+
+    return positions, r1topology, r2topology
+
+
+def symmetry_equivalent_points(
+        fractional_coordinates, atoms, tol=1e-5):
+    """Return the symmetrically equivalent points from a list of
+    provided fractional coordinates.
+
+    Parameters
+    ----------
+    fractional_coordinates : ndarray (N ,3)
+        Fractional coordinates to find symmetrical equivalence
+        between.
+    atoms : Atoms object
+        Atoms object to use the unit cell, positions, and pbc of.
+    tol : float
+        Float point precision tolerance.
+
+    Returns
+    -------
+    symmetry_match : ndarray (N,)
+        Indices of fractional coordinates which are unique or
+        matching.
+    """
+    sym = symmetry.Symmetry(atoms, tol=1e-2)
+    affine_matrices = sym.get_symmetry_operations()
+    affine_matrices = np.swapaxes(affine_matrices, 1, 2)
+
+    pbc = ~np.array(atoms.pbc.tolist() + [True])
+    nt = np.isclose(affine_matrices[:, pbc, 3], 0).any(axis=1)
+    nt &= np.isclose(affine_matrices[:, pbc, 2], 1).any(axis=1)
+    affine_matrices = affine_matrices[nt]
+
+    affine_points = np.insert(fractional_coordinates, 3, 1, axis=1)
+    operations = np.dot(affine_points, affine_matrices)[:, :, :3]
+
+    periodic_match = np.arange(fractional_coordinates.shape[0])
+    symmetry_match = periodic_match.copy()
+    for i, j in enumerate(symmetry_match):
+        if i != j:
+            continue
+
+        d = operations[i, :, None] - fractional_coordinates
+        d -= np.round(d)
+        dind = np.where((np.abs(d) < tol).all(axis=2))[-1]
+        symmetry_match[np.unique(dind)] = periodic_match[i]
+
+    return symmetry_match
