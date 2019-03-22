@@ -320,11 +320,6 @@ class Gratoms(ase.Atoms):
                 raise ValueError(
                     'Cannot repeat along undefined lattice vector')
 
-        if self.pbc.any() and len(self.edges()) > 0:
-            warnings.warn(
-                ("Edge conservation not currently supported with "
-                 "pbc. Remove pbc or edges first."))
-
         M = np.product(m)
         n = len(self)
 

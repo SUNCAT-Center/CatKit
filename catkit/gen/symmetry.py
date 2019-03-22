@@ -60,7 +60,7 @@ class Symmetry():
         atoms : Atoms object
             Atomic structure to return the symmetry operations for.
         tol : float
-            Tolerance for floating point rounding errors.
+            Tolerance for floating point precision errors.
         """
         self.lattice = atoms.cell
         self.positions = atoms.get_scaled_positions()
@@ -92,8 +92,8 @@ class Symmetry():
             Affine matrix operations, combinations of the rotation and
             translation with ones along the diagonal.
         """
-        rotations = self.data['rotations']
-        translations = self.data['translations']
+        rotations = self.data['rotations'][1:]
+        translations = self.data['translations'][1:]
 
         if affine:
             affine_matrices = np.zeros((rotations.shape[0], 4, 4))

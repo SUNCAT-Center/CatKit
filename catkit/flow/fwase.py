@@ -45,6 +45,7 @@ def get_potential_energy(
         images = ase.io.read(out_file, ':')
 
     # Moneky patch for constraints and pbc conservation.
+    images[0].info = atoms.info
     for image in images:
         image.constraints = atoms.constraints
         image._pbc = atoms.pbc
@@ -108,5 +109,49 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
 
     with db.Connect() as dbflow:
         dbflow.update_bulk_entry(images)
+
+    return fwio.atoms_to_encode(images)
+
+
+def get_bayesian_neb(
+        calculator,
+        neb_class,
+        images='input.traj',
+        out_file='neb.json'):
+    """Performs a Bayesian NEB with a compatible ASE calculator.
+    Keywords are defined inside the atoms object information.
+
+    Parameters
+    ----------
+    calculator : str
+        Import name of the calculator to use.
+    neb_class : str
+        Import name of the Bayesian optimizer to use.
+    images: list of Atoms objects | str
+        User provided iniital guess for the NEB pathway. Parameters for
+        the calculator should be placed into the first image.
+    out_file: str
+        Name of the file to store output.
+    """
+    if isinstance(images, str):
+        images = ase.io.read(images, ':')
+
+    parameters = images[0].info['calculator_parameters']
+    parameters['calculation'] = 'scf'
+    parameters['tprnfor'] = True
+
+    calculator = utils.str_to_class(calculator)
+    neb_class = utils.str_to_class(neb_class)
+
+    neb = neb_class(
+        trajectory=images,
+        calculator=calculator(**parameters),
+    )
+
+    fmax = parameters.get('fmax', 0.05)
+    neb.run(fmax=fmax)
+
+    images = ase.io.read(out_file, ':')
+    images[0].info['calculator_parameters'] = parameters
 
     return fwio.atoms_to_encode(images)

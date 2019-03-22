@@ -413,10 +413,7 @@ class SlabGenerator(object):
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
 
-        ind = np.lexsort(
-            (slab.positions[:, 0],
-             slab.positions[:, 1],
-             slab.positions[:, 2]))
+        ind = np.lexsort(slab.positions.T)
         slab = slab[ind]
 
         if self.fixed:
