@@ -25,8 +25,7 @@ class AdsorptionSites():
         tol : float
             Absolute tolerance for floating point errors.
         """
-        index, coords, offsets = utils.expand_cell(
-            slab.positions, slab.cell, slab.pbc)
+        index, coords, offsets = utils.expand_cell(slab, cutoff=5.0)
         if surface_atoms is None:
             surface_atoms = slab.get_surface_atoms()
         if surface_atoms is None:
@@ -766,9 +765,8 @@ def get_adsorption_sites(slab,
 def _get_adsorption_sites(surface_positions, tol=1e-5):
     """Return the positions and topology of adsorption sites based on the
     provided 3D positions of surface atoms for a structure.
-    
-    This function is intended for internal use only as will likely not
-    perform correctly if the 
+
+    This function is intended for internal use only.
 
     Parameters
     ----------
