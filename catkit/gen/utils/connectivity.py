@@ -5,7 +5,7 @@ import scipy
 import warnings
 
 
-def get_voronoi_neighbors(atoms, padding=None):
+def get_voronoi_neighbors(atoms, cutoff=5.0):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
@@ -14,23 +14,15 @@ def get_voronoi_neighbors(atoms, padding=None):
     atoms : atoms object
         Atoms object with the periodic boundary conditions and
         unit cell information to use.
-    padding : ndarray (3,)
-        Padding of repetition of the unit cell in the x, y, z
-        directions. e.g. [1, 0, 1].
+    cutoff : float
+        Radius of maximum atomic bond distance to consider.
 
     Returns
     -------
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    index, coords, offsets = coordinates.expand_cell(atoms, padding)
-    if offsets.max() > 9:
-        warnings.warn(
-            ("The unit cell has a large number of repetitions and may "
-             "consume a great deal of memory. Consider manually setting "
-             "the padding or, if this is a bulk structure, standardizing "
-             "the unit cell with catkit.gen.symmetry.get_standardized_cell."
-            ))
+    index, coords, offsets = coordinates.expand_cell(atoms, cutoff=cutoff)
 
     L = int(len(offsets) / 2)
     origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))

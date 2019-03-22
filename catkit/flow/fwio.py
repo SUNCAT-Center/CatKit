@@ -13,7 +13,6 @@ def array_to_list(data):
     """
     if isinstance(data, list):
         for i, v in enumerate(data):
-            print(i, v)
             if isinstance(v, np.ndarray):
                 data[i] = v.tolist()
 
