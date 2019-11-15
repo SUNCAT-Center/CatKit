@@ -49,7 +49,7 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
         for j, edge in enumerate(unique_edge):
             indices = np.where(np.all(edge == edges, axis=1))[0]
 
-            d = dist[np.where(dist[indices] < cutoff)[0]]
+            d = dist[indices][np.where(dist[indices] < cutoff)[0]]
             count = len(d)
             if count == 0:
                 continue
