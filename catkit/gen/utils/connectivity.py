@@ -5,7 +5,7 @@ import scipy
 import warnings
 
 
-def get_voronoi_neighbors(atoms, cutoff=5.0):
+def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
     """Return the connectivity matrix from the Voronoi
     method. Multi-bonding occurs through periodic boundary conditions.
 
@@ -31,8 +31,12 @@ def get_voronoi_neighbors(atoms, cutoff=5.0):
     points = voronoi.ridge_points
 
     connectivity = np.zeros((len(atoms), len(atoms)))
+    distances = []
+    distance_indices = []
     for i, n in enumerate(origional_indices):
         p = points[np.where(points == n)[0]]
+        d = np.linalg.norm(np.diff(coords[p], axis=1), axis=-1)[:, 0]
+
         edges = np.sort(index[p])
 
         if not edges.size:
@@ -41,17 +45,32 @@ def get_voronoi_neighbors(atoms, cutoff=5.0):
                  "no neighbors. This may result in incorrect connectivity."))
             continue
 
-        unique_edge, edge_counts = np.unique(
-            edges,
-            return_counts=True,
-            axis=0)
+        unique_edge = np.unique(edges, axis=0)
 
         for j, edge in enumerate(unique_edge):
+            indices = np.where(np.all(edge == edges, axis=1))[0]
+
             u, v = edge
-            connectivity[u][v] += edge_counts[j]
-            connectivity[v][u] += edge_counts[j]
+
+            distance_indices += [sorted([u,v])]
+            distances += [sorted(d[indices])]
+
+            count = len(np.where(d[indices] < cutoff)[0])
+
+            connectivity[u][v] += count
+            connectivity[v][u] += count
 
     connectivity /= 2
+    if return_distances:
+        return connectivity.astype(int), distances
+
+    distance_indices, unique_idx_idx = \
+        np.unique(distance_indices, axis=0, return_index=True)
+
+    distances = [distances[i] for i in unique_idx_idx]
+
+    if return_distances:
+        return connectivity.astype(int), (distance_indices, distances)
 
     return connectivity.astype(int)
 
