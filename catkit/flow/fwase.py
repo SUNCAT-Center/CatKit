@@ -48,7 +48,7 @@ def get_potential_energy(
     images[0].info = atoms.info
     for image in images:
         image.constraints = atoms.constraints
-        image._pbc = atoms.pbc
+        image.pbc = atoms.pbc
 
     return fwio.atoms_to_encode(images)
 
@@ -105,7 +105,7 @@ def catflow_relaxation(atoms=None, calculator_name=None, parameters=None):
     # Moneky patch for constraints and pbc conservation.
     for image in images:
         image.constraints = atoms.constraints
-        image._pbc = atoms.pbc
+        image.pbc = atoms.pbc
 
     with db.Connect() as dbflow:
         dbflow.update_bulk_entry(images)

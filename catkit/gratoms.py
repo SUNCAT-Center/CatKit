@@ -149,7 +149,7 @@ class Gratoms(ase.Atoms):
 
     def copy(self):
         """Return a copy."""
-        atoms = self.__class__(cell=self._cell, pbc=self._pbc, info=self.info)
+        atoms = self.__class__(cell=self.cell, pbc=self.pbc, info=self.info)
 
         atoms.arrays = {}
         for name, a in self.arrays.items():
@@ -212,7 +212,7 @@ class Gratoms(ase.Atoms):
                 except IndexError:
                     pass
 
-        atoms = self.__class__(cell=self._cell, pbc=self._pbc, info=self.info,
+        atoms = self.__class__(cell=self.cell, pbc=self.pbc, info=self.info,
                                celldisp=self._celldisp)
 
         atoms.arrays = {}
@@ -315,7 +315,7 @@ class Gratoms(ase.Atoms):
         if isinstance(m, int):
             m = (m, m, m)
 
-        for x, vec in zip(m, self._cell):
+        for x, vec in zip(m, self.cell):
             if x != 1 and not vec.any():
                 raise ValueError(
                     'Cannot repeat along undefined lattice vector')
@@ -334,7 +334,7 @@ class Gratoms(ase.Atoms):
             for m1 in range(m[1]):
                 for m2 in range(m[2]):
                     i1 = i0 + n
-                    positions[i0:i1] += np.dot((m0, m1, m2), self._cell)
+                    positions[i0:i1] += np.dot((m0, m1, m2), self.cell)
                     i0 = i1
                     if m0 + m1 + m2 != 0:
                         self._graph = nx.disjoint_union(self._graph, cgraph)
@@ -342,6 +342,6 @@ class Gratoms(ase.Atoms):
         if self.constraints is not None:
             self.constraints = [c.repeat(m, n) for c in self.constraints]
 
-        self._cell = np.array([m[c] * self._cell[c] for c in range(3)])
+        self.cell = np.array([m[c] * self.cell[c] for c in range(3)])
 
         return self
