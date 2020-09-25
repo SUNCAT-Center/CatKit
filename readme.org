@@ -46,7 +46,7 @@ Then, add =~/catkit/bin= and =~/catkit= to your =PATH= and =PYTHONPATH= environm
 
 #+BEGIN_SRC sh
 export PYTHONPATH=~/catkit:$PYTHONPATH
-export PATH=~/catkit/bin:PATH
+export PATH=~/catkit/bin:$PATH
 #+END_SRC
 
 And install the package:
