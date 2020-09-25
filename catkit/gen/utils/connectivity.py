@@ -30,13 +30,13 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
     origional_indices = np.arange(L * len(atoms), (L + 1) * len(atoms))
 
     voronoi = scipy.spatial.Voronoi(coords, qhull_options='QbB Qc Qs')
-    points = voronoi.ridge_points    
+    points = voronoi.ridge_points
 
     connectivity = np.zeros((len(atoms), len(atoms)))
     distances = []
     distance_indices = []
     for i, n in enumerate(origional_indices):
-        ridge_indices = np.where(points == n)[0]        
+        ridge_indices = np.where(points == n)[0]
         p = points[ridge_indices]
         dist = np.linalg.norm(np.diff(coords[p], axis=1), axis=-1)[:, 0]
         edges = np.sort(index[p])
@@ -63,12 +63,10 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
 
             connectivity[u][v] += count
             connectivity[v][u] += count
-            
 
     connectivity /= 2
     if not return_distances:
         return connectivity.astype(int)
-
 
     if len(distances) > 0:
         distance_indices, unique_idx_idx = \
@@ -82,7 +80,6 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
 
     return connectivity.astype(int), pair_distances
 
-    
 
 def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     """Return the connectivity matrix from a simple radial cutoff.
