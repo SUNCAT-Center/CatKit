@@ -81,7 +81,7 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
     return connectivity.astype(int), pair_distances
 
 
-def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
+def get_cutoff_neighbors(atoms, cutoff=None, scale_cov_radii=1, atol=1e-8):
     """Return the connectivity matrix from a simple radial cutoff.
     Multi-bonding occurs through periodic boundary conditions.
 
@@ -92,6 +92,9 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
         unit cell information to use.
     cutoff : float
         Cutoff radius to use when determining neighbors.
+    scale_cov_radii : float
+        Value close to 1 to scale the covalent radii used for automated
+        cutoff values.
     atol: float
         Absolute tolerance to use when computing distances.
 
@@ -100,7 +103,7 @@ def get_cutoff_neighbors(atoms, cutoff=None, atol=1e-8):
     connectivity : ndarray (n, n)
         Number of edges formed between atoms in a system.
     """
-    cov_radii = catkit.gen.defaults.get('radii')
+    cov_radii = catkit.gen.defaults.get('radii') * scale_cov_radii
     numbers = atoms.numbers
     index, coords = coordinates.expand_cell(atoms)[:2]
 
