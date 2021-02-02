@@ -195,20 +195,20 @@ class AdsorptionSites():
                 sites['hollow'][0] += [hollow]
                 sites['hollow'][1] += [corners.tolist()]
 
-        # For collecting missed bridge neighbors
-        for s in sites['4fold'][1]:
-
-            edges = itertools.product(s[:2], s[2:])
-            for edge in edges:
-                edge = sorted(edge)
-                i = sites['bridge'][1].index(edge)
-                n, m = sites['bridge'][1][i], sites['bridge'][2][i]
-                nn = list(set(s) - set(n + m))
-
-                if len(nn) == 0:
-                    continue
-                sites['bridge'][2][i] += [nn[0]]
-
+#        # For collecting missed bridge neighbors
+#        for s in sites['4fold'][1]:
+#
+#            edges = itertools.product(s[:2], s[2:])
+#            for edge in edges:
+#                edge = sorted(edge)
+#                i = sites['bridge'][1].index(edge)
+#                n, m = sites['bridge'][1][i], sites['bridge'][2][i]
+#                nn = list(set(s) - set(n + m))
+#
+#                if len(nn) == 0:
+#                    continue
+#                sites['bridge'][2][i] += [nn[0]]
+#
         return sites
 
     def get_periodic_sites(self, screen=True):
