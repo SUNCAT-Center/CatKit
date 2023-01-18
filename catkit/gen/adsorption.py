@@ -57,8 +57,8 @@ class AdsorptionSites():
 
         self.coordinates = np.array(self.coordinates)
         self.connectivity = np.array(self.connectivity, dtype=int)
-        self.r1_topology = np.array(self.r1_topology)
-        self.r2_topology = np.array(self.r2_topology)
+        self.r1_topology = np.array(self.r1_topology, dtype=object)
+        self.r2_topology = np.array(self.r2_topology, dtype=object)
         self.frac_coords = np.dot(self.coordinates, np.linalg.pinv(slab.cell))
         self.slab = slab
 
@@ -91,7 +91,7 @@ class AdsorptionSites():
     def get_topology(self, unique=True):
         """Return the indices of adjacent surface atoms."""
         topology = [self.index[top] for top in self.r1_topology]
-        topology = np.array(topology)
+        topology = np.array(topology, dtype=object)
         if unique:
             sel = self.get_symmetric_sites()
         else:
