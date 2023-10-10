@@ -57,8 +57,8 @@ class AdsorptionSites():
 
         self.coordinates = np.array(self.coordinates)
         self.connectivity = np.array(self.connectivity, dtype=int)
-        self.r1_topology = np.array(self.r1_topology)
-        self.r2_topology = np.array(self.r2_topology)
+        self.r1_topology = np.array(self.r1_topology, dtype=object)
+        self.r2_topology = np.array(self.r2_topology, dtype=object)
         self.frac_coords = np.dot(self.coordinates, np.linalg.pinv(slab.cell))
         self.slab = slab
 
@@ -514,7 +514,7 @@ class Builder(AdsorptionSites):
             raise ValueError('Specify the index of atom to bond.')
 
         elif len(bonds) == 1:
-            if index is -1:
+            if index == -1:
                 slab = []
                 for i, _ in enumerate(self.get_symmetric_sites()):
                     slab += [self._single_adsorption(
