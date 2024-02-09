@@ -9,6 +9,7 @@ import itertools
 import warnings
 import scipy
 import ase
+from ase.formula import Formula
 try:
     from math import gcd
 except ImportError:
@@ -44,16 +45,12 @@ class SlabGenerator(object):
         Angstroms of vacuum to apply to the slab.
     fixed : int
         Number of slab layers to constrain.
-    layer_type : 'angs', 'trim', 'stoich', or 'sym'
+    layer_type : 'angs' or 'trim'
         Determines how to perform slab layering.
 
         'angs': Layers denotes the thickness of the slab in Angstroms.
         'trim': The slab will be trimmed to a number of layers equal to the
         exact number of unique z-coordinates. Useful for precision control.
-        'stoich' : Constraints any slab generated to have the same
-        stoichiometric ratio as the provided bulk.
-        'sym' : Return a slab which is inversion symmetric. i.e. The
-        same on both sides.
     attach_graph : bool
         Attach the connectivity graph generated from the bulk structure.
         This is only necessary for fingerprinting and setting it to False
@@ -62,6 +59,14 @@ class SlabGenerator(object):
         Covert the bulk input to its standard form before and
         produce the cleave from it. This is highly recommended as
         Miller indices are not defined for non-standard cells.
+    symmetric: bool
+        Return a slab which is inversion symmetric. i.e. The same on both sides
+    stoich: bool
+        Constraints any slab generated to have the same stoichiometric ratio 
+        as the provided bulk.
+    exclude_elements: list
+        Atomic elements to exclude when defining the number of layers
+        for the 'trim' layer_type selection. 
     tol : float
         Tolerance for floating point rounding errors.
     """
@@ -75,7 +80,10 @@ class SlabGenerator(object):
                  layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=False,
+                 symmetric=False,
+                 stoich=False,
                  primitive=True,
+                 exclude_elements=['O'],
                  tol=1e-8):
         self.layers = layers
         self.vacuum = vacuum
@@ -83,11 +91,14 @@ class SlabGenerator(object):
         self.tol = tol
         self.layer_type = layer_type
         self.standardized = standardize_bulk
+        self.symmetric = symmetric
+        self.stoich = stoich
         self.primitive = primitive
         self.attach_graph = attach_graph
         self.unique_terminations = None
         self.slab_basis = None
         self.slab = None
+        self.exclude_elements = exclude_elements
 
         miller_index = np.array(miller_index)
         if len(miller_index) == 4:
@@ -116,6 +127,7 @@ class SlabGenerator(object):
             primitive_bulk = bulk
 
         self._bulk = self.align_crystal(primitive_bulk, miller_index)
+       # ase.visualize.view(self._bulk)
 
     def align_crystal(self, bulk, miller_index):
         """Return an aligned unit cell from bulk unit cell. This alignment
@@ -280,7 +292,8 @@ class SlabGenerator(object):
             ibasis.set_scaled_positions(scaled_positions)
             ibasis.wrap(pbc=True)
 
-        bulk_layers = utils.get_unique_coordinates(_basis)
+        bulk_layers = utils.get_unique_coordinates(
+            _basis, exclude_elements=self.exclude_elements)
 
         if self.layer_type != 'trim':
             height = np.abs(self._bulk.cell[2][2])
@@ -290,9 +303,6 @@ class SlabGenerator(object):
 
         ibasis *= (1, 1, int(minimum_repetitions))
 
-        # Get difference in the 2nd components of the b and c
-        # basis, this is a good starting guess for the needed
-        # value of the 2nd component (+/- 2 for safety)
         div = ibasis.cell[2][1] / ibasis.cell[1][1]
         sign = -np.sign(div)
         if sign == 0:
@@ -351,6 +361,15 @@ class SlabGenerator(object):
 
         return ibasis
 
+    def get_slabs(self, size=1):
+        """ Return slabs for all possible terminations """
+        slabs = []
+        for i in range(len(self.get_unique_terminations())):
+            slab = self.get_slab(size=size, iterm=i)
+            if slab:
+                slabs += [slab]
+        return slabs
+
     def get_slab(self, size=1, iterm=0):
         """Generate a slab from the bulk structure. This function is meant
         specifically for selection of an individual termination or enumeration
@@ -374,8 +393,10 @@ class SlabGenerator(object):
             given.
         """
         slab = self.get_slab_basis(iterm).copy()
-        slab = self.set_size(slab, size)
+        # from ase.visualize import view
 
+        slab = self.set_size(slab, size)
+        # ase.visualize.view(slab)
         # Orthogonalize the z-coordinate
         # Breaks bulk periodicity in the c-basis
         slab.cell[2] = [0, 0, slab.cell[2][2]]
@@ -385,15 +406,16 @@ class SlabGenerator(object):
             slab = transform_ab(slab, [[-1, 0], [0, 1]])
 
         # Trim the bottom of the cell, bulk symmetry may be lost
-        if self.layer_type == 'trim':
-            zlayers = utils.get_unique_coordinates(slab)
-            reverse_sort = np.sort(zlayers)[::-1]
-            ncut = reverse_sort[:self.layers][-1] * slab.cell[2][2]
 
+        zlayers = utils.get_unique_coordinates(
+            slab, exclude_elements=self.exclude_elements)
+
+        if self.layer_type == 'trim' and not self.layers == len(zlayers):
+            reverse_sort = np.sort(zlayers)[::-1]
+            ncut = reverse_sort[:self.layers + 1][-1] * slab.cell[2][2]
             zpos = slab.positions[:, 2]
             index = np.arange(len(slab))
-            del slab[index[zpos - ncut < -self.tol]]
-
+            del slab[index[zpos < ncut + self.tol]]
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
 
@@ -402,13 +424,19 @@ class SlabGenerator(object):
         translation[2] = 0
         slab.translate(-translation)
         slab.wrap()
-
         if self.vacuum:
             slab.center(vacuum=self.vacuum, axis=2)
 
         utils.get_unique_coordinates(slab, tag=True)
-        if self.layer_type == 'sym':
+
+        if self.symmetric:
             slab = self.make_symmetric(slab)
+        if self.stoich:
+            slab = self.make_stoichiometric(slab)
+            if not slab:
+                warnings.warn('Warning: No stoichiometric slab found for iterm={}'
+                              .format(iterm))
+                return slab
 
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
@@ -529,13 +557,18 @@ class SlabGenerator(object):
 
         return supercell
 
+    # def fix_bottom_coverage(self, slab):
+
     def make_symmetric(self, slab):
         """Returns a symmetric slab. Note, this will trim the slab potentially
         resulting in loss of stoichiometry.
         """
+        # ase.visualize.view(slab)
+        # import sys
+        # sys.exit()
         sym = symmetry.Symmetry(slab)
-        inversion_symmetric = sym.get_point_group(check_laue=True)[1]
 
+        point_group, inversion_symmetric = sym.get_point_group(check_laue=True)
         # Trim the cell until it is symmetric
         while not inversion_symmetric:
             tags = slab.get_tags()
@@ -550,8 +583,43 @@ class SlabGenerator(object):
                               'slab size.')
                 break
 
+        Nlayers = len(utils.get_unique_coordinates(
+            slab, exclude_elements=self.exclude_elements))
+        if Nlayers < self.layers:
+            warnings.warn(
+                'Number of layers reduced to {} to achieve symmetric slab'.format(Nlayers))
 
         return slab
+
+    def make_stoichiometric(self, slab):
+        reduced_slab = Formula(slab.get_chemical_formula()).reduce()[0]
+        reduced_bulk = Formula(self._bulk.get_chemical_formula()).reduce()[0]
+        if not reduced_slab == reduced_bulk:
+            zlayers = \
+                utils.get_unique_coordinates(slab,
+                                             exclude_elements=self.exclude_elements)
+            zlayers *= slab.cell[2][2]
+            zpos = slab.positions[:, 2]
+            bottom_atom = np.argmin(zpos)
+
+            while zpos[bottom_atom] < zlayers[0]:
+                del slab[[bottom_atom]]
+                zpos = slab.positions[:, 2]
+                bottom_atom = np.argmin(zpos)
+                reduced_slab = Formula(slab.get_chemical_formula()).reduce()[0]
+                if reduced_slab == reduced_bulk:
+                    break
+        if not reduced_slab == reduced_bulk:
+            return None
+
+        if self.symmetric:
+            sym = symmetry.Symmetry(slab)
+            inversion_symmetric = sym.get_point_group(check_laue=True)[1]
+            if not inversion_symmetric:
+                return None
+
+        return slab
+
 
 def transform_ab(slab, matrix, tol=1e-5):
     """Transform the slab basis vectors parallel to the z-plane
