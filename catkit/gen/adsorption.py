@@ -57,8 +57,6 @@ class AdsorptionSites():
 
         self.coordinates = np.array(self.coordinates)
         self.connectivity = np.array(self.connectivity, dtype=int)
-        self.r1_topology = np.array(self.r1_topology)
-        self.r2_topology = np.array(self.r2_topology)
         self.frac_coords = np.dot(self.coordinates, np.linalg.pinv(slab.cell))
         self.slab = slab
 
@@ -307,8 +305,8 @@ class AdsorptionSites():
         else:
             sel = self.get_periodic_sites(screen=screen)
         coords = self.coordinates[sel]
-        r1top = self.r1_topology[sel]
-        r2top = self.r2_topology[sel]
+        r1top = [self.r1_topology[i] for i in sel]
+        r2top = [self.r2_topology[i] for i in sel]
 
         vectors = np.empty((coords.shape[0], 3))
         for i, s in enumerate(coords):
