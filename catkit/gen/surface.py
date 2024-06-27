@@ -1,4 +1,6 @@
 from __future__ import division
+
+import ase.constraints
 from .. import Gratoms
 from . import symmetry
 from . import utils
@@ -54,6 +56,8 @@ class SlabGenerator(object):
         stoichiometric ratio as the provided bulk.
         'sym' : Return a slab which is inversion symmetric. i.e. The
         same on both sides.
+    fix_type : 'bottom' or 'center,
+        Determines wheter bottom or center atoms are fixed.
     attach_graph : bool
         Attach the connectivity graph generated from the bulk structure.
         This is only necessary for fingerprinting and setting it to False
@@ -72,6 +76,7 @@ class SlabGenerator(object):
                  layers,
                  vacuum=None,
                  fixed=None,
+                 fix_type='bottom',
                  layer_type='ang',
                  attach_graph=True,
                  standardize_bulk=False,
@@ -80,6 +85,7 @@ class SlabGenerator(object):
         self.layers = layers
         self.vacuum = vacuum
         self.fixed = fixed
+        self.fix_type = fix_type
         self.tol = tol
         self.layer_type = layer_type
         self.standardized = standardize_bulk
@@ -385,7 +391,7 @@ class SlabGenerator(object):
             slab = transform_ab(slab, [[-1, 0], [0, 1]])
 
         # Trim the bottom of the cell, bulk symmetry may be lost
-        if self.layer_type == 'trim':
+        if self.layer_type == 'trim' or self.layer_type == 'symtrim':
             zlayers = utils.get_unique_coordinates(slab)
             reverse_sort = np.sort(zlayers)[::-1]
             ncut = reverse_sort[:self.layers][-1] * slab.cell[2][2]
@@ -395,7 +401,7 @@ class SlabGenerator(object):
             del slab[index[zpos - ncut < -self.tol]]
 
             slab.cell[2][2] -= ncut
-            slab.translate([0, 0, -ncut])
+            slab.translate([0, 0, -ncut])            
 
         tl = np.argmax(slab.get_scaled_positions()[:, 2])
         translation = slab[tl].position.copy()
@@ -406,9 +412,9 @@ class SlabGenerator(object):
         if self.vacuum:
             slab.center(vacuum=self.vacuum, axis=2)
 
-        utils.get_unique_coordinates(slab, tag=True)
-        if self.layer_type == 'sym':
-            slab = self.make_symmetric(slab)
+        utils.get_unique_coordinates(slab, tag=True)        
+        if self.layer_type == 'sym' or self.layer_type == 'symtrim':
+            slab = self.make_symmetric(slab,self.layer_type)
 
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
@@ -416,11 +422,23 @@ class SlabGenerator(object):
         ind = np.lexsort(slab.positions.T)
         slab = slab[ind]
 
-        if self.fixed:
-            tags = slab.get_tags()
-            constraints = ase.constraints.FixAtoms(
-                mask=tags > (tags.max() - self.fixed))
-            slab.set_constraint(constraints)
+        if self.fix_type == 'bottom':
+            if self.fixed:
+                tags = slab.get_tags()
+                constraints = ase.constraints.FixAtoms(
+                    mask=tags > (tags.max() - self.fixed))
+                slab.set_constraint(constraints)
+        
+        if self.fix_type == 'center':
+            if self.fixed:
+                tags = slab.get_tags()
+
+                bottom_fix = tags <= (tags.max() - self.fixed)
+                top_fix = tags >= (tags.min() + self.fixed)
+
+                fixed = np.logical_and(bottom_fix, top_fix)
+                constraints = ase.constraints.FixAtoms(mask = fixed)
+                slab.set_constraint(constraints)
 
         self.slab = slab
 
@@ -529,27 +547,43 @@ class SlabGenerator(object):
 
         return supercell
 
-    def make_symmetric(self, slab):
+    def make_symmetric(self, slab, mode):
         """Returns a symmetric slab. Note, this will trim the slab potentially
         resulting in loss of stoichiometry.
         """
+
         sym = symmetry.Symmetry(slab)
-        inversion_symmetric = sym.get_point_group(check_laue=True)[1]
+        inversion_symmetric = sym.get_pointgroup(check_laue=True)[1]
 
         # Trim the cell until it is symmetric
-        while not inversion_symmetric:
-            tags = slab.get_tags()
-            bottom_layer = np.max(tags)
-            del slab[tags == bottom_layer]
+        if mode == 'sym':
+            while not inversion_symmetric:
+                tags = slab.get_tags()
+        
+                bottom_layer = np.max(tags)
+                del slab[tags == bottom_layer]
 
-            sym = symmetry.Symmetry(slab)
-            inversion_symmetric = sym.get_point_group(check_laue=True)[1]
+                sym = symmetry.Symmetry(slab)
+                inversion_symmetric = sym.get_pointgroup(check_laue=True)[1]
 
-            if len(slab) <= len(self._bulk):
-                warnings.warn('Too many sites removed, please use a larger '
-                              'slab size.')
-                break
+                if len(slab) <= len(self._bulk):
+                    warnings.warn('Too many sites removed, please use a larger '
+                                'slab size.')
+                    break
+        
+        if mode == 'symtrim':
+            while not inversion_symmetric:
+                tags = slab.get_tags()
+                top_layer = np.min(tags)
+                del slab[tags == top_layer]
 
+                sym = symmetry.Symmetry(slab)
+                inversion_symmetric = sym.get_pointgroup(check_laue=True)[1]
+
+                if len(slab) <= len(self._bulk):
+                    warnings.warn('Too many sites removed, please use a larger '
+                                'slab size.')
+                    break
 
         return slab
 
