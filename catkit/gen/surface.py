@@ -437,9 +437,7 @@ class SlabGenerator(object):
                 top_fix = tags >= (tags.min() + self.fixed)
 
                 fixed = np.logical_and(bottom_fix, top_fix)
-                print(fixed)
                 constraints = ase.constraints.FixAtoms(mask = fixed)
-                print(constraints)
                 slab.set_constraint(constraints)
 
         self.slab = slab
