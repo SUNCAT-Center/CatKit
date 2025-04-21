@@ -81,7 +81,7 @@ def get_voronoi_neighbors(atoms, cutoff=5.0, return_distances=False):
     return connectivity.astype(int), pair_distances
 
 
-def get_cutoff_neighbors(atoms, cutoff=None, scale_cov_radii=1, atol=1e-8):
+def get_cutoff_neighbors(atoms, cutoff=None, scale_cov_radii=1.2, atol=1e-8):
     """Return the connectivity matrix from a simple radial cutoff.
     Multi-bonding occurs through periodic boundary conditions.
 
