@@ -14,29 +14,30 @@ Welcome to CatKit! A staging ground for computational tools which are generally 
 You can find our [[http://catkit.readthedocs.io/en/latest/?badge=latest][full documentation here]].
 
 * Installation
+
+** Conda environment
+It’s recommended to install the package in a virtual environment to avoid dependency conflicts. Python 3.10 has been tested with the required dependencies as of April 16, 2025.
+#+BEGIN_SRC sh
+conda create -n catkit python=3.10
+conda activate catkit
+#+END_SRC
 ** Pip installation
 CatKit is most easily installed with pip using:
 
 #+BEGIN_SRC sh
-pip install catkit
-#+END_SRC
-
-For Mac OSX, homebrew can be used in place of pip
-
-#+BEGIN_SRC sh
-brew install catkit
+pip install git+https://github.com/SUNCAT-Center/CatKit.git
 #+END_SRC
 
 For usage on high-performance computers, installation will need to be performed locally which can be done using:
 
 #+BEGIN_SRC sh
-pip install --user catkit
+pip install --user git+https://github.com/SUNCAT-Center/CatKit.git
 #+END_SRC
 
-These commands will install all of the necessary dependencies for you. 
+These commands will install all of the necessary dependencies for you.
 
 ** Source installation
-Alternatively, a version with the most recent commits can be install through git by running the following in your home directory.
+Alternatively, clone the git repo to your home directory.
 
 #+BEGIN_SRC sh
 git clone https://github.com/SUNCAT-Center/CatKit.git catkit
@@ -53,17 +54,6 @@ And install the package:
 #+BEGIN_SRC sh
 cd catkit/
 python setup.py install
-#+END_SRC
-
-Or, one can use pip to install from the master branch directly:
-
-#+BEGIN_SRC sh
-pip install --upgrade git+https://github.com/SUNCAT-Center/CatKit.git catkit
-#+END_SRC
-
-#+BEGIN_SRC sh
-cd ~/cakit
-pip install -e .
 #+END_SRC
 
 * CatGen: Catalysis Generator
