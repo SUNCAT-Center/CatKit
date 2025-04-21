@@ -2,7 +2,7 @@
 # (see accompanying license files for details).
 """Catalysis Generator."""
 
-from collections import MutableMapping
+from collections.abc import MutableMapping
 import numpy as np
 import ase
 
