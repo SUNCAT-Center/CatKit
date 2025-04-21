@@ -207,10 +207,14 @@ def get_response_reactions(epsilon, selection=None, species=False):
     possible_routes = itertools.combinations(selection, r=s + 1)
     for sel in possible_routes:
         values = np.zeros(epsilon.shape[0], dtype=int)
-
-        sigma = np.repeat(epsilon[[sel]][None], s + 1, axis=0)
-        eye = np.eye(s + 1)[:, :, None]
-        R = np.concatenate([sigma, eye], axis=2)
+        #sigma = np.repeat(epsilon[[sel]],axis=0)
+        sigma = epsilon[list(sel)]  # This is a 2D array
+        # # Add axis 0 and repeat
+        sigma_expanded = np.repeat(sigma[None, :, :], s + 1, axis=0)  # Now a 3D array with shape (s+1, len(sel), epsilon.shape[1])
+        # Create the identity part
+        eye = np.eye(s + 1)[:, :, None]  # 3D array with shape (s+1, s+1, 1)
+        # Now both arrays are 3D and can be concatenated along axis 2
+        R = np.concatenate([sigma_expanded, eye], axis=2)
 
         # Does not convert to correct integers without round
         values[[sel]] = np.round(np.linalg.det(R))
