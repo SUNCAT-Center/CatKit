@@ -515,7 +515,7 @@ class Builder(AdsorptionSites):
             raise ValueError('Specify the index of atom to bond.')
 
         elif len(bonds) == 1:
-            if index is -1:
+            if index == -1:
                 slab = []
                 for i, _ in enumerate(self.get_symmetric_sites()):
                     slab += [self._single_adsorption(
