@@ -14,6 +14,13 @@ Welcome to CatKit! A staging ground for computational tools which are generally 
 You can find our [[http://catkit.readthedocs.io/en/latest/?badge=latest][full documentation here]].
 
 * Installation
+
+** Conda environment
+It’s recommended to install the package in a virtual environment to avoid dependency conflicts. Python 3.10 has been tested with the required dependencies as of April 16, 2025.
+#+BEGIN_SRC sh
+conda create -n catkit python=3.10
+conda activate catkit
+#+END_SRC
 ** Pip installation
 CatKit is most easily installed with pip using:
 

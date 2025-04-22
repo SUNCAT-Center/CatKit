@@ -583,7 +583,7 @@ def transform_ab(slab, matrix, tol=1e-5):
 
     corners = np.dot(scorners_newcell, newcell[:2, :2])
     scorners = np.linalg.solve(slab.cell[:2, :2].T, corners.T).T
-    rep = np.ceil(scorners.ptp(axis=0)).astype(int)
+    rep = np.ceil(np.ptp(scorners,axis=0)).astype(int)
 
     slab *= (rep[0], rep[1], 1)
     slab.set_cell(newcell)
