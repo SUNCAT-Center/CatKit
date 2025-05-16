@@ -78,7 +78,7 @@ class SlabGenerator(object):
                  vacuum=None,
                  fixed=None,
                  layer_type='ang',
-                 attach_graph=True,
+                 attach_graph=False,
                  standardize_bulk=False,
                  symmetric=False,
                  stoich=False,
@@ -295,7 +295,7 @@ class SlabGenerator(object):
         bulk_layers = utils.get_unique_coordinates(
             _basis, exclude_elements=self.exclude_elements)
 
-        if self.layer_type != 'trim':
+        if self.layer_type == 'ang':
             height = np.abs(self._bulk.cell[2][2])
             minimum_repetitions = np.ceil(self.layers / height)
         else:
@@ -393,12 +393,7 @@ class SlabGenerator(object):
             given.
         """
         slab = self.get_slab_basis(iterm).copy()
-        # from ase.visualize import view
-
         slab = self.set_size(slab, size)
-        # ase.visualize.view(slab)
-        # Orthogonalize the z-coordinate
-        # Breaks bulk periodicity in the c-basis
         slab.cell[2] = [0, 0, slab.cell[2][2]]
         slab.set_pbc([1, 1, 0])
 
@@ -585,7 +580,7 @@ class SlabGenerator(object):
 
         Nlayers = len(utils.get_unique_coordinates(
             slab, exclude_elements=self.exclude_elements))
-        if Nlayers < self.layers:
+        if self.layer_type == 'trim' and Nlayers < self.layers:
             warnings.warn(
                 'Number of layers reduced to {} to achieve symmetric slab'.format(Nlayers))
 
