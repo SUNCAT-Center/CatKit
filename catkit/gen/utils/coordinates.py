@@ -231,7 +231,7 @@ def matching_coordinates(position, comparators, tol=1e-8):
     return match
 
 
-def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
+def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3, exclude_elements=[]):
     """Return unique coordinate values of a given atoms object
     for a specified axis.
 
@@ -252,6 +252,9 @@ def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
         Array of unique positions in fractional coordinates.
     """
     positions = (atoms.get_scaled_positions()[:, axis] + tol) % 1
+
+    layer_idx = [i for i,a in enumerate(atoms) if a.symbol not in exclude_elements]
+    positions = positions[layer_idx]  #np.array([positions[i] for i,a in enumerate(atoms) if a.symbol not in exclude_elements])
     positions -= tol
 
     values = [positions[0]]
@@ -261,12 +264,11 @@ def get_unique_coordinates(atoms, axis=2, tag=False, tol=1e-3):
     values = np.sort(values)
 
     if tag:
-        tags = []
-        for p in positions:
+        tags = np.zeros([len(atoms)])
+        for i,p in enumerate(positions):
             close = np.isclose(p, values[::-1], atol=tol, rtol=tol)
-            tags += [np.where(close)[0][0] + 1]
+            tags[layer_idx[i]] = np.where(close)[0][0] + 1
         atoms.set_tags(tags)
-
     return values
 
 

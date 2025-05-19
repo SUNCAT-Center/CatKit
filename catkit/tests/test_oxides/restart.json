@@ -1,0 +1,15 @@
+{"1": {
+ "calculator": "vasp",
+ "calculator_parameters": {},
+ "cell": {"array": {"__ndarray__": [[3, 3], "float64", [4.54259263, 0.0, 0.0, 0.0, 4.54259263, 0.0, 0.0, 0.0, 3.138319146]]}, "__ase_objtype__": "cell"},
+ "ctime": 24.029691133530747,
+ "initial_charges": {"__ndarray__": [[6], "float64", [1.72, 1.72, -0.86, -0.86, -0.86, -0.86]]},
+ "initial_magmoms": {"__ndarray__": [[6], "float64", [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]]},
+ "mtime": 24.029691133530747,
+ "numbers": {"__ndarray__": [[6], "int64", [44, 44, 8, 8, 8, 8]]},
+ "pbc": {"__ndarray__": [[3], "bool", [true, true, true]]},
+ "positions": {"__ndarray__": [[6, 3], "float64", [2.2713, 2.2713, 1.56915, 0.0, 0.0, 0.0, 0.88175, 3.66084, 1.56915, 3.66084, 0.88175, 1.56915, 1.38953, 1.38953, 0.0, 3.15305, 3.15305, 0.0]]},
+ "unique_id": "5ebdd8356b3edc5f12aa5fd8ca7faec3",
+ "user": "winther"},
+"ids": [1],
+"nextid": 2}

@@ -62,6 +62,8 @@ class Symmetry():
         tol : float
             Tolerance for floating point precision errors.
         """
+        import ase
+       # ase.visualize.view(atoms)
         self.lattice = atoms.cell
         self.positions = atoms.get_scaled_positions()
         self.numbers = atoms.get_atomic_numbers()
@@ -73,6 +75,7 @@ class Symmetry():
         cell = (self.lattice, self.positions, self.modified_numbers)
         self.data = spglib.get_symmetry_dataset(
             cell, symprec=tol, angle_tolerance=ang_tol)
+        # print(self.data)
 
     def get_symmetry_operations(self, affine=True):
         """Return the symmetry operations for a given atomic structure.
@@ -104,7 +107,7 @@ class Symmetry():
 
         return rotations, translations
 
-    def get_pointgroup(self, check_laue=False):
+    def get_point_group(self, check_laue=False):
         """Return the point group operations of a systems.
 
         Parameters
@@ -125,7 +128,6 @@ class Symmetry():
             laue = ['-1', '2/m', 'mmm', '4/m', '4/mmm',
                     '-3', '-3m', '6/m', '6/mmm', 'm-3', 'm-3m']
             is_laue = pointgroup in laue
-
             return pointgroup, is_laue
 
         return pointgroup
