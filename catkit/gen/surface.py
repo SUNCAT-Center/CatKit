@@ -62,11 +62,10 @@ class SlabGenerator(object):
     symmetric: bool
         Return a slab which is inversion symmetric. i.e. The same on both sides
     stoich: bool
-        Constraints any slab generated to have the same stoichiometric ratio 
+        Constraints any slab generated to have the same stoichiometric ratio
         as the provided bulk.
     exclude_elements: list
-        Atomic elements to exclude when defining the number of layers
-        for the 'trim' layer_type selection. 
+        Atomic elements to exclude when counting the number of layers.
     tol : float
         Tolerance for floating point rounding errors.
     """
@@ -83,7 +82,7 @@ class SlabGenerator(object):
                  symmetric=False,
                  stoich=False,
                  primitive=True,
-                 exclude_elements=['O'],
+                 exclude_elements=['O', 'N', 'S', 'H'],
                  tol=1e-8):
         self.layers = layers
         self.vacuum = vacuum
@@ -414,6 +413,32 @@ class SlabGenerator(object):
             slab.cell[2][2] -= ncut
             slab.translate([0, 0, -ncut])
 
+        utils.get_unique_coordinates(slab, tag=True)
+
+        if self.symmetric:
+            slab = self.make_symmetric(slab)
+            if not slab:
+                warnings.warn('No symmetric slab found for iterm={}'
+                              .format(iterm))
+                return slab
+        if self.stoich:
+            slab = self.make_stoichiometric(slab)
+            if not slab:
+                warnings.warn('No stoichiometric slab found for iterm={}'
+                              .format(iterm))
+                return slab
+
+        zlayers = utils.get_unique_coordinates(
+                slab, exclude_elements=self.exclude_elements)
+
+        Nlayers = len(zlayers)
+
+        thickness = (np.max(zlayers) - np.min(zlayers)) * slab.cell[2,2]
+        if (self.layer_type == 'trim' and Nlayers < self.layers) or \
+            (self.layer_type == 'ang' and thickness < self.layers):
+            warnings.warn(
+                'Slab thickness reduced to {} layers, {:.2f} Ang'.format(Nlayers, thickness))
+
         tl = np.argmax(slab.get_scaled_positions()[:, 2])
         translation = slab[tl].position.copy()
         translation[2] = 0
@@ -421,17 +446,6 @@ class SlabGenerator(object):
         slab.wrap()
         if self.vacuum:
             slab.center(vacuum=self.vacuum, axis=2)
-
-        utils.get_unique_coordinates(slab, tag=True)
-
-        if self.symmetric:
-            slab = self.make_symmetric(slab)
-        if self.stoich:
-            slab = self.make_stoichiometric(slab)
-            if not slab:
-                warnings.warn('Warning: No stoichiometric slab found for iterm={}'
-                              .format(iterm))
-                return slab
 
         roundoff = np.isclose(slab.cell, 0)
         slab.cell[roundoff] = 0
@@ -565,24 +579,19 @@ class SlabGenerator(object):
 
         point_group, inversion_symmetric = sym.get_point_group(check_laue=True)
         # Trim the cell until it is symmetric
+        i = 0
         while not inversion_symmetric:
+            i += 1
             tags = slab.get_tags()
             bottom_layer = np.max(tags)
             del slab[tags == bottom_layer]
-
+            if len(slab) <= len(self._bulk):
+                if i <= len(self._bulk):
+                    warnings.warn(
+                        'Too many sites removed, please use a larger slab size.')
+                return None
             sym = symmetry.Symmetry(slab)
             inversion_symmetric = sym.get_point_group(check_laue=True)[1]
-
-            if len(slab) <= len(self._bulk):
-                warnings.warn('Too many sites removed, please use a larger '
-                              'slab size.')
-                break
-
-        Nlayers = len(utils.get_unique_coordinates(
-            slab, exclude_elements=self.exclude_elements))
-        if self.layer_type == 'trim' and Nlayers < self.layers:
-            warnings.warn(
-                'Number of layers reduced to {} to achieve symmetric slab'.format(Nlayers))
 
         return slab
 
