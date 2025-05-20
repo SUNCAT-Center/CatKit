@@ -95,8 +95,8 @@ class Symmetry():
             Affine matrix operations, combinations of the rotation and
             translation with ones along the diagonal.
         """
-        rotations = self.data['rotations'][1:]
-        translations = self.data['translations'][1:]
+        rotations = self.data.rotations[1:]
+        translations = self.data.translations[1:]
 
         if affine:
             affine_matrices = np.zeros((rotations.shape[0], 4, 4))
@@ -122,7 +122,7 @@ class Symmetry():
         is_laue : bool
             Whether the pointgroup is a laue symmetry.
         """
-        pointgroup = self.data['pointgroup']
+        pointgroup = self.data.pointgroup
 
         if check_laue:
             laue = ['-1', '2/m', 'mmm', '4/m', '4/mmm',
@@ -142,7 +142,7 @@ class Symmetry():
         lattice : str
             The name of the structures lattice.
         """
-        space_group_number = self.data['number']
+        space_group_number = self.data.number
 
         if space_group_number in [146, 148, 155, 160, 161, 166, 167]:
             return 'rhombohedral'
