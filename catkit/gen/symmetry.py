@@ -104,7 +104,7 @@ class Symmetry():
 
         return rotations, translations
 
-    def get_pointgroup(self, check_laue=False):
+    def get_point_group(self, check_laue=False):
         """Return the point group operations of a systems.
 
         Parameters
